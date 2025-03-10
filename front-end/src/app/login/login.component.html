@@ -1,0 +1,88 @@
+<mat-card class="login-container">
+  <mat-card-header>
+    <mat-card-title class="text-center">
+      {{ showOtpSection ? 'Vérification OTP' : 'Connexion' }}
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Formulaire de connexion -->
+    <form *ngIf="!showOtpSection" [formGroup]="loginForm" (ngSubmit)="onSubmitCredentials()">
+      <mat-form-field appearance="outline">
+        <mat-label>Nom d'utilisateur</mat-label>
+        <input matInput formControlName="username">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error>Champ obligatoire</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput 
+               type="password" 
+               formControlName="password"
+               [type]="hidePassword ? 'password' : 'text'">
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>Champ obligatoire</mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button 
+              color="primary" 
+              type="submit"
+              [disabled]="loginForm.invalid || isLoading"
+              class="submit-button">
+        <span *ngIf="!isLoading">Se connecter</span>
+        <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+      </button>
+    </form>
+
+    <!-- Formulaire OTP -->
+    <form *ngIf="showOtpSection" [formGroup]="otpForm" (ngSubmit)="onSubmitOtp()">
+      <p class="otp-instructions">
+        Un code de vérification à 6 chiffres a été envoyé à votre adresse email.
+      </p>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Code OTP</mat-label>
+        <input matInput 
+               formControlName="code" 
+               maxlength="6"
+               inputmode="numeric">
+        <mat-icon matSuffix>lock</mat-icon>
+        <mat-error *ngIf="otpForm.get('code')?.hasError('required')">
+          Code obligatoire
+        </mat-error>
+        <mat-error *ngIf="otpForm.get('code')?.hasError('pattern')">
+          Format invalide (6 chiffres requis)
+        </mat-error>
+      </mat-form-field>
+
+      <div class="button-group">
+        <button mat-stroked-button 
+                type="button"
+                (click)="showOtpSection = false">
+          Retour
+        </button>
+        
+        <button mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="otpForm.invalid || isLoading"
+                class="submit-button">
+          <span *ngIf="!isLoading">Vérifier</span>
+          <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+        </button>
+      </div>
+    </form>
+
+    <div class="register-link">
+      <a mat-button routerLink="/register">
+        <mat-icon>person_add</mat-icon>
+        Créer un compte
+      </a>
+    </div>
+  </mat-card-content>
+
+  <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+</mat-card>
