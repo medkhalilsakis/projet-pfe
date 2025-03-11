@@ -14,4 +14,6 @@ public interface OTPRepository extends JpaRepository<OTP, Long> {
     @Modifying
     @Transactional
     void deleteByUtilisateur(User utilisateur);
+
+    Optional<OTP> findTopByUtilisateurAndIsUsedOrderByExpiresAtDesc(User utilisateur, boolean b);
 }

@@ -1,18 +1,17 @@
 package com.projet.pp.controller;
 
-import com.projet.pp.repository.UserRepository;
+import com.projet.pp.model.User;
 import com.projet.pp.service.OTPService;
+import com.projet.pp.service.PasswordUtil;
+import com.projet.pp.service.UserService;
+import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.projet.pp.model.User;
-import com.projet.pp.service.UserService;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +23,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -31,8 +31,9 @@ public class UserController {
     private OTPService otpService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private PasswordEncoder passwordEncoder;
 
+    // Récupérer un utilisateur par username
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
@@ -51,70 +52,80 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
-    // POST /api/users : créer un nouvel utilisateur
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    // POST /api/users/signup : création d'un nouvel utilisateur
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody Map<String, String> signupData) {
+        String nom = signupData.get("nom");
+        String prenom = signupData.get("prenom");
+        String username = signupData.get("username");
+        String email = signupData.get("email");
+        String rawPassword = signupData.get("password");
+
+        // Hachage du mot de passe avec BCrypt
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+
+        User user = new User();
+        user.setNom(nom);
+        user.setPrenom(prenom);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(hashedPassword);
+        // Vous pouvez définir d'autres champs comme dateEmbauche, salaire, role, etc.
+
+        User createdUser = userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    // PUT /api/users/{id} : mettre à jour un utilisateur existant
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return new ResponseEntity<>(userService.updateUser(id, user), HttpStatus.OK);
-    }
-
-    // DELETE /api/users/{id} : supprimer un utilisateur
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
+    // POST /api/users/login : connexion (déchiffrage du mot de passe, vérification et envoi de l'OTP)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
-        String username = loginData.get("username");
-        String password = loginData.get("password");
-
         try {
-            // Authentification via Spring Security
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String username = loginData.get("username");
+            String encryptedPassword = loginData.get("password");
 
-            // Récupération de l'utilisateur depuis la base de données
+            String decryptedPassword = PasswordUtil.decrypt(encryptedPassword);
+
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-            // Génération et envoi du code OTP par email
+            // Comparer le mot de passe déchiffré avec le hash stocké en base
+            if (!passwordEncoder.matches(decryptedPassword, user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("message", "Identifiants invalides"));
+            }
+
+            // Facultatif : authentifier l'utilisateur dans le contexte Spring Security
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(username, decryptedPassword);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // Générer et envoyer l'OTP par email
             otpService.generateAndSendOTP(user);
 
             return ResponseEntity.ok(Collections.singletonMap("message", "OTP envoyé à votre email"));
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Identifiants invalides"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Erreur lors du décryptage ou de l'authentification"));
         }
     }
 
-    // Endpoint pour vérifier l'OTP
-    // On attend un JSON contenant "username" et "otpCode"
+    // POST /api/users/verify-otp : vérifier le code OTP
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOTP(@RequestBody Map<String, String> otpData) {
-        String username = otpData.get("username");
-        String otpCode = otpData.get("otpCode");
-
-        // Récupération de l'utilisateur par son username
+    public ResponseEntity<?> verifyOTP(
+            @RequestParam String username,
+            @RequestParam String code // Le nom doit correspondre au paramètre de la requête
+    ) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        boolean isValid = otpService.verifyOTP(user, otpCode);
+        boolean isValid = otpService.verifyOTP(user, code);
+
         if (isValid) {
-            return ResponseEntity.ok(Collections.singletonMap("message", "OTP validé, connexion réussie"));
+            return ResponseEntity.ok(Map.of("message", "OTP validé, connexion réussie"));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Collections.singletonMap("message", "OTP invalide ou expiré"));
+                    .body(Map.of("message", "OTP invalide ou expiré"));
         }
     }
-
-
 }

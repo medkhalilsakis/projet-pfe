@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { SessionStorageService } from '../services/session-storage.service';
+import { EncryptionService } from '../services/encryption.service';
 
 @Component({
   selector: 'app-login',
@@ -35,6 +36,7 @@ export class LoginComponent {
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private sessionStorage = inject(SessionStorageService);
+  private encryptionService = inject(EncryptionService);
 
   loginForm = this.fb.group({
     username: ['', Validators.required],
@@ -52,23 +54,32 @@ export class LoginComponent {
 
   onSubmitCredentials() {
     if (this.loginForm.invalid) return;
-
+  
     this.isLoading = true;
     const { username, password } = this.loginForm.value;
-
-    const params = new HttpParams()
-      .set('username', username ?? '')
-      .set('password', password ?? '');
-
-    this.http.get('http://localhost:8080/api/users/login', { params }).subscribe({
-      next: () => {
-        this.currentUsername = username ?? '';
-        this.showOtpSection = true;
-        this.snackBar.open('Code OTP envoyé à votre email', 'Fermer', { duration: 5000 });
-      },
-      error: (error) => this.handleLoginError(error),
-      complete: () => this.isLoading = false
-    });
+  
+    try {
+      const encryptedPassword = this.encryptionService.encrypt(password ?? '');
+      
+      this.http.post('http://localhost:8080/api/users/login', {
+        username: username,
+        password: encryptedPassword
+      }).subscribe({
+        next: () => {
+          this.currentUsername = username ?? '';
+          this.showOtpSection = true;
+          this.snackBar.open('Code OTP envoyé à votre email', 'Fermer', { duration: 5000 });
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.handleLoginError(error);
+          this.isLoading = false;
+        }
+      });
+    } catch (encryptionError) {
+      this.isLoading = false;
+      this.snackBar.open('Erreur de chiffrement des identifiants', 'Fermer', { duration: 5000 });
+    }
   }
 
   onSubmitOtp() {
@@ -78,18 +89,19 @@ export class LoginComponent {
     const code = this.otpForm.value.code ?? '';
 
     this.http.post('http://localhost:8080/api/users/verify-otp', null, {
-      params: {
-        username: this.currentUsername,
-        code: code
-      }
+      params: new HttpParams()
+        .set('username', this.currentUsername)
+        .set('code', code)
     }).subscribe({
       next: () => {
         this.fetchAndStoreUserData();
-      },
-      error: () => {
-        this.snackBar.open('Code OTP invalide', 'Fermer', { duration: 5000 });
         this.isLoading = false;
-      }
+      },
+      error: (error) => {
+        this.snackBar.open('Code OTP invalide ou expiré', 'Fermer', { duration: 5000 });
+        this.isLoading = false;
+      },
+      complete: () => this.isLoading = false
     });
   }
 
@@ -99,7 +111,7 @@ export class LoginComponent {
         this.sessionStorage.saveUser(user);
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (error) => {
         this.snackBar.open('Erreur lors de la récupération des données utilisateur', 'Fermer', { duration: 5000 });
         this.isLoading = false;
       }
@@ -107,13 +119,17 @@ export class LoginComponent {
   }
 
   private handleLoginError(error: any) {
-    this.isLoading = false;
-    const message = error.status === 404 ? 
-      'Utilisateur non trouvé' : 
-      error.status === 401 ? 
-      'Mot de passe incorrect' : 
-      'Erreur de connexion';
+    let message = 'Erreur de connexion';
+    
+    if (error.status === 404) {
+      message = 'Utilisateur non trouvé';
+    } else if (error.status === 401) {
+      message = 'Mot de passe incorrect';
+    } else if (error.error?.message) {
+      message = error.error.message;
+    }
 
     this.snackBar.open(message, 'Fermer', { duration: 5000 });
+    this.isLoading = false;
   }
 }

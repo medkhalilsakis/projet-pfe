@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OTPService {
@@ -24,10 +22,9 @@ public class OTPService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // Génère le code OTP, supprime les anciens OTP pour l'utilisateur, le sauvegarde en base et l'envoie par email
+    // Génère le code OTP, supprime les anciens OTP pour l'utilisateur, le sauvegarde et l'envoie par email
     @Transactional
     public void generateAndSendOTP(User utilisateur) {
-        // Supprimer les anciens OTP pour éviter les redondances
         otpRepository.deleteByUtilisateur(utilisateur);
 
         String otpCode = generateOTPCode();
@@ -35,7 +32,7 @@ public class OTPService {
         otp.setUtilisateur(utilisateur);
         otp.setCode(otpCode);
         otp.setCreatedAt(LocalDateTime.now());
-        otp.setExpiresAt(LocalDateTime.now().plusMinutes(5)); // validité de 5 minutes
+        otp.setExpiresAt(LocalDateTime.now().plusMinutes(5));
         otp.setAttempts(0);
         otp.setIsUsed(false);
         otpRepository.save(otp);
@@ -43,13 +40,11 @@ public class OTPService {
         sendOTPEmail(utilisateur.getEmail(), otpCode);
     }
 
-    // Génération d'un code à 6 chiffres
     private String generateOTPCode() {
         int otp = new Random().nextInt(900000) + 100000;
         return String.valueOf(otp);
     }
 
-    // Envoi du code OTP par email
     private void sendOTPEmail(String email, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
@@ -58,18 +53,20 @@ public class OTPService {
         mailSender.send(message);
     }
 
-    // Vérifie que le code OTP est correct et non expiré
     public boolean verifyOTP(User utilisateur, String code) {
-        Optional<OTP> otpOptional = otpRepository.findByUtilisateurAndCodeAndIsUsed(utilisateur, code, false);
-        if (otpOptional.isPresent()) {
-            OTP otp = otpOptional.get();
-            if (otp.getExpiresAt().isAfter(LocalDateTime.now())) {
-                otp.setIsUsed(true); // marque comme utilisé
-                otpRepository.save(otp);
-                return true;
-            }
-        }
-        return false;
+        Optional<OTP> otpOptional = otpRepository.findTopByUtilisateurAndIsUsedOrderByExpiresAtDesc(
+                utilisateur,
+                false
+        );
+
+        return otpOptional
+                .filter(otp -> otp.getCode().equals(code))
+                .filter(otp -> otp.getExpiresAt().isAfter(LocalDateTime.now()))
+                .map(otp -> {
+                    otp.setIsUsed(true);
+                    otpRepository.save(otp);
+                    return true;
+                })
+                .orElse(false);
     }
 }
-
