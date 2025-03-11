@@ -5,6 +5,8 @@ import com.projet.pp.model.User;
 import com.projet.pp.repository.OTPRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -14,7 +16,7 @@ import java.util.Random;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class OtpService {
+public class OTPService {
 
     @Autowired
     private OTPRepository otpRepository;

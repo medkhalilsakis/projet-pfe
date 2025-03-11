@@ -23,6 +23,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + id));
     }
 
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
     // Créer un nouvel utilisateur (mot de passe non crypté)
     public User createUser(User user) {
         return userRepository.save(user);
