@@ -1,62 +1,82 @@
 package com.projet.pp.service;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.stream.Collectors;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 public class PasswordUtil {
 
     private static final String PRIVATE_KEY_PEM = """
-        -----BEGIN RSA PRIVATE KEY-----
-        MIIEogIBAAKCAQBowND8P21noe1WzMY0NSLWJOwQbFPOmgjavc4jjcRtXEy2fCtu
-        HNT1s/Y8L5KIAZP3BSQxOrAxKW8MBYAQKSUbDlCjKXPvu/wBzJOIbLFD9w1wiA6E
-        9k+y8MQg+5kjEsff6hWtjSPIVFnIwMJVHMbhFv7IivP4C5Ruhq64wJLimvDQk/7e
-        oGuQeN/Xp5q1PIfEM6wISWY4mI6oe/jFnxta2fnA1WmUYgh5tAd3Qid1exYkgBXS
-        McrNKf1iGBsV1f5dryvvspqbb0b+JRp4qyQm+ZhZXZzo7G46na6LfdmsyUe0Rqm6
-        FcJwxDYKkjUF+mmJ7jUUmI7Eqv+18bzwf38nAgMBAAECggEAVYV92ULrTh1MSH48
-        Hyl2fIB+XdYjAdyN+A/X+Pzn7iTZ2G49gtN1Jfe7w11Pc0xegeCnsK1qZWifaaAf
-        8pG04oboXJ0eMw41az6bAFlEy+kqBsJ9oB376WpZpVfjqVfO6McS1bMSEJ6VAqok
-        vhoVYHVGo3GWRt8lWqsIgHtwMCIjJrV/lbuLRH7AEHQeS1kfLEgS/E3H4PPhT04d
-        9UeodtYksEjfODbMSqZvTLzMm2HuyNKwDA50iPLxX8SHOvShaM2XpUVxV6M9zzuI
-        fd+/TEgt/xWXi/ExYBhZceNFx3xfWYZSZmNpu21WfOmWZjX60vor56vrmTeKmk1Z
-        OeaxOQKBgQC75W4FFqqg3bkBrt9jHW6rwttHnOEHQ+toC5eT3i6Ai/pbsA3bVvEx
-        sluW1dtjZ1G3+jCAOxisFvqCfhK+lgwtkAYZ01OJ1IEdEBT/NbLsfokLeFnPUEMZ
-        hjVfZUcSgzk9KYQugEZjH6kXVBEgnepVT4Y556hnpAscOtsigAuRfQKBgQCOuK/V
-        PXDI4nsGOX0yIuUujBe7Xkel7on0PV2XclkjMg4rSSYj1IE+MhdYgXV++Di8M/WL
-        J/9QVK/5RIlOZYpq/pyV6HZ6emItugTpbs4RrXwwncO12308B3byjUGnq9i5jbkS
-        Bf+eoddHkAfogj4I8QUfUHqbuQI0EseLeMr0cwKBgQCb/Hkcwld+2vNHAW00dG+3
-        Kjoutn9eL7WTl+QLfu0uDIcYbQzj5cawkjhU/U93s4N078AqBGWUIDNx98YJ8LlF
-        bgaSlA0LJJ7XiM1Vnbffe6C8I/qzEBfUbcWLX6HkLYpsSzYQAK/uhI807baWVGMA
-        1ddB5R66g8Yxdm8Lsi9oZQKBgE5LsWKJV0NNQ/JxPWZw0EvN3QMUQLgd+Z58v8hi
-        mdX+EtnaQksrvE9TiY0rUDr8j5tn4c+afK0kGHnmCHFysRHrZhmzMrQUSaIOR72L
-        5Q67nsLI+eHdbIGvEqkTpy4Fz1pUDnB9y/LJlGGU+VGrib68AnRgYTLmtve8Sa4Q
-        8T5TAoGAX3hEB3Lh1pTlEkcosu1UJy846gPy7v4Qkgq6iXcX/vMGft4OOkdBEyMJ
-        VUsAJ0yORqF7lgNUGZJKjvSDTx4ZeZEKB65D17SzuSZDbIxdLdg5cuuwOdoAzh3J
-        7gGzMpivzadCLoTKjaY54v/RabDtMKNX74/kLzP6KUiUUBHa/vg=
-        -----END RSA PRIVATE KEY-----
-        """;
-
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDgiWQbbONxXxku
+A2McFcTOtSQHuhfhp21asjI58RP7ljVibmH4rizeSbX6dIK/p9d/I0k111tjaPeg
+BZbNFj37Zia6YRUpVU+bguxQOdno2BvrFR3kFwaX+CKRxdj2iVAdneHv/nPzWFPm
+ZcgSWkp0pWedTk6G7NepVMBw9QipmLhh5/sSBA/HtWCsR/fCCEKkVQpaHYIjHI3d
+6CZkR0vFSrhj0lXlCyoaCCVeDvNqjHtK5DMZ1C0S66AMJMz+fj3/EXgLNHfwflqM
+MmXSHIbTi2yVwlBWSsLrmWU03jUVFjD8yEyHm+/Q/92QRYsbbIMreIfI+gViQuiM
+XIZ2C/evAgMBAAECggEASmv/bD+pGzikBeZFgVeNxd2wNYduxvJRgpAxqZbIQslE
+pH1lp6FDaeIQmRTpCVE+UfuGFnxs5AQ0nyt7EjrfDGaNS5VGCE8odajtXqHuIgkP
+J9n18FXZb6FlA+AJy50zmr1r17oFAJE0LddqevrGVudD8pWz3XC/Anb+2fG9j0ha
+R/L2TpiauRKo1fpUgFl86AyiW8OYJ5cY3uDMLn2gHVsmYOwvy27VgCodavk51WDR
+bvoc3U5uTU8/9C01R6JOX/w6igM5yOM+V7y/sLtXpyHYYMza6hlJXroFmK6FcS+n
+ynvU7KF22EHey7IOlP6cwFWzDBMCMCk6hAjQZcKToQKBgQD2IpXDVyrDZ8nXE1P4
+EgB/Go7L1Wb+bs6fzCxpvp1Ww94i7KrtvXvOk15DBuFhWRKRDB+JvuqJV3oM829l
+u6mlta+r8lUvDBRqgqMUvhhvjv9aCVNHaCoR4iqXdlLMKhY3LV7Oo3x+b64nqiMl
+ZWYOww1u0e2eMTbiH6JnY47g2QKBgQDpiTNEOjyuDhEWJCu2xpxupHYxmNe/+9+d
+Pv4lc0W0SvMOngnpX3ZEdlVvif0TjtEd1/VuUVPmfLQ9qPJjCDEV8Bz3CjbN/nJ6
+sQQRib0jkOXt44Mw6w+oAlhiXz9Sk5ZYNW4SSTZiHBV/tx/lQzjyJU6/2OyylH+D
+T2/MWzdHxwKBgF/PkKqseLn94cT2Ah6zqzvO870GwgPS0F3F1ZgIGikXL5Y6uEK5
+GsOL/AptWDhTuvV5WaF+DsANrDX0YO2iAmS997cgKuaYdi4L0j2Vzd9HM8Exlhha
+xN2XQ2sYJRzSWTl7UMdxPlndUVahVPMOqI6ggM8dqriEgc+97rL+PzTpAoGBAJJP
+fcn5/nhBodzQTn7VUb5T1STfkBPclk0q4QjPflUlO7/lrWoDf9IGnSIjPmXZbRQY
+b9BsrXbSnA2hYjI/OJl49Hylbo6CInDRpC3ksJWuuw7eIhwsuINW7M68w6xVgLTE
+zLAyJBs1Yxa/wQDeq7exPfQd0LVVKco3o2BRqYGTAoGBAIn4cpDq+y7i1qd+U7S6
+O+lQqNXSgYevheBt35RRy+S58yVc3dQQDIDkgUz2CFH/XAXu5XyIUjBNepxvrpnj
+c2dmZWeykOIo/C5U2h3Rt5909kePnNdR8URYdhvffiE4NsFgHcBms9+fKwNIpu0e
+PAF0iiaVElZNFm9dehsHzKjQ
+-----END PRIVATE KEY-----
+""";
     private static PrivateKey getPrivateKey() throws Exception {
-        // Nettoyage du PEM
-        String privateKeyPem = PRIVATE_KEY_PEM
-                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                .replace("-----END RSA PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
+        String privateKeyPemClean = PRIVATE_KEY_PEM
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\n", "")
+                .replaceAll("\\s", "")
+                .trim();
 
-        byte[] keyBytes = Base64.getDecoder().decode(privateKeyPem);
-
-        // Pour une clé PKCS#1, besoin d'une conversion en PKCS#8
+        byte[] keyBytes = Base64.getDecoder().decode(privateKeyPemClean);
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         return KeyFactory.getInstance("RSA").generatePrivate(spec);
     }
 
     public static String decrypt(String encryptedData) throws Exception {
         PrivateKey privateKey = getPrivateKey();
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+        // Spécifier explicitement les paramètres OAEP
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
+        OAEPParameterSpec oaepParams = new OAEPParameterSpec(
+                "SHA-256",
+                "MGF1",
+                MGF1ParameterSpec.SHA256,
+                PSource.PSpecified.DEFAULT
+        );
+
+        cipher.init(Cipher.DECRYPT_MODE, privateKey, oaepParams);
         byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }
