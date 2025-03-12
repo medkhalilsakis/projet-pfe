@@ -33,7 +33,6 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Récupérer un utilisateur par username
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
@@ -76,7 +75,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    // POST /api/users/login : connexion (déchiffrage du mot de passe, vérification et envoi de l'OTP)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         try {
