@@ -43,6 +43,8 @@ export class LoginComponent {
     password: ['', Validators.required]
   });
 
+  
+
   otpForm = this.fb.group({
     code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
   });
