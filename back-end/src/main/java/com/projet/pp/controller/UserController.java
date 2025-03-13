@@ -33,20 +33,20 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Récupérer un utilisateur par username
+
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    // GET /api/users : lister tous les utilisateurs
+
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
-    // GET /api/users/{id} : récupérer un utilisateur par son id
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
@@ -70,13 +70,13 @@ public class UserController {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(hashedPassword);
-        // Vous pouvez définir d'autres champs comme dateEmbauche, salaire, role, etc.
+
 
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    // POST /api/users/login : connexion (déchiffrage du mot de passe, vérification et envoi de l'OTP)
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         try {
@@ -88,18 +88,18 @@ public class UserController {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-            // Comparer le mot de passe déchiffré avec le hash stocké en base
+
             if (!passwordEncoder.matches(decryptedPassword, user.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Identifiants invalides"));
             }
 
-            // Facultatif : authentifier l'utilisateur dans le contexte Spring Security
+
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(username, decryptedPassword);
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            // Générer et envoyer l'OTP par email
+
             otpService.generateAndSendOTP(user);
 
             return ResponseEntity.ok(Collections.singletonMap("message", "OTP envoyé à votre email"));
@@ -110,11 +110,11 @@ public class UserController {
         }
     }
 
-    // POST /api/users/verify-otp : vérifier le code OTP
+
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOTP(
             @RequestParam String username,
-            @RequestParam String code // Le nom doit correspondre au paramètre de la requête
+            @RequestParam String code
     ) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));

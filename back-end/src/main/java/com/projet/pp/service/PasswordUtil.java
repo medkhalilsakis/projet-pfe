@@ -67,7 +67,7 @@ PAF0iiaVElZNFm9dehsHzKjQ
     public static String decrypt(String encryptedData) throws Exception {
         PrivateKey privateKey = getPrivateKey();
 
-        // Spécifier explicitement les paramètres OAEP
+
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
         OAEPParameterSpec oaepParams = new OAEPParameterSpec(
                 "SHA-256",

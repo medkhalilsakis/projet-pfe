@@ -22,7 +22,7 @@ public class OTPService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // Génère le code OTP, supprime les anciens OTP pour l'utilisateur, le sauvegarde et l'envoie par email
+
     @Transactional
     public void generateAndSendOTP(User utilisateur) {
         otpRepository.deleteByUtilisateur(utilisateur);

@@ -2,16 +2,23 @@ package com.projet.pp.service;
 
 import com.projet.pp.model.Project;
 import com.projet.pp.model.ProjectFile;
+import com.projet.pp.model.User;
+import com.projet.pp.model.ItemType;
 import com.projet.pp.repository.ProjectFileRepository;
 import com.projet.pp.repository.ProjectRepository;
+import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -24,31 +31,47 @@ public class ProjectService {
     @Autowired
     private ProjectFileRepository projectFileRepository;
 
-    // Répertoire de stockage des fichiers uploadés (créé dans le répertoire courant)
-    private final Path storageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    @Autowired
+    private UserRepository userRepository;
 
-    // Pour cet exemple, on utilise un projet temporaire (attention aux accès concurrents en production)
-    private Project currentProject;
+
+    private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
     public ProjectService() {
         try {
-            Files.createDirectories(storageLocation);
-        } catch (Exception e) {
-            throw new RuntimeException("Impossible de créer le dossier de stockage.", e);
+            Files.createDirectories(baseStorage);
+        } catch (IOException e) {
+            throw new RuntimeException("Impossible de créer le répertoire de stockage.", e);
         }
     }
 
-    // Création du projet et sauvegarde des fichiers uploadés
-    public void uploadProject(MultipartFile[] files, boolean decompress) throws IOException {
-        // Création d'un nouveau projet avec un nom unique
-        currentProject = new Project("Projet_" + System.currentTimeMillis());
-        projectRepository.save(currentProject);
 
+    public void uploadProject(MultipartFile[] files, boolean decompress, Long userId) throws IOException {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+
+        Project project = new Project();
+        project.setName("Projet_" + System.currentTimeMillis());
+        project.setVisibilite("privée");
+        project.setDescription("");
+        project.setCommitted(false);
+        project.setUser(user);
+        project.setCreatedAt(LocalDateTime.now());
+        project.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(project);
+
+        // Répertoire de stockage pour ce projet
+        Path projectStorage = baseStorage.resolve(project.getId().toString());
+        Files.createDirectories(projectStorage);
+
+        // Traitement des fichiers uploadés
         for (MultipartFile file : files) {
             if (decompress && isArchive(file)) {
-                decompressArchive(file);
+                decompressArchive(file, projectStorage, project);
             } else {
-                saveFile(file, "");
+                saveFile(file, projectStorage, project, "");
             }
         }
     }
@@ -59,11 +82,12 @@ public class ProjectService {
         return "application/zip".equals(contentType) || "application/x-zip-compressed".equals(contentType);
     }
 
-    // Décompresse une archive ZIP et sauvegarde les fichiers extraits
-    private void decompressArchive(MultipartFile file) throws IOException {
+
+    private void decompressArchive(MultipartFile file, Path projectStorage, Project project) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
+                String relativePath = zipEntry.getName();
                 if (!zipEntry.isDirectory()) {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
@@ -72,47 +96,56 @@ public class ProjectService {
                         baos.write(buffer, 0, len);
                     }
                     byte[] fileContent = baos.toByteArray();
-                    saveFile(zipEntry.getName(), fileContent, zipEntry.getSize());
+                    saveFile(relativePath, fileContent, zipEntry.getSize(), projectStorage, project);
                 }
                 zis.closeEntry();
             }
         }
     }
 
-    // Sauvegarde un fichier extrait d'une archive
-    private void saveFile(String relativePath, byte[] content, long size) throws IOException {
-        Path targetLocation = this.storageLocation.resolve(relativePath);
-        Files.createDirectories(targetLocation.getParent());
-        Files.write(targetLocation, content, StandardOpenOption.CREATE);
 
-        ProjectFile projectFile = new ProjectFile();
-        //projectFile.setFileName(relativePath);
-        projectFile.setFilePath(targetLocation.toString());
-        //projectFile.setSize(size);
-        //projectFile.setContentType("application/octet-stream");
-        projectFile.setProject(currentProject);
-        projectFileRepository.save(projectFile);
-    }
-
-    // Sauvegarde d'un fichier MultipartFile "normal"
-    private void saveFile(MultipartFile file, String relativeFolder) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        Path targetLocation = this.storageLocation.resolve(relativeFolder).resolve(fileName);
+    private void saveFile(MultipartFile file, Path projectStorage, Project project, String relativeFolder) throws IOException {
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        Path targetLocation = projectStorage.resolve(relativeFolder).resolve(fileName);
         Files.createDirectories(targetLocation.getParent());
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
+
         ProjectFile projectFile = new ProjectFile();
-        //rojectFile.setFileName(fileName);
+        projectFile.setName(fileName);
         projectFile.setFilePath(targetLocation.toString());
-        //projectFile.setSize(file.getSize());
-        //projectFile.setContentType(file.getContentType());
-        projectFile.setProject(currentProject);
+        projectFile.setFileSize(file.getSize());
+        projectFile.setMimeType(file.getContentType());
+        projectFile.setType(ItemType.FILE);
+        projectFile.setProject(project);
         projectFileRepository.save(projectFile);
     }
 
-    // Méthode de commit final (à étendre selon vos besoins)
-    public void commitProject() {
-        // Par exemple, vous pouvez mettre à jour l'état du projet pour le marquer comme finalisé.
-        // Pour cet exemple, nous ne faisons qu'une opération de commit sans changement particulier.
+
+    private void saveFile(String relativePath, byte[] content, long size, Path projectStorage, Project project) throws IOException {
+        Path targetLocation = projectStorage.resolve(relativePath);
+        Files.createDirectories(targetLocation.getParent());
+        try (FileOutputStream fos = new FileOutputStream(targetLocation.toFile())) {
+            fos.write(content);
+        }
+
+        ProjectFile projectFile = new ProjectFile();
+        projectFile.setName(relativePath);
+        projectFile.setFilePath(targetLocation.toString());
+        projectFile.setFileSize(size);
+        projectFile.setMimeType("application/octet-stream");
+        projectFile.setType(ItemType.FILE);
+        projectFile.setProject(project);
+        projectFileRepository.save(projectFile);
+    }
+
+
+    public void commitProject(Long projectId) {
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        project.setCommitted(true);
+        project.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(project);
     }
 }

@@ -1,5 +1,5 @@
-import { HttpClient, HttpEventType } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
+import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -13,6 +13,7 @@ import { FileSizePipe } from './file-size.pipe';
 
 @Component({
   selector: 'app-upload',
+  standalone: true,
   imports: [
     CommonModule,
     MatProgressBarModule,
@@ -22,11 +23,10 @@ import { FileSizePipe } from './file-size.pipe';
     FileSizePipe
   ],
   templateUrl: './upload.component.html',
-  styleUrl: './upload.component.css'
+  styleUrls: ['./upload.component.css']
 })
+export class UploadComponent implements OnDestroy {
 
-export class UploadComponent {
-  
   files: File[] = [];
   uploadProgress: FileProgress[] = [];
   isUploading = false;
@@ -59,26 +59,39 @@ export class UploadComponent {
       }
       return !exists;
     });
-
     this.files = [...this.files, ...newFiles];
   }
 
   startUpload() {
     if (this.files.length === 0) return;
-
     this.isUploading = true;
     this.startTime = Date.now();
+
+    // Récupération de l'ID de l'utilisateur depuis le SessionStorage
+    const user = this.sessionStorage.getUser();
+    if (!user || !user.id) {
+      this.snackBar.open('Utilisateur non identifié, veuillez vous reconnecter.', 'Fermer', { duration: 5000 });
+      this.isUploading = false;
+      return;
+    }
+    const userId = user.id;
+
     const formData = new FormData();
     this.files.forEach(file => formData.append('files', file));
 
     // Détermine si c'est une archive
-    const isArchive = this.files.length === 1 && 
+    const isArchive = this.files.length === 1 &&
       ['application/zip', 'application/x-rar-compressed'].includes(this.files[0].type);
+
+    // Ajout de userId dans les paramètres
+    const params = new HttpParams()
+      .set('decompress', isArchive.toString())
+      .set('userId', userId);
 
     this.http.post('http://localhost:8080/api/projects/upload', formData, {
       reportProgress: true,
       observe: 'events',
-      params: { decompress: isArchive }
+      params
     }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (event: any) => {
@@ -101,7 +114,7 @@ export class UploadComponent {
     const elapsedTime = (Date.now() - this.startTime) / 1000;
     const speed = event.loaded / elapsedTime; // bytes/sec
 
-    this.uploadProgress = this.files.map((file, index) => ({
+    this.uploadProgress = this.files.map(file => ({
       name: file.name,
       progress: Math.round((event.loaded / event.total) * 100),
       speed: speed / 1024, // KB/s

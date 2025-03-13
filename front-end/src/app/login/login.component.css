@@ -1,36 +1,140 @@
-/* Ajoute un fond animé en dégradé */
-.background-search {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #2C3E50, #4CA1AF);
-    background-size: cover;
-    /* Animation très légère de luminosité */
-    animation: subtleBg 20s ease infinite;
-  }
-  
-  @keyframes subtleBg {
-    0% { filter: brightness(1); }
-    50% { filter: brightness(0.95); }
-    100% { filter: brightness(1); }
-  }
+/* login.component.css */
+.cyber-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0a192f;
+  overflow: hidden;
+  z-index: 0;
+}
 
-/* Effet de verre dépoli pour la carte */
+.network-lines {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(90deg, transparent 49%, rgba(0, 255, 234, 0.1) 50%, transparent 51%),
+    linear-gradient(180deg, transparent 49%, rgba(0, 255, 234, 0.1) 50%, transparent 51%);
+  background-size: 50px 50px;
+  animation: moveLines 40s linear infinite;
+  opacity: 0.7;
+}
+
+.floating-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  animation: float 20s infinite linear;
+}
+
+.floating-dots::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, transparent 70%);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.glowing-effects {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(0,119,255,0.2) 0%, transparent 30%),
+    radial-gradient(circle at 80% 20%, rgba(0,234,255,0.2) 0%, transparent 30%);
+  animation: glowMove 15s ease infinite;
+}
+
+@keyframes moveLines {
+  from { background-position: 0 0; }
+  to { background-position: 1000px 1000px; }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5%, 5%); }
+  50% { transform: translate(5%, -5%); }
+  75% { transform: translate(-5%, -5%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+@keyframes glowMove {
+  0% { background-position: 20% 80%, 80% 20%; }
+  50% { background-position: 30% 70%, 70% 30%; }
+  100% { background-position: 20% 80%, 80% 20%; }
+}
+
+/* Styles pour le formulaire */
+.login-container {
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  max-width: 500px;
+  margin: 2rem auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.mat-form-field {
+  margin: 1rem 0;
+}
+
+.mat-card-title {
+  color: #0a192f;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.submit-button {
+  transition: all 0.3s ease;
+  background: linear-gradient(45deg, #0066ff, #00ccff);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, 
+    transparent 25%,
+    rgba(255,255,255,0.2) 50%,
+    transparent 75%);
+  animation: buttonGlow 3s infinite linear;
+}
+
+@keyframes buttonGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
 .login-container {
   max-width: 500px;
   margin: 2rem auto;
   padding: 2rem;
 }
 
-/* Autres styles inchangés */
 mat-card-title {
   font-size: 1.5rem;
   font-weight: 500;
   margin-bottom: 2rem !important;
-  color: white;
 }
 
 mat-form-field {
@@ -54,6 +158,12 @@ mat-form-field {
   flex: 1;
 }
 
+.code-instructions {
+  margin: 1.5rem 0;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+}
+
 .register-link {
   margin-top: 2rem;
   text-align: center;
@@ -64,10 +174,8 @@ mat-form-field {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: white;
 }
 
 .text-center {
   text-align: center;
-  color: black;
 }

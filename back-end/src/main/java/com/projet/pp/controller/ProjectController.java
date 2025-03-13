@@ -14,26 +14,28 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
-    // Endpoint pour l'upload des fichiers du projet
     @PostMapping("/upload")
     public ResponseEntity<?> uploadProject(@RequestParam("files") MultipartFile[] files,
-                                           @RequestParam(required = false, defaultValue = "false") boolean decompress) {
+                                           @RequestParam(value = "decompress", defaultValue = "false") boolean decompress,
+                                           @RequestParam("userId") Long userId) {
         try {
-            projectService.uploadProject(files, decompress);
-            return ResponseEntity.ok().build();
+            projectService.uploadProject(files, decompress, userId);
+            return ResponseEntity.ok("Fichiers uploadés avec succès");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de l'upload : " + e.getMessage());
         }
     }
 
-    // Endpoint pour finaliser (commit) le projet
+    // Endpoint pour le commit final du projet
     @PostMapping("/commit")
-    public ResponseEntity<?> commitProject() {
+    public ResponseEntity<?> commitProject(@RequestParam("projectId") Long projectId) {
         try {
-            projectService.commitProject();
-            return ResponseEntity.ok().build();
+            projectService.commitProject(projectId);
+            return ResponseEntity.ok("Projet finalisé avec succès");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors du commit : " + e.getMessage());
         }

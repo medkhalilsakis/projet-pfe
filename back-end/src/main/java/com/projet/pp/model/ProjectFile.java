@@ -24,7 +24,7 @@ public class ProjectFile {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    // Référence au dossier parent (nullable pour les éléments racines)
+    // Référence au dossier parent, si applicable (null pour les éléments racines)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private ProjectFile parent;
@@ -32,10 +32,10 @@ public class ProjectFile {
     @Column(nullable = false)
     private String name;
 
-    // Type de l'élément : "file" ou "folder"
+    // Type de l'élément : "FILE" ou "FOLDER"
     @Enumerated(EnumType.STRING)
     @Column(name = "item_type", nullable = false)
-    private ItemType itemType;
+    private ItemType type;
 
     @Column(name = "file_size")
     private Long fileSize;
@@ -49,6 +49,4 @@ public class ProjectFile {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-
 }
