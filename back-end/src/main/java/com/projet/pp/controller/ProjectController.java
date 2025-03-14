@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
@@ -19,8 +22,16 @@ public class ProjectController {
                                            @RequestParam(value = "decompress", defaultValue = "false") boolean decompress,
                                            @RequestParam("userId") Long userId) {
         try {
-            projectService.uploadProject(files, decompress, userId);
-            return ResponseEntity.ok("Fichiers uploadés avec succès");
+            // Appel au service qui gère l'upload et retourne l'ID du projet créé
+            Long projectId = projectService.uploadProject(files, decompress, userId);
+
+            // Création d'une réponse JSON avec un message et l'ID du projet
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Fichiers uploadés avec succès");
+            response.put("projectId", projectId);
+
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

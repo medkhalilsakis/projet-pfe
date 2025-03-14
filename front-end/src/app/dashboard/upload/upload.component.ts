@@ -1,4 +1,4 @@
-import { HttpClient, HttpEventType, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -10,17 +10,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { FileSizePipe } from './file-size.pipe';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-upload',
   standalone: true,
   imports: [
+    ReactiveFormsModule,
     CommonModule,
     MatProgressBarModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    FileSizePipe
+    FileSizePipe,
+    MatFormField,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule
   ],
   templateUrl: './upload.component.html',
   styleUrls: ['./upload.component.css']
@@ -33,12 +42,23 @@ export class UploadComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
   private startTime!: number;
 
+  showDescriptionForm = false;
+  projectForm!: FormGroup;
+
   constructor(
+    private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
     private snackBar: MatSnackBar,
     private sessionStorage: SessionStorageService
-  ) {}
+  ) {
+    this.projectForm = this.fb.group({
+      name: ['', Validators.required],
+      type: ['WEB', Validators.required],
+      description: [''],
+      visibilite: ['privé', Validators.required]
+    });
+  }
 
   onFileSelected(event: any) {
     this.addFiles(event.target.files);
@@ -67,7 +87,6 @@ export class UploadComponent implements OnDestroy {
     this.isUploading = true;
     this.startTime = Date.now();
 
-    // Récupération de l'ID de l'utilisateur depuis le SessionStorage
     const user = this.sessionStorage.getUser();
     if (!user || !user.id) {
       this.snackBar.open('Utilisateur non identifié, veuillez vous reconnecter.', 'Fermer', { duration: 5000 });
@@ -88,7 +107,8 @@ export class UploadComponent implements OnDestroy {
       .set('decompress', isArchive.toString())
       .set('userId', userId);
 
-    this.http.post('http://localhost:8080/api/projects/upload', formData, {
+    // Supposons que le backend renvoie du JSON contenant { projectId: number }
+    this.http.post<{ projectId: number }>('http://localhost:8080/api/projects/upload', formData, {
       reportProgress: true,
       observe: 'events',
       params
@@ -97,15 +117,20 @@ export class UploadComponent implements OnDestroy {
         next: (event: any) => {
           if (event.type === HttpEventType.UploadProgress) {
             this.updateProgress(event);
+          } else if (event instanceof HttpResponse) {
+            // L'upload est terminé : récupérer l'ID du projet et le stocker dans le session storage
+            this.isUploading = false;
+            const projectId = event.body.projectId;
+            // Mettre à jour l'utilisateur avec currentProjectId
+            this.sessionStorage.setUser({ ...user, currentProjectId: projectId });
+            this.showDescriptionForm = true;
+            this.snackBar.open('Upload terminé! Complétez les informations du projet', 'Fermer', { duration: 5000 });
           }
         },
         error: (error) => {
+          console.log(error);
           this.snackBar.open('Erreur lors de l\'upload', 'Fermer', { duration: 5000 });
           this.resetState();
-        },
-        complete: () => {
-          this.isUploading = false;
-          this.snackBar.open('Upload terminé! Cliquez sur Commit pour sauvegarder', 'Fermer');
         }
       });
   }
@@ -124,18 +149,36 @@ export class UploadComponent implements OnDestroy {
   }
 
   commitProject() {
-    this.http.post('http://localhost:8080/api/projects/commit', {})
+    if (this.projectForm.invalid) return;
+  
+    // Récupérer l'ID du projet stocké dans le session storage
+    const projectId = this.sessionStorage.getUser()?.currentProjectId;
+    if (!projectId) {
+      this.snackBar.open('Aucun projet en cours', 'Fermer', { duration: 5000 });
+      return;
+    }
+  
+    const params = new HttpParams().set('projectId', projectId.toString());
+    this.http.post('http://localhost:8080/api/projects/commit', {}, { params, responseType: 'text' })
       .subscribe({
         next: () => {
           this.router.navigate(['/projects']);
           this.resetState();
+          // Suppression du currentProjectId après commit
+          const currentUser = this.sessionStorage.getUser();
+          if (currentUser) {
+            delete currentUser.currentProjectId;
+            this.sessionStorage.setUser(currentUser);
+          }
         },
-        error: () => {
+        error: (error) => {
+          console.log(error);
           this.snackBar.open('Erreur lors du commit', 'Fermer', { duration: 5000 });
         }
       });
   }
-
+  
+  
   private resetState() {
     this.files = [];
     this.uploadProgress = [];

@@ -1,10 +1,10 @@
 import {
-  BidiModule
-} from "./chunk-VEGHRYFQ.js";
-import {
   _CdkPrivateStyleLoader,
   _VisuallyHiddenLoader
 } from "./chunk-OVXSM4F3.js";
+import {
+  BidiModule
+} from "./chunk-VEGHRYFQ.js";
 import {
   Platform,
   _bindEventWithOptions,
@@ -15,7 +15,7 @@ import {
   coerceElement,
   coerceNumberProperty,
   normalizePassiveListenerOptions
-} from "./chunk-KM234JRW.js";
+} from "./chunk-QBBVLLQS.js";
 import {
   DOCUMENT
 } from "./chunk-COKL5FHY.js";
@@ -1188,6 +1188,17 @@ var ListKeyManager = class {
         this._activeItemIndex = newIndex;
         this._typeahead?.setCurrentSelectedItemIndex(newIndex);
       }
+    }
+  }
+};
+var ActiveDescendantKeyManager = class extends ListKeyManager {
+  setActiveItem(index) {
+    if (this.activeItem) {
+      this.activeItem.setInactiveStyles();
+    }
+    super.setActiveItem(index);
+    if (this.activeItem) {
+      this.activeItem.setActiveStyles();
     }
   }
 };
@@ -5206,7 +5217,10 @@ export {
   ObserversModule,
   BreakpointObserver,
   Breakpoints,
+  addAriaReferencedId,
+  removeAriaReferencedId,
   AriaDescriber,
+  ActiveDescendantKeyManager,
   FocusKeyManager,
   InteractivityChecker,
   FocusTrapFactory,
@@ -5259,4 +5273,4 @@ export {
   MatRippleLoader,
   _MatInternalFormField
 };
-//# sourceMappingURL=chunk-VFY5CVLM.js.map
+//# sourceMappingURL=chunk-TR7NREH2.js.map

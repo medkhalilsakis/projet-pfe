@@ -110,7 +110,7 @@ export class LoginComponent {
   private fetchAndStoreUserData() {
     this.http.get(`http://localhost:8080/api/users/username/${this.currentUsername}`).subscribe({
       next: (user: any) => {
-        this.sessionStorage.saveUser(user);
+        this.sessionStorage.setUser(user);
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {

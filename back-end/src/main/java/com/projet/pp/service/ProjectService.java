@@ -46,11 +46,9 @@ public class ProjectService {
     }
 
 
-    public void uploadProject(MultipartFile[] files, boolean decompress, Long userId) throws IOException {
-
+    public Long uploadProject(MultipartFile[] files, boolean decompress, Long userId) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
 
         Project project = new Project();
         project.setName("Projet_" + System.currentTimeMillis());
@@ -60,7 +58,8 @@ public class ProjectService {
         project.setUser(user);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(project);
+
+        project = projectRepository.save(project); // Sauvegarde et récupération de l'ID généré
 
         // Répertoire de stockage pour ce projet
         Path projectStorage = baseStorage.resolve(project.getId().toString());
@@ -74,6 +73,8 @@ public class ProjectService {
                 saveFile(file, projectStorage, project, "");
             }
         }
+
+        return project.getId(); // Retourne l'ID du projet
     }
 
     // Vérifie si le fichier est une archive ZIP
