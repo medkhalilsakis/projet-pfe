@@ -1,0 +1,46 @@
+.project-list-container {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .project-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .status-indicator {
+    margin-right: 20px;
+    min-width: 40px;
+  }
+  
+  .status-indicator mat-icon {
+    font-size: 24px;
+  }
+  
+  .project-content {
+    flex: 1;
+  }
+  
+  .project-content h3 {
+    margin: 0 0 5px 0;
+    color: #3f51b5;
+  }
+  
+  .description {
+    color: #666;
+    margin: 0 0 10px 0;
+  }
+  
+  .project-meta {
+    display: flex;
+    gap: 15px;
+    color: #888;
+    font-size: 0.9em;
+  }
+  
+  .project-actions {
+    display: flex;
+    gap: 10px;
+  }

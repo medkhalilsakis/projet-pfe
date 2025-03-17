@@ -3,9 +3,6 @@ import { Routes } from '@angular/router';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { authGuard } from './login/auth.guard';
-import { OverviewComponent } from './dashboard/overview/overview.component';
-import { ProjectsComponent } from './dashboard/projects/projects.component';
-import { MessagesComponent } from './dashboard/messages/messages.component';
 
 export const routes: Routes = [
   { 

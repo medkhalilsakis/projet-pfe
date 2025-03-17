@@ -1,6 +1,6 @@
 import {
   isPlatformBrowser
-} from "./chunk-COKL5FHY.js";
+} from "./chunk-3OROHM6F.js";
 import {
   ElementRef,
   Injectable,
@@ -12,9 +12,9 @@ import {
   ɵɵdefineInjectable,
   ɵɵdefineInjector,
   ɵɵdefineNgModule
-} from "./chunk-CTFRI7GK.js";
+} from "./chunk-YNEK6H2P.js";
 
-// node_modules/@angular/cdk/fesm2022/platform.mjs
+// ../../../node_modules/@angular/cdk/fesm2022/platform.mjs
 var hasV8BreakIterator;
 try {
   hasV8BreakIterator = typeof Intl !== "undefined" && Intl.v8BreakIterator;
@@ -257,7 +257,7 @@ function _bindEventWithOptions(renderer, target, eventName, callback, options) {
   };
 }
 
-// node_modules/@angular/cdk/fesm2022/coercion.mjs
+// ../../../node_modules/@angular/cdk/fesm2022/coercion.mjs
 function coerceBooleanProperty(value) {
   return value != null && `${value}` !== "false";
 }
@@ -315,4 +315,4 @@ export {
   coerceElement,
   coerceStringArray
 };
-//# sourceMappingURL=chunk-QBBVLLQS.js.map
+//# sourceMappingURL=chunk-VFUAJJET.js.map

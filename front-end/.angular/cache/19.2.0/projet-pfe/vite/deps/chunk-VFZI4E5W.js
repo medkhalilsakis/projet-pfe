@@ -2,19 +2,19 @@ import {
   ScrollDispatcher,
   ScrollingModule,
   ViewportRuler
-} from "./chunk-B6YYRVNR.js";
+} from "./chunk-OUFQVIKB.js";
 import {
   ESCAPE,
   _IdGenerator,
   hasModifierKey
-} from "./chunk-TR7NREH2.js";
+} from "./chunk-NGEZUC4Q.js";
 import {
   _CdkPrivateStyleLoader
-} from "./chunk-OVXSM4F3.js";
+} from "./chunk-YUQGTQZN.js";
 import {
   BidiModule,
   Directionality
-} from "./chunk-VEGHRYFQ.js";
+} from "./chunk-KBISOAE3.js";
 import {
   Platform,
   _bindEventWithOptions,
@@ -23,11 +23,11 @@ import {
   coerceArray,
   coerceCssPixelValue,
   supportsScrollBehavior
-} from "./chunk-QBBVLLQS.js";
+} from "./chunk-VFUAJJET.js";
 import {
   DOCUMENT,
   Location
-} from "./chunk-COKL5FHY.js";
+} from "./chunk-3OROHM6F.js";
 import {
   ANIMATION_MODULE_TYPE,
   ApplicationRef,
@@ -65,7 +65,7 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵgetInheritedFactory
-} from "./chunk-CTFRI7GK.js";
+} from "./chunk-YNEK6H2P.js";
 import {
   Subject,
   Subscription,
@@ -73,13 +73,13 @@ import {
   merge,
   takeUntil,
   takeWhile
-} from "./chunk-P6U2JBMQ.js";
+} from "./chunk-TYA5IJOH.js";
 import {
   __spreadProps,
   __spreadValues
 } from "./chunk-EIB7IA3J.js";
 
-// node_modules/@angular/cdk/fesm2022/portal.mjs
+// ../../../node_modules/@angular/cdk/fesm2022/portal.mjs
 function throwNullPortalError() {
   throw Error("Must provide a portal to attach");
 }
@@ -639,7 +639,7 @@ var PortalModule = class _PortalModule {
   }], null, null);
 })();
 
-// node_modules/@angular/cdk/fesm2022/overlay.mjs
+// ../../../node_modules/@angular/cdk/fesm2022/overlay.mjs
 var scrollBehaviorSupported = supportsScrollBehavior();
 var BlockScrollStrategy = class {
   _viewportRuler;
@@ -3442,10 +3442,12 @@ export {
   CdkPortalOutlet,
   PortalModule,
   OverlayConfig,
+  OverlayContainer,
+  OverlayRef,
   FlexibleConnectedPositionStrategy,
   Overlay,
   CdkOverlayOrigin,
   CdkConnectedOverlay,
   OverlayModule
 };
-//# sourceMappingURL=chunk-XFCQ5BIH.js.map
+//# sourceMappingURL=chunk-VFZI4E5W.js.map

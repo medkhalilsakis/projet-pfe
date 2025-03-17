@@ -1,5 +1,6 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,7 +23,9 @@ public class ProjectFile {
     // Association au projet
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference  // Ne sérialise pas la référence vers le projet pour éviter la récursion
     private Project project;
+
 
     // Référence au dossier parent, si applicable (null pour les éléments racines)
     @ManyToOne(fetch = FetchType.LAZY)

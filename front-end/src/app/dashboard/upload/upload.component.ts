@@ -1,5 +1,5 @@
 import { HttpClient, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -14,6 +14,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { ProjectDescriptionDialogComponent } from '../project-description-dialog/project-description-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-upload',
@@ -26,15 +28,15 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     MatIconModule,
     FileSizePipe,
-    MatFormField,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule
-  ],
+],
   templateUrl: './upload.component.html',
   styleUrls: ['./upload.component.css']
 })
 export class UploadComponent implements OnDestroy {
+  @Output() uploadCompleted = new EventEmitter<void>();
 
   files: File[] = [];
   uploadProgress: FileProgress[] = [];
@@ -50,7 +52,8 @@ export class UploadComponent implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private snackBar: MatSnackBar,
-    private sessionStorage: SessionStorageService
+    private sessionStorage: SessionStorageService,
+    private dialog: MatDialog
   ) {
     this.projectForm = this.fb.group({
       name: ['', Validators.required],
@@ -98,16 +101,14 @@ export class UploadComponent implements OnDestroy {
     const formData = new FormData();
     this.files.forEach(file => formData.append('files', file));
 
-    // Détermine si c'est une archive
     const isArchive = this.files.length === 1 &&
       ['application/zip', 'application/x-rar-compressed'].includes(this.files[0].type);
 
-    // Ajout de userId dans les paramètres
     const params = new HttpParams()
       .set('decompress', isArchive.toString())
       .set('userId', userId);
 
-    // Supposons que le backend renvoie du JSON contenant { projectId: number }
+    // Appel à l'API upload, qui renvoie { projectId: number }
     this.http.post<{ projectId: number }>('http://localhost:8080/api/projects/upload', formData, {
       reportProgress: true,
       observe: 'events',
@@ -118,13 +119,13 @@ export class UploadComponent implements OnDestroy {
           if (event.type === HttpEventType.UploadProgress) {
             this.updateProgress(event);
           } else if (event instanceof HttpResponse) {
-            // L'upload est terminé : récupérer l'ID du projet et le stocker dans le session storage
             this.isUploading = false;
             const projectId = event.body.projectId;
-            // Mettre à jour l'utilisateur avec currentProjectId
+            // Stocker l'id du projet dans le session storage
             this.sessionStorage.setUser({ ...user, currentProjectId: projectId });
-            this.showDescriptionForm = true;
-            this.snackBar.open('Upload terminé! Complétez les informations du projet', 'Fermer', { duration: 5000 });
+            this.snackBar.open('Upload terminé!', 'Fermer', { duration: 3000 });
+            // Ouvrir la popup pour saisir la description du projet
+            this.openProjectDescriptionDialog(projectId);
           }
         },
         error: (error) => {
@@ -133,6 +134,40 @@ export class UploadComponent implements OnDestroy {
           this.resetState();
         }
       });
+  }
+
+  private openProjectDescriptionDialog(projectId: number): void {
+    const dialogRef = this.dialog.open(ProjectDescriptionDialogComponent, {
+      width: '400px',
+      data: { projectId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Appel à l'API commit avec les données du formulaire
+        const params = new HttpParams().set('projectId', projectId.toString());
+        this.http.post('http://localhost:8080/api/projects/commit', result, { params, responseType: 'text' })
+          .subscribe({
+            next: (response) => {
+              this.snackBar.open(response, 'Fermer', { duration: 3000 });
+              // Émettre l'événement pour que le parent effectue la redirection vers la liste des projets
+              this.uploadCompleted.emit();
+              this.resetState();
+            },
+            error: (error) => {
+              console.log(error);
+              this.snackBar.open('Erreur lors de la finalisation du projet', 'Fermer', { duration: 5000 });
+              // En cas d'échec, rediriger quand même vers la liste
+              this.uploadCompleted.emit();
+              this.resetState();
+            }
+          });
+      } else {
+        this.snackBar.open('Finalisation annulée', 'Fermer', { duration: 3000 });
+        this.uploadCompleted.emit();
+        this.resetState();
+      }
+    });
   }
 
   private updateProgress(event: any) {

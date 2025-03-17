@@ -1,106 +1,54 @@
 <div class="dashboard-container">
-    <mat-card class="upload-card">
-      <mat-card-header>
-        <mat-card-title>Upload de Projet</mat-card-title>
-      </mat-card-header>
-  
-      <mat-card-content>
-        <div class="drop-zone" 
-             (drop)="onDrop($event)"
-             (dragover)="$event.preventDefault()"
-             (dragleave)="$event.preventDefault()"
-             [class.dragover]="false">
-          <mat-icon>cloud_upload</mat-icon>
-          <p>Glissez vos fichiers ici ou</p>
-          <input type="file" #fileInput hidden (change)="onFileSelected($event)" multiple webkitdirectory>
-          <button mat-raised-button color="primary" (click)="fileInput.click()">
-            Sélectionner des fichiers/dossiers
-          </button>
-          <p>Formats supportés : fichiers/dossiers ou archives (.zip, .rar)</p>
+  <mat-card class="upload-card">
+    <mat-card-header>
+      <mat-card-title>Upload de Projet</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="drop-zone" 
+           (drop)="onDrop($event)"
+           (dragover)="$event.preventDefault()"
+           (dragleave)="$event.preventDefault()"
+           [class.dragover]="false">
+        <mat-icon>cloud_upload</mat-icon>
+        <p>Glissez vos fichiers ici ou</p>
+        <input type="file" #fileInput hidden (change)="onFileSelected($event)" multiple webkitdirectory>
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Sélectionner des fichiers/dossiers
+        </button>
+        <p>Formats supportés : fichiers/dossiers ou archives (.zip, .rar)</p>
+      </div>
+
+      <div class="file-list" *ngIf="files.length > 0">
+        <h3>Fichiers sélectionnés :</h3>
+        <div class="file-item" *ngFor="let file of files">
+          <mat-icon>{{ file.type.includes('directory') ? 'folder' : 'insert_drive_file' }}</mat-icon>
+          <span>{{ file.name }}</span>
+          <span class="file-size">{{ file.size | fileSize }}</span>
         </div>
-  
-        <div class="file-list" *ngIf="files.length > 0">
-          <h3>Fichiers sélectionnés :</h3>
-          <div class="file-item" *ngFor="let file of files">
-            <mat-icon>{{ file.type.includes('directory') ? 'folder' : 'insert_drive_file' }}</mat-icon>
-            <span>{{ file.name }}</span>
-            <span class="file-size">{{ file.size | fileSize }}</span>
+      </div>
+
+      <div class="progress-section" *ngIf="isUploading">
+        <h3>Progression de l'upload :</h3>
+        <div class="progress-item" *ngFor="let progress of uploadProgress">
+          <div class="progress-header">
+            <span>{{ progress.name }}</span>
+            <span>{{ progress.speed | number:'1.1-1' }} KB/s</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="progress.progress"></mat-progress-bar>
+          <div class="progress-footer">
+            <span>{{ progress.uploaded | fileSize }} / {{ progress.size | fileSize }}</span>
+            <span>{{ progress.progress }}%</span>
           </div>
         </div>
-  
-        <div class="progress-section" *ngIf="isUploading">
-          <h3>Progression de l'upload :</h3>
-          <div class="progress-item" *ngFor="let progress of uploadProgress">
-            <div class="progress-header">
-              <span>{{ progress.name }}</span>
-              <span>{{ progress.speed | number:'1.1-1' }} KB/s</span>
-            </div>
-            <mat-progress-bar 
-              mode="determinate" 
-              [value]="progress.progress">
-            </mat-progress-bar>
-            <div class="progress-footer">
-              <span>{{ progress.uploaded | fileSize }} / {{ progress.size | fileSize }}</span>
-              <span>{{ progress.progress }}%</span>
-            </div>
-          </div>
-        </div>
-  
-        <div class="action-buttons">
-          <button mat-raised-button 
-                  color="primary" 
-                  (click)="startUpload()"
-                  [disabled]="files.length === 0 || isUploading">
-            Démarrer l'Upload
-          </button>
-  
-          <button mat-raised-button 
-                  color="accent" 
-                  (click)="commitProject()"
-                  [disabled]="isUploading || uploadProgress.length === 0">
-            Commit
-          </button>
-        </div>
-      </mat-card-content>
-      <div class="description-section" *ngIf="showDescriptionForm && !isUploading">
-        <h3>Finalisez votre projet</h3>
-        
-        <form [formGroup]="projectForm" (ngSubmit)="commitProject()">
-            <mat-form-field appearance="outline">
-                <mat-label>Nom du projet</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error>Ce champ est obligatoire</mat-error>
-            </mat-form-field>
+      </div>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Type de projet</mat-label>
-                <mat-select formControlName="type">
-                    <mat-option value="WEB">Application Web</mat-option>
-                    <mat-option value="MOBILE">Application Mobile</mat-option>
-                    <mat-option value="IA">Intelligence Artificielle</mat-option>
-                    <mat-option value="DATA">Science des Données</mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description" rows="4"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-                <mat-label>Visibilité</mat-label>
-                <mat-select formControlName="visibilite">
-                    <mat-option value="public">Public</mat-option>
-                    <mat-option value="privé">Privé</mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <div class="action-buttons">
-                <button mat-raised-button color="primary" type="submit" [disabled]="projectForm.invalid">
-                    Finaliser le projet
-                </button>
-            </div>
-        </form>
-    </div>
-    </mat-card>
-  </div>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="startUpload()"
+                [disabled]="files.length === 0 || isUploading">
+          Démarrer l'Upload
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

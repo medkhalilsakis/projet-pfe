@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -141,12 +142,25 @@ public class ProjectService {
     }
 
 
-    public void commitProject(Long projectId) {
-
+    public void commitProject(Long projectId, String name, String type, String description, String visibilite) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        // Mettre à jour le projet avec les valeurs transmises
+        project.setName(name);
+        project.setType(type);
+        project.setDescription(description);
+        project.setVisibilite(visibilite);
+
+        // Les valeurs par défaut pour status (0) et committed (false initialement) sont déjà définies à la création.
+        // Ici, on marque le projet comme finalisé
         project.setCommitted(true);
         project.setUpdatedAt(LocalDateTime.now());
+
         projectRepository.save(project);
+    }
+
+    public List<Project> getProjectsByUserId(Long userId) {
+        return projectRepository.findByUserId(userId);
     }
 }

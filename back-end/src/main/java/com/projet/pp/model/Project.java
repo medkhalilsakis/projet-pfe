@@ -1,5 +1,7 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,6 +27,7 @@ public class Project {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
     @Column(nullable = false)
@@ -52,7 +55,9 @@ public class Project {
 
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference  // Sérialise la liste des fichiers
     private List<ProjectFile> files = new ArrayList<>();
+
 
 
     @ManyToMany
@@ -60,4 +65,8 @@ public class Project {
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> invitedUsers = new ArrayList<>();
+
+
+    @Column(nullable = false)
+    private Integer status = 0;
 }
