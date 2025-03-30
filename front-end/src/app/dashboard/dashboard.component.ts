@@ -68,7 +68,7 @@ export class DashboardComponent {
       { label: 'Upload Projet', icon: 'cloud_upload', action: () => this.navigateTo('upload') },
       { label: 'Messagerie', icon: 'message', action: () => this.navigateTo('messages') },
       { label: 'Analytics', icon: 'insights', action: () => this.navigateTo('analytics') },
-      { label: 'Paramètres', icon: 'settings', action: () => this.navigateTo('settings') }
+      { label: 'Paramètres', icon: 'settings', action: () => this.navigateTo('settings') },
     ];
   
 

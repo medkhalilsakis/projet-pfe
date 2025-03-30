@@ -27,6 +27,12 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
+    public List<User> searchUsers(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query);
+    }
+
+
+
     // Créer un nouvel utilisateur (mot de passe non crypté)
     public User createUser(User user) {
         return userRepository.save(user);

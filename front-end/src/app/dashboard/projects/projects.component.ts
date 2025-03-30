@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProjectFilesComponent } from "./project-files/project-files.component";
 
 export interface Project {
   id: number;
@@ -27,12 +28,16 @@ export interface Project {
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatProgressBarModule
-  ],
+    MatProgressBarModule,
+    ProjectFilesComponent
+],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
+editDetails(_t6: Project) {
+  throw new Error('Method not implemented.');
+}
   projects: Project[] = [];
   loading = false;
   userId!: number;
@@ -54,7 +59,9 @@ export class ProjectsComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
-
+  openProject(project: Project) {
+    this.selectedProject = project;
+  }
   loadProjects(): void {
     this.loading = true;
     // Appel à l'API pour récupérer les projets de l'utilisateur
@@ -73,8 +80,10 @@ export class ProjectsComponent implements OnInit {
   }
 
   // Action pour afficher les détails du projet (fichiers et sous-dossiers)
+  selectedProject: Project | null = null;
+
   viewDetails(project: Project): void {
-    this.router.navigate(['/projects', project.id]);
+    this.selectedProject = project;
   }
 
   // Action pour accéder aux paramètres du projet
@@ -110,4 +119,16 @@ export class ProjectsComponent implements OnInit {
       default: return 'black';
     }
   }
+
+  getStatusLabel(status: number): string {
+    switch(status) {
+      case 0: return 'Brouillon';
+      case 1: return 'Clôturé/Suspendu';
+      case 2: return 'En cours';
+      case 3: return 'En attente';
+      case 4: return 'Accepté';
+      default: return 'Inconnu';
+    }
+  }
+
 }

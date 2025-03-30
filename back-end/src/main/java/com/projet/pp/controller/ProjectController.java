@@ -1,6 +1,7 @@
 package com.projet.pp.controller;
 
 import com.projet.pp.model.Project;
+import com.projet.pp.model.ProjectFile;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,16 +25,11 @@ public class ProjectController {
                                            @RequestParam(value = "decompress", defaultValue = "false") boolean decompress,
                                            @RequestParam("userId") Long userId) {
         try {
-            // Appel au service qui gère l'upload et retourne l'ID du projet créé
             Long projectId = projectService.uploadProject(files, decompress, userId);
-
-            // Création d'une réponse JSON avec un message et l'ID du projet
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Fichiers uploadés avec succès");
             response.put("projectId", projectId);
-
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -41,16 +37,15 @@ public class ProjectController {
         }
     }
 
-    // Endpoint pour le commit final du projet
+    // Endpoint pour finaliser le projet, sans utiliser de DTO dédié
     @PostMapping("/commit")
     public ResponseEntity<?> commitProject(
             @RequestParam("projectId") Long projectId,
             @RequestBody Map<String, String> commitData) {
         try {
-            // Extraction des champs depuis le Map
             String name = commitData.get("name");
             String type = commitData.get("type");
-            String description = commitData.get("description"); // Peut être null
+            String description = commitData.get("description"); // Optionnel
             String visibilite = commitData.get("visibilite");
 
             projectService.commitProject(projectId, name, type, description, visibilite);
@@ -62,16 +57,28 @@ public class ProjectController {
         }
     }
 
-
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getProjectsByUser(@PathVariable("userId") Long userId) {
         try {
             List<Project> projects = projectService.getProjectsByUserId(userId);
             return ResponseEntity.ok(projects);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de la récupération des projets : " + e.getMessage());
         }
     }
+
+    @GetMapping("/{projectId}/files")
+    public ResponseEntity<?> getProjectFiles(@PathVariable("projectId") Long projectId) {
+        try {
+            List<ProjectFile> files = projectService.getFilesByProjectId(projectId);
+            return ResponseEntity.ok(files);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la récupération des fichiers : " + e.getMessage());
+        }
+    }
+
 }

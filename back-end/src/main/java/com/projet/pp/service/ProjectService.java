@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +34,6 @@ public class ProjectService {
     @Autowired
     private UserRepository userRepository;
 
-
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
     public ProjectService() {
@@ -46,12 +44,12 @@ public class ProjectService {
         }
     }
 
-
     public Long uploadProject(MultipartFile[] files, boolean decompress, Long userId) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         Project project = new Project();
+        // Nom auto-généré initialement
         project.setName("Projet_" + System.currentTimeMillis());
         project.setVisibilite("privée");
         project.setDescription("");
@@ -60,13 +58,13 @@ public class ProjectService {
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
 
-        project = projectRepository.save(project); // Sauvegarde et récupération de l'ID généré
+        project = projectRepository.save(project); // Enregistrement pour obtenir l'ID
 
-        // Répertoire de stockage pour ce projet
+        // Créer le répertoire de stockage pour ce projet
         Path projectStorage = baseStorage.resolve(project.getId().toString());
         Files.createDirectories(projectStorage);
 
-        // Traitement des fichiers uploadés
+        // Pour chaque fichier, si on doit décompresser et que le fichier est une archive, décompresse sinon sauvegarde tel quel
         for (MultipartFile file : files) {
             if (decompress && isArchive(file)) {
                 decompressArchive(file, projectStorage, project);
@@ -75,15 +73,14 @@ public class ProjectService {
             }
         }
 
-        return project.getId(); // Retourne l'ID du projet
+        return project.getId();
     }
 
-    // Vérifie si le fichier est une archive ZIP
+    // Modification : vérifier par extension (non par type MIME)
     private boolean isArchive(MultipartFile file) {
-        String contentType = file.getContentType();
-        return "application/zip".equals(contentType) || "application/x-zip-compressed".equals(contentType);
+        String originalFilename = file.getOriginalFilename();
+        return originalFilename != null && originalFilename.toLowerCase().endsWith(".zip");
     }
-
 
     private void decompressArchive(MultipartFile file, Path projectStorage, Project project) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
@@ -105,13 +102,11 @@ public class ProjectService {
         }
     }
 
-
     private void saveFile(MultipartFile file, Path projectStorage, Project project, String relativeFolder) throws IOException {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         Path targetLocation = projectStorage.resolve(relativeFolder).resolve(fileName);
         Files.createDirectories(targetLocation.getParent());
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
 
         ProjectFile projectFile = new ProjectFile();
         projectFile.setName(fileName);
@@ -122,7 +117,6 @@ public class ProjectService {
         projectFile.setProject(project);
         projectFileRepository.save(projectFile);
     }
-
 
     private void saveFile(String relativePath, byte[] content, long size, Path projectStorage, Project project) throws IOException {
         Path targetLocation = projectStorage.resolve(relativePath);
@@ -141,20 +135,17 @@ public class ProjectService {
         projectFileRepository.save(projectFile);
     }
 
-
+    // Pour finaliser le projet : on met à jour le nom, type, description et visibilité.
+    // Ici, on considère que finaliser le projet signifie passer committed à true.
     public void commitProject(Long projectId, String name, String type, String description, String visibilite) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
-        // Mettre à jour le projet avec les valeurs transmises
         project.setName(name);
         project.setType(type);
         project.setDescription(description);
         project.setVisibilite(visibilite);
-
-        // Les valeurs par défaut pour status (0) et committed (false initialement) sont déjà définies à la création.
-        // Ici, on marque le projet comme finalisé
-        project.setCommitted(true);
+        project.setCommitted(true); // Finalisé
         project.setUpdatedAt(LocalDateTime.now());
 
         projectRepository.save(project);
@@ -163,4 +154,10 @@ public class ProjectService {
     public List<Project> getProjectsByUserId(Long userId) {
         return projectRepository.findByUserId(userId);
     }
+
+    public List<ProjectFile> getFilesByProjectId(Long projectId) {
+        // Vous pouvez ajouter une méthode dans ProjectFileRepository pour récupérer par projectId
+        return projectFileRepository.findByProjectId(projectId);
+    }
+
 }

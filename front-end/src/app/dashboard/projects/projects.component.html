@@ -1,37 +1,40 @@
 <div class="project-list-container" *ngIf="!loading">
-    <mat-card *ngFor="let project of projects" class="project-card">
-      <mat-card-header>
-        <!-- Icône de statut -->
-        <div mat-card-avatar [ngStyle]="{'background-color': getStatusColor(project.status)}">
-          <mat-icon>assignment</mat-icon>
-        </div>
-        <mat-card-title>{{ project.name }}</mat-card-title>
-        <mat-card-subtitle>
-          Créé le {{ project.createdAt | date:'medium' }}<br>
-          Mis à jour le {{ project.updatedAt | date:'medium' }}
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <!-- Bouton Détails -->
-        <button mat-icon-button color="primary" (click)="viewDetails(project)">
-          <mat-icon>info</mat-icon>
-        </button>
-        <!-- Bouton Paramètres -->
-        <button mat-icon-button color="accent" (click)="openSettings(project)">
-          <mat-icon>settings</mat-icon>
-        </button>
-        <!-- Bouton Suppression -->
-        <button mat-icon-button color="warn" (click)="deleteProject(project)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
-  
-  <div *ngIf="loading">
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-  </div>
-  
+  <mat-card *ngFor="let project of projects" class="project-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <mat-card-title>{{ project.name }}</mat-card-title>
+      <mat-card-subtitle>
+        Créé le {{ project.createdAt | date:'medium' }}<br>
+        Mis à jour le {{ project.updatedAt | date:'medium' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
+      <div class="status-container">
+        <div class="status-circle" [ngStyle]="{'background-color': getStatusColor(project.status)}"></div>
+        <span class="status-label">{{ getStatusLabel(project.status) }}</span>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-icon-button color="primary" (click)="viewDetails(project)">
+        <mat-icon>code</mat-icon>
+      </button>      
+      <button mat-icon-button color="primary" (click)="editDetails(project)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="accent" (click)="openSettings(project)">
+        <mat-icon>settings</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" (click)="deleteProject(project)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  <app-project-files *ngIf="selectedProject" [project]="selectedProject"></app-project-files>
+</div>
+
+<div *ngIf="loading">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
