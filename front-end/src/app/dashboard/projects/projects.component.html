@@ -1,40 +1,53 @@
-<div class="project-list-container" *ngIf="!loading">
-  <mat-card *ngFor="let project of projects" class="project-card">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>assignment</mat-icon>
-      </div>
-      <mat-card-title>{{ project.name }}</mat-card-title>
-      <mat-card-subtitle>
-        Créé le {{ project.createdAt | date:'medium' }}<br>
-        Mis à jour le {{ project.updatedAt | date:'medium' }}
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
-      <div class="status-container">
-        <div class="status-circle" [ngStyle]="{'background-color': getStatusColor(project.status)}"></div>
-        <span class="status-label">{{ getStatusLabel(project.status) }}</span>
-      </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-icon-button color="primary" (click)="viewDetails(project)">
-        <mat-icon>code</mat-icon>
-      </button>      
-      <button mat-icon-button color="primary" (click)="editDetails(project)">
-        <mat-icon>edit</mat-icon>
+<div class="projects-container">
+  <!-- Barre de recherche -->
+  <div class="search-bar-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Rechercher un projet</mat-label>
+      <input matInput placeholder="Nom du projet" [(ngModel)]="searchQuery" (keyup)="filterProjects()">
+      <button mat-icon-button matSuffix (click)="filterProjects()">
+        <mat-icon>search</mat-icon>
       </button>
-      <button mat-icon-button color="accent" (click)="openSettings(project)">
-        <mat-icon>settings</mat-icon>
-      </button>
-      <button mat-icon-button color="warn" (click)="deleteProject(project)">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </mat-card-actions>
-  </mat-card>
-  <app-project-files *ngIf="selectedProject" [project]="selectedProject"></app-project-files>
-</div>
+    </mat-form-field>
+  </div>
 
-<div *ngIf="loading">
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  <!-- Liste des projets -->
+  <div class="project-list" *ngIf="!loading">
+    <mat-card *ngFor="let project of filteredProjects" class="project-card">
+      <mat-card-header>
+        <div mat-card-avatar>
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <mat-card-title>{{ project.name }}</mat-card-title>
+        <mat-card-subtitle>
+          Créé le {{ project.createdAt | date:'medium' }}<br>
+          Mis à jour le {{ project.updatedAt | date:'medium' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
+        <div class="status-container">
+          <div class="status-circle" [ngStyle]="{'background-color': getStatusColor(project.status)}"></div>
+          <span class="status-label">{{ getStatusLabel(project.status) }}</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-icon-button color="primary" (click)="viewDetails(project)">
+          <mat-icon>visibility</mat-icon>
+        </button>      
+        <button mat-icon-button color="primary" (click)="openSettings(project)">
+          <mat-icon>settings</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteProject(project)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Affichage des détails du projet (fichiers, etc.) si sélectionné -->
+    <app-project-files *ngIf="selectedProject" [project]="selectedProject"></app-project-files>
+  </div>
+
+  <div *ngIf="loading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
 </div>

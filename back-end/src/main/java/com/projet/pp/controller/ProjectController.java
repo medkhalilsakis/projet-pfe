@@ -20,6 +20,12 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
+    @GetMapping
+    public ResponseEntity<List<Project>> getAllProjects() {
+        List<Project> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<?> uploadProject(@RequestParam("files") MultipartFile[] files,
                                            @RequestParam(value = "decompress", defaultValue = "false") boolean decompress,
@@ -64,7 +70,7 @@ public class ProjectController {
             return ResponseEntity.ok(projects);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(500)
                     .body("Erreur lors de la récupération des projets : " + e.getMessage());
         }
     }

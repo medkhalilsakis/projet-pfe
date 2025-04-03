@@ -9,6 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProjectFilesComponent } from "./project-files/project-files.component";
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 export interface Project {
   id: number;
@@ -17,7 +20,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   status: number;
-  // Vous pouvez ajouter d'autres champs si nécessaire
+  // Autres champs si nécessaire
 }
 
 @Component({
@@ -25,22 +28,28 @@ export interface Project {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    MatLabel,
     MatCardModule,
+    MatInputModule,
     MatIconModule,
     MatButtonModule,
     MatProgressBarModule,
     ProjectFilesComponent
-],
+  ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
-editDetails(_t6: Project) {
-  throw new Error('Method not implemented.');
-}
   projects: Project[] = [];
+  filteredProjects: Project[] = [];
   loading = false;
   userId!: number;
+  userRole!: number; // 1, 2 ou 3
+  searchQuery: string = '';
+  
+  // Pour afficher les détails d'un projet
+  selectedProject: Project | null = null;
 
   constructor(
     private http: HttpClient,
@@ -53,22 +62,37 @@ editDetails(_t6: Project) {
     const user = this.sessionStorage.getUser();
     if (user && user.id) {
       this.userId = user.id;
+      this.userRole = user.role;  // On suppose que le rôle est stocké sous "role"
       this.loadProjects();
     } else {
       this.snackBar.open('Utilisateur non identifié', 'Fermer', { duration: 5000 });
       this.router.navigate(['/login']);
     }
   }
-  openProject(project: Project) {
-    this.selectedProject = project;
-  }
+
   loadProjects(): void {
     this.loading = true;
-    // Appel à l'API pour récupérer les projets de l'utilisateur
-    this.http.get<Project[]>(`http://localhost:8080/api/projects/user/${this.userId}`)
+    let endpoint = '';
+    let user = this.sessionStorage.getUser();
+    this.userRole = user.role.id;
+    // Sélection dynamique de l'endpoint en fonction du rôle
+    if (this.userRole === 3) {
+      // Superviseur : tous les projets
+      endpoint = `http://localhost:8080/api/projects`;
+    } else if (this.userRole === 2) {
+      // Testeur : projets assignés au testeur
+      endpoint = `http://localhost:8080/api/projects/tester/${this.userId}`;
+    } else if (this.userRole === 1) {
+      // Développeur : projets uploadés par lui-même
+      endpoint = `http://localhost:8080/api/projects/user/${this.userId}`;
+    }
+    console.log('Endpoint utilisé :', endpoint);
+
+    this.http.get<Project[]>(endpoint)
       .subscribe({
         next: (data: Project[]) => {
           this.projects = data;
+          this.filteredProjects = data; // initialement, aucun filtre
           this.loading = false;
         },
         error: (err) => {
@@ -79,19 +103,24 @@ editDetails(_t6: Project) {
       });
   }
 
-  // Action pour afficher les détails du projet (fichiers et sous-dossiers)
-  selectedProject: Project | null = null;
+  // Filtrer les projets localement par nom
+  filterProjects(): void {
+    if (!this.searchQuery.trim()) {
+      this.filteredProjects = this.projects;
+    } else {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredProjects = this.projects.filter(proj => proj.name.toLowerCase().includes(query));
+    }
+  }
 
   viewDetails(project: Project): void {
     this.selectedProject = project;
   }
 
-  // Action pour accéder aux paramètres du projet
   openSettings(project: Project): void {
     this.router.navigate(['/projects', project.id, 'settings']);
   }
 
-  // Action pour supprimer un projet
   deleteProject(project: Project): void {
     if (confirm(`Voulez-vous vraiment supprimer le projet "${project.name}" ?`)) {
       this.http.delete(`http://localhost:8080/api/projects/${project.id}`)
@@ -108,12 +137,11 @@ editDetails(_t6: Project) {
     }
   }
 
-  // Retourne la couleur correspondant au statut du projet
   getStatusColor(status: number): string {
     switch(status) {
-      case 0: return 'grey';   // Brouillon (non publié)
+      case 0: return 'grey';   // Brouillon
       case 1: return 'red';    // Clôturé/Suspendu
-      case 2: return 'orange'; // En cours (phase de testing)
+      case 2: return 'orange'; // En cours (testing)
       case 3: return 'blue';   // En attente d'approbation finale
       case 4: return 'green';  // Accepté
       default: return 'black';
@@ -130,5 +158,4 @@ editDetails(_t6: Project) {
       default: return 'Inconnu';
     }
   }
-
 }

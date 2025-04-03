@@ -70,6 +70,7 @@ export class DashboardComponent {
       { label: 'Upload Projet', icon: 'cloud_upload', action: () => this.navigateTo('upload') },
       { label: 'Messagerie', icon: 'message', action: () => this.navigateTo('messages') },
       { label: 'Analytics', icon: 'insights', action: () => this.navigateTo('analytics') },
+      { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') },
       { label: 'Paramètres', icon: 'settings', action: () => this.navigateTo('settings') },
     ];
   
@@ -79,9 +80,8 @@ export class DashboardComponent {
         this.menuItems = [
           ...baseMenu,
           { label: 'Liste des Projets', icon: 'list_alt', action: () => this.navigateTo('projects') },
-          { label: 'Utilisateurs', icon: 'people', action: () => this.navigateTo('users') },
-          { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') },
           { label: 'Ajouter Utilisateur', icon: 'add', action: () => this.navigateTo('add-user') },
+          { label: 'Utilisateurs', icon: 'people', action: () => this.navigateTo('users') }
         ];
         break;
       
@@ -98,7 +98,6 @@ export class DashboardComponent {
         this.menuItems = [
           ...baseMenu,
           { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('projects') },
-          { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') }
         ];
         break;
     }

@@ -44,6 +44,11 @@ public class ProjectService {
         }
     }
 
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
+    }
+
+
     public Long uploadProject(MultipartFile[] files, boolean decompress, Long userId) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
