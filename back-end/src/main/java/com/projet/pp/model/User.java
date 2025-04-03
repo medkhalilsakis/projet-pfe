@@ -43,8 +43,11 @@ public class User{
     @JsonIgnoreProperties("hibernateLazyInitializer")
     private Role role;
 
+    @Column(nullable = false, unique = true)
+    private String ncin;
+
     public User(String nom, String prenom, String username, String email, String password,
-                LocalDate dateEmbauche, double salaire, Role role) {
+                LocalDate dateEmbauche, double salaire, Role role, String ncin) {
         this.nom = nom;
         this.prenom = prenom;
         this.username = username;
@@ -53,5 +56,6 @@ public class User{
         this.dateEmbauche = dateEmbauche;
         this.salaire = salaire;
         this.role = role;
+        this.ncin = ncin;
     }
 }

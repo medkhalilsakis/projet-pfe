@@ -40,7 +40,7 @@
           <app-projects *ngSwitchCase="'projects'"></app-projects>
           <app-messages *ngSwitchCase="'messages'"></app-messages>
           <app-upload *ngSwitchCase="'upload'" (uploadCompleted)="navigateTo('projects')"></app-upload>
-
+          <app-add-user *ngSwitchCase="'add-user'"></app-add-user>
           <!-- Ajouter d'autres composants ici -->
         </ng-container>
       </mat-sidenav-content>

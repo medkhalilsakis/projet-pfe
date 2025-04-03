@@ -13,6 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { NotificationService } from '../services/notification.service';
 import { UploadComponent } from './upload/upload.component';
+import { AddUserComponent } from './add-user/add-user.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,7 +34,8 @@ import { UploadComponent } from './upload/upload.component';
     MessagesComponent,
     NgSwitch,
     NgSwitchCase,
-    UploadComponent
+    UploadComponent,
+    AddUserComponent
   ],
 })
 export class DashboardComponent {
@@ -78,7 +80,8 @@ export class DashboardComponent {
           ...baseMenu,
           { label: 'Liste des Projets', icon: 'list_alt', action: () => this.navigateTo('projects') },
           { label: 'Utilisateurs', icon: 'people', action: () => this.navigateTo('users') },
-          { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') }
+          { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') },
+          { label: 'Ajouter Utilisateur', icon: 'add', action: () => this.navigateTo('add-user') },
         ];
         break;
       

@@ -1,0 +1,58 @@
+<mat-card class="form-card">
+  <mat-card-title>Ajouter un utilisateur</mat-card-title>
+  <form [formGroup]="addUserForm" (ngSubmit)="onSubmit()">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="prenom" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Numéro carte d'identité</mat-label>
+        <input matInput formControlName="ncin">
+      </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nom d'utilisateur</mat-label>
+      <input matInput formControlName="username" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Mot de passe</mat-label>
+      <input matInput type="password" formControlName="password" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date d'embauche</mat-label>
+      <input matInput type="date" formControlName="date_embauche" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Salaire</mat-label>
+      <input matInput type="number" formControlName="salaire" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Rôle</mat-label>
+      <mat-select formControlName="role" required>
+        <mat-option *ngFor="let r of roles" [value]="r.value">
+          {{ r.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="addUserForm.invalid">
+      Ajouter
+    </button>
+  </form>
+</mat-card>

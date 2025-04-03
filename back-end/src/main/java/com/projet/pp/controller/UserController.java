@@ -1,6 +1,8 @@
 package com.projet.pp.controller;
 
+import com.projet.pp.model.Role;
 import com.projet.pp.model.User;
+import com.projet.pp.repository.RoleRepository;
 import com.projet.pp.service.OTPService;
 import com.projet.pp.service.PasswordUtil;
 import com.projet.pp.service.UserService;
@@ -13,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +29,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private OTPService otpService;
@@ -65,17 +71,23 @@ public class UserController {
         String username = signupData.get("username");
         String email = signupData.get("email");
         String rawPassword = signupData.get("password");
+        String ncin = signupData.get("ncin"); // Récupération du NCIN
 
         // Hachage du mot de passe avec BCrypt
         String hashedPassword = passwordEncoder.encode(rawPassword);
 
-        User user = new User();
-        user.setNom(nom);
-        user.setPrenom(prenom);
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(hashedPassword);
+        // Conversion de la date d'embauche (format: yyyy-MM-dd)
+        LocalDate dateEmbauche = LocalDate.parse(signupData.get("dateEmbauche"));
 
+        // Conversion du salaire
+        double salaire = Double.parseDouble(signupData.get("salaire"));
+
+        // Récupération du rôle depuis l'ID
+        Long roleId = Long.parseLong(signupData.get("role_id"));
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
+
+        User user = new User(nom, prenom, username, email, hashedPassword, dateEmbauche, salaire, role, ncin);
 
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

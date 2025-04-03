@@ -1,0 +1,31 @@
+.add-user-card {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .form-card {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
