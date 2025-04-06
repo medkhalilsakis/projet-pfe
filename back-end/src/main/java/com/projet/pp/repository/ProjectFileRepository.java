@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ProjectFileRepository extends JpaRepository<ProjectFile, Long> {
     List<ProjectFile> findByProjectId(Long projectId);
+    List<ProjectFile> findByProjectIdAndParentId(Long projectId, Long parentId);
 }

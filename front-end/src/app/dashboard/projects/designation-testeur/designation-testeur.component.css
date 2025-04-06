@@ -1,0 +1,11 @@
+.table-container {
+    overflow-x: auto;
+    margin: 20px;
+  }
+  table {
+    width: 100%;
+  }
+  mat-form-field {
+    width: 200px;
+  }
+  

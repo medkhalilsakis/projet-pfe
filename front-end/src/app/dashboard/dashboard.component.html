@@ -25,12 +25,36 @@
     <mat-sidenav-container>
       <mat-sidenav mode="side" opened class="side-nav">
         <mat-nav-list>
-          <a mat-list-item *ngFor="let item of menuItems" (click)="item.action()" 
-             [class.active]="currentView() === item.label">
-            <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
-            <span matListItemTitle>{{item.label}}</span>
-          </a>
+          <ng-container *ngFor="let item of menuItems">
+            <!-- Si l'item a un sous-menu -->
+            <ng-container *ngIf="item.subMenu; else singleItem">
+              <mat-expansion-panel class="menu-panel" hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                    {{ item.label }}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list>
+                  <a mat-list-item *ngFor="let sub of item.subMenu"
+                     (click)="sub.action()"
+                     [class.active]="currentView() === sub.label">
+                    <mat-icon matListItemIcon>chevron_right</mat-icon>
+                    <span>{{ sub.label }}</span>
+                  </a>
+                </mat-nav-list>
+              </mat-expansion-panel>
+            </ng-container>
+            <!-- Si pas de sous-menu, on affiche un lien normal -->
+            <ng-template #singleItem>
+              <a mat-list-item (click)="item.action()" [class.active]="currentView() === item.label">
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </a>
+            </ng-template>
+          </ng-container>
         </mat-nav-list>
+        
       </mat-sidenav>
 
       <!-- Contenu principal -->
@@ -41,6 +65,8 @@
           <app-messages *ngSwitchCase="'messages'"></app-messages>
           <app-upload *ngSwitchCase="'upload'" (uploadCompleted)="navigateTo('projects')"></app-upload>
           <app-add-user *ngSwitchCase="'add-user'"></app-add-user>
+          <app-designation-testeur *ngSwitchCase="'designation'"></app-designation-testeur>
+
           <!-- Ajouter d'autres composants ici -->
         </ng-container>
       </mat-sidenav-content>

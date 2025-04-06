@@ -25,8 +25,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Autoriser tous les endpoints de projets
+                        .requestMatchers("/api/projects/**").permitAll()
+
+                        // vos autres règles existantes...
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/projects/upload", "/api/projects/**", "/api/projects/user/**", "/api/users/**", "/api/users/signup").permitAll()
+                        .requestMatchers("/api/projects/upload", "/api/assignments/**", "/api/projects/user/**", "/api/users/**", "/api/users/signup").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

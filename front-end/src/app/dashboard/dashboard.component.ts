@@ -14,6 +14,9 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { NotificationService } from '../services/notification.service';
 import { UploadComponent } from './upload/upload.component';
 import { AddUserComponent } from './add-user/add-user.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { DesignationTesteurComponent } from './projects/designation-testeur/designation-testeur.component';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -35,7 +38,9 @@ import { AddUserComponent } from './add-user/add-user.component';
     NgSwitch,
     NgSwitchCase,
     UploadComponent,
-    AddUserComponent
+    AddUserComponent,
+    MatExpansionModule,
+    DesignationTesteurComponent
   ],
 })
 export class DashboardComponent {
@@ -79,7 +84,18 @@ export class DashboardComponent {
       case 3: // Superviseur
         this.menuItems = [
           ...baseMenu,
-          { label: 'Liste des Projets', icon: 'list_alt', action: () => this.navigateTo('projects') },
+          {
+            label: 'Liste des Projets',
+            icon: 'list_alt',
+            subMenu: [
+              { label: 'Vue d\'ensemble', action: () => this.navigateTo('projects') },
+              { label: 'Désignation des testeurs', action: () => this.navigateTo('designation') },
+              { label: 'Projets en révision',     action: () => this.navigateTo('projects/revision')   },
+              { label: 'Réclamations',             action: () => this.navigateTo('projects/complaints') },
+              { label: 'Projets archivés',         action: () => this.navigateTo('projects/archived')   },
+              { label: 'Projets terminés',         action: () => this.navigateTo('projects/completed')  },
+            ]
+          },
           { label: 'Ajouter Utilisateur', icon: 'add', action: () => this.navigateTo('add-user') },
           { label: 'Utilisateurs', icon: 'people', action: () => this.navigateTo('users') }
         ];

@@ -166,9 +166,14 @@ private updateIndividualProgress(event: any) {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        const status = result.visibilite === 'public' ? 1 : 0;
+        const payload = {
+          ...result,
+          status: status
+        };
         // Envoi des informations saisies à l'API commit
         const params = new HttpParams().set('projectId', projectId.toString());
-        this.http.post('http://localhost:8080/api/projects/commit', result, { params, responseType: 'text' })
+        this.http.post('http://localhost:8080/api/projects/commit', payload, { params, responseType: 'text' })
           .subscribe({
             next: (response) => {
               this.snackBar.open(response, 'Fermer', { duration: 3000 });

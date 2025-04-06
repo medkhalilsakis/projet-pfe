@@ -12,6 +12,7 @@ import { ProjectFilesComponent } from "./project-files/project-files.component";
 import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialog } from '@angular/material/dialog';
 
 export interface Project {
   id: number;
@@ -34,8 +35,7 @@ export interface Project {
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    MatProgressBarModule,
-    ProjectFilesComponent
+    MatProgressBarModule
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.css']
@@ -55,7 +55,8 @@ export class ProjectsComponent implements OnInit {
     private http: HttpClient,
     private sessionStorage: SessionStorageService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -114,7 +115,11 @@ export class ProjectsComponent implements OnInit {
   }
 
   viewDetails(project: Project): void {
-    this.selectedProject = project;
+    // Ouvrir le dialog pour afficher l'arbre des fichiers du projet
+    this.dialog.open(ProjectFilesComponent, {
+      width: '600px',
+      data: { project: project }
+    });
   }
 
   openSettings(project: Project): void {
@@ -140,7 +145,7 @@ export class ProjectsComponent implements OnInit {
   getStatusColor(status: number): string {
     switch(status) {
       case 0: return 'grey';   // Brouillon
-      case 1: return 'red';    // Clôturé/Suspendu
+      case 1: return '#DE2E4B';    // Clôturé/Suspendu
       case 2: return 'orange'; // En cours (testing)
       case 3: return 'blue';   // En attente d'approbation finale
       case 4: return 'green';  // Accepté
@@ -150,8 +155,8 @@ export class ProjectsComponent implements OnInit {
 
   getStatusLabel(status: number): string {
     switch(status) {
-      case 0: return 'Brouillon';
-      case 1: return 'Clôturé/Suspendu';
+      case 0: return 'Brouillon : projet non publié';
+      case 1: return 'En attente de désignation du testeur';
       case 2: return 'En cours';
       case 3: return 'En attente';
       case 4: return 'Accepté';

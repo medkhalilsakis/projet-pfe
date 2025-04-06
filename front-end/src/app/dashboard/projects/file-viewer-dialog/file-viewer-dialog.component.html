@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Fichier : {{ data.file.name }}</h2>
+
+<div mat-dialog-content>
+  <div *ngIf="loading">Chargement...</div>
+
+  <div *ngIf="!loading">
+    <textarea *ngIf="isEditing" [(ngModel)]="editedContent" rows="20" cols="80"></textarea>
+    <pre *ngIf="!isEditing">{{ content }}</pre>
+  </div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-icon-button color="warn" (click)="deleteFile()" matTooltip="Supprimer">
+    <mat-icon>delete</mat-icon>
+  </button>
+
+  <button mat-icon-button *ngIf="!isEditing" color="primary" (click)="enableEdit()" matTooltip="Modifier">
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <button mat-icon-button *ngIf="isEditing" color="primary" (click)="saveChanges()" matTooltip="Enregistrer">
+    <mat-icon>save</mat-icon>
+  </button>
+
+  <button mat-button (click)="onClose()">Fermer</button>
+</div>

@@ -48,7 +48,7 @@ import { CommonModule } from '@angular/common';
           <mat-label>Visibilité</mat-label>
           <mat-select formControlName="visibilite">
             <mat-option value="public">Public</mat-option>
-            <mat-option value="privé">Privé</mat-option>
+            <mat-option value="prive">Privé</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -72,7 +72,7 @@ export class ProjectDescriptionDialogComponent {
       name: ['', Validators.required],
       type: ['WEB', Validators.required],
       description: [''],
-      visibilite: ['privé', Validators.required]
+      visibilite: ['prive', Validators.required]
     });
   }
 

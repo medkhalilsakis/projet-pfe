@@ -53,6 +53,8 @@ public class Project {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "status")
+    private Integer status;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference  // Sérialise la liste des fichiers
@@ -65,8 +67,4 @@ public class Project {
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> invitedUsers = new ArrayList<>();
-
-
-    @Column(nullable = false)
-    private Integer status = 0;
 }

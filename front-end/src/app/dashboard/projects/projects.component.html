@@ -32,8 +32,9 @@
       </mat-card-content>
       <mat-card-actions>
         <button mat-icon-button color="primary" (click)="viewDetails(project)">
-          <mat-icon>visibility</mat-icon>
-        </button>      
+          <mat-icon>code</mat-icon>
+        </button>
+             
         <button mat-icon-button color="primary" (click)="openSettings(project)">
           <mat-icon>settings</mat-icon>
         </button>
@@ -43,8 +44,7 @@
       </mat-card-actions>
     </mat-card>
 
-    <!-- Affichage des détails du projet (fichiers, etc.) si sélectionné -->
-    <app-project-files *ngIf="selectedProject" [project]="selectedProject"></app-project-files>
+
   </div>
 
   <div *ngIf="loading">

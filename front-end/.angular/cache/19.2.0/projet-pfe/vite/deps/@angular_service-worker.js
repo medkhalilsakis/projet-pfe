@@ -12,7 +12,7 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-YNEK6H2P.js";
+} from "./chunk-54QPJIZ3.js";
 import {
   NEVER,
   Subject,
@@ -30,12 +30,12 @@ import {
   take,
   tap,
   throwError
-} from "./chunk-TYA5IJOH.js";
+} from "./chunk-K3A73UNH.js";
 import {
   __spreadValues
 } from "./chunk-EIB7IA3J.js";
 
-// ../../../node_modules/@angular/service-worker/fesm2022/service-worker.mjs
+// ../../../../node_modules/@angular/service-worker/fesm2022/service-worker.mjs
 var ERR_SW_NOT_SUPPORTED = "Service workers are disabled or not supported by this browser";
 function errorObservable(message) {
   return defer(() => throwError(new Error(message)));
