@@ -157,8 +157,8 @@ export class ProjectsComponent implements OnInit {
     switch(status) {
       case 0: return 'Brouillon : projet non publié';
       case 1: return 'En attente de désignation du testeur';
-      case 2: return 'En cours';
-      case 3: return 'En attente';
+      case 2: return 'En phase de test';
+      case 3: return 'Projet cloturé';
       case 4: return 'Accepté';
       default: return 'Inconnu';
     }

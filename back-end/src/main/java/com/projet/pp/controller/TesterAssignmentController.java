@@ -38,12 +38,58 @@ public class TesterAssignmentController {
 
     // 3) Assignation — on récupère superviseurId dans le body
     @PostMapping("/assign")
-    public ResponseEntity<?> assign(@RequestBody Map<String, Long> body) {
-        Long projectId     = body.get("projectId");
-        Long testeurId     = body.get("testeurId");
-        Long superviseurId = body.get("superviseurId");  // ← depuis Angular
-
-        service.assignTester(projectId, testeurId, superviseurId);
-        return ResponseEntity.ok("Testeur assigné");
+    public ResponseEntity<?> assign(@RequestBody Map<String,Long> body) {
+        try {
+            Long projectId = body.get("projectId");
+            Long testeurId = body.get("testeurId");
+            Long superviseurId = body.get("superviseurId");
+            service.assignTester(projectId, testeurId, superviseurId);
+            return ResponseEntity.ok("Testeur assigné");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+
+
+    @DeleteMapping("/remove/{assignmentId}")
+    public ResponseEntity<?> removeTester(@PathVariable Long assignmentId) {
+        service.removeTester(assignmentId);
+        return ResponseEntity.ok("Testeur retiré");
+    }
+
+    // 5) Modifier une affectation
+    @PutMapping("/update")
+    public ResponseEntity<?> updateTester(@RequestBody Map<String, Long> body) {
+        Long assignmentId = body.get("assignmentId");
+        Long newTesterId = body.get("newTesterId");
+        service.updateTester(assignmentId, newTesterId);
+        return ResponseEntity.ok("Testeur modifié");
+    }
+
+    // 6) Interrompre la phase de test pour un projet
+    @PostMapping("/interrupt/{projectId}")
+    public ResponseEntity<?> interruptPhase(@PathVariable Long projectId) {
+        service.interruptTestingPhase(projectId);
+        return ResponseEntity.ok("Phase de test interrompue. Projet clôturé.");
+    }
+
+
+    @GetMapping("/testing-projects")
+    public List<Project> testingProjects() {
+        return service.getTestingProjects();
+    }
+
+    @PostMapping("/resume/{projectId}")
+    public ResponseEntity<?> resumeTestingPhase(@PathVariable Long projectId, @RequestBody Map<String, Object> body) {
+        Long superviseurId = ((Number) body.get("superviseurId")).longValue();
+        // On attend dans le body un tableau de testeurIds sous forme de nombres
+        List<Integer> testerIdsInt = (List<Integer>) body.get("testerIds");
+        List<Long> testerIds = testerIdsInt.stream().map(Integer::longValue).toList();
+        service.resumeTestingPhase(projectId, testerIds, superviseurId);
+        return ResponseEntity.ok("Phase de testing relancée pour le projet");
+    }
+
+
+
 }

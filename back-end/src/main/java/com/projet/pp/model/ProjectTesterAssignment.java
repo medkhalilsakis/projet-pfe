@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="project_testeur_assignments")
@@ -40,4 +41,11 @@ public class ProjectTesterAssignment {
     @Enumerated(EnumType.STRING)
     @Column(name="statut_test", nullable=false)
     private TestStatus statutTest = TestStatus.non_commence;
+
+    public void setUpdatedAt(LocalDateTime now) {
+    }
+
+    public void setCreatedAt(LocalDateTime now) {
+
+    }
 }

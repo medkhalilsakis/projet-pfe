@@ -1,11 +1,43 @@
-.table-container {
-    overflow-x: auto;
-    margin: 20px;
-  }
-  table {
-    width: 100%;
-  }
-  mat-form-field {
-    width: 200px;
-  }
-  
+:host {
+  display: block;
+  padding: 16px;
+  font-family: Roboto, sans-serif;
+  color: #424242;
+}
+
+.project-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.assignment-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.assignment-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: #fff;
+}
+
+.phase-actions {
+  margin-top: 12px;
+}
+
+mat-form-field {
+  width: 200px;
+}
+
+button {
+  text-transform: none;
+}
