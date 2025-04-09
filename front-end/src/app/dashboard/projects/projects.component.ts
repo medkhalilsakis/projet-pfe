@@ -12,7 +12,8 @@ import { ProjectFilesComponent } from "./project-files/project-files.component";
 import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ProjectChatComponent } from './project-chat/project-chat.component';
 
 export interface Project {
   id: number;
@@ -41,6 +42,12 @@ export interface Project {
   styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
+  chatDetails(project: Project): void {
+    this.dialog.open(ProjectChatComponent, {
+      width: '600px',
+      data: { projectId: project.id }
+    });
+  }
   projects: Project[] = [];
   filteredProjects: Project[] = [];
   loading = false;
@@ -70,6 +77,7 @@ export class ProjectsComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+  
 
   loadProjects(): void {
     this.loading = true;

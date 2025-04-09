@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Chat du projet</h2>
+<mat-dialog-content class="chat-content">
+  <div class="messages-container" *ngIf="!loading; else loadingTemplate">
+    <div *ngFor="let msg of messages" class="message-item">
+      <strong>{{ msg.sender.name }} :</strong> <span>{{ msg.message }}</span>
+      <small>{{ msg.createdAt | date:'shortTime' }}</small>
+    </div>
+  </div>
+  <ng-template #loadingTemplate>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </ng-template>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <mat-form-field appearance="outline" class="message-input">
+    <input matInput placeholder="Votre message..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()">
+  </mat-form-field>
+  <button mat-icon-button color="primary" (click)="sendMessage()">
+    <mat-icon>send</mat-icon>
+  </button>
+  <button mat-button (click)="close()">Fermer</button>
+</mat-dialog-actions>
