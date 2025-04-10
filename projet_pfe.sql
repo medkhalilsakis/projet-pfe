@@ -33,7 +33,7 @@ CREATE TABLE `otp` (
   PRIMARY KEY (`id`),
   KEY `fk_utilisateur` (`utilisateur_id`),
   CONSTRAINT `fk_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,8 +42,38 @@ CREATE TABLE `otp` (
 
 LOCK TABLES `otp` WRITE;
 /*!40000 ALTER TABLE `otp` DISABLE KEYS */;
-INSERT INTO `otp` VALUES (18,3,'466283','2025-03-09 10:02:19','2025-03-09 10:07:19',0,1),(33,4,'482407','2025-03-14 03:38:48','2025-03-14 03:43:48',0,1);
+INSERT INTO `otp` VALUES (68,4,'700222','2025-04-10 09:21:25','2025-04-10 09:26:25',0,1);
 /*!40000 ALTER TABLE `otp` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_chat_messages`
+--
+
+DROP TABLE IF EXISTS `project_chat_messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_chat_messages` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `project_id` bigint NOT NULL,
+  `sender_id` bigint NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_project` (`project_id`),
+  KEY `fk_sender` (`sender_id`),
+  CONSTRAINT `fk_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_chat_messages`
+--
+
+LOCK TABLES `project_chat_messages` WRITE;
+/*!40000 ALTER TABLE `project_chat_messages` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_chat_messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -68,7 +98,7 @@ CREATE TABLE `project_files` (
   KEY `fk_project_files_parent` (`parent_id`),
   CONSTRAINT `fk_project_files_parent` FOREIGN KEY (`parent_id`) REFERENCES `project_files` (`id`),
   CONSTRAINT `fk_project_files_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=934 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1009 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -77,6 +107,7 @@ CREATE TABLE `project_files` (
 
 LOCK TABLES `project_files` WRITE;
 /*!40000 ALTER TABLE `project_files` DISABLE KEYS */;
+INSERT INTO `project_files` VALUES (1002,47,NULL,'rrr/a.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\a.txt','text/plain','2025-04-09 14:10:26'),(1003,47,NULL,'rrr/Y/b.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\Y\\b.txt','text/plain','2025-04-09 14:10:26'),(1004,47,NULL,'rrr/Y/d.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\Y\\d.txt','text/plain','2025-04-09 14:10:26'),(1005,47,NULL,'rrr/Y/Z/b.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\Y\\Z\\b.txt','text/plain','2025-04-09 14:10:26'),(1006,47,NULL,'rrr/Y/Z/c.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\Y\\Z\\c.txt','text/plain','2025-04-09 14:10:26'),(1007,47,NULL,'rrr/Y/Z/NEW.txt','FILE',0,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\Y\\Z\\NEW.txt','text/plain','2025-04-09 14:10:26'),(1008,47,NULL,'rrr/x/y/b.txt','FILE',100,'D:\\PFE\\projet-pfe\\back-end\\uploads\\projets\\47\\rrr\\x\\y\\b.txt','text/plain','2025-04-09 14:10:26');
 /*!40000 ALTER TABLE `project_files` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -107,6 +138,43 @@ LOCK TABLES `project_invited_users` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `project_testeur_assignments`
+--
+
+DROP TABLE IF EXISTS `project_testeur_assignments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_testeur_assignments` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `project_id` bigint NOT NULL,
+  `testeur_id` bigint NOT NULL,
+  `superviseur_id` bigint NOT NULL,
+  `date_designation` date NOT NULL,
+  `numero_testeur` int NOT NULL,
+  `cas_test_path` varchar(255) DEFAULT NULL,
+  `statut_test` enum('non_commence','en_cours','en_pause','termine') DEFAULT 'non_commence',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `project_id` (`project_id`),
+  KEY `testeur_id` (`testeur_id`),
+  KEY `superviseur_id` (`superviseur_id`),
+  CONSTRAINT `project_testeur_assignments_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `project_testeur_assignments_ibfk_2` FOREIGN KEY (`testeur_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `project_testeur_assignments_ibfk_3` FOREIGN KEY (`superviseur_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_testeur_assignments`
+--
+
+LOCK TABLES `project_testeur_assignments` WRITE;
+/*!40000 ALTER TABLE `project_testeur_assignments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_testeur_assignments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `projects`
 --
 
@@ -123,10 +191,12 @@ CREATE TABLE `projects` (
   `committed` tinyint(1) DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `status` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_projects_user` (`user_id`),
-  CONSTRAINT `fk_projects_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateur` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_projects_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateur` (`id`),
+  CONSTRAINT `projects_chk_1` CHECK ((`status` in (0,1,2,3,4)))
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,6 +205,7 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+INSERT INTO `projects` VALUES (47,4,'test','WEB','test','prive',1,'2025-04-09 14:10:26','2025-04-09 14:15:31',1);
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,12 +252,13 @@ CREATE TABLE `utilisateur` (
   `date_embauche` date DEFAULT NULL,
   `salaire` double DEFAULT NULL,
   `role_id` bigint NOT NULL,
+  `ncin` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
   KEY `role_id` (`role_id`),
   CONSTRAINT `utilisateur_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +267,7 @@ CREATE TABLE `utilisateur` (
 
 LOCK TABLES `utilisateur` WRITE;
 /*!40000 ALTER TABLE `utilisateur` DISABLE KEYS */;
-INSERT INTO `utilisateur` VALUES (1,'Doe','John','johndoe','johndoe@example.com','password123','2024-03-01',4500,2),(2,'test','test','testtest','test@example.com','$2a$10$LdJ001ZTfgVhXba4dcrVDO62d8dxa4KEcAur9pRqO1W7Qlg7cKcJq','2024-08-01',4500,2),(3,'Zum','Berg','zumberg1','zumberg1@gmailbrt.com','$2a$10$VrIFSSki6L4JNc5zQSX4Tu51enjeO7HIZl7IfZskwj2jpFFH8sUN2','2024-05-01',2000,1),(4,'admin','admin','admin','medkhalilsakis@gmail.com','$2a$10$rcBdPASv5cTFRJIElSsRSeKLz7Nr0gpiEWKYDKFjG9uUt5eWdqc0u','2024-05-01',4000,3);
+INSERT INTO `utilisateur` VALUES (4,'admin','admin','admin','medkhalilsakis@gmail.com','$2a$10$rcBdPASv5cTFRJIElSsRSeKLz7Nr0gpiEWKYDKFjG9uUt5eWdqc0u','2024-05-01',4000,3,NULL),(8,'Bot','11','Bot','bot@bot.bot','$2a$10$8PgCNfAxaSR5oAc9o.15QOOWaryV6wFQ83fGCYPQKQqJsIe.NKJae','1999-01-01',1000,2,'12345678'),(9,'youssef','souilem','root','s.swilem0@gmail.com','$2a$10$wzBXx7go1yaiIqH4qsLWFuH3TqwDe6DlydgABWny8AXmrCv.0V7La','2000-01-01',2000,3,'00000000');
 /*!40000 ALTER TABLE `utilisateur` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -208,4 +280,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-14  4:53:32
+-- Dump completed on 2025-04-10 10:22:53
