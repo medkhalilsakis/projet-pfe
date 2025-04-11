@@ -106,7 +106,7 @@ public class UserController {
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
 
-            if (!passwordEncoder.matches(decryptedPassword, user.getPassword())) {
+            if (!passwordEncoder.matches(encryptedPassword, user.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Identifiants invalides"));
             }

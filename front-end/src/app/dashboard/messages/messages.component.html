@@ -1,0 +1,39 @@
+<div class="messagerie-container">
+  <div class="sidebar">
+    <mat-form-field appearance="outline" class="search-bar">
+      <mat-label>Search users</mat-label>
+      <input matInput [(ngModel)]="searchQuery" placeholder="Search">
+    </mat-form-field>
+
+    <mat-list>
+      <mat-list-item
+        *ngFor="let user of filteredUsers()"
+        [class.selected]="user.id === selectedUser?.id"
+        (click)="selectUser(user)">
+        {{ user.prenom }} {{ user.nom }}
+
+      </mat-list-item>
+    </mat-list>
+  </div>
+
+  <div class="chat-window">
+    <div class="messages" #scrollContainer>
+      <div *ngFor="let message of messages; let i = index">
+        <div *ngIf="shouldShowTimestamp(i)">
+          <small class="timestamp">{{ message.date | date:'shortTime' }}</small>
+        </div>  
+        <div [ngClass]="{'message-sent': message.sentBy === 'me', 'message-received': message.sentBy !== 'me'}">
+          <strong>{{ message.sentBy === 'me' ? 'You' : selectedUser?.name }}:</strong> {{ message.text }}
+        </div>
+      </div>
+      
+    </div>
+
+    <div class="message-input">
+      <mat-form-field appearance="outline" class="input-field">
+        <input matInput [(ngModel)]="newMessage" placeholder="Type your message">
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>

@@ -1,22 +1,17 @@
-import "./chunk-4YIU5QGA.js";
+import "./chunk-TRES2BGH.js";
 import {
   A11yModule,
   AriaDescriber,
   InteractivityChecker,
   MatCommonModule,
+  _CdkPrivateStyleLoader,
   _IdGenerator,
   _VisuallyHiddenLoader
-} from "./chunk-BNV3CTTS.js";
-import "./chunk-KMPFDXM6.js";
-import "./chunk-H6MLSOHN.js";
-import {
-  _CdkPrivateStyleLoader
-} from "./chunk-SVZRW3WG.js";
-import "./chunk-STAXYF4C.js";
-import "./chunk-AC2B6BPQ.js";
+} from "./chunk-ZHLERBER.js";
+import "./chunk-232TWIMJ.js";
 import {
   DOCUMENT
-} from "./chunk-RQ5OF2RZ.js";
+} from "./chunk-TM4F5KTK.js";
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -36,11 +31,11 @@ import {
   ɵɵdefineDirective,
   ɵɵdefineInjector,
   ɵɵdefineNgModule
-} from "./chunk-AI2HXGW4.js";
-import "./chunk-7CYZS5HB.js";
+} from "./chunk-USOX7VMV.js";
+import "./chunk-LWQBS4VX.js";
 import "./chunk-EIB7IA3J.js";
 
-// ../../../../../node_modules/@angular/material/fesm2022/badge.mjs
+// node_modules/@angular/material/fesm2022/badge.mjs
 var BADGE_CONTENT_CLASS = "mat-badge-content";
 var _MatBadgeStyleLoader = class __MatBadgeStyleLoader {
   static ɵfac = function _MatBadgeStyleLoader_Factory(__ngFactoryType__) {

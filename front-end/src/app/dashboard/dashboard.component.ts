@@ -4,6 +4,9 @@ import { Router, RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
 import { OverviewComponent } from './overview/overview.component';
@@ -31,6 +34,9 @@ import { DesignationTesteurComponent } from './projects/designation-testeur/desi
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
+    MatInputModule,
+    MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
     OverviewComponent,
     ProjectsComponent,
