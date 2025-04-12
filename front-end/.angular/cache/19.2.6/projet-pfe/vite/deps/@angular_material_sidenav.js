@@ -1,10 +1,16 @@
+<<<<<<< Updated upstream
 import "./chunk-3IHC52YU.js";
 import "./chunk-2IVARR7N.js";
+=======
+import "./chunk-SZS4RJEH.js";
+import "./chunk-UDU42JBG.js";
+>>>>>>> Stashed changes
 import {
   CdkScrollable,
   CdkScrollableModule,
   ScrollDispatcher,
   ViewportRuler
+<<<<<<< Updated upstream
 } from "./chunk-LQMUQNV3.js";
 import "./chunk-7AE3QLT6.js";
 import "./chunk-DAMLJ25K.js";
@@ -13,6 +19,16 @@ import {
   coerceBooleanProperty
 } from "./chunk-Y47N34PV.js";
 import "./chunk-UJD6B2YZ.js";
+=======
+} from "./chunk-EG7K3V5O.js";
+import "./chunk-FTUDD53L.js";
+import "./chunk-GHVPTWB2.js";
+import "./chunk-F5YF3NDX.js";
+import {
+  coerceBooleanProperty
+} from "./chunk-DZBF2YG3.js";
+import "./chunk-CIGKH54X.js";
+>>>>>>> Stashed changes
 import {
   ESCAPE,
   FocusMonitor,
@@ -20,6 +36,7 @@ import {
   InteractivityChecker,
   MatCommonModule,
   hasModifierKey
+<<<<<<< Updated upstream
 } from "./chunk-BNV3CTTS.js";
 import "./chunk-KMPFDXM6.js";
 import {
@@ -34,6 +51,22 @@ import "./chunk-AC2B6BPQ.js";
 import {
   DOCUMENT
 } from "./chunk-RQ5OF2RZ.js";
+=======
+} from "./chunk-OSZZOMYT.js";
+import "./chunk-M3HR6BUY.js";
+import "./chunk-6COPRIYP.js";
+import {
+  Directionality
+} from "./chunk-WOOQROC3.js";
+import {
+  Platform,
+  coerceNumberProperty
+} from "./chunk-BGUQCJF2.js";
+import "./chunk-EQZHVY73.js";
+import {
+  DOCUMENT
+} from "./chunk-FUVFBHOY.js";
+>>>>>>> Stashed changes
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -81,7 +114,11 @@ import {
   ɵɵstyleProp,
   ɵɵtemplate,
   ɵɵviewQuery
+<<<<<<< Updated upstream
 } from "./chunk-AI2HXGW4.js";
+=======
+} from "./chunk-V47ADDGH.js";
+>>>>>>> Stashed changes
 import {
   Subject,
   debounceTime,
@@ -93,7 +130,11 @@ import {
   startWith,
   take,
   takeUntil
+<<<<<<< Updated upstream
 } from "./chunk-7CYZS5HB.js";
+=======
+} from "./chunk-P6U2JBMQ.js";
+>>>>>>> Stashed changes
 import "./chunk-EIB7IA3J.js";
 
 // ../../../../../node_modules/@angular/material/fesm2022/sidenav.mjs
