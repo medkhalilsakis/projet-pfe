@@ -1,4 +1,4 @@
-import "./chunk-4YIU5QGA.js";
+import "./chunk-TRES2BGH.js";
 import {
   A11yModule,
   AriaDescriber,
@@ -6,31 +6,17 @@ import {
   MatCommonModule,
   _IdGenerator,
   _VisuallyHiddenLoader
-<<<<<<< Updated upstream
-} from "./chunk-BNV3CTTS.js";
-import "./chunk-KMPFDXM6.js";
-import "./chunk-H6MLSOHN.js";
-import {
-  _CdkPrivateStyleLoader
-} from "./chunk-SVZRW3WG.js";
-import "./chunk-STAXYF4C.js";
-import "./chunk-AC2B6BPQ.js";
-import {
-  DOCUMENT
-} from "./chunk-RQ5OF2RZ.js";
-=======
-} from "./chunk-OSZZOMYT.js";
+} from "./chunk-C2KBEE27.js";
 import "./chunk-M3HR6BUY.js";
+import "./chunk-WOOQROC3.js";
 import {
   _CdkPrivateStyleLoader
 } from "./chunk-6COPRIYP.js";
-import "./chunk-WOOQROC3.js";
-import "./chunk-BGUQCJF2.js";
+import "./chunk-VGNHPLL4.js";
 import "./chunk-EQZHVY73.js";
 import {
   DOCUMENT
 } from "./chunk-FUVFBHOY.js";
->>>>>>> Stashed changes
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -50,16 +36,11 @@ import {
   ɵɵdefineDirective,
   ɵɵdefineInjector,
   ɵɵdefineNgModule
-<<<<<<< Updated upstream
-} from "./chunk-AI2HXGW4.js";
-import "./chunk-7CYZS5HB.js";
-=======
 } from "./chunk-V47ADDGH.js";
 import "./chunk-P6U2JBMQ.js";
->>>>>>> Stashed changes
 import "./chunk-EIB7IA3J.js";
 
-// ../../../../../node_modules/@angular/material/fesm2022/badge.mjs
+// node_modules/@angular/material/fesm2022/badge.mjs
 var BADGE_CONTENT_CLASS = "mat-badge-content";
 var _MatBadgeStyleLoader = class __MatBadgeStyleLoader {
   static ɵfac = function _MatBadgeStyleLoader_Factory(__ngFactoryType__) {

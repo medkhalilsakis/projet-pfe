@@ -66,5 +66,7 @@ public class Project {
     @JoinTable(name = "project_invited_users",
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<User> invitedUsers = new ArrayList<>();
+
 }

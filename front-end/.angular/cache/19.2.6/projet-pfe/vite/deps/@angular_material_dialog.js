@@ -4,42 +4,24 @@ import {
   OverlayContainer,
   OverlayModule,
   OverlayRef
-<<<<<<< Updated upstream
-} from "./chunk-LW5HIKER.js";
-import "./chunk-3IHC52YU.js";
-import "./chunk-ILFSSB2E.js";
-=======
-} from "./chunk-EKDNWF6E.js";
-import "./chunk-SZS4RJEH.js";
+} from "./chunk-LLRRA7QJ.js";
 import "./chunk-OIBNGD5S.js";
->>>>>>> Stashed changes
 import {
   BasePortalOutlet,
   CdkPortalOutlet,
   ComponentPortal,
   PortalModule,
   TemplatePortal
-<<<<<<< Updated upstream
-} from "./chunk-XS7YACMJ.js";
-import "./chunk-2IVARR7N.js";
-import {
-  CdkScrollable
-} from "./chunk-LQMUQNV3.js";
-import "./chunk-7AE3QLT6.js";
-import "./chunk-AGM5TXDT.js";
-import "./chunk-Y47N34PV.js";
-import "./chunk-UJD6B2YZ.js";
-=======
 } from "./chunk-L2CW7W62.js";
+import "./chunk-SZS4RJEH.js";
 import "./chunk-UDU42JBG.js";
 import {
   CdkScrollable
-} from "./chunk-EG7K3V5O.js";
+} from "./chunk-HY5PNM65.js";
 import "./chunk-FTUDD53L.js";
 import "./chunk-F5YF3NDX.js";
 import "./chunk-DZBF2YG3.js";
 import "./chunk-CIGKH54X.js";
->>>>>>> Stashed changes
 import {
   A11yModule,
   ESCAPE,
@@ -50,37 +32,20 @@ import {
   _IdGenerator,
   _getFocusedElementPierceShadowDom,
   hasModifierKey
-<<<<<<< Updated upstream
-} from "./chunk-BNV3CTTS.js";
-import "./chunk-KMPFDXM6.js";
-import {
-  Directionality
-} from "./chunk-H6MLSOHN.js";
-import "./chunk-SVZRW3WG.js";
-import {
-  Platform,
-  coerceNumberProperty
-} from "./chunk-STAXYF4C.js";
-import "./chunk-AC2B6BPQ.js";
-import {
-  DOCUMENT
-} from "./chunk-RQ5OF2RZ.js";
-=======
-} from "./chunk-OSZZOMYT.js";
+} from "./chunk-C2KBEE27.js";
 import "./chunk-M3HR6BUY.js";
-import "./chunk-6COPRIYP.js";
 import {
   Directionality
 } from "./chunk-WOOQROC3.js";
+import "./chunk-6COPRIYP.js";
 import {
   Platform,
   coerceNumberProperty
-} from "./chunk-BGUQCJF2.js";
+} from "./chunk-VGNHPLL4.js";
 import "./chunk-EQZHVY73.js";
 import {
   DOCUMENT
 } from "./chunk-FUVFBHOY.js";
->>>>>>> Stashed changes
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -121,11 +86,7 @@ import {
   ɵɵqueryRefresh,
   ɵɵtemplate,
   ɵɵviewQuery
-<<<<<<< Updated upstream
-} from "./chunk-AI2HXGW4.js";
-=======
 } from "./chunk-V47ADDGH.js";
->>>>>>> Stashed changes
 import {
   Subject,
   defer,
@@ -134,17 +95,13 @@ import {
   of,
   startWith,
   take
-<<<<<<< Updated upstream
-} from "./chunk-7CYZS5HB.js";
-=======
 } from "./chunk-P6U2JBMQ.js";
->>>>>>> Stashed changes
 import {
   __spreadProps,
   __spreadValues
 } from "./chunk-EIB7IA3J.js";
 
-// ../../../../../node_modules/@angular/cdk/fesm2022/dialog.mjs
+// node_modules/@angular/cdk/fesm2022/dialog.mjs
 function CdkDialogContainer_ng_template_0_Template(rf, ctx) {
 }
 var DialogConfig = class {
@@ -993,7 +950,7 @@ var DialogModule = class _DialogModule {
   }], null, null);
 })();
 
-// ../../../../../node_modules/@angular/material/fesm2022/module-c1a8b4bb.mjs
+// node_modules/@angular/material/fesm2022/module-c1a8b4bb.mjs
 function MatDialogContainer_ng_template_2_Template(rf, ctx) {
 }
 var MatDialogConfig = class {
@@ -1913,7 +1870,7 @@ var MatDialogModule = class _MatDialogModule {
   }], null, null);
 })();
 
-// ../../../../../node_modules/@angular/material/fesm2022/dialog.mjs
+// node_modules/@angular/material/fesm2022/dialog.mjs
 var _defaultParams = {
   params: {
     enterAnimationDuration: "150ms",

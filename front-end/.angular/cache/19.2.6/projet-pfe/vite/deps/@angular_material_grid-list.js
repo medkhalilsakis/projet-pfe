@@ -1,34 +1,17 @@
-<<<<<<< Updated upstream
-import "./chunk-Y47N34PV.js";
-import {
-  MatCommonModule
-} from "./chunk-BNV3CTTS.js";
-import "./chunk-KMPFDXM6.js";
-import {
-  Directionality
-} from "./chunk-H6MLSOHN.js";
-import "./chunk-SVZRW3WG.js";
-import {
-  coerceNumberProperty
-} from "./chunk-STAXYF4C.js";
-import "./chunk-AC2B6BPQ.js";
-import "./chunk-RQ5OF2RZ.js";
-=======
 import "./chunk-DZBF2YG3.js";
 import {
   MatCommonModule
-} from "./chunk-OSZZOMYT.js";
+} from "./chunk-C2KBEE27.js";
 import "./chunk-M3HR6BUY.js";
-import "./chunk-6COPRIYP.js";
 import {
   Directionality
 } from "./chunk-WOOQROC3.js";
+import "./chunk-6COPRIYP.js";
 import {
   coerceNumberProperty
-} from "./chunk-BGUQCJF2.js";
+} from "./chunk-VGNHPLL4.js";
 import "./chunk-EQZHVY73.js";
 import "./chunk-FUVFBHOY.js";
->>>>>>> Stashed changes
 import {
   ChangeDetectionStrategy,
   Component,
@@ -54,20 +37,13 @@ import {
   ɵɵprojection,
   ɵɵprojectionDef,
   ɵɵqueryRefresh
-<<<<<<< Updated upstream
-} from "./chunk-AI2HXGW4.js";
-import {
-  startWith
-} from "./chunk-7CYZS5HB.js";
-=======
 } from "./chunk-V47ADDGH.js";
 import {
   startWith
 } from "./chunk-P6U2JBMQ.js";
->>>>>>> Stashed changes
 import "./chunk-EIB7IA3J.js";
 
-// ../../../../../node_modules/@angular/material/fesm2022/public-api-c3ea43bd.mjs
+// node_modules/@angular/material/fesm2022/public-api-c3ea43bd.mjs
 var TileCoordinator = class {
   /** Tracking array (see class description). */
   tracker;
@@ -171,7 +147,7 @@ var TilePosition = class {
 };
 var ɵTileCoordinator = TileCoordinator;
 
-// ../../../../../node_modules/@angular/material/fesm2022/line-f14556b4.mjs
+// node_modules/@angular/material/fesm2022/line-f14556b4.mjs
 var MatLine = class _MatLine {
   static ɵfac = function MatLine_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _MatLine)();
@@ -233,7 +209,7 @@ var MatLineModule = class _MatLineModule {
   }], null, null);
 })();
 
-// ../../../../../node_modules/@angular/material/fesm2022/grid-list.mjs
+// node_modules/@angular/material/fesm2022/grid-list.mjs
 var _c0 = ["*"];
 var _c1 = [[["", "mat-grid-avatar", ""], ["", "matGridAvatar", ""]], [["", "mat-line", ""], ["", "matLine", ""]], "*"];
 var _c2 = ["[mat-grid-avatar], [matGridAvatar]", "[mat-line], [matLine]", "*"];

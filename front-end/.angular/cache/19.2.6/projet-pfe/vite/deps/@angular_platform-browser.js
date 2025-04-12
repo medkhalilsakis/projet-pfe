@@ -19,11 +19,7 @@ import {
   withI18nSupport,
   withIncrementalHydration,
   withNoHttpTransferCache
-<<<<<<< Updated upstream
-} from "./chunk-I7OJUJDZ.js";
-=======
 } from "./chunk-MWPBA53E.js";
->>>>>>> Stashed changes
 import {
   BrowserDomAdapter,
   BrowserGetTestability,
@@ -40,16 +36,6 @@ import {
   createApplication,
   platformBrowser,
   provideProtractorTestingSupport
-<<<<<<< Updated upstream
-} from "./chunk-YTMB76ZD.js";
-import "./chunk-ABKRE4SC.js";
-import {
-  getDOM
-} from "./chunk-AC2B6BPQ.js";
-import "./chunk-RQ5OF2RZ.js";
-import "./chunk-AI2HXGW4.js";
-import "./chunk-7CYZS5HB.js";
-=======
 } from "./chunk-PPUFILCS.js";
 import "./chunk-7SKAWPNO.js";
 import {
@@ -58,7 +44,6 @@ import {
 import "./chunk-FUVFBHOY.js";
 import "./chunk-V47ADDGH.js";
 import "./chunk-P6U2JBMQ.js";
->>>>>>> Stashed changes
 import "./chunk-EIB7IA3J.js";
 export {
   BrowserModule,
