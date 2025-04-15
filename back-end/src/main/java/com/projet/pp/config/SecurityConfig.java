@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // Autoriser tous les endpoints de projets
-                        .requestMatchers("/api/projects/**").permitAll()
+                        .requestMatchers("/api/projects/**", "/api/news/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
 
                         // vos autres règles existantes...

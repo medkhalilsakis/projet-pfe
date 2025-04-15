@@ -1,11 +1,29 @@
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
-<p>overview works!</p>
+<!-- src/app/overview/overview.component.html -->
+<div class="news-widget">
+    <div class="widget-header">
+      <h3>Technologie News</h3>
+    </div>
+  
+    <div *ngIf="loading" class="loading">
+      Chargement...
+    </div>
+    <div *ngIf="errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+  
+    <div class="news-content" *ngIf="!loading && !errorMessage">
+      <mat-card *ngFor="let article of articles" class="news-card">
+        <mat-card-header>
+          <mat-card-title>{{ article.title }}</mat-card-title>
+        </mat-card-header>
+        <img mat-card-image [src]="article.urlToImage" alt="{{ article.title }}" *ngIf="article.urlToImage">
+        <mat-card-content>
+          <p>{{ article.description }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button color="primary" [href]="article.url" target="_blank">Lire la suite</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+  
