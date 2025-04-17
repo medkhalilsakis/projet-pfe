@@ -85,7 +85,7 @@ export class DashboardComponent {
         this.menuItems = [
           ...baseMenu,
           {
-            label: 'Liste des Projets',
+            label: 'Projets',
             icon: 'list_alt',
             subMenu: [
               { label: 'Vue d\'ensemble', action: () => this.navigateTo('projects') },
@@ -97,7 +97,7 @@ export class DashboardComponent {
             ]
           },
           { label: 'Ajouter Utilisateur', icon: 'add', action: () => this.navigateTo('add-user') },
-          { label: 'Utilisateurs', icon: 'people', action: () => this.navigateTo('users') }
+          { label: 'Gestion des utilisateurs', icon: 'people', action: () => this.navigateTo('users') }
         ];
         break;
       

@@ -1,6 +1,7 @@
 package com.projet.pp.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,7 +31,9 @@ public class ProjectFile {
     // Référence au dossier parent, si applicable (null pour les éléments racines)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ProjectFile parent;
+
 
     @Column(nullable = false)
     private String name;

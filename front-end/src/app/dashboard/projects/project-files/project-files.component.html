@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>{{ data.project.name }} - Gestion des fichiers</h2>
+<mat-dialog-content>
+  <!-- Fil d'Ariane pour naviguer dans l'arborescence -->
+  <nav class="breadcrumb">
+    <ng-container *ngFor="let bc of breadcrumbs; let last = last">
+      <a *ngIf="!last" (click)="navigateTo(bc)" class="crumb">{{ bc.name }}</a>
+      <span *ngIf="last" class="crumb current">{{ bc.name }}</span>
+      <mat-icon *ngIf="!last" class="sep">chevron_right</mat-icon>
+    </ng-container>
+  </nav>
+
+  <!-- Affichage en grille du contenu du dossier courant -->
+  <mat-grid-list [cols]="cols" rowHeight="120px" gutterSize="16px">
+    <mat-grid-tile *ngFor="let item of files" (click)="onItemClick(item)" class="tile">
+      <mat-icon class="icon">
+        {{ item.type === 'FOLDER' ? 'folder' : 'insert_drive_file' }}
+      </mat-icon>
+      <div class="name">{{ item.name }}</div>
+    </mat-grid-tile>
+  </mat-grid-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Fermer</button>
+</mat-dialog-actions>

@@ -25,13 +25,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Autoriser tous les endpoints de projets
-                        .requestMatchers("/api/projects/**", "/api/news/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+                        // Permet toutes les requêtes sur tous les chemins
+                        .requestMatchers("/**").permitAll()
 
-                        // vos autres règles existantes...
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/projects/upload", "/api/assignments/**","/api/assignments/testing-projects", "/api/chat/**" ,"/api/projects/user/**", "/api/users/**", "/api/users/signup").permitAll()
+                        // Si tu veux ajouter des règles spécifiques plus tard, tu peux le faire ici
+                        //.requestMatchers("/api/projects/**").permitAll()
+
+                        // Les autres règles peuvent être gardées si nécessaire
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

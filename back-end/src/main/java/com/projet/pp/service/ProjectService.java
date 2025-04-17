@@ -35,6 +35,10 @@ public class ProjectService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProjectClosureRepository closureRepo;
+
+
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
     public ProjectService() {
@@ -55,7 +59,6 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         Project project = new Project();
-        // Nom auto-généré initialement
         project.setName("Projet_" + System.currentTimeMillis());
         project.setVisibilite("privée");
         project.setDescription("");
@@ -64,25 +67,68 @@ public class ProjectService {
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
 
-        project = projectRepository.save(project); // Enregistrement pour obtenir l'ID
-
-        // Créer le répertoire de stockage pour ce projet
+        project = projectRepository.save(project);
         Path projectStorage = baseStorage.resolve(project.getId().toString());
         Files.createDirectories(projectStorage);
 
-        // Pour chaque fichier, si on doit décompresser et que le fichier est une archive, décompresse sinon sauvegarde tel quel
-        for (MultipartFile file : files) {
-            if (decompress && isArchive(file)) {
+        if (decompress && files.length > 0 && isArchive(files[0])) {
+            for (MultipartFile file : files) {
                 decompressArchive(file, projectStorage, project);
-            } else {
-                saveFile(file, projectStorage, project, "");
+            }
+        } else {
+            for (MultipartFile file : files) {
+                // Supposons que file.getOriginalFilename() contient le chemin relatif (ex: "test/A/C/test.txt")
+                String relativePath = file.getOriginalFilename();
+                if (relativePath == null) continue;
+                String[] parts = relativePath.split("/");
+                // Le dernier élément est le nom du fichier
+                String fileName = parts[parts.length - 1];
+                Long currentParentId = null;
+                // Pour chaque dossier du chemin, on crée ou récupère le dossier
+                for (int i = 0; i < parts.length - 1; i++) {
+                    String folderName = parts[i];
+                    currentParentId = getOrCreateFolder(project, projectStorage, currentParentId, folderName);
+                }
+                // Enregistrer le fichier avec le parent déterminé
+                saveFileWithParent(file, projectStorage, project, currentParentId);
             }
         }
 
         return project.getId();
     }
 
-    // Modification : vérifier par extension (non par type MIME)
+    @Transactional
+    protected Long getOrCreateFolder(Project project, Path projectStorage, Long parentFolderId, String folderName) throws IOException {
+        ProjectFile parent = null;
+        if (parentFolderId != null) {
+            parent = projectFileRepository.findById(parentFolderId).orElse(null);
+        }
+        // On cherche un dossier dans le projet qui porte ce nom et qui a le même parent
+        Optional<ProjectFile> optFolder = projectFileRepository.findByProjectAndNameAndParent(project, folderName, parent);
+        if (optFolder.isPresent()) {
+            return optFolder.get().getId();
+        } else {
+            // Déterminer le chemin du nouveau dossier
+            Path dir;
+            if (parent != null) {
+                dir = Paths.get(parent.getFilePath()).resolve(folderName);
+            } else {
+                dir = projectStorage.resolve(folderName);
+            }
+            Files.createDirectories(dir);
+
+            ProjectFile folder = new ProjectFile();
+            folder.setName(folderName);
+            folder.setType(ItemType.FOLDER);
+            folder.setProject(project);
+            folder.setFilePath(dir.toString());
+            folder.setParent(parent);
+            ProjectFile savedFolder = projectFileRepository.save(folder);
+            return savedFolder.getId();
+        }
+    }
+
+    // Méthode pour déterminer si le fichier est une archive
     private boolean isArchive(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         return originalFilename != null && originalFilename.toLowerCase().endsWith(".zip");
@@ -101,36 +147,64 @@ public class ProjectService {
                         baos.write(buffer, 0, len);
                     }
                     byte[] fileContent = baos.toByteArray();
-                    saveFile(relativePath, fileContent, zipEntry.getSize(), projectStorage, project);
+                    // Pour le décompressé, on suppose que la structure du zip correspond à l'arborescence
+                    // Ici, on peut appeler saveFileWithParent en découpant relativePath comme dans uploadProject
+                    String[] parts = relativePath.split("/");
+                    Long currentParentId = null;
+                    for (int i = 0; i < parts.length - 1; i++) {
+                        String folderName = parts[i];
+                        currentParentId = getOrCreateFolder(project, projectStorage, currentParentId, folderName);
+                    }
+                    saveFileWithParent(fileContent, zipEntry.getName(), zipEntry.getSize(), projectStorage, project, currentParentId);
                 }
                 zis.closeEntry();
             }
         }
     }
 
-    private void saveFile(MultipartFile file, Path projectStorage, Project project, String relativeFolder) throws IOException {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        Path targetLocation = projectStorage.resolve(relativeFolder).resolve(fileName);
+    private void saveFileWithParent(MultipartFile file, Path projectStorage, Project project, Long parentId) throws IOException {
+        ProjectFile parent = null;
+        if (parentId != null) {
+            parent = projectFileRepository.findById(parentId)
+                    .orElseThrow(() -> new RuntimeException("Dossier parent non trouvé"));
+        }
+        Path targetLocation;
+        if (parent != null) {
+            targetLocation = Paths.get(parent.getFilePath()).resolve(file.getOriginalFilename());
+        } else {
+            targetLocation = projectStorage.resolve(file.getOriginalFilename());
+        }
         Files.createDirectories(targetLocation.getParent());
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
         ProjectFile projectFile = new ProjectFile();
-        projectFile.setName(fileName);
+        projectFile.setName(file.getOriginalFilename());
         projectFile.setFilePath(targetLocation.toString());
         projectFile.setFileSize(file.getSize());
         projectFile.setMimeType(file.getContentType());
         projectFile.setType(ItemType.FILE);
         projectFile.setProject(project);
+        projectFile.setParent(parent);
         projectFileRepository.save(projectFile);
     }
 
-    private void saveFile(String relativePath, byte[] content, long size, Path projectStorage, Project project) throws IOException {
-        Path targetLocation = projectStorage.resolve(relativePath);
+    // Méthode pour sauvegarder un fichier décompressé (à partir d'un tableau de bytes) avec son parent
+    private void saveFileWithParent(byte[] content, String relativePath, long size, Path projectStorage, Project project, Long parentId) throws IOException {
+        ProjectFile parent = null;
+        if (parentId != null) {
+            parent = projectFileRepository.findById(parentId)
+                    .orElseThrow(() -> new RuntimeException("Dossier parent non trouvé"));
+        }
+        Path targetLocation;
+        if (parent != null) {
+            targetLocation = Paths.get(parent.getFilePath()).resolve(relativePath);
+        } else {
+            targetLocation = projectStorage.resolve(relativePath);
+        }
         Files.createDirectories(targetLocation.getParent());
         try (FileOutputStream fos = new FileOutputStream(targetLocation.toFile())) {
             fos.write(content);
         }
-
         ProjectFile projectFile = new ProjectFile();
         projectFile.setName(relativePath);
         projectFile.setFilePath(targetLocation.toString());
@@ -138,11 +212,11 @@ public class ProjectService {
         projectFile.setMimeType("application/octet-stream");
         projectFile.setType(ItemType.FILE);
         projectFile.setProject(project);
+        projectFile.setParent(parent);
         projectFileRepository.save(projectFile);
     }
 
-    // Pour finaliser le projet : on met à jour le nom, type, description et visibilité.
-    // Ici, on considère que finaliser le projet signifie passer committed à true.
+    // Pour finaliser le projet : mise à jour des métadonnées
     public void commitProject(Long projectId, String name, String type, String description, String visibilite, String status) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
@@ -151,7 +225,7 @@ public class ProjectService {
         project.setType(type);
         project.setDescription(description);
         project.setVisibilite(visibilite);
-        project.setCommitted(true); // Finalisé
+        project.setCommitted(true);
         project.setUpdatedAt(LocalDateTime.now());
         project.setStatus(Integer.valueOf(status));
         projectRepository.save(project);
@@ -168,11 +242,9 @@ public class ProjectService {
 
     public List<ProjectFileNode> buildProjectFileTree(Long projectId) {
         List<ProjectFile> files = projectFileRepository.findByProjectId(projectId);
-        // Map pour associer chaque fichier à son DTO
         Map<Long, ProjectFileNode> nodeMap = new HashMap<>();
         List<ProjectFileNode> roots = new ArrayList<>();
 
-        // Créer les nœuds de base
         for (ProjectFile file : files) {
             ProjectFileNode node = new ProjectFileNode();
             node.setId(file.getId());
@@ -182,7 +254,6 @@ public class ProjectService {
             nodeMap.put(file.getId(), node);
         }
 
-        // Construire l'arbre
         for (ProjectFile file : files) {
             ProjectFileNode node = nodeMap.get(file.getId());
             if (file.getParent() != null && file.getParent().getId() != null) {
@@ -191,7 +262,6 @@ public class ProjectService {
                     parentNode.getChildren().add(node);
                 }
             } else {
-                // Pas de parent : c'est un nœud racine
                 roots.add(node);
             }
         }
@@ -307,5 +377,25 @@ public class ProjectService {
     public List<ProjectFile> getFilesByProjectIdAndParentId(Long projectId, Long parentId) {
         return projectFileRepository.findByProjectIdAndParentId(projectId, parentId);
     }
+
+    @Transactional
+    public void closeProject(Long projectId, Long supervisorId, String reason) {
+        Project proj = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        User sup = userRepository.findById(supervisorId)
+                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
+
+        // 1) Enregistrer la raison
+        ProjectClosure closure = new ProjectClosure();
+        closure.setProject(proj);
+        closure.setSupervisor(sup);
+        closure.setReason(reason);
+        closureRepo.save(closure);
+
+        // 2) Mettre à jour le statut du projet
+        proj.setStatus(3);
+        projectRepository.save(proj);
+    }
+
 
 }

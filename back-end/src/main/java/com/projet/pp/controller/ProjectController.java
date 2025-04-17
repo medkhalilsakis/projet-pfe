@@ -86,9 +86,11 @@ public class ProjectController {
             List<ProjectFile> files = projectService.getFilesByProjectIdAndParentId(projectId, parentId);
             return ResponseEntity.ok(files);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @GetMapping("/{projectId}/files/tree")
     public ResponseEntity<?> getProjectFilesTree(@PathVariable("projectId") Long projectId) {
@@ -167,4 +169,58 @@ public class ProjectController {
         List<ProjectFile> saved = projectService.addFiles(projectId, parentId, files);
         return ResponseEntity.ok(saved);
     }
+
+    // Inviter un utilisateur (ajoute une ligne dans project_invited_users)
+    @PostMapping("/{projectId}/invite")
+    public ResponseEntity<?> inviteUser(
+            @PathVariable Long projectId,
+            @RequestBody Map<String, String> body) {
+        try {
+            Long userId = Long.valueOf(body.get("userId"));
+            String status = body.get("status"); // Par exemple: "pending", "accepted", etc.
+            // Vous pouvez définir dans le service une méthode inviteUser pour gérer l'enregistrement dans la table project_invited_users
+            projectService.inviteUser(projectId, userId, status);
+            return ResponseEntity.ok("Utilisateur invité avec succès");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'invitation : " + e.getMessage());
+        }
+    }
+
+    // Retirer un utilisateur invité
+    @DeleteMapping("/{projectId}/invite/{userId}")
+    public ResponseEntity<?> removeInvitedUser(
+            @PathVariable Long projectId,
+            @PathVariable Long userId) {
+        try {
+            projectService.removeInvitedUser(projectId, userId);
+            return ResponseEntity.ok("Utilisateur retiré avec succès");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors du retrait de l'invitation : " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{projectId}")
+    public ResponseEntity<?> getProjectById(@PathVariable Long projectId) {
+        try {
+            Project project = projectService.getProjectById(projectId);
+            return ResponseEntity.ok(project);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{projectId}/close")
+    public ResponseEntity<String> closeProject(
+            @PathVariable Long projectId,
+            @RequestBody Map<String,String> body) {
+        Long supId = Long.valueOf(body.get("supervisorId"));
+        String reason = body.get("reason");
+        projectService.closeProject(projectId, supId, reason);
+        return ResponseEntity.ok("Projet clôturé avec succès");
+    }
+
 }

@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProjectChatComponent } from './project-chat/project-chat.component';
+import { ParametresProjetComponent } from './parametres-projet/parametres-projet.component';
 
 export interface Project {
   id: number;
@@ -44,6 +45,13 @@ export interface Project {
 export class ProjectsComponent implements OnInit {
   chatDetails(project: Project): void {
     this.dialog.open(ProjectChatComponent, {
+      width: '600px',
+      data: { projectId: project.id }
+    });
+  }
+
+  openSettings(project: Project): void{
+    this.dialog.open(ParametresProjetComponent, {
       width: '600px',
       data: { projectId: project.id }
     });
@@ -130,9 +138,6 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
-  openSettings(project: Project): void {
-    this.router.navigate(['/projects', project.id, 'settings']);
-  }
 
   deleteProject(project: Project): void {
     if (confirm(`Voulez-vous vraiment supprimer le projet "${project.name}" ?`)) {
