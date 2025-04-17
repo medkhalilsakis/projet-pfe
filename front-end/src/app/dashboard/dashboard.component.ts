@@ -7,8 +7,10 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
 import { OverviewComponent } from './overview/overview.component';
+import { SettingsComponent } from './settings/settings.component';
 import { ProjectsComponent } from './projects/projects.component';
 import { MessagesComponent } from './messages/messages.component';
+import { TaskBoadComponent } from './task-boad/task-boad.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { NotificationService } from '../services/notification.service';
@@ -33,8 +35,10 @@ import { DesignationTesteurComponent } from './projects/designation-testeur/desi
     MatListModule,
     MatIconModule,
     OverviewComponent,
+    SettingsComponent,
     ProjectsComponent,
     MessagesComponent,
+    TaskBoadComponent,
     NgSwitch,
     NgSwitchCase,
     UploadComponent,
@@ -64,6 +68,7 @@ export class DashboardComponent {
     //this.notifications.set(notifications);
   }
   navigateTo(view: string) {
+    console.log('Navigating to:', view); // Add this line
     this.currentView.set(view);
     history.replaceState(null, '', '/dashboard');
   }
@@ -84,6 +89,8 @@ export class DashboardComponent {
       case 3: // Superviseur
         this.menuItems = [
           ...baseMenu,
+          { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
+
           {
             label: 'Liste des Projets',
             icon: 'list_alt',
@@ -104,15 +111,26 @@ export class DashboardComponent {
       case 2: // Testeur
         this.menuItems = [
           ...baseMenu,
-          { label: 'Projets à tester', icon: 'assignment', action: () => this.navigateTo('projects?type=to-test') },
-          { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects?type=in-progress') },
-          { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects?type=completed') }
+
+          {
+            label: 'Liste des Projets',
+            icon: 'list_alt',
+            subMenu: [
+
+              { label: 'Projets à tester', icon: 'assignment', action: () => this.navigateTo('projects?type=to-test') },
+    
+              { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects?type=in-progress') },
+              { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects?type=completed') }
+              ]
+          },
+          
         ];
         break;
 
       case 1: // Développeur
         this.menuItems = [
           ...baseMenu,
+          { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
           { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('projects') },
         ];
         break;

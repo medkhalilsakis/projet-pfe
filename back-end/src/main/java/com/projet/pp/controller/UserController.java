@@ -93,6 +93,42 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> updateData) {
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        String username = updateData.get("username");
+        User existingUserWithUsername = userRepository.findByUsername(username).orElse(null);
+        if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Nom d'utilisateur déjà utilisé"));
+        }
+
+        existingUser.setNom(updateData.getOrDefault("nom", existingUser.getNom()));
+        existingUser.setPrenom(updateData.getOrDefault("prenom", existingUser.getPrenom()));
+        existingUser.setUsername(username);
+        existingUser.setEmail(updateData.getOrDefault("email", existingUser.getEmail()));
+        existingUser.setNcin(updateData.getOrDefault("ncin", existingUser.getNcin()));
+
+        String rawPassword = updateData.get("password");
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(rawPassword));
+        }
+
+        if (updateData.containsKey("dateEmbauche")) {
+            existingUser.setDateEmbauche(LocalDate.parse(updateData.get("dateEmbauche")));
+        }
+        if (updateData.containsKey("salaire")) {
+            existingUser.setSalaire(Double.parseDouble(updateData.get("salaire")));
+        }
+        if (updateData.containsKey("role_id")) {
+            Long roleId = Long.parseLong(updateData.get("role_id"));
+            Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
+            existingUser.setRole(role);
+        }
+
+        User updatedUser = userService.updateUser(id, existingUser);
+        return ResponseEntity.ok(updatedUser);
+    }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         try {
@@ -143,5 +179,40 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "OTP invalide ou expiré"));
         }
+    }
+
+
+
+    @PostMapping("/verify-password")
+    public ResponseEntity<?> verifyPassword(@RequestBody Map<String, String> body) {
+        try {
+            String username = body.get("username");
+            String encryptedPassword = body.get("password");
+            String decryptedPassword;
+            try {
+                decryptedPassword = PasswordUtil.decrypt(encryptedPassword);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return ResponseEntity.badRequest().body(Map.of("message", "Erreur de déchiffrement du mot de passe"));
+            }
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+            if (passwordEncoder.matches(decryptedPassword, user.getPassword())) {
+                return ResponseEntity.ok(Map.of("valid", true));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("valid", false, "message", "Mot de passe incorrect"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Add this to see the error in the console
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Erreur lors de la vérification du mot de passe"));
+        }
+    }
+
+    @PostMapping("/send-otp/{username}")
+    public ResponseEntity<?> sendOtp(@PathVariable String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        otpService.generateAndSendOTP(user);
+        return ResponseEntity.ok(Map.of("valid", true, "message", "OTP envoyé à votre email"));
     }
 }

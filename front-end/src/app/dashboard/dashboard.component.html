@@ -61,8 +61,11 @@
       <mat-sidenav-content class="content-area">
         <ng-container [ngSwitch]="currentView()">
           <app-overview *ngSwitchCase="'overview'"></app-overview>
+          
+          <app-task-boad *ngSwitchCase="'tâches'"></app-task-boad> 
           <app-projects *ngSwitchCase="'projects'"></app-projects>
           <app-messages *ngSwitchCase="'messages'"></app-messages>
+          <app-settings *ngSwitchCase="'settings'"></app-settings>
           <app-upload *ngSwitchCase="'upload'" (uploadCompleted)="navigateTo('projects')"></app-upload>
           <app-add-user *ngSwitchCase="'add-user'"></app-add-user>
           <app-designation-testeur *ngSwitchCase="'designation'"></app-designation-testeur>
