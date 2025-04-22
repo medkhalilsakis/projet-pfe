@@ -18,7 +18,7 @@ import { UploadComponent } from './upload/upload.component';
 import { AddUserComponent } from './add-user/add-user.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { DesignationTesteurComponent } from './projects/designation-testeur/designation-testeur.component';
-
+import { TaskDetailComponent } from './task-boad/task-detail/task-detail.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,6 +26,7 @@ import { DesignationTesteurComponent } from './projects/designation-testeur/desi
   styleUrls: ['./dashboard.component.css'],
   standalone: true,
   imports: [
+    TaskDetailComponent,
     CommonModule,
     RouterModule,
     MatMenuModule,
@@ -136,6 +137,17 @@ export class DashboardComponent {
         break;
     }
   }
+  selectedTask = signal<any>(null);
+
+viewTaskDetails(task: any) {
+  this.selectedTask.set(task);
+  this.currentView.set('task-detail');
+}
+goToUpload(task: any) {
+  this.selectedTask.set(task);
+  this.currentView.set('upload');
+}
+
 
   logout() {
     this.sessionService.clearStorage();

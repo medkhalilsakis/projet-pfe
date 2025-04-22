@@ -1,0 +1,46 @@
+
+<!-- Admin Control Panel -->
+<div *ngIf="isAdmin()" class="assign-container">
+  <h3>Assign to Developer</h3>
+  <button mat-raised-button color="primary" (click)="openDeveloperDialog()">
+    Assign project to developers
+  </button>
+</div>
+
+<div class="task-grid" *ngIf="filteredTasks.length > 0">
+  <mat-grid-list [cols]="gridCols" gutterSize="20px" rowHeight="1:1">
+    <mat-grid-tile *ngFor="let task of filteredTasks">
+      <mat-card class="task-card" (click)="viewTaskDetails(task)">
+        <mat-card-header>
+          <p><span class="status-circle" [ngClass]="getStatusClass(task.status)"></span>{{ getStatus(task.status) }}</p>
+          <mat-card-title>{{ task.name }}</mat-card-title>
+          <mat-card-subtitle>Created: {{ task.creationDate | date:'shortDate' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ task.description }}</p>
+          <p><strong>Deadline:</strong> {{ task.deadline | date:'shortDate' }}</p>
+          <p><strong>Tools:</strong> {{ task.outils }}</p>
+
+
+        </mat-card-content>
+        <mat-card-footer>
+          <mat-card-title>
+            <p><strong *ngIf="isdeveloper() && task.assignedBy">Assigned by {{ task.assignedBy.nom }} {{ task.assignedBy.prenom }}</strong></p>
+            <p><strong *ngIf="isAdmin() && task.assignedTo">Assigned to {{ task.assignedTo.nom }} {{ task.assignedTo.prenom }}</strong></p>
+          </mat-card-title>
+          <ng-container *ngIf="isAdmin()">
+            <button mat-raised-button [matMenuTriggerFor]="statusMenu">Changer le status</button>
+            <mat-menu #statusMenu="matMenu">
+              <button mat-menu-item (click)="updateTaskStatus(task.id, 'terminé')">Terminé</button>
+              <button mat-menu-item (click)="updateTaskStatus(task.id, 'cloturé')">Clôturé</button>
+              <button mat-menu-item (click)="updateTaskStatus(task.id, 'suspendu')">Suspendu</button>
+              <button mat-menu-item (click)="updateTaskStatus(task.id, 'a_developper')">À développer</button>
+              <button mat-menu-item (click)="updateTaskStatus(task.id, 'en_test')">En test</button>
+            </mat-menu>
+          </ng-container>
+
+        </mat-card-footer>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

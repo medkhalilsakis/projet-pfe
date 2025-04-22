@@ -1,0 +1,46 @@
+<h2>Select a Developer</h2>
+
+<mat-selection-list [(ngModel)]="selectedDeveloper" (selectionChange)="onDeveloperSelectionChange($event)">
+    <mat-list-option *ngFor="let dev of developers" [value]="dev">
+      {{ dev.nom }} {{ dev.prenom }}
+    </mat-list-option>
+  </mat-selection-list>
+  
+
+
+
+<div *ngIf="selectedDeveloper">
+  <h3>Create New Task for {{ selectedDeveloper.name }}</h3>
+  <form [formGroup]="taskForm" (ngSubmit)="createTask()">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Task Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Deadline</mat-label>
+      <input matInput type="date" formControlName="deadline">
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Tools to Use</mat-label>
+      <input matInput formControlName="outils">
+    </mat-form-field>
+    <div class="file-upload">
+        <label for="projectFile">Project Details PDF</label>
+        <input id="projectFile" type="file" (change)="onFileChange($event, 'project')" accept="application/pdf">
+      </div>
+      
+      <div class="file-upload">
+        <label for="testCasesFile">Test Cases PDF</label>
+        <input id="testCasesFile" type="file" (change)="onFileChange($event, 'testCases')" accept="application/pdf">
+      </div>
+      
+    <button mat-raised-button color="primary" type="submit">Create Task</button>
+  </form>
+</div>

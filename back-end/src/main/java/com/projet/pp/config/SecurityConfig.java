@@ -31,7 +31,7 @@ public class SecurityConfig {
 
                         // vos autres règles existantes...
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/projects/upload", "/api/assignments/**","/api/assignments/testing-projects", "/api/chat/**" ,"/api/projects/user/**", "/api/users/**", "/api/users/signup","/api/users/send-otp**", "/api/users/verify-otp", "api/taches" ,"api/taches/create**", "api/taches/update/**").permitAll()
+                        .requestMatchers("/api/projects/upload", "/api/assignments/**","/api/assignments/testing-projects", "/api/chat/**" ,"/api/projects/user/**", "/api/users/**", "/api/users/signup","/api/users/send-otp**", "/api/users/verify-otp", "api/taches" ,"api/taches/create**", "api/taches/update/**","api/taches/download").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

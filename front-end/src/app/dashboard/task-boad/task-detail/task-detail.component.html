@@ -1,0 +1,47 @@
+<div class="task-detail">
+    <button mat-button (click)="back.emit()">← Retour</button>
+    <strong>name:</strong><h2>{{ task?.name }}</h2>
+    <p>Created: {{ task.creationDate | date:'shortDate' }}</p>
+
+    <p>{{ task.description }}</p>
+
+    <p><strong>Deadline:</strong> {{ task.deadline | date:'shortDate' }}</p>
+    <p><strong>Tools:</strong> {{ task.outils }}</p>
+    <!-- Project Details PDF -->
+    <div *ngIf="task.projectDetailsPdf">
+      <p><strong>Project Details:</strong></p><img
+      src="assets/pdf-icon.png"
+      alt="Download Project PDF"
+        width="100"
+        style="cursor:pointer;"
+        (click)="downloadFile(task.projectDetailsPdf)"
+      />
+    </div>
+  
+    <!-- Test Cases PDF (Admin only) -->
+    <div *ngIf="isAdmin() && task.testCasesPdf">
+      <p><strong>Test Cases:</strong></p><img
+        src="assets/pdf-icon.png"
+        alt="Download Test Cases PDF"
+        width="100"
+        style="cursor:pointer;"
+        (click)="downloadFile(task.testCasesPdf)"
+      />
+    </div>
+  
+    <!-- Error message -->
+    <p *ngIf="downloadError" style="color: red;">
+      {{ downloadError }}
+    </p>
+  
+    <p><strong *ngIf="isdeveloper() && task.assignedBy">Assigned by {{ task.assignedBy.nom }} {{ task.assignedBy.prenom }}</strong></p>
+    <p><strong *ngIf="isAdmin() && task.assignedTo">Assigned to {{ task.assignedTo.nom }} {{ task.assignedTo.prenom }}</strong></p>
+
+    <div *ngIf="isdeveloper() && !task.project" class="assign-container">
+        <h3>Assign to Developer</h3>
+        <button mat-raised-button color="primary" (click)="GoToUpload(task)">
+          upload Project<!--for thid button i want when the developper click on it  it routes him to a componenet named upload -->
+        </button>
+      </div>
+  </div>
+  

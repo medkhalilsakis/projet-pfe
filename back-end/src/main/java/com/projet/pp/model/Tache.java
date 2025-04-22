@@ -41,6 +41,15 @@ public class Tache {
     @JoinColumn(name = "assignedBy", referencedColumnName = "id")
     private User assignedBy;
 
+    @Column(name = "project_details_pdf")
+    private String projectDetailsPdf;
+
+    @Column(name = "test_cases_pdf")
+    private String testCasesPdf;
+
+    @OneToOne
+    @JoinColumn(name = "project_id", unique = true) // Ensures one-to-one
+    private Project project;
 
     public enum Status {
         a_developper,

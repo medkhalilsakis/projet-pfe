@@ -62,7 +62,9 @@
         <ng-container [ngSwitch]="currentView()">
           <app-overview *ngSwitchCase="'overview'"></app-overview>
           
-          <app-task-boad *ngSwitchCase="'tâches'"></app-task-boad> 
+          <app-task-boad *ngSwitchCase="'tâches'" (taskSelected)="viewTaskDetails($event)"></app-task-boad> 
+          <app-task-detail  *ngSwitchCase="'task-detail'" [task]="selectedTask()" [roleId]="currentUser?.roleId" (Selected)="goToUpload($event)"  (back)="navigateTo('tâches')"></app-task-detail>
+
           <app-projects *ngSwitchCase="'projects'"></app-projects>
           <app-messages *ngSwitchCase="'messages'"></app-messages>
           <app-settings *ngSwitchCase="'settings'"></app-settings>

@@ -1,0 +1,48 @@
+package com.projet.pp.service;
+
+import com.projet.pp.model.Tache;
+import com.projet.pp.model.User;
+import com.projet.pp.repository.TacheRepository;
+import com.projet.pp.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TacheService {
+
+    @Autowired
+    private TacheRepository tacheRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private final Path baseStorage = Paths.get("uploads/pdfFiles").toAbsolutePath().normalize();
+
+
+    public List<Tache> getAllTaches() {
+        return tacheRepository.findAll();
+    }
+
+    public List<Tache> getTachesByUserId(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(tacheRepository::findByAssignedTo).orElse(null);
+    }
+
+    public Tache createTache(Tache tache) {
+
+        return tacheRepository.save(tache);
+    }
+
+    public Optional<Tache> getTacheById(Long id) {
+        return tacheRepository.findById(id);
+    }
+
+    public void deleteTache(Long id) {
+        tacheRepository.deleteById(id);
+    }
+}
