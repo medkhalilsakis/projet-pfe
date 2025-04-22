@@ -1,12 +1,14 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { SessionStorageService } from '../../../services/session-storage.service';
+import { ChatStompService } from '../../../services/chat-stomp.service';
 
 export interface ChatMessage {
   id: number;
@@ -21,116 +23,111 @@ export interface ChatMessage {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
+    FormsModule,
     MatIconModule,
     MatButtonModule,
-    FormsModule
+    MatDialogModule
   ],
   template: `
-  <h2 mat-dialog-title>Chat du projet</h2>
-  <mat-dialog-content class="chat-content">
-    <nav class="chat-tabs">
-      <button mat-button 
-              [ngClass]="{'active': activeTab === 'public'}" 
-              (click)="switchTab('public')">
-        Chat Public
-      </button>
-      <button mat-button 
-              [ngClass]="{'active': activeTab === 'private'}" 
-              (click)="switchTab('private')">
-        Commentaires Privés
-      </button>
-    </nav>
-    
-    <div *ngIf="activeTab === 'public'" class="messages-container">
-      <div *ngFor="let msg of publicMessages" 
-           [ngClass]="{'bubble': true, 'mine': msg.sender.id === userId, 'theirs': msg.sender.id !== userId}">
-        <div class="message-header">
-          <span class="sender">{{ msg.sender.prenom }} {{ msg.sender.nom }}</span>
-          <span class="timestamp">{{ msg.createdAt | date:'shortTime' }}</span>
-        </div>
-        <div class="message-body">{{ msg.message }}</div>
-      </div>
-    </div>
-    
-    <div *ngIf="activeTab === 'private'" class="messages-container">
-      <!-- Si l'utilisateur n'est pas uploader, on n'affiche rien -->
-      <ng-container *ngIf="isUploader; else noAccess">
-        <div *ngFor="let msg of privateMessages" 
-             [ngClass]="{'bubble': true, 'mine': msg.sender.id === userId, 'theirs': msg.sender.id !== userId}">
+    <h2 mat-dialog-title>Chat du projet</h2>
+
+    <mat-dialog-content class="chat-content" #scrollMe>
+      <nav class="chat-tabs">
+        <button mat-button 
+                [class.active]="activeTab==='public'" 
+                (click)="switchTab('public')">
+          Chat Public
+        </button>
+        <button mat-button 
+                [class.active]="activeTab==='private'" 
+                (click)="switchTab('private')">
+          Commentaires Privés
+        </button>
+      </nav>
+
+      <div *ngIf="activeTab==='public'" class="messages-container">
+        <div *ngFor="let msg of publicMessages"
+             class="bubble"
+             [class.mine]="msg.sender.id === userId"
+             [class.theirs]="msg.sender.id !== userId">
           <div class="message-header">
-            <span class="sender">{{ msg.sender.prenom }} {{ msg.sender.nom }}</span>
-            <span class="timestamp">{{ msg.createdAt | date:'shortTime' }}</span>
+            <span class="sender">{{msg.sender.prenom}} {{msg.sender.nom}}</span>
+            <span class="timestamp">{{msg.createdAt | date:'shortTime'}}</span>
           </div>
-          <div class="message-body">{{ msg.message }}</div>
+          <div class="message-body">{{msg.message}}</div>
         </div>
-      </ng-container>
-      <ng-template #noAccess>
-        <div class="not-allowed">
-          Vous n'êtes pas autorisé à consulter les commentaires privés.
-        </div>
-      </ng-template>
-    </div>
-    
-  </mat-dialog-content>
-  <mat-dialog-actions align="end" class="chat-actions">
-    <textarea matInput placeholder="Votre message..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"></textarea>
-    <button mat-icon-button color="primary" (click)="sendMessage()">
-      <mat-icon>send</mat-icon>
-    </button>
-    <button mat-button (click)="close()">Fermer</button>
-  </mat-dialog-actions>
+      </div>
+
+      <div *ngIf="activeTab==='private'" class="messages-container">
+        <ng-container *ngIf="isUploader; else noAccess">
+          <div *ngFor="let msg of privateMessages"
+               class="bubble"
+               [class.mine]="msg.sender.id === userId"
+               [class.theirs]="msg.sender.id !== userId">
+            <div class="message-header">
+              <span class="sender">{{msg.sender.prenom}} {{msg.sender.nom}}</span>
+              <span class="timestamp">{{msg.createdAt | date:'shortTime'}}</span>
+            </div>
+            <div class="message-body">{{msg.message}}</div>
+          </div>
+        </ng-container>
+        <ng-template #noAccess>
+          <div class="not-allowed">
+            Vous n'êtes pas autorisé à consulter les commentaires privés.
+          </div>
+        </ng-template>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="chat-actions">
+      <textarea matInput
+                placeholder="Votre message..."
+                [(ngModel)]="newMessage"
+                (keyup.enter)="sendMessage()">
+      </textarea>
+      <button mat-icon-button color="primary" (click)="sendMessage()">
+        <mat-icon>send</mat-icon>
+      </button>
+      <button mat-button (click)="close()">Fermer</button>
+    </mat-dialog-actions>
   `,
   styles: [`
-    /* Conteneur principal du chat */
     .chat-content {
       max-height: 400px;
       overflow-y: auto;
       padding: 8px;
-      background-color: #fafafa;
+      background: #fafafa;
       border: 1px solid #e0e0e0;
       border-radius: 4px;
     }
-    /* Onglets */
     .chat-tabs {
       display: flex;
       gap: 16px;
       margin-bottom: 16px;
       border-bottom: 1px solid #ddd;
     }
-    .chat-tabs button {
-      text-transform: none;
-    }
     .chat-tabs button.active {
       color: #3f51b5;
       border-bottom: 2px solid #3f51b5;
     }
-    /* Zone des messages */
     .messages-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-bottom: 8px;
     }
-    /* Bulles de messages */
     .bubble {
       max-width: 70%;
       padding: 12px;
       border-radius: 16px;
-      box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
       white-space: pre-wrap;
       word-break: break-word;
     }
-    .bubble.mine {
-      align-self: flex-end;
-      background-color: #dcf8c6;
-    }
-    .bubble.theirs {
-      align-self: flex-start;
-      background-color: #ffffff;
-    }
+    .mine { align-self: flex-end; background: #dcf8c6; }
+    .theirs { align-self: flex-start; background: #fff; }
     .message-header {
-      font-size: 0.8em;
+      font-size: .8em;
       margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
@@ -139,7 +136,6 @@ export interface ChatMessage {
     .sender { font-weight: 600; }
     .timestamp { font-style: italic; color: #999; }
     .message-body { font-size: 1em; color: #333; }
-    /* Actions du chat */
     .chat-actions {
       display: flex;
       align-items: center;
@@ -160,99 +156,104 @@ export interface ChatMessage {
     }
   `]
 })
-export class ProjectChatComponent implements OnInit {
+export class ProjectChatComponent implements OnInit, AfterViewChecked, OnDestroy {
+  @ViewChild('scrollMe') private scrollContainer!: ElementRef;
 
   publicMessages: ChatMessage[] = [];
   privateMessages: ChatMessage[] = [];
-  newMessage: string = '';
+  newMessage = '';
   activeTab: 'public' | 'private' = 'public';
-  isUploader: boolean = false;
+  isUploader = false;
   projectId!: number;
   userId!: number;
 
+  private subs = new Subscription();
+
   constructor(
     private http: HttpClient,
+    private chatStomp: ChatStompService,
     private snackBar: MatSnackBar,
     private sessionStorage: SessionStorageService,
     public dialogRef: MatDialogRef<ProjectChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { projectId: number, uploaderId: number }
+    @Inject(MAT_DIALOG_DATA) public data: { projectId: number; uploaderId: number }
   ) {
     this.projectId = data.projectId;
   }
 
   ngOnInit(): void {
     const user = this.sessionStorage.getUser();
-    if (!user || !user.id) {
-      this.snackBar.open("Erreur : utilisateur non identifié.", "Fermer", { duration: 3000 });
-      this.dialogRef.close();
-      return;
+    if (!user?.id) {
+      this.snackBar.open('Utilisateur non identifié.', 'Fermer', { duration: 3000 });
+      return this.dialogRef.close();
     }
-    this.userId = user.id;
-    // Tous les utilisateurs peuvent envoyer des messages privés,
-    // mais seul l'uploader pourra consulter le chat privé.
+    this.userId    = user.id;
     this.isUploader = this.userId === this.data.uploaderId;
+
+    // 1) Charger l’historique HTTP
     this.loadPublicMessages();
+    if (this.isUploader) { this.loadPrivateMessages(); }
+
+    // 2) S’abonner au flux temps réel
+    this.subs.add(
+      this.chatStomp.watchPublic(this.projectId)
+        .subscribe(msg => { this.publicMessages.push(msg); this.scrollToBottom(); })
+    );
     if (this.isUploader) {
-      this.loadPrivateMessages();
+      this.subs.add(
+        this.chatStomp.watchPrivate(this.projectId)
+          .subscribe(msg => { this.privateMessages.push(msg); this.scrollToBottom(); })
+      );
     }
   }
 
-  switchTab(tab: 'public' | 'private'): void {
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  switchTab(tab: 'public'|'private'): void {
     this.activeTab = tab;
     if (tab === 'private' && this.isUploader) {
       this.loadPrivateMessages();
     }
   }
 
-  loadPublicMessages(): void {
+  private loadPublicMessages(): void {
     this.http.get<ChatMessage[]>(`http://localhost:8080/api/pchats/${this.projectId}/public`)
-      .subscribe({
-        next: msgs => this.publicMessages = msgs,
-        error: err => this.snackBar.open('Erreur lors du chargement du chat public', 'Fermer', { duration: 3000 })
-      });
+      .subscribe(msgs => { this.publicMessages = msgs; this.scrollToBottom(); },
+                 _    => this.snackBar.open('Erreur chargement chat public','Fermer',{duration:3000}));
   }
 
-  loadPrivateMessages(): void {
+  private loadPrivateMessages(): void {
     this.http.get<ChatMessage[]>(`http://localhost:8080/api/pchats/${this.projectId}/private?requesterId=${this.userId}`)
-      .subscribe({
-        next: msgs => this.privateMessages = msgs,
-        error: err => this.snackBar.open('Erreur lors du chargement des commentaires privés', 'Fermer', { duration: 3000 })
-      });
+      .subscribe(msgs => { this.privateMessages = msgs; this.scrollToBottom(); },
+                 _    => this.snackBar.open('Erreur chat privé','Fermer',{duration:3000}));
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim()) return;
-  
-    const endpoint = (this.activeTab === 'public')
-      ? `http://localhost:8080/api/pchats/${this.projectId}/public`
-      : `http://localhost:8080/api/pchats/${this.projectId}/private`;
+    const text = this.newMessage.trim();
+    if (!text) return;
+    const payload = { senderId: this.userId.toString(), message: text };
 
-    const payload = {
-      senderId: this.userId.toString(),
-      message: this.newMessage
-    };
-  
-    this.http.post<ChatMessage>(endpoint, payload)
-      .subscribe({
-        next: (msg: ChatMessage) => {
-          if (this.activeTab === 'public') {
-            this.publicMessages.push(msg);
-          } else {
-            // Seul l'uploader peut consulter le chat privé, 
-            // donc si l'utilisateur n'est pas uploader, on affiche une confirmation sans ajouter le message à l'affichage
-            if (this.isUploader) {
-              this.privateMessages.push(msg);
-            } else {
-              this.snackBar.open('Votre message privé a été envoyé.', 'Fermer', { duration: 3000 });
-            }
-          }
-          this.newMessage = '';
-        },
-        error: err => this.snackBar.open('Erreur lors de l\'envoi du message', 'Fermer', { duration: 3000 })
-      });
+    if (this.activeTab === 'public') {
+      this.chatStomp.sendPublic(this.projectId, payload);
+    } else {
+      this.chatStomp.sendPrivate(this.projectId, payload);
+    }
+    this.newMessage = '';
   }
-  
+
   close(): void {
     this.dialogRef.close();
+  }
+
+  private scrollToBottom(): void {
+    try {
+      const el = this.scrollContainer.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    } catch {}
   }
 }

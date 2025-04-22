@@ -1,26 +1,45 @@
-<h2 mat-dialog-title>Fichier : {{ data.file.name }}</h2>
+<h2 mat-dialog-title>Éditeur : {{ data.file.name }}</h2>
 
-<div mat-dialog-content>
-  <div *ngIf="loading">Chargement...</div>
+<mat-dialog-content class="editor-content">
+  <ng-container *ngIf="isText; else binaryTpl">
+    <div class="code-editor-container">
+      <div #gutter class="line-numbers"></div>
+      <textarea
+        #codeArea
+        class="code-input"
+        [(ngModel)]="content"
+        (scroll)="syncScroll($event)"
+        spellcheck="false"
+      ></textarea>
+    </div>
+  </ng-container>
 
-  <div *ngIf="!loading">
-    <textarea *ngIf="isEditing" [(ngModel)]="editedContent" rows="20" cols="80"></textarea>
-    <pre *ngIf="!isEditing">{{ content }}</pre>
-  </div>
-</div>
+  <ng-template #binaryTpl>
+    <div class="media-preview-container">
+      <ng-container [ngSwitch]="data.file.mimeType.split('/')[0]">
+        <img *ngSwitchCase="'image'" [src]="blobUrl" />
+        <video *ngSwitchCase="'video'" [src]="blobUrl" controls></video>
+        <audio *ngSwitchCase="'audio'" [src]="blobUrl" controls></audio>
+        <object *ngSwitchDefault [data]="blobUrl" type="{{ data.file.mimeType }}">
+          <a [href]="blobUrl" download>{{ data.file.name }}</a>
+        </object>
+      </ng-container>
+    </div>
+  </ng-template>
+</mat-dialog-content>
 
-<div mat-dialog-actions align="end">
-  <button mat-icon-button color="warn" (click)="deleteFile()" matTooltip="Supprimer">
+<mat-dialog-actions align="end">
+  <button mat-icon-button color="warn" (click)="delete()" matTooltip="Supprimer">
     <mat-icon>delete</mat-icon>
   </button>
-
-  <button mat-icon-button *ngIf="!isEditing" color="primary" (click)="enableEdit()" matTooltip="Modifier">
-    <mat-icon>edit</mat-icon>
-  </button>
-
-  <button mat-icon-button *ngIf="isEditing" color="primary" (click)="saveChanges()" matTooltip="Enregistrer">
+  <button
+    mat-icon-button
+    color="primary"
+    *ngIf="isText"
+    (click)="save()"
+    matTooltip="Enregistrer"
+  >
     <mat-icon>save</mat-icon>
   </button>
-
-  <button mat-button (click)="onClose()">Fermer</button>
-</div>
+  <button mat-button (click)="close()">Fermer</button>
+</mat-dialog-actions>

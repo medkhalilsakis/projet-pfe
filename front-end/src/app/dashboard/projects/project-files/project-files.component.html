@@ -1,24 +1,65 @@
-<h2 mat-dialog-title>{{ data.project.name }} - Gestion des fichiers</h2>
-<mat-dialog-content>
-  <!-- Fil d'Ariane pour naviguer dans l'arborescence -->
-  <nav class="breadcrumb">
+<mat-toolbar color="primary" class="toolbar">
+  <button mat-icon-button (click)="onClose()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span class="toolbar-title">{{ data.project.name }}</span>
+
+  <span class="spacer"></span>
+
+  <!-- Créer un nouveau dossier -->
+  <button mat-raised-button color="accent" (click)="openNewFolderDialog()">
+    <mat-icon>create_new_folder</mat-icon> Nouveau dossier
+  </button>
+  
+
+  <!-- Bouton d'upload -->
+  <button mat-icon-button matTooltip="Uploader des fichiers" (click)="fileInput.click()">
+    <mat-icon>upload_file</mat-icon>
+  </button>
+  <input
+    #fileInput
+    type="file"
+    multiple
+    (change)="onFilesSelected($event)"
+    hidden
+  />
+</mat-toolbar>
+
+<div class="container">
+  <!-- Fil d’Ariane -->
+  <div class="breadcrumb">
     <ng-container *ngFor="let bc of breadcrumbs; let last = last">
-      <a *ngIf="!last" (click)="navigateTo(bc)" class="crumb">{{ bc.name }}</a>
-      <span *ngIf="last" class="crumb current">{{ bc.name }}</span>
+      <a *ngIf="!last" class="crumb" (click)="navigateTo(bc)">{{ bc.name }}</a>
+      <span *ngIf="last" class="current">{{ bc.name }}</span>
       <mat-icon *ngIf="!last" class="sep">chevron_right</mat-icon>
     </ng-container>
-  </nav>
+  </div>
 
-  <!-- Affichage en grille du contenu du dossier courant -->
-  <mat-grid-list [cols]="cols" rowHeight="120px" gutterSize="16px">
-    <mat-grid-tile *ngFor="let item of files" (click)="onItemClick(item)" class="tile">
-      <mat-icon class="icon">
-        {{ item.type === 'FOLDER' ? 'folder' : 'insert_drive_file' }}
+  <!-- Recherche -->
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Rechercher dans « {{ breadcrumbs[breadcrumbs.length-1].name }} »</mat-label>
+    <input
+      matInput
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="filterFiles()"
+      placeholder="Nom de fichier ou dossier"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <!-- Grille responsive -->
+  <div class="grid">
+    <mat-progress-bar *ngIf="uploading"
+                  mode="determinate"
+                  [value]="progress"
+                  style="margin-bottom: 16px">
+  </mat-progress-bar>
+
+    <div class="file-tile" *ngFor="let file of files" (dblclick)="onItemClick(file)">
+      <mat-icon class="file-icon">
+        {{ file.type === 'FOLDER' ? 'folder' : 'insert_drive_file' }}
       </mat-icon>
-      <div class="name">{{ item.name }}</div>
-    </mat-grid-tile>
-  </mat-grid-list>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onClose()">Fermer</button>
-</mat-dialog-actions>
+      <div class="file-name">{{ getDisplayName(file.name) }}</div>
+    </div>
+  </div>
+</div>

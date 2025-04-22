@@ -1,121 +1,124 @@
-<div class="dashboard-container">
-  <!-- Barre supérieure -->
-  <mat-toolbar color="primary" class="top-toolbar">
-    <div class="toolbar-content">
-      <span class="app-name">Projexia</span>
-      
-      <div class="toolbar-actions">
-        <!-- Notifications -->
-        <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
-          <mat-icon [matBadge]="notifications().length" matBadgeColor="warn">notifications</mat-icon>
-        </button>
-        
-        <!-- Profile -->
-        <button mat-icon-button [matMenuTriggerFor]="profileMenu">
-          <div class="profile-circle">
-            {{ currentUser?.prenom?.charAt(0) || 'U' }}{{ currentUser?.nom?.charAt(0) || 'S' }}
-          </div>
-        </button>
-      </div>
-    </div>
-  </mat-toolbar>
+          <div class="dashboard-container">
+            <!-- Barre supérieure -->
+            <mat-toolbar color="primary" class="top-toolbar">
+              <div class="toolbar-content">
+                <span class="app-name">Projexia</span>
+                
+                <div class="toolbar-actions">
+                  <!-- Notifications -->
+                  <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
+                    <mat-icon [matBadge]="notifications().length" matBadgeColor="warn">notifications</mat-icon>
+                  </button>
+                  
+                  <!-- Profile -->
+                  <button mat-icon-button [matMenuTriggerFor]="profileMenu">
+                    <div class="profile-circle">
+                      {{ currentUser?.prenom?.charAt(0) || 'U' }}{{ currentUser?.nom?.charAt(0) || 'S' }}
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </mat-toolbar>
+          
+            <div class="main-content">
+              <!-- Menu vertical -->
+              <mat-sidenav-container>
+                <mat-sidenav mode="side" opened class="side-nav">
+                  <mat-nav-list>
+                    <ng-container *ngFor="let item of menuItems">
+                      <!-- Si l'item a un sous-menu -->
+                      <ng-container *ngIf="item.subMenu; else singleItem">
+                        <mat-expansion-panel class="menu-panel" hideToggle>
+                          <mat-expansion-panel-header>
+                            <mat-panel-title>
+                              <mat-icon>{{ item.icon }}</mat-icon>
+                              {{ item.label }}
+                            </mat-panel-title>
+                          </mat-expansion-panel-header>
+                          <mat-nav-list>
+                            <a mat-list-item *ngFor="let sub of item.subMenu"
+                               (click)="sub.action()"
+                               [class.active]="currentView() === sub.label">
+                              <mat-icon matListItemIcon>chevron_right</mat-icon>
+                              <span>{{ sub.label }}</span>
+                            </a>
+                          </mat-nav-list>
+                        </mat-expansion-panel>
+                      </ng-container>
+                      <!-- Si pas de sous-menu, on affiche un lien normal -->
+                      <ng-template #singleItem>
+                        <a mat-list-item (click)="item.action()" [class.active]="currentView() === item.label">
+                          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                          <span>{{ item.label }}</span>
+                        </a>
+                      </ng-template>
+                    </ng-container>
+                  </mat-nav-list>
+                  
+                </mat-sidenav>
+          
+                <!-- Contenu principal -->
+                <mat-sidenav-content class="content-area">
+                  <ng-container [ngSwitch]="currentView()">                    
+                    <app-overview *ngSwitchCase="'overview'"></app-overview>
+                    <app-task-boad *ngSwitchCase="'tâches'"></app-task-boad> 
 
-  <div class="main-content">
-    <!-- Menu vertical -->
-    <mat-sidenav-container>
-      <mat-sidenav mode="side" opened class="side-nav">
-        <mat-nav-list>
-          <ng-container *ngFor="let item of menuItems">
-            <!-- Si l'item a un sous-menu -->
-            <ng-container *ngIf="item.subMenu; else singleItem">
-              <mat-expansion-panel class="menu-panel" hideToggle>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    <mat-icon>{{ item.icon }}</mat-icon>
-                    {{ item.label }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <mat-nav-list>
-                  <a mat-list-item *ngFor="let sub of item.subMenu"
-                     (click)="sub.action()"
-                     [class.active]="currentView() === sub.label">
-                    <mat-icon matListItemIcon>chevron_right</mat-icon>
-                    <span>{{ sub.label }}</span>
-                  </a>
-                </mat-nav-list>
-              </mat-expansion-panel>
-            </ng-container>
-            <!-- Si pas de sous-menu, on affiche un lien normal -->
-            <ng-template #singleItem>
-              <a mat-list-item (click)="item.action()" [class.active]="currentView() === item.label">
-                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-                <span>{{ item.label }}</span>
-              </a>
-            </ng-template>
-          </ng-container>
-        </mat-nav-list>
-        
-      </mat-sidenav>
-
-      <!-- Contenu principal -->
-      <mat-sidenav-content class="content-area">
-        <ng-container [ngSwitch]="currentView()">
-          <app-overview *ngSwitchCase="'overview'"></app-overview>
           <app-projects *ngSwitchCase="'projects'"></app-projects>
+          <app-settings *ngSwitchCase="'settings'"></app-settings>
           <app-messages *ngSwitchCase="'messages'"></app-messages>
           <app-upload *ngSwitchCase="'upload'" (uploadCompleted)="navigateTo('projects')"></app-upload>
           <app-add-user *ngSwitchCase="'add-user'"></app-add-user>
           <app-designation-testeur *ngSwitchCase="'designation'"></app-designation-testeur>
-
-          <!-- Ajouter d'autres composants ici -->
-        </ng-container>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
-  </div>
-
-  <!-- Menu des notifications -->
-  <mat-menu #notificationsMenu="matMenu">
-    <div class="notification-menu">
-      <h3 class="notification-header">Notifications ({{notifications().length}})</h3>
-      <div class="notification-list">
-        <div *ngFor="let notification of notifications()" class="notification-item">
-          <mat-icon>info</mat-icon>
-          <div class="notification-content">
-            <p class="notification-title">{{notification.title}}</p>
-            <p class="notification-time">{{notification.timestamp | date:'short'}}</p>
+          
+                    <!-- Ajouter d'autres composants ici -->
+                  </ng-container>
+                </mat-sidenav-content>
+              </mat-sidenav-container>
+            </div>
+          
+            <!-- Menu des notifications -->
+            <mat-menu #notificationsMenu="matMenu">
+              <div class="notification-menu">
+                <h3 class="notification-header">Notifications ({{notifications().length}})</h3>
+                <div class="notification-list">
+                  <div *ngFor="let notification of notifications()" class="notification-item">
+                    <mat-icon>info</mat-icon>
+                    <div class="notification-content">
+                      <p class="notification-title">{{notification.title}}</p>
+                      <p class="notification-time">{{notification.timestamp | date:'short'}}</p>
+                    </div>
+                  </div>
+                  <div *ngIf="!notifications().length" class="no-notifications">
+                    Aucune nouvelle notification
+                  </div>
+                </div>
+              </div>
+            </mat-menu>
+          
+            <!-- Menu du profil -->
+            <mat-menu #profileMenu="matMenu">
+              <div class="profile-menu">
+                <div class="profile-header">
+                  <div class="profile-circle large">
+                    {{ currentUser?.prenom?.charAt(0) || 'U' }}{{ currentUser?.nom?.charAt(0) || 'S' }}
+                  </div>
+                  <div class="profile-info">
+                    <h3>{{currentUser?.prenom}} {{currentUser?.nom}}</h3>
+                    <p>{{currentUser?.email}}</p>
+                  </div>
+                </div>
+                <button mat-menu-item (click)="navigateTo('Paramètres')">
+                  <mat-icon>settings</mat-icon>
+                  <span>Paramètres</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>help</mat-icon>
+                  <span>Aide</span>
+                </button>
+                <button mat-menu-item (click)="logout()">
+                  <mat-icon>exit_to_app</mat-icon>
+                  <span>Se déconnecter</span>
+                </button>
+              </div>
+            </mat-menu>
           </div>
-        </div>
-        <div *ngIf="!notifications().length" class="no-notifications">
-          Aucune nouvelle notification
-        </div>
-      </div>
-    </div>
-  </mat-menu>
-
-  <!-- Menu du profil -->
-  <mat-menu #profileMenu="matMenu">
-    <div class="profile-menu">
-      <div class="profile-header">
-        <div class="profile-circle large">
-          {{ currentUser?.prenom?.charAt(0) || 'U' }}{{ currentUser?.nom?.charAt(0) || 'S' }}
-        </div>
-        <div class="profile-info">
-          <h3>{{currentUser?.prenom}} {{currentUser?.nom}}</h3>
-          <p>{{currentUser?.email}}</p>
-        </div>
-      </div>
-      <button mat-menu-item (click)="navigateTo('Paramètres')">
-        <mat-icon>settings</mat-icon>
-        <span>Paramètres</span>
-      </button>
-      <button mat-menu-item>
-        <mat-icon>help</mat-icon>
-        <span>Aide</span>
-      </button>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>exit_to_app</mat-icon>
-        <span>Se déconnecter</span>
-      </button>
-    </div>
-  </mat-menu>
-</div>

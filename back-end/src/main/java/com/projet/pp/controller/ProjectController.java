@@ -6,6 +6,7 @@ import com.projet.pp.model.ProjectFile;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -111,24 +112,7 @@ public class ProjectController {
     }
 
 
-    /**
-     * PUT /api/projects/{projectId}/files/{fileId}/content
-     * Met à jour le contenu textuel du fichier.
-     */
-    @PutMapping("/{projectId}/files/{fileId}/content")
-    public ResponseEntity<?> updateFileContent(
-            @PathVariable Long projectId,
-            @PathVariable Long fileId,
-            @RequestBody String newContent) {
-        try {
-            projectService.updateFileContent(fileId, newContent);
-            return ResponseEntity.ok("Contenu mis à jour avec succès");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erreur lors de la mise à jour : " + e.getMessage());
-        }
-    }
+
 
     /**
      * DELETE /api/projects/{projectId}/files/{fileId}
@@ -150,7 +134,7 @@ public class ProjectController {
 
 
     @PostMapping("/{projectId}/files/folder")
-    public ResponseEntity<?> createFolder(
+    public ResponseEntity<ProjectFile> createFolder(
             @PathVariable Long projectId,
             @RequestBody Map<String,String> body) throws IOException {
         Long parentId = body.containsKey("parentId")
@@ -159,6 +143,9 @@ public class ProjectController {
         ProjectFile pf = projectService.createFolder(projectId, parentId, name);
         return ResponseEntity.status(HttpStatus.CREATED).body(pf);
     }
+
+
+
 
     // Upload de nouveaux fichiers dans un dossier existant
     @PostMapping("/{projectId}/files/upload")
@@ -222,5 +209,37 @@ public class ProjectController {
         projectService.closeProject(projectId, supId, reason);
         return ResponseEntity.ok("Projet clôturé avec succès");
     }
+
+
+    @PutMapping(
+            path = "/{projectId}/files/{fileId}/content",
+            consumes = MediaType.TEXT_PLAIN_VALUE,
+            produces = MediaType.TEXT_PLAIN_VALUE
+    )
+    public ResponseEntity<String> updateFileContent(
+            @PathVariable Long projectId,
+            @PathVariable Long fileId,
+            @RequestBody String newContent) throws IOException {
+        // (Optionnel) vérifier que ce fichier appartient bien au projetId passé
+        projectService.updateFileContent(fileId, newContent);
+        return ResponseEntity
+                .ok("Contenu mis à jour avec succès");
+    }
+
+    @PutMapping("/{projectId}/visibility")
+    public ResponseEntity<String> updateVisibility(
+            @PathVariable Long projectId,
+            @RequestBody Map<String, String> body) {
+        try {
+            Long userId = Long.valueOf(body.get("userId"));
+            String vis = body.get("visibilite");      // "public" ou "privée"
+            Integer status = Integer.valueOf(body.get("status")); // 1 ou 0
+            projectService.updateVisibility(projectId, userId, vis, status);
+            return ResponseEntity.ok("Visibilité mise à jour avec succès");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
+
 
 }

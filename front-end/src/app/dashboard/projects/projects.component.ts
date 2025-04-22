@@ -131,12 +131,13 @@ export class ProjectsComponent implements OnInit {
   }
 
   viewDetails(project: Project): void {
-    // Ouvrir le dialog pour afficher l'arbre des fichiers du projet
     this.dialog.open(ProjectFilesComponent, {
-      width: '600px',
-      data: { project: project }
+      width: '80vw',
+      height: '80vh',
+      data: { project }
     });
   }
+  
 
 
   deleteProject(project: Project): void {
@@ -153,6 +154,36 @@ export class ProjectsComponent implements OnInit {
           }
         });
     }
+  }
+
+  setPrivate(project: Project) {
+    const user = this.sessionStorage.getUser();
+    this.http.put<string>(
+      `http://localhost:8080/api/projects/${project.id}/visibility`,
+      { userId: user.id.toString(), visibilite: 'privée', status: '0' },
+      { responseType: 'text' as 'json' }
+    ).subscribe({
+      next: msg => {
+        this.snackBar.open(msg, 'Fermer', {duration:3000});
+        this.loadProjects();
+      },
+      error: err => this.snackBar.open('Erreur: '+err.error, 'Fermer', {duration:3000})
+    });
+  }
+
+  setPublic(project: Project) {
+    const user = this.sessionStorage.getUser();
+    this.http.put<string>(
+      `http://localhost:8080/api/projects/${project.id}/visibility`,
+      { userId: user.id.toString(), visibilite: 'public', status: '1' },
+      { responseType: 'text' as 'json' }
+    ).subscribe({
+      next: msg => {
+        this.snackBar.open(msg, 'Fermer', {duration:3000});
+        this.loadProjects();
+      },
+      error: err => this.snackBar.open('Erreur: '+err.error, 'Fermer', {duration:3000})
+    });
   }
 
   getStatusColor(status: number): string {

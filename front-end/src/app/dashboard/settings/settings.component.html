@@ -1,0 +1,55 @@
+<!-- settings.component.html -->
+<mat-card class="settings-card">
+    <mat-card-title>Mes Paramètres</mat-card-title>
+    <mat-card-content>
+      <div class="avatar-section">
+        <img *ngIf="profileImageUrl; else placeholder"
+             [src]="previewUrl || profileImageUrl"
+             class="avatar">
+        <ng-template #placeholder>
+          <mat-icon class="avatar-placeholder">person</mat-icon>
+        </ng-template>
+        <button mat-mini-fab color="primary" (click)="fileInput.click()">
+          <mat-icon>photo_camera</mat-icon>
+        </button>
+        <input #fileInput type="file" accept="image/*"
+               (change)="onFileChange($event)" hidden>
+      </div>
+  
+      <button mat-raised-button
+              color="accent"
+              (click)="uploadImage()"
+              [disabled]="!selectedFile || uploadInProgress">
+        {{ uploadInProgress ? 'Chargement…' : 'Uploader Image' }}
+      </button>
+  
+      <form [formGroup]="userForm" class="form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nom</mat-label>
+          <input matInput formControlName="nom">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Prénom</mat-label>
+          <input matInput formControlName="prenom">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>NCIN</mat-label>
+          <input matInput formControlName="ncin">
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-raised-button color="primary" (click)="saveProfile()">
+        Enregistrer
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  

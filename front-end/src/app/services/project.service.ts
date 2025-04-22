@@ -40,4 +40,6 @@ export class ProjectService {
   getProjects(): Observable<any> {
     return this.http.get(`${this.baseUrl}`);
   }
+
+
 }

@@ -1,10 +1,8 @@
 package com.projet.pp.service;
 
 import com.projet.pp.dto.ProjectFileNode;
-import com.projet.pp.model.Project;
-import com.projet.pp.model.ProjectFile;
-import com.projet.pp.model.User;
-import com.projet.pp.model.ItemType;
+import com.projet.pp.model.*;
+import com.projet.pp.repository.ProjectClosureRepository;
 import com.projet.pp.repository.ProjectFileRepository;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.UserRepository;
@@ -17,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -277,15 +276,22 @@ public class ProjectService {
 
     @Transactional
     public void updateFileContent(Long fileId, String newContent) throws IOException {
+        // 1) Charger l’entité existante
         ProjectFile pf = projectFileRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("Fichier introuvable"));
+                .orElseThrow(() -> new RuntimeException("Fichier introuvable avec l’ID " + fileId));
 
+        // 2) Écrire le nouveau contenu (en UTF‑8 par défaut) sur le système de fichiers
         Path path = Paths.get(pf.getFilePath());
-        // Remplacer le contenu
-        Files.writeString(path, newContent, StandardOpenOption.TRUNCATE_EXISTING);
+        // Crée les répertoires parents si nécessaire
+        Files.createDirectories(path.getParent());
+        // Réécrit entièrement le fichier
+        Files.writeString(path, newContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-        // Si vous souhaitez mettre à jour la date de modification en base :
-        pf.setCreatedAt(LocalDateTime.now()); // ou un champ updatedAt si vous en avez un
+        // 3) Mettre à jour la date de modification
+        // Si vous disposez d’un champ `updatedAt`, c’est l’idéal ; ici on réutilise `createdAt` pour la démo
+        pf.setCreatedAt(LocalDateTime.now());
+
+        // 4) Sauvegarder en base
         projectFileRepository.save(pf);
     }
 
@@ -311,30 +317,32 @@ public class ProjectService {
     public ProjectFile createFolder(Long projectId, Long parentId, String folderName) throws IOException {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        Path projectStorage = baseStorage.resolve(projectId.toString());
+        // racine disque du projet
+        Path projectDir = baseStorage.resolve(projectId.toString());
 
-        // Calcule le chemin relatif du parent
-        String relativeFolder = "";
+        // on détermine le dossier parent
+        ProjectFile parent = null;
+        Path targetDir = projectDir;
         if (parentId != null) {
-            ProjectFile parent = projectFileRepository.findById(parentId)
+            parent = projectFileRepository.findById(parentId)
                     .orElseThrow(() -> new RuntimeException("Dossier parent introuvable"));
-            Path parentPath = Paths.get(parent.getFilePath()).getParent();
-            relativeFolder = baseStorage.resolve(projectId.toString())
-                    .relativize(parentPath).toString();
+            targetDir = Paths.get(parent.getFilePath());
         }
 
-        // Crée physiquement le dossier
-        Path dir = projectStorage.resolve(relativeFolder).resolve(folderName);
-        Files.createDirectories(dir);
+        // création physique du nouveau dossier
+        Path newDir = targetDir.resolve(folderName);
+        Files.createDirectories(newDir);
 
-        // Enregistre en base
+        // enregistrement en base
         ProjectFile pf = new ProjectFile();
         pf.setName(folderName);
         pf.setType(ItemType.FOLDER);
         pf.setProject(project);
-        pf.setFilePath(dir.toString());
+        pf.setParent(parent);
+        pf.setFilePath(newDir.toString());
         return projectFileRepository.save(pf);
     }
+
 
     /**
      * Ajoute des fichiers (upload) dans le dossier parent donné.
@@ -343,25 +351,31 @@ public class ProjectService {
     public List<ProjectFile> addFiles(Long projectId, Long parentId, MultipartFile[] files) throws IOException {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        // dossier racine du projet
         Path projectStorage = baseStorage.resolve(projectId.toString());
 
-        // Calcule le chemin relatif du parent
-        String relativeFolder = "";
+        // on détermine le dossier cible
+        ProjectFile parent = null;
+        Path targetDir = projectStorage;
         if (parentId != null) {
-            ProjectFile parent = projectFileRepository.findById(parentId)
+            parent = projectFileRepository.findById(parentId)
                     .orElseThrow(() -> new RuntimeException("Dossier parent introuvable"));
-            Path parentPath = Paths.get(parent.getFilePath()).getParent();
-            relativeFolder = baseStorage.resolve(projectId.toString())
-                    .relativize(parentPath).toString();
+            targetDir = Paths.get(parent.getFilePath());
         }
 
         List<ProjectFile> saved = new ArrayList<>();
         for (MultipartFile file : files) {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            Path target = projectStorage.resolve(relativeFolder).resolve(filename);
-            Files.createDirectories(target.getParent());
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            // assure l’existence du dossier
+            Files.createDirectories(targetDir);
+            Path target = targetDir.resolve(filename);
 
+            // copie disque
+            try (InputStream in = file.getInputStream()) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            // enregistrement JPA
             ProjectFile pf = new ProjectFile();
             pf.setName(filename);
             pf.setType(ItemType.FILE);
@@ -369,10 +383,12 @@ public class ProjectService {
             pf.setFilePath(target.toString());
             pf.setFileSize(file.getSize());
             pf.setMimeType(file.getContentType());
+            pf.setParent(parent);
             saved.add(projectFileRepository.save(pf));
         }
         return saved;
     }
+
 
     public List<ProjectFile> getFilesByProjectIdAndParentId(Long projectId, Long parentId) {
         return projectFileRepository.findByProjectIdAndParentId(projectId, parentId);
@@ -394,6 +410,38 @@ public class ProjectService {
 
         // 2) Mettre à jour le statut du projet
         proj.setStatus(3);
+        projectRepository.save(proj);
+    }
+
+
+    public void inviteUser(Long projectId, Long userId, String status) {
+    }
+
+    public void removeInvitedUser(Long projectId, Long userId) {
+    }
+
+    public Project getProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+    }
+
+
+    @Transactional
+    public void updateVisibility(Long projectId, Long userId, String visibilite, Integer status) {
+        Project proj = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        // ne laisser faire que le propriétaire quand status est 1 ou 0
+        if (!proj.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Accès refusé");
+        }
+        if (!(proj.getStatus() == 1 || proj.getStatus() == 0)) {
+            throw new RuntimeException("Impossible de modifier la visibilité pour ce statut");
+        }
+
+        proj.setVisibilite(visibilite);
+        proj.setStatus(status);
+        proj.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(proj);
     }
 

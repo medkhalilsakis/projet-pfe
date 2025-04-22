@@ -1,94 +1,126 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-file-viewer-dialog',
   templateUrl: './file-viewer-dialog.component.html',
   styleUrls: ['./file-viewer-dialog.component.css'],
-  imports: [CommonModule, MatIconModule, FormsModule]
+  imports:[
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatIconModule
+  ]
 })
 export class FileViewerDialogComponent implements OnInit {
-  content: string = '';
-  loading: boolean = true;
-  isEditing: boolean = false;
-  editedContent: string = '';
+  @ViewChild('gutter') gutter!: ElementRef<HTMLElement>;
+  @ViewChild('codeArea') codeArea!: ElementRef<HTMLTextAreaElement>;
+
+  isText = true;
+  content = '';
+  blobUrl!: SafeResourceUrl;
 
   constructor(
     private http: HttpClient,
     private snackBar: MatSnackBar,
+    private sanitizer: DomSanitizer,
     public dialogRef: MatDialogRef<FileViewerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { file: any, projectId: number }
+    @Inject(MAT_DIALOG_DATA)
+    public data: { file: { id: number; name: string; mimeType: string }; projectId: number }
   ) {}
 
   ngOnInit(): void {
-    this.loadContent();
+    this.isText =
+      this.data.file.mimeType.startsWith('text/') ||
+      this.data.file.mimeType === 'application/json' ||
+      this.data.file.mimeType.endsWith('+xml');
+
+    if (this.isText) {
+      this.http
+        .get(
+          `/api/projects/${this.data.projectId}/files/${this.data.file.id}/content`,
+          { responseType: 'text' }
+        )
+        .subscribe(
+          (txt) => {
+            this.content = txt;
+            setTimeout(() => this.updateLineNumbers(), 0);
+          },
+          () => this.snackBar.open('Erreur chargement', 'Fermer', { duration: 3000 })
+        );
+    } else {
+      this.http
+        .get(
+          `/api/projects/${this.data.projectId}/files/${this.data.file.id}/content`,
+          { responseType: 'blob' }
+        )
+        .subscribe(
+          (blob) => {
+            const url = URL.createObjectURL(blob);
+            this.blobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          },
+          () => this.snackBar.open('Erreur chargement binaire', 'Fermer', { duration: 3000 })
+        );
+    }
   }
 
-  loadContent(): void {
-    this.loading = true;
-    this.http.get(
-      `http://localhost:8080/api/projects/${this.data.projectId}/files/${this.data.file.id}/content`,
-      { responseType: 'text' }
-    ).subscribe({
-      next: (text: string) => {
-        this.content = text;
-        this.editedContent = text;
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Erreur chargement contenu fichier:', err);
-        this.content = 'Erreur lors du chargement du contenu.';
-        this.loading = false;
-      }
-    });
+  save(): void {
+    if (!this.isText) return;
+    this.http
+      .put(
+        `/api/projects/${this.data.projectId}/files/${this.data.file.id}/content`,
+        this.content,
+        { responseType: 'text', headers: { 'Content-Type': 'text/plain' } }
+      )
+      .subscribe(
+        () => this.snackBar.open('Sauvegardé', 'Fermer', { duration: 2000 }),
+        () => this.snackBar.open('Erreur sauvegarde', 'Fermer', { duration: 2000 })
+      );
   }
 
-  enableEdit(): void {
-    this.isEditing = true;
+  delete(): void {
+    if (!confirm('Supprimer définitivement ?')) return;
+    this.http
+      .delete(`/api/projects/${this.data.projectId}/files/${this.data.file.id}`, {
+        responseType: 'text'
+      })
+      .subscribe(
+        (msg) => {
+          this.snackBar.open(msg, 'Fermer', { duration: 2000 });
+          this.dialogRef.close({ deleted: true });
+        },
+        () => this.snackBar.open('Erreur suppression', 'Fermer', { duration: 2000 })
+      );
   }
 
-  saveChanges(): void {
-    this.http.put(
-      `http://localhost:8080/api/projects/${this.data.projectId}/files/${this.data.file.id}/content`,
-      { content: this.editedContent },
-      { responseType: 'text' }
-    ).subscribe({
-      next: () => {
-        this.snackBar.open('Fichier sauvegardé avec succès.', 'Fermer', { duration: 3000 });
-        this.content = this.editedContent;
-        this.isEditing = false;
-      },
-      error: err => {
-        console.error('Erreur sauvegarde fichier:', err);
-        this.snackBar.open('Erreur lors de la sauvegarde.', 'Fermer', { duration: 3000 });
-      }
-    });
-  }
-
-  deleteFile(): void {
-    if (!confirm('Voulez-vous vraiment supprimer ce fichier ?')) return;
-  
-    this.http.delete(
-      `http://localhost:8080/api/projects/${this.data.projectId}/files/${this.data.file.id}`,
-      { responseType: 'text' }  // ← Important !
-    ).subscribe({
-      next: (res: string): void => {
-        this.snackBar.open(res, 'Fermer', { duration: 3000 });
-        this.dialogRef.close({ deleted: true });
-      },
-      error: (err: any): void => {
-        console.error('Erreur suppression fichier:', err);
-        this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { duration: 3000 });
-      }
-    });
-  }
-
-  onClose(): void {
+  close(): void {
     this.dialogRef.close();
+  }
+
+  /** Met à jour la gutter avec les numéros de ligne */
+  private updateLineNumbers(): void {
+    const lines = this.content.split('\n').length;
+    const gutterEl = this.gutter.nativeElement;
+    gutterEl.innerHTML = Array
+      .from({ length: lines }, (_, i) => `<span>${i + 1}</span>`)
+      .join('');
+  }
+
+  /** Synchronise le scroll entre textarea et gutter */
+  syncScroll(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    this.gutter.nativeElement.scrollTop = textarea.scrollTop;
   }
 }

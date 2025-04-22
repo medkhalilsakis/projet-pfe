@@ -144,4 +144,41 @@ public class UserController {
                     .body(Map.of("message", "OTP invalide ou expiré"));
         }
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> updateData) {
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        String username = updateData.get("username");
+        User existingUserWithUsername = userRepository.findByUsername(username).orElse(null);
+        if (existingUserWithUsername != null && !existingUserWithUsername.getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Nom d'utilisateur déjà utilisé"));
+        }
+
+        existingUser.setNom(updateData.getOrDefault("nom", existingUser.getNom()));
+        existingUser.setPrenom(updateData.getOrDefault("prenom", existingUser.getPrenom()));
+        existingUser.setUsername(username);
+        existingUser.setEmail(updateData.getOrDefault("email", existingUser.getEmail()));
+        existingUser.setNcin(updateData.getOrDefault("ncin", existingUser.getNcin()));
+
+        String rawPassword = updateData.get("password");
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(rawPassword));
+        }
+
+        if (updateData.containsKey("dateEmbauche")) {
+            existingUser.setDateEmbauche(LocalDate.parse(updateData.get("dateEmbauche")));
+        }
+        if (updateData.containsKey("salaire")) {
+            existingUser.setSalaire(Double.parseDouble(updateData.get("salaire")));
+        }
+        if (updateData.containsKey("role_id")) {
+            Long roleId = Long.parseLong(updateData.get("role_id"));
+            Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
+            existingUser.setRole(role);
+        }
+
+        User updatedUser = userService.updateUser(id, existingUser);
+        return ResponseEntity.ok(updatedUser);
+    }
 }

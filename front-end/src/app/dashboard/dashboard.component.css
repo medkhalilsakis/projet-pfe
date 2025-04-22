@@ -2,7 +2,12 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
 }
+:host {
+  display: block;
+  width: 100%;
+} 
 
 .top-toolbar {
   height: 64px;
@@ -60,8 +65,18 @@
 }
 
 .content-area {
-  padding: 24px;
+  flex: 1;
   background: white;
+  overflow-x: hidden;
+
+  width: 100%;         /* Ensure it takes full available width */
+  box-sizing: border-box; /* Include padding in total width */
+}
+
+mat-sidenav-container {
+  flex: 1;
+  height: 100%;
+  width: 100%;
 }
 
 .notification-menu {

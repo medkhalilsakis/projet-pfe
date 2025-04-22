@@ -16,6 +16,8 @@ import { UploadComponent } from './upload/upload.component';
 import { AddUserComponent } from './add-user/add-user.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { DesignationTesteurComponent } from './projects/designation-testeur/designation-testeur.component';
+import { SettingsComponent } from './settings/settings.component';
+import { TaskBoadComponent } from './task-boad/task-boad.component';
 
 
 @Component({
@@ -40,7 +42,9 @@ import { DesignationTesteurComponent } from './projects/designation-testeur/desi
     UploadComponent,
     AddUserComponent,
     MatExpansionModule,
-    DesignationTesteurComponent
+    DesignationTesteurComponent,
+    SettingsComponent,
+    TaskBoadComponent
   ],
 })
 export class DashboardComponent {
@@ -84,6 +88,7 @@ export class DashboardComponent {
       case 3: // Superviseur
         this.menuItems = [
           ...baseMenu,
+          { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
           {
             label: 'Projets',
             icon: 'list_alt',
@@ -113,6 +118,7 @@ export class DashboardComponent {
       case 1: // Développeur
         this.menuItems = [
           ...baseMenu,
+          { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
           { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('projects') },
         ];
         break;

@@ -1,32 +1,31 @@
-import "./chunk-4BR7NGDR.js";
-import "./chunk-XUL36GCJ.js";
+import {
+  SharedResizeObserver
+} from "./chunk-NDBFB5UH.js";
+import "./chunk-INWQP2PC.js";
 import {
   CdkPortal,
   CdkPortalOutlet,
   TemplatePortal
-} from "./chunk-A2U7XBWH.js";
-import {
-  SharedResizeObserver
-} from "./chunk-VYEX7GST.js";
-import "./chunk-NBONYJLV.js";
-import "./chunk-HL4OBYZU.js";
+} from "./chunk-ES5TEDLB.js";
+import "./chunk-M3GGAECP.js";
+import "./chunk-ESZMZSSW.js";
+import "./chunk-AEVW6JXZ.js";
 import {
   CdkScrollable,
   ViewportRuler
-} from "./chunk-MMWF67GG.js";
-import "./chunk-AVOMMXQG.js";
+} from "./chunk-WDLOUOYD.js";
+import "./chunk-5UX7PZMG.js";
 import {
   MAT_RIPPLE_GLOBAL_OPTIONS,
   MatRipple
-} from "./chunk-NGSFQXZV.js";
+} from "./chunk-T5HAAU2G.js";
+import "./chunk-E5O3GCT5.js";
+import "./chunk-XSHXRMQE.js";
+import "./chunk-SWVF6GUU.js";
 import {
   _StructuralStylesLoader
-} from "./chunk-5UJXVW4Y.js";
-import "./chunk-PSCWXOJR.js";
-import "./chunk-L7XR6SHA.js";
-import "./chunk-I4LF2DCS.js";
-import "./chunk-CRJ3UGH2.js";
-import "./chunk-NHNHQPQ2.js";
+} from "./chunk-TDPKNSCD.js";
+import "./chunk-YXSG6ISY.js";
 import {
   CdkMonitorFocus,
   CdkObserveContent,
@@ -37,20 +36,21 @@ import {
   SPACE,
   _IdGenerator,
   hasModifierKey
-} from "./chunk-LBE3QUDN.js";
-import "./chunk-W2EZSZM7.js";
+} from "./chunk-VIKABHD3.js";
+import "./chunk-6UBQ3CO5.js";
+import "./chunk-KKIF25KL.js";
+import {
+  Directionality
+} from "./chunk-3OZ7TW4Q.js";
 import {
   _CdkPrivateStyleLoader,
   _bindEventWithOptions
-} from "./chunk-ESATNL77.js";
-import {
-  Directionality
-} from "./chunk-DCZMI7FS.js";
+} from "./chunk-VGH7HT6H.js";
 import {
   Platform
-} from "./chunk-K63Z64TR.js";
-import "./chunk-E4FW7WUC.js";
-import "./chunk-R7H5THIO.js";
+} from "./chunk-ECKOYA6B.js";
+import "./chunk-GTUG4U7J.js";
+import "./chunk-SB5XCHZJ.js";
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -117,11 +117,11 @@ import {
   ɵɵtext,
   ɵɵtextInterpolate,
   ɵɵviewQuery
-} from "./chunk-XLEF4V3A.js";
+} from "./chunk-WDMDUI2V.js";
+import "./chunk-CGJMYSBH.js";
 import {
   merge
-} from "./chunk-ZMFQCUPT.js";
-import "./chunk-6INCSTX2.js";
+} from "./chunk-MD4MEXAA.js";
 import {
   BehaviorSubject,
   EMPTY,
@@ -136,10 +136,10 @@ import {
   switchMap,
   takeUntil,
   timer
-} from "./chunk-PLVU6SBE.js";
-import "./chunk-EIB7IA3J.js";
+} from "./chunk-TYOVXHQK.js";
+import "./chunk-KBUIKKCC.js";
 
-// ../../../../node_modules/@angular/material/fesm2022/tabs.mjs
+// ../../../node_modules/@angular/material/fesm2022/tabs.mjs
 var _c0 = ["*"];
 function MatTab_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
