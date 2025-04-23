@@ -16,10 +16,11 @@ public class ChatWebSocketController {
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage) {
-        // Optionally save message to DB here
+        // Enregistrer le message dans la base de données si nécessaire
         messagingTemplate.convertAndSend(
                 "/topic/messages/" + chatMessage.getReceiver().getId(),
                 chatMessage
         );
     }
+
 }

@@ -1,4 +1,3 @@
-// chat-stomp.service.ts
 import { Injectable } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -28,23 +27,22 @@ export class ChatStompService {
     this.client.activate();
   }
 
-  /** renvoie un Observable qui souscrit **après** connexion */
+  /** renvoie un Observable qui souscrit **après** connexion au topic public */
   watchPublic(projectId: number): Observable<ChatMessage> {
     return new Observable(sub => {
-      // n’abonner qu’après connexion
       const connSub = this.connected$.subscribe(ready => {
         if (!ready) return;
         const stompSub = this.client.subscribe(
           `/topic/pchats/${projectId}/public`,
           (msg: IMessage) => sub.next(JSON.parse(msg.body))
         );
-        connSub.unsubscribe();   // plus besoin de réécouter
-        // cleanup
+        connSub.unsubscribe();
         return () => stompSub.unsubscribe();
       });
     });
   }
 
+  /** envoie un message public via STOMP */
   sendPublic(projectId: number, payload: any) {
     if (!this.connected$.value) return;
     this.client.publish({
@@ -53,5 +51,7 @@ export class ChatStompService {
     });
   }
 
-  // idem pour watchPrivate() et sendPrivate()
+ 
+
+
 }

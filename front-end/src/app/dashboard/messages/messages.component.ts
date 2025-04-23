@@ -1,25 +1,22 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCardModule } from '@angular/material/card';
-import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SessionStorageService } from '../../services/session-storage.service';
 import { FormsModule } from '@angular/forms';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import SockJS from 'sockjs-client';
 import { Client, IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client'; // ✅ default import
-import { Subscription } from 'rxjs'; // ✅ default import
+import { forkJoin } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-messages',
-  templateUrl: './messages.component.html',
-  styleUrls: ['./messages.component.css'],
   standalone: true,
   imports: [
     CommonModule,
@@ -28,179 +25,208 @@ import { Subscription } from 'rxjs'; // ✅ default import
     MatIconModule,
     MatButtonModule,
     MatInputModule,
-    MatSelectModule,
-    MatSnackBarModule,
-    MatButtonModule,
-    ReactiveFormsModule,  // Ensure ReactiveFormsModule is imported here
-    MatCardModule
-  ]
+    MatFormFieldModule,
+    MatCardModule,
+    MatSelectModule
+  ],
+  templateUrl: './messages.component.html',
+  styleUrls: ['./messages.component.css']
 })
-export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
   users: any[] = [];
-  messages: { text: string; sentBy: string; date: Date }[] = [];
   selectedUser: any = null;
+  messages: { text: string; sentBy: 'me'|'other'; date: Date }[] = [];
   newMessage = '';
   searchQuery = '';
+  currentUserId!: number;
+  stompClient!: Client;
+  isMobile = window.innerWidth < 768;
+  private subscription: any;  // Track the current subscription
 
-  private stompClient!: Client;
-
-  constructor(private http: HttpClient, private snackBar: MatSnackBar, private sessionStorage: SessionStorageService) {
+  constructor(
+    private http: HttpClient,
+    private snackBar: MatSnackBar,
+    private session: SessionStorageService
+  ) {
+    const u = this.session.getUser();
+    this.currentUserId = u?.id;
     this.loadUsers();
   }
 
-  ngOnInit(): void {
+  @HostListener('window:resize', ['$event'])
+  onResize(e: UIEvent) {
+    this.isMobile = (e.target as Window).innerWidth < 768;
+  }
+
+  ngOnInit() {
     this.connectWebSocket();
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     if (this.stompClient) {
-      this.stompClient.deactivate();  // Use deactivate() to disconnect
-      console.log('WebSocket disconnected');
+      this.stompClient.deactivate();
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
-  connectWebSocket() {
-    const userId = this.sessionStorage.getUser().id;
+  private connectWebSocket() {
     const socket = new SockJS('http://localhost:8080/ws');
-  
     this.stompClient = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
-      connectHeaders: {
-        'X-User-Id': userId,
-      },
-      debug: (str) => console.log(str),
+      webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-      webSocketFactory: () => socket
+      connectHeaders: { 'X-User-Id': this.currentUserId.toString(), }
     });
-  
-    this.stompClient.onConnect = () => {
-      console.log('WebSocket connected');
-    };
-  
+    this.stompClient.onConnect = () => console.log('WS connected');
     this.stompClient.activate();
   }
 
-
-  loadUsers() {
+  private loadUsers() {
     this.http.get<any[]>('http://localhost:8080/api/users').subscribe({
-      next: (users) => {
-        this.users = users;
+      next: users => {
+        this.users = users
+          .filter(u => u.id !== this.currentUserId)
+          .map(u => ({
+            ...u,
+            status: 'Hors-ligne',
+            hasImage: false,
+            avatarUrl: '',
+            initials: `${u.prenom[0]}${u.nom[0]}`.toUpperCase()
+          }));
+
+        // Charger les avatars existants
+        this.users.forEach(u => {
+          this.http.get(`http://localhost:8080/api/users/${u.id}/profile-image/meta`)
+            .subscribe({
+              next: () => {
+                u.hasImage = true;
+                u.avatarUrl = `http://localhost:8080/api/users/${u.id}/profile-image/raw`;
+              },
+              error: () => { /* pas d'image */ }
+            });
+        });
       },
-      error: () => {
-        this.snackBar.open('Erreur lors de chargement des utilisateurs', 'Fermer', { duration: 3000 });
-      }
-    });
-  }
-
-  loadMessages(receiverId: number) {
-    const currentUserId = this.sessionStorage.getUser().id;
-
-    const senderToReceiver$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${currentUserId}/${receiverId}`);
-    const receiverToSender$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${receiverId}/${currentUserId}`);
-
-    forkJoin([senderToReceiver$, receiverToSender$]).subscribe({
-      next: ([messagesA, messagesB]) => {
-        const combined = [...messagesA, ...messagesB].map(msg => ({
-          text: msg.message,
-          sentBy: msg.sender.id === currentUserId ? 'me' : 'other',
-          date: new Date(msg.createdAt)
-        }));
-
-        this.messages = combined.sort((a, b) => a.date.getTime() - b.date.getTime());
-      },
-      error: () => {
-        this.snackBar.open('Erreur lors du chargement des messages', 'Fermer', { duration: 3000 });
-      }
+      error: () => this.snackBar.open('Erreur chargement users','Fermer',{duration:3000})
     });
   }
 
   filteredUsers() {
-    return this.users.filter(user =>
-      user.nom.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      user.prenom.toLowerCase().includes(this.searchQuery.toLowerCase())
+    const q = this.searchQuery.toLowerCase().trim();
+    return this.users.filter(u =>
+      u.prenom.toLowerCase().includes(q) ||
+      u.nom.toLowerCase().includes(q)
     );
   }
 
-  selectUser(user: any) {
-    this.selectedUser = user;
-    this.loadMessages(user.id);
+  selectUser(u: any) {
+    this.selectedUser = u;
+    if (!this.selectedUser) {
+      this.snackBar.open('Utilisateur non sélectionné.', 'Fermer', { duration: 3000 });
+      return;
+    }
+    if (this.isMobile) window.scrollTo(0, 0);
+    this.loadMessages(u.id);
   
+    // Assurez-vous que le WebSocket fonctionne correctement
     if (!this.stompClient || !this.stompClient.connected) {
       return;
     }
   
-    const userId = this.sessionStorage.getUser().id;
-    const selectedUserId = user.id;
+    // Désabonnement précédent s'il existe
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   
-    // Avoid duplicate subscriptions by unsubscribing previous ones
-    this.stompClient.unsubscribe('chat-sub'); // optional cleanup if you add `id` when subscribing
-  
-    const topic1 = `/topic/messages/${userId}/${selectedUserId}`;
-    const topic2 = `/topic/messages/${selectedUserId}/${userId}`;
-  
-    this.stompClient.subscribe(topic1, (message: IMessage) => {
+    // Souscription au topic du nouvel utilisateur sélectionné
+    const topic = `/topic/messages/${this.currentUserId}/${u.id}`;
+    this.subscription = this.stompClient.subscribe(topic, (message: IMessage) => {
       const body = JSON.parse(message.body);
-      this.messages.push({ text: body.message, sentBy: 'other', date: new Date(body.createdAt) });
+      
+      // Vérification si senderId est présent (utilisation de senderId au lieu de sender)
+      if (!body.senderId) {
+        console.error('Erreur : senderId manquant', body);
+        return;
+      }
+    
+      // Utilisez senderId pour déterminer si c'est l'utilisateur actuel ou un autre utilisateur
+      const sentBy: 'me' | 'other' = body.senderId === this.currentUserId ? 'me' : 'other';
+    
+      this.messages.push({
+        text: body.message,
+        sentBy,
+        date: new Date(body.createdAt)
+      });
+    
       this.scrollToBottom();
-    }, { id: 'chat-sub' });
-  
-    /*this.stompClient.subscribe(topic2, (message: IMessage) => {
-      const body = JSON.parse(message.body);
-      this.messages.push({ text: body.message, sentBy: 'other', date: new Date(body.createdAt) });
-      this.scrollToBottom();
-    }, { id: 'chat-sub' });*/
+    });
+    
   }
   
 
-  ngAfterViewChecked() {
-    this.scrollToBottom();
+  deselectUser() {
+    this.selectedUser = null;
+  }
+
+  private loadMessages(receiverId: number) {
+    const me = this.currentUserId;
+    const a$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${me}/${receiverId}`);
+    const b$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${receiverId}/${me}`);
+    forkJoin([a$, b$]).subscribe({
+      next: ([as, bs]) => {
+        this.messages = [...as, ...bs]
+          .map(m => {
+            const sentBy: 'me' | 'other' = (m.sender.id === me ? 'me' : 'other');
+            return {
+              text: String(m.message),
+              sentBy,
+              date: new Date(m.createdAt)
+            };
+          })
+          .sort((a, b) => a.date.getTime() - b.date.getTime());
+      },
+      error: () => this.snackBar.open('Erreur chargement messages', 'Fermer', { duration: 3000 })
+    });
+  }
+  
+
+  sendMessage() {
+    if(!this.newMessage.trim() || !this.selectedUser) return;
+    const me = this.currentUserId;
+    const to = this.selectedUser.id;
+    const payload = {
+      message: this.newMessage,
+      senderId: me,
+      receiverId: to,
+      createdAt: new Date().toISOString()
+    };
+
+    this.http.post('http://localhost:8080/api/chat/send', payload).subscribe({
+      next: () => {
+        this.messages.push({ text: this.newMessage, sentBy: 'me', date: new Date() });
+        this.stompClient.publish({
+          destination: `/topic/messages/${to}/${me}`,
+          body: JSON.stringify(payload)
+        });
+        this.newMessage = '';
+      },
+      error: () => this.snackBar.open('Erreur envoi', 'Fermer', { duration: 3000 })
+    });
   }
 
   scrollToBottom(): void {
     try {
-      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-    } catch (err) {}
-  }
-
-  sendMessage() {
-    if (!this.newMessage.trim() || !this.selectedUser) return;
-    
-    const formData = {
-      message: this.newMessage,
-      senderId: this.sessionStorage.getUser().id,
-      receiverId: this.selectedUser.id,
-      createdAt: new Date()
-    };
-
-    // REST call
-    this.http.post(`http://localhost:8080/api/chat/send`, formData).subscribe({
-      next: () => {
-        this.messages.push({ text: this.newMessage, sentBy: 'me', date: new Date() });
-        this.newMessage = '';
-        this.snackBar.open('Message envoyé avec succès', 'Fermer', { duration: 3000 });
-
-        // WebSocket push
-        if (this.stompClient && this.stompClient.connected) {
-          this.stompClient.publish({
-            destination: `/topic/messages/${formData.receiverId}/${formData.senderId}`,
-            body: JSON.stringify(formData)
-          });
-        }
-
-      },
-      error: () => {
-        this.snackBar.open('Erreur lors de l\'envoi du message', 'Fermer', { duration: 3000 });
+      if (this.scrollContainer && this.scrollContainer.nativeElement) {
+        const el = this.scrollContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
       }
-    });
+    } catch (err) {
+      console.error('Erreur lors du défilement automatique', err);
+    }
   }
 
-  shouldShowTimestamp(index: number): boolean {
-    if (index === 0) return true;
-    const current = this.messages[index].date;
-    const previous = this.messages[index - 1].date;
-    return (current.getTime() - previous.getTime()) > 30 * 60 * 1000 - 1;
+  ngAfterViewChecked() {
+    this.scrollToBottom();
   }
 }

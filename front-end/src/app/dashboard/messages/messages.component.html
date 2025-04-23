@@ -1,39 +1,85 @@
 <div class="messagerie-container">
-    <div class="sidebar">
-      <mat-form-field appearance="outline" class="search-bar">
-        <mat-label>Search users</mat-label>
-        <input matInput [(ngModel)]="searchQuery" placeholder="Search">
-      </mat-form-field>
-  
-      <mat-list>
-        <mat-list-item
-          *ngFor="let user of filteredUsers()"
-          [class.selected]="user.id === selectedUser?.id"
-          (click)="selectUser(user)">
-          {{ user.prenom }} {{ user.nom }}
-  
-        </mat-list-item>
-      </mat-list>
-    </div>
-  
-    <div class="chat-window">
-      <div class="messages" #scrollContainer>
-        <div *ngFor="let message of messages; let i = index">
-          <div *ngIf="shouldShowTimestamp(i)">
-            <small class="timestamp">{{ message.date | date:'shortTime' }}</small>
-          </div>  
-          <div [ngClass]="{'message-sent': message.sentBy === 'me', 'message-received': message.sentBy !== 'me'}">
-            <strong>{{ message.sentBy === 'me' ? 'You' : selectedUser?.name }}:</strong> {{ message.text }}
+
+  <!-- SIDEBAR UTILISATEURS -->
+  <aside class="sidebar" *ngIf="!isMobile || !selectedUser">
+    <mat-form-field appearance="outline" class="search-bar">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="searchQuery" placeholder="Rechercher">
+    </mat-form-field>
+
+    <div class="user-list">
+      <mat-card *ngFor="let user of filteredUsers()"
+                class="user-card"
+                [class.selected]="user.id===selectedUser?.id"
+                (click)="selectUser(user)">
+        <div class="user-card-content">
+          <ng-container *ngIf="user.hasImage; else initialsTpl">
+            <img [src]="user.avatarUrl" class="avatar" alt="avatar">
+          </ng-container>
+          <ng-template #initialsTpl>
+            <div class="avatar initials">{{ user.initials }}</div>
+          </ng-template>
+          <div class="user-info">
+            <h3>{{ user.prenom }} {{ user.nom }}</h3>
+            <p class="status">{{ user.status }}</p>
           </div>
         </div>
-        
+      </mat-card>
+    </div>
+  </aside>
+
+  <!-- CHAT AREA -->
+  <section class="chat-area" *ngIf="selectedUser">
+    <header class="chat-header">
+      <button mat-icon-button *ngIf="isMobile" (click)="deselectUser()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="chat-user-info">
+        <ng-container *ngIf="selectedUser.hasImage; else selInit">
+          <img [src]="selectedUser.avatarUrl" class="avatar-sm" alt="avatar">
+        </ng-container>
+        <ng-template #selInit>
+          <div class="avatar-sm initials">{{ selectedUser.initials }}</div>
+        </ng-template>
+        <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
       </div>
-  
-      <div class="message-input">
-        <mat-form-field appearance="outline" class="input-field">
-          <input matInput [(ngModel)]="newMessage" placeholder="Type your message">
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="sendMessage()">Send</button>
+      <div class="chat-actions">
+        <button mat-icon-button><mat-icon>info</mat-icon></button>
+        <button mat-icon-button><mat-icon>more_vert</mat-icon></button>
+      </div>
+    </header>
+
+    <div class="messages" #scrollContainer>
+      <div *ngFor="let m of messages"
+           [ngClass]="m.sentBy==='me'?'msg-sent':'msg-received'">
+        <div class="bubble">
+          <p>{{ m.text }}</p>
+          <span class="time">{{ m.date | date:'HH:mm' }}</span>
+        </div>
       </div>
     </div>
-  </div>
+
+    <footer class="chat-input">
+      <mat-form-field appearance="outline" class="input-box">
+        <input matInput
+               [(ngModel)]="newMessage"
+               (keyup.enter)="sendMessage()"
+               placeholder="Écrire un message…">
+      </mat-form-field>
+      <button mat-fab color="primary" (click)="sendMessage()">
+        <mat-icon>send</mat-icon>
+      </button>
+    </footer>
+  </section>
+
+  <!-- PANEL INFO (optionnel) -->
+  <aside class="info-panel" *ngIf="selectedUser && !isMobile">
+    <mat-card>
+      <mat-card-title>Profil</mat-card-title>
+      <mat-card-content>
+        <!-- détails supplémentaires ici -->
+      </mat-card-content>
+    </mat-card>
+  </aside>
+
+</div>
