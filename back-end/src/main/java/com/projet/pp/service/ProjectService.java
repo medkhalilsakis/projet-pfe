@@ -5,6 +5,7 @@ import com.projet.pp.model.*;
 import com.projet.pp.repository.ProjectClosureRepository;
 import com.projet.pp.repository.ProjectFileRepository;
 import com.projet.pp.repository.ProjectRepository;
+import com.projet.pp.repository.projectInvitedUserRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,8 @@ public class ProjectService {
     @Autowired
     private ProjectClosureRepository closureRepo;
 
+    @Autowired
+    private projectInvitedUserRepository projectInvitedUserRepository;
 
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
@@ -414,8 +417,22 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public void inviteUser(Long projectId, Long userId, String status) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        ProjectInvitedUser invitedUser = new ProjectInvitedUser();
+        invitedUser.setProject(project);
+        invitedUser.setUser(user);
+        invitedUser.setStatus(status); // "pending", "accepted", "rejected"
+        invitedUser.setInvitedAt(LocalDateTime.now());
+
+        projectInvitedUserRepository.save(invitedUser);
     }
+
 
     public void removeInvitedUser(Long projectId, Long userId) {
     }

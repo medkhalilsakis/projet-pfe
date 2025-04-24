@@ -12,6 +12,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-upload',
@@ -158,42 +159,77 @@ private updateIndividualProgress(event: any) {
 }
 
 
-  private openProjectDescriptionDialog(projectId: number): void {
-    const dialogRef = this.dialog.open(ProjectDescriptionDialogComponent, {
-      width: '400px',
-      data: { projectId }
-    });
+// … dans UploadComponent …
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const status = result.visibilite === 'public' ? 1 : 0;
-        const payload = {
-          ...result,
-          status: status
-        };
-        // Envoi des informations saisies à l'API commit
-        const params = new HttpParams().set('projectId', projectId.toString());
-        this.http.post('http://localhost:8080/api/projects/commit', payload, { params, responseType: 'text' })
-          .subscribe({
-            next: (response) => {
-              this.snackBar.open(response, 'Fermer', { duration: 3000 });
-              this.uploadCompleted.emit();
-              this.resetState();
-            },
-            error: (error) => {
-              console.log(error);
-              this.snackBar.open('Erreur lors de la finalisation du projet', 'Fermer', { duration: 5000 });
-              this.uploadCompleted.emit();
-              this.resetState();
-            }
-          });
-      } else {
-        this.snackBar.open('Finalisation annulée', 'Fermer', { duration: 3000 });
-        this.uploadCompleted.emit();
-        this.resetState();
-      }
-    });
-  }
+private openProjectDescriptionDialog(projectId: number): void {
+  const dialogRef = this.dialog.open(ProjectDescriptionDialogComponent, {
+    width: '500px',
+    data: { projectId }
+  });
+
+  dialogRef.afterClosed().subscribe(formData => {
+    if (!formData) {
+      this.snackBar.open('Finalisation annulée', 'Fermer', { duration: 3000 });
+      this.resetState();
+      return;
+    }
+
+    // 1) On commit d'abord le projet
+    const status = formData.visibilite === 'public' ? 1 : 0;
+    const commitPayload = {
+      name: formData.name,
+      type: formData.type,
+      description: formData.description || '',
+      visibilite: formData.visibilite,
+      status
+    };
+
+    const params = new HttpParams().set('projectId', projectId.toString());
+    this.http.post('http://localhost:8080/api/projects/commit', commitPayload, { params, responseType: 'text' })
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Projet finalisé.', 'Fermer', { duration: 3000 });
+
+          // 2) Si des invitations ont été sélectionnées, on les envoie en parallèle
+          const toInvite: number[] = formData.users || [];
+          if (toInvite.length) {
+            // un tableau d’observables POST d’invitation
+            const invites$ = toInvite.map(uid =>
+              this.http.post(
+                `http://localhost:8080/api/projects/${projectId}/invite`,
+                { userId: uid, status: 'pending' },
+                { responseType: 'text' }
+              )
+            );
+            forkJoin(invites$).subscribe({
+              next: () => {
+                this.snackBar.open('Invitations envoyées.', 'Fermer', { duration: 3000 });
+                this.uploadCompleted.emit();
+                this.resetState();
+              },
+              error: () => {
+                this.snackBar.open('Erreur lors des invitations', 'Fermer', { duration: 3000 });
+                this.uploadCompleted.emit();
+                this.resetState();
+              }
+            });
+          } else {
+            // pas d’invitations -> on termine
+            this.uploadCompleted.emit();
+            this.resetState();
+          }
+        },
+        error: () => {
+          this.snackBar.open('Erreur finalisation projet', 'Fermer', { duration: 3000 });
+          this.uploadCompleted.emit();
+          this.resetState();
+        }
+      });
+  });
+}
+
+
+
 
   private resetState() {
     this.files = [];

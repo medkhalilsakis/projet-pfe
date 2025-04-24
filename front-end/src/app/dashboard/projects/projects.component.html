@@ -63,6 +63,11 @@
         <button mat-icon-button color="warn" (click)="deleteProject(project)">
           <mat-icon>delete</mat-icon>
         </button>
+        <!-- ... dans mat-card-actions ... -->
+        <button mat-icon-button color="warn" (click)="viewStatus(project)" matTooltip="Voir le statut">
+          <mat-icon>info</mat-icon>
+        </button>
+
       </mat-card-actions>
     </mat-card>
   </div>

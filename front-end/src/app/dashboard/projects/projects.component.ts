@@ -15,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProjectChatComponent } from './project-chat/project-chat.component';
 import { ParametresProjetComponent } from './parametres-projet/parametres-projet.component';
+import { ProjectStatusDialogComponent } from './project-status-dialog/project-status-dialog.component';
 
 export interface Project {
   id: number;
@@ -206,5 +207,12 @@ export class ProjectsComponent implements OnInit {
       case 4: return 'Accepté';
       default: return 'Inconnu';
     }
+  }
+
+  viewStatus(project: Project): void {
+    this.dialog.open(ProjectStatusDialogComponent, {
+      width: '600px',
+      data: { project }
+    });
   }
 }

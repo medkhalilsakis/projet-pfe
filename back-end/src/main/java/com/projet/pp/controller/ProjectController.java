@@ -165,7 +165,6 @@ public class ProjectController {
         try {
             Long userId = Long.valueOf(body.get("userId"));
             String status = body.get("status"); // Par exemple: "pending", "accepted", etc.
-            // Vous pouvez définir dans le service une méthode inviteUser pour gérer l'enregistrement dans la table project_invited_users
             projectService.inviteUser(projectId, userId, status);
             return ResponseEntity.ok("Utilisateur invité avec succès");
         } catch (Exception e) {
@@ -174,6 +173,7 @@ public class ProjectController {
                     .body("Erreur lors de l'invitation : " + e.getMessage());
         }
     }
+
 
     // Retirer un utilisateur invité
     @DeleteMapping("/{projectId}/invite/{userId}")
@@ -189,6 +189,7 @@ public class ProjectController {
                     .body("Erreur lors du retrait de l'invitation : " + e.getMessage());
         }
     }
+
 
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getProjectById(@PathVariable Long projectId) {
