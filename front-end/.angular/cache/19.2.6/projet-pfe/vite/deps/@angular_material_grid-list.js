@@ -1,17 +1,22 @@
-import "./chunk-SWVF6GUU.js";
+import {
+  MatLine,
+  MatLineModule,
+  setLines
+} from "./chunk-BK5HDXAE.js";
+import "./chunk-2AA2HD2T.js";
 import {
   MatCommonModule
-} from "./chunk-I7V6ZGPU.js";
-import "./chunk-6UBQ3CO5.js";
+} from "./chunk-3NRCQ6N5.js";
+import "./chunk-M3HR6BUY.js";
 import {
   Directionality
-} from "./chunk-UFTIKIU3.js";
-import "./chunk-W5GJLPPS.js";
+} from "./chunk-SOELOKGL.js";
+import "./chunk-HNVHM5KX.js";
 import {
   coerceNumberProperty
-} from "./chunk-UWVGUKEP.js";
-import "./chunk-RS45677F.js";
-import "./chunk-EFG7GNFH.js";
+} from "./chunk-PIGDFS4N.js";
+import "./chunk-6JKX2N6V.js";
+import "./chunk-24KVZAYN.js";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -37,15 +42,13 @@ import {
   ɵɵprojection,
   ɵɵprojectionDef,
   ɵɵqueryRefresh
-} from "./chunk-OS5UTTE2.js";
-import "./chunk-MD4MEXAA.js";
-import "./chunk-CGJMYSBH.js";
-import {
-  startWith
-} from "./chunk-TYOVXHQK.js";
+} from "./chunk-7SGOSYYL.js";
+import "./chunk-WPM5VTLQ.js";
+import "./chunk-PEBH6BBU.js";
+import "./chunk-4S3KYZTJ.js";
 import "./chunk-EIB7IA3J.js";
 
-// ../../../node_modules/@angular/material/fesm2022/public-api-c3ea43bd.mjs
+// node_modules/@angular/material/fesm2022/public-api-c3ea43bd.mjs
 var TileCoordinator = class {
   /** Tracking array (see class description). */
   tracker;
@@ -149,69 +152,7 @@ var TilePosition = class {
 };
 var ɵTileCoordinator = TileCoordinator;
 
-// ../../../node_modules/@angular/material/fesm2022/line-f14556b4.mjs
-var MatLine = class _MatLine {
-  static ɵfac = function MatLine_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _MatLine)();
-  };
-  static ɵdir = ɵɵdefineDirective({
-    type: _MatLine,
-    selectors: [["", "mat-line", ""], ["", "matLine", ""]],
-    hostAttrs: [1, "mat-line"]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatLine, [{
-    type: Directive,
-    args: [{
-      selector: "[mat-line], [matLine]",
-      host: {
-        "class": "mat-line"
-      }
-    }]
-  }], null, null);
-})();
-function setLines(lines, element, prefix = "mat") {
-  lines.changes.pipe(startWith(lines)).subscribe(({
-    length
-  }) => {
-    setClass(element, `${prefix}-2-line`, false);
-    setClass(element, `${prefix}-3-line`, false);
-    setClass(element, `${prefix}-multi-line`, false);
-    if (length === 2 || length === 3) {
-      setClass(element, `${prefix}-${length}-line`, true);
-    } else if (length > 3) {
-      setClass(element, `${prefix}-multi-line`, true);
-    }
-  });
-}
-function setClass(element, className, isAdd) {
-  element.nativeElement.classList.toggle(className, isAdd);
-}
-var MatLineModule = class _MatLineModule {
-  static ɵfac = function MatLineModule_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _MatLineModule)();
-  };
-  static ɵmod = ɵɵdefineNgModule({
-    type: _MatLineModule,
-    imports: [MatCommonModule, MatLine],
-    exports: [MatLine, MatCommonModule]
-  });
-  static ɵinj = ɵɵdefineInjector({
-    imports: [MatCommonModule, MatCommonModule]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatLineModule, [{
-    type: NgModule,
-    args: [{
-      imports: [MatCommonModule, MatLine],
-      exports: [MatLine, MatCommonModule]
-    }]
-  }], null, null);
-})();
-
-// ../../../node_modules/@angular/material/fesm2022/grid-list.mjs
+// node_modules/@angular/material/fesm2022/grid-list.mjs
 var _c0 = ["*"];
 var _c1 = [[["", "mat-grid-avatar", ""], ["", "matGridAvatar", ""]], [["", "mat-line", ""], ["", "matLine", ""]], "*"];
 var _c2 = ["[mat-grid-avatar], [matGridAvatar]", "[mat-line], [matLine]", "*"];

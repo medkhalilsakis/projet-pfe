@@ -17,6 +17,8 @@ import { forkJoin, of }                   from 'rxjs';
 import { map, catchError }                from 'rxjs/operators';
 import { MatTableDataSource }             from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { AddUserDialogComponent } from './add-user-dialog/add-user-dialog.component';
 
 export interface User {
   id: number;
@@ -29,6 +31,7 @@ export interface User {
   salaire: number;
   role: { libelle: string };
   avatarUrl?: string;
+  genre: string;
 }
 
 @Component({
@@ -62,7 +65,8 @@ export class UserManagementComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private snack: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +76,10 @@ export class UserManagementComponent implements OnInit {
   private loadUsers(): void {
     this.http.get<User[]>('http://localhost:8080/api/users').subscribe(users => {
       // On génère un observable par utilisateur pour récupérer son avatar
+      users.forEach(u => {
+        u.titre = u.genre === 'Femme' ? 'Mme.' : 'Mr.';
+      });
+
       const obs$ = users.map(u =>
         this.http.get<any>(`http://localhost:8080/api/users/${u.id}/profile-image/meta`).pipe(
           map(meta =>
@@ -98,7 +106,6 @@ export class UserManagementComponent implements OnInit {
     this.dataSource.filter = filter;
   }
 
-  onAdd()      { this.router.navigate(['/dashboard/users','new']); }
   onEdit(u: User)    { this.router.navigate(['/dashboard/users',u.id,'edit']); }
   onDelete(u: User)  {
     if(!confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) return;
@@ -109,4 +116,13 @@ export class UserManagementComponent implements OnInit {
   }
   onAnalytics(u: User){ this.router.navigate(['/dashboard/users',u.id,'analytics']); }
   onMessage(u: User)  { this.router.navigate(['/dashboard/messages'],{ queryParams:{to:u.id} }); }
+
+  onAdd() {
+    const ref = this.dialog.open(AddUserDialogComponent, {
+      width: '600px'
+    });
+    ref.afterClosed().subscribe( result => {
+      if (result === true) this.loadUsers();
+    });
+  }
 }

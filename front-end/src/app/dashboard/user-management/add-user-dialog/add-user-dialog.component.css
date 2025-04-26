@@ -1,0 +1,12 @@
+/* src/app/dashboard/user-management/add-user-dialog.component.css */
+.full { width: 100%; }
+.row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+mat-form-field { flex: 1; }
+.error {
+  color: #f44336;
+  margin-top: 8px;
+}

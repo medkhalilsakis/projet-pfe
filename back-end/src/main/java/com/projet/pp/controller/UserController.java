@@ -71,7 +71,8 @@ public class UserController {
         String username = signupData.get("username");
         String email = signupData.get("email");
         String rawPassword = signupData.get("password");
-        String ncin = signupData.get("ncin"); // Récupération du NCIN
+        String ncin = signupData.get("ncin");
+        String genre = signupData.get("genre");
 
         // Hachage du mot de passe avec BCrypt
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -87,7 +88,7 @@ public class UserController {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
 
-        User user = new User(nom, prenom, username, email, hashedPassword, dateEmbauche, salaire, role, ncin);
+        User user = new User(nom, prenom, username, email, hashedPassword, dateEmbauche, salaire, role, ncin, genre);
 
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

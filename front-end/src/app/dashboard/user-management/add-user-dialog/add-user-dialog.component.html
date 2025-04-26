@@ -1,0 +1,89 @@
+<h2 mat-dialog-title>Ajouter un utilisateur</h2>
+
+<mat-dialog-content [formGroup]="form">
+
+  <div class="row">
+    <mat-form-field class="flex">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom">
+    </mat-form-field>
+
+    <mat-form-field class="flex">
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="prenom">
+    </mat-form-field>
+  </div>
+
+  <mat-form-field class="full">
+    <mat-label>Username</mat-label>
+    <input matInput formControlName="username">
+    <mat-error *ngIf="form.get('username')?.hasError('usernameTaken')">
+      Ce nom d’utilisateur est déjà pris.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="full">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email">
+  </mat-form-field>
+
+  <mat-form-field class="full">
+    <mat-label>Mot de passe</mat-label>
+    <input matInput type="password" formControlName="password">
+    <mat-hint align="end">Min 8 caractères</mat-hint>
+  </mat-form-field>
+
+  <div class="row">
+    <mat-form-field class="flex">
+      <mat-label>Date d’embauche</mat-label>
+      <input matInput
+             type="date"
+             formControlName="dateEmbauche">
+      <mat-error *ngIf="form.get('dateEmbauche')?.hasError('required')">
+        La date d’embauche est requise.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="flex">
+      <mat-label>Salaire</mat-label>
+      <input matInput type="number" formControlName="salaire">
+    </mat-form-field>
+  </div>
+
+  <div class="row">
+    <mat-form-field class="flex">
+      <mat-label>Rôle</mat-label>
+      <mat-select formControlName="role_id">
+        <mat-option *ngFor="let r of roles" [value]="r.id">{{ r.libelle }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="flex">
+      <mat-label>Genre</mat-label>
+      <mat-select formControlName="genre">
+        <mat-option value="Homme">Homme</mat-option>
+        <mat-option value="Femme">Femme</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field class="full">
+    <mat-label>NCIN</mat-label>
+    <input matInput formControlName="ncin">
+  </mat-form-field>
+
+  <!-- Affiche l’erreur serveur si besoin -->
+  <div *ngIf="form.hasError('serverError')" class="error">
+    {{ form.getError('serverError') }}
+  </div>
+  
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary"
+          (click)="submit()" [disabled]="form.invalid">
+    Créer
+  </button>
+</mat-dialog-actions>
