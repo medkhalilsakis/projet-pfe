@@ -13,12 +13,22 @@
                 [class.selected]="user.id===selectedUser?.id"
                 (click)="selectUser(user)">
         <div class="user-card-content">
-          <ng-container *ngIf="user.hasImage; else initialsTpl">
-            <img [src]="user.avatarUrl" class="avatar" alt="avatar">
+
+          <!-- si l'utilisateur a un avatar en base, on l'affiche, sinon avatar par défaut -->
+          <ng-container *ngIf="user.hasImage; else defaultAvatarTpl">
+            <img
+              [src]="user.avatarUrl"
+              class="avatar"
+              alt="avatar"
+              (error)="user.avatarUrl = 'https://i.imgur.com/vtrfxgY.png'">
           </ng-container>
-          <ng-template #initialsTpl>
-            <div class="avatar initials">{{ user.initials }}</div>
+          <ng-template #defaultAvatarTpl>
+            <img
+              src="https://i.imgur.com/vtrfxgY.png"
+              class="avatar"
+              alt="avatar">
           </ng-template>
+
           <div class="user-info">
             <h3>{{ user.prenom }} {{ user.nom }}</h3>
             <p class="status">{{ user.status }}</p>
@@ -35,12 +45,22 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <div class="chat-user-info">
-        <ng-container *ngIf="selectedUser.hasImage; else selInit">
-          <img [src]="selectedUser.avatarUrl" class="avatar-sm" alt="avatar">
+
+        <!-- avatar de l'utilisateur sélectionné ou avatar par défaut en cas d'erreur/404 -->
+        <ng-container *ngIf="selectedUser.hasImage; else defaultSelAvatarTpl">
+          <img
+            [src]="selectedUser.avatarUrl"
+            class="avatar-sm"
+            alt="avatar"
+            (error)="selectedUser.avatarUrl = 'https://i.imgur.com/vtrfxgY.png'">
         </ng-container>
-        <ng-template #selInit>
-          <div class="avatar-sm initials">{{ selectedUser.initials }}</div>
+        <ng-template #defaultSelAvatarTpl>
+          <img
+            src="https://i.imgur.com/vtrfxgY.png"
+            class="avatar-sm"
+            alt="avatar">
         </ng-template>
+
         <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
       </div>
       <div class="chat-actions">
@@ -51,7 +71,7 @@
 
     <div class="messages" #scrollContainer>
       <div *ngFor="let m of messages"
-           [ngClass]="m.sentBy==='me'?'msg-sent':'msg-received'">
+           [ngClass]="m.sentBy==='me' ? 'msg-sent' : 'msg-received'">
         <div class="bubble">
           <p>{{ m.text }}</p>
           <span class="time">{{ m.date | date:'HH:mm' }}</span>

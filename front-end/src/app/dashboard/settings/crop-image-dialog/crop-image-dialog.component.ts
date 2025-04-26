@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
@@ -17,7 +17,7 @@ import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
       <image-cropper
         [imageChangedEvent]="data.imageChangedEvent"
         [maintainAspectRatio]="true"
-        [aspectRatio]="1 / 1"
+        [aspectRatio]="1/1"
         format="png"
         (imageCropped)="onImageCropped($event)"
         (loadImageFailed)="onLoadFailed()">
@@ -46,15 +46,18 @@ export class CropImageDialogComponent {
 
   constructor(
     private dialogRef: MatDialogRef<CropImageDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { imageChangedEvent: Event }
+    @Inject(MAT_DIALOG_DATA) public data: { imageChangedEvent: Event },
+    private cdr: ChangeDetectorRef
   ) {}
 
   onImageCropped(event: ImageCroppedEvent) {
+    console.log('Image recadrée reçue:', event.base64);
     this.croppedImage = event.base64!;
+    this.cdr.detectChanges();
   }
 
   onLoadFailed() {
-    // si tu veux afficher un message d'erreur…
+    // Échec du chargement
   }
 
   onConfirm() {

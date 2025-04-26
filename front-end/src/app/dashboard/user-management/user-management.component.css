@@ -1,0 +1,20 @@
+/* src/app/dashboard/user-management/user-management.component.css */
+
+.user-mgmt-card {
+    margin: 16px;
+  }
+  
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .avatar-cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  

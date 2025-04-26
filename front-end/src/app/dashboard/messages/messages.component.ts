@@ -14,6 +14,8 @@ import SockJS from 'sockjs-client';
 import { Client, IMessage } from '@stomp/stompjs';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-messages',
@@ -84,33 +86,46 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private loadUsers() {
-    this.http.get<any[]>('http://localhost:8080/api/users').subscribe({
-      next: users => {
+    this.http.get<any[]>('http://localhost:8080/api/users')
+      .pipe(
+        catchError(err => {
+          this.snackBar.open('Erreur chargement users', 'Fermer', { duration: 3000 });
+          return of([]); // on continue avec une liste vide
+        })
+      )
+      .subscribe(users => {
         this.users = users
           .filter(u => u.id !== this.currentUserId)
           .map(u => ({
             ...u,
-            status: 'Hors-ligne',
-            hasImage: false,
-            avatarUrl: '',
+            // par défaut, on utilise l’image ImgURl
+            avatarUrl: 'https://i.imgur.com/vtrfxgY.png',
             initials: `${u.prenom[0]}${u.nom[0]}`.toUpperCase()
           }));
-
-        // Charger les avatars existants
+  
+        // pour chacun, on tente de récupérer le meta
         this.users.forEach(u => {
-          this.http.get(`http://localhost:8080/api/users/${u.id}/profile-image/meta`)
-            .subscribe({
-              next: () => {
-                u.hasImage = true;
+          const metaUrl = `http://localhost:8080/api/users/${u.id}/profile-image/meta`;
+          this.http.get(metaUrl, { observe: 'response' })
+            .pipe(
+              catchError(err => {
+                // si 404 on ne fait rien, sinon on peut logger
+                if (err.status !== 404) {
+                  console.error(`Erreur inattendue pour avatar meta user ${u.id}`, err);
+                  this.snackBar.open(`Erreur chargement avatar de ${u.prenom}`, 'Fermer', { duration: 3000 });
+                }
+                return of(null);
+              })
+            )
+            .subscribe(resp => {
+              if (resp && resp.status === 200) {
                 u.avatarUrl = `http://localhost:8080/api/users/${u.id}/profile-image/raw`;
-              },
-              error: () => { /* pas d'image */ }
+              }
             });
         });
-      },
-      error: () => this.snackBar.open('Erreur chargement users','Fermer',{duration:3000})
-    });
+      });
   }
+  
 
   filteredUsers() {
     const q = this.searchQuery.toLowerCase().trim();

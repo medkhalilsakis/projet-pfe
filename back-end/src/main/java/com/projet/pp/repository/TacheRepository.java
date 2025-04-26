@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TacheRepository extends JpaRepository<Tache, Long> {
-    List<Tache> findByAssignedTo(User user);
-    List<Tache> findByStatus(String status); // Optional: for 'to develop' or 'to test'
+    List<Tache> findByNameContainingIgnoreCase(String q);
+    List<Tache> findByStatus(Tache.Status status);
+    List<Tache> findByAssignedToId(Long userId);
+    List<Tache> findByNameContainingIgnoreCaseAndStatusAndAssignedToId(
+            String q, Tache.Status status, Long userId);
 }

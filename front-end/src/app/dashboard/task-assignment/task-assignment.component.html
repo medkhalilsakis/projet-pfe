@@ -1,0 +1,45 @@
+<mat-toolbar color="primary">
+  <span>Gérer les tâches</span>
+  <span class="spacer"></span>
+  <button mat-flat-button (click)="openNew()">
+    <mat-icon>add</mat-icon> Nouvelle tâche
+  </button>
+</mat-toolbar>
+
+<div class="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Recherche</mat-label>
+    <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()">
+    <button mat-icon-button matSuffix (click)="search=''; onSearchChange()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Filtrer par statut</mat-label>
+    <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
+      <mat-option value="">Tous</mat-option>
+      <mat-option *ngFor="let s of ['a_developper','en_test','suspendu','cloturé','terminé']"
+                  [value]="s">{{ s }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="grid">
+  <mat-grid-list cols="3" gutterSize="16px" rowHeight="1:1">
+    <mat-grid-tile *ngFor="let t of filtered">
+      <mat-card class="task-card">
+        <mat-card-header>
+          <mat-card-title>{{ t.name }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ t.assignedTo.prenom }} {{ t.assignedTo.nom }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p><strong>Status:</strong> {{ t.status }}</p>
+          <p><strong>Deadline:</strong> {{ t.deadline | date:'shortDate' }}</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

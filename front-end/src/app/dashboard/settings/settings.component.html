@@ -2,34 +2,39 @@
   <mat-card-title>Mes Paramètres</mat-card-title>
   <mat-card-content>
     <div class="avatar-section">
+      <!-- Aperçu temporaire si sélectionné -->
       <img *ngIf="previewUrl; else showStored"
            [src]="previewUrl"
            class="avatar">
+
       <ng-template #showStored>
+        <!-- Sinon l'avatar actuel -->
         <img *ngIf="profileImageUrl; else placeholder"
              [src]="profileImageUrl"
              class="avatar">
       </ng-template>
+
       <ng-template #placeholder>
         <mat-icon class="avatar-placeholder">person</mat-icon>
       </ng-template>
 
-      <!-- input caché pour déclencher le file picker -->
+      <!-- input caché pour sélectionner l'image -->
       <input #fileInput
              type="file"
              accept="image/*"
              hidden
-             (change)="openCropDialog($event)">
-
-      <button mat-mini-fab color="primary"
-              (click)="openCropDialog(fileInput)">
+             (change)="onFileSelected($event)">
+      <button mat-mini-fab
+              color="primary"
+              (click)="fileInput.click()">
         <mat-icon>photo_camera</mat-icon>
       </button>
     </div>
 
-    <button mat-raised-button color="accent"
+    <button mat-raised-button
+            color="accent"
             (click)="uploadImage()"
-            [disabled]="!croppedImage || uploadInProgress">
+            [disabled]="!selectedFile || uploadInProgress">
       {{ uploadInProgress ? 'Chargement…' : 'Enregistrer Photo' }}
     </button>
 
@@ -61,7 +66,9 @@
     </form>
   </mat-card-content>
   <mat-card-actions align="end">
-    <button mat-raised-button color="primary" (click)="saveProfile()">
+    <button mat-raised-button
+            color="primary"
+            (click)="saveProfile()">
       Enregistrer
     </button>
   </mat-card-actions>

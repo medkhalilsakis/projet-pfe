@@ -1,0 +1,17 @@
+.spacer { flex: 1 1 auto; }
+
+.filters {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+.filters mat-form-field { flex: 1; }
+
+.grid {
+  padding: 16px;
+}
+.task-card {
+  cursor: pointer;
+  transition: transform .2s;
+}
+.task-card:hover { transform: scale(1.02); }

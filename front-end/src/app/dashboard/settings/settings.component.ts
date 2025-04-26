@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+// src/app/settings/settings.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { SessionStorageService } from '../../services/session-storage.service';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,8 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { CropImageDialogComponent } from './crop-image-dialog/crop-image-dialog.component';
+import { ProfileImageService } from '../../services/profile-image.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -23,26 +24,32 @@ import { CropImageDialogComponent } from './crop-image-dialog/crop-image-dialog.
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatDialogModule
+    MatButtonModule
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
   userForm!: FormGroup;
   user: any;
-  previewUrl: string|null = null;
-  croppedImage: string|null = null;
+
+  /** Fichier sélectionné et aperçu temporaire */
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
+
+  /** URL du profil (émise par le service) */
+  profileImageUrl: string | null = null;
+
   uploadInProgress = false;
-  profileImageUrl: string|null = null;
+
+  private sub!: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private session: SessionStorageService,
     private http: HttpClient,
-    public snack: MatSnackBar,
-    private dialog: MatDialog
+    private snack: MatSnackBar,
+    private profileImageService: ProfileImageService
   ) {}
 
   ngOnInit(): void {
@@ -61,53 +68,53 @@ export class SettingsComponent implements OnInit {
       password: ['']
     });
 
+    // S'abonner au service pour recevoir les changements d'URL d'avatar
+    this.sub = this.profileImageService.imageUrl$
+      .subscribe(url => this.profileImageUrl = url);
+
+    // Charger la méta pour déclencher la 1ère émission
     this.loadProfileMeta();
   }
 
-  loadProfileMeta(): void {
-    this.http.get<any>(`http://localhost:8080/api/users/${this.user.id}/profile-image/meta`)
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  /** Récupère la méta et notifie le service */
+  private loadProfileMeta(): void {
+    const id = this.user.id;
+    this.http.get<any>(`http://localhost:8080/api/users/${id}/profile-image/meta`)
       .subscribe({
         next: meta => {
-          if (meta?.filePath) {
-            this.profileImageUrl = 
-              `http://localhost:8080/api/users/${this.user.id}/profile-image/raw`;
-          }
+          const url = meta?.filePath
+            ? `http://localhost:8080/api/users/${id}/profile-image/raw?ts=${Date.now()}`
+            : null;
+          this.profileImageService.setImageUrl(url);
         },
         error: () => {
-          // pas d'image => on ignore
+          this.profileImageService.setImageUrl(null);
         }
       });
   }
 
-  openCropDialog(eventOrInput: Event|HTMLInputElement): void {
-    if (eventOrInput instanceof HTMLInputElement) {
-      eventOrInput.click();            // ouvre le file picker
+  /** Gestion de la sélection de fichier */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.selectedFile = input.files[0];
+    this.previewUrl = URL.createObjectURL(this.selectedFile);
+  }
+
+  /** Envoie au back-end (crop côté serveur) */
+  uploadImage(): void {
+    if (!this.selectedFile) {
+      this.snack.open('Veuillez sélectionner une image.', 'Fermer', { duration: 2000 });
       return;
     }
-    // sinon, c'est un event change -> on ouvre le popup
-    const dialogRef = this.dialog.open(CropImageDialogComponent, {
-      width: '450px',
-      data: { event: eventOrInput }
-    });
-    dialogRef.afterClosed().subscribe(base64 => {
-      if (base64) {
-        this.croppedImage = base64;
-        this.previewUrl  = base64;
-      }
-    });
-  }
-  
-
-  uploadImage(): void {
-    if (!this.croppedImage) return;
     this.uploadInProgress = true;
 
-    // conversion base64 → Blob → File
-    const blob = this.base64ToBlob(this.croppedImage);
-    const file = new File([blob], `profile_${this.user.id}.png`, { type: blob.type });
-
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', this.selectedFile);
 
     this.http.post(
       `http://localhost:8080/api/users/${this.user.id}/profile-image`,
@@ -115,10 +122,10 @@ export class SettingsComponent implements OnInit {
     ).subscribe({
       next: () => {
         this.snack.open('Photo mise à jour.', 'Fermer', { duration: 2000 });
-        this.session.setUser({ ...this.user, profileImageUrl: this.previewUrl });
-        this.loadProfileMeta();
-        this.croppedImage = null;
         this.previewUrl = null;
+        this.selectedFile = null;
+        // recharger la méta pour propager la nouvelle URL
+        this.loadProfileMeta();
         this.uploadInProgress = false;
       },
       error: () => {
@@ -128,16 +135,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  private base64ToBlob(dataURI: string): Blob {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const buffer = new Uint8Array(byteString.length);
-    for (let i = 0; i < byteString.length; i++) {
-      buffer[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([buffer], { type: mime });
-  }
-
+  /** Sauvegarde des autres champs */
   saveProfile(): void {
     if (this.userForm.invalid) {
       this.snack.open('Corrigez le formulaire.', 'Fermer', { duration: 2000 });
@@ -145,8 +143,10 @@ export class SettingsComponent implements OnInit {
     }
     const v = this.userForm.value;
     const upd: any = {
-      nom: v.nom, prenom: v.prenom,
-      email: v.email, username: v.username,
+      nom: v.nom,
+      prenom: v.prenom,
+      email: v.email,
+      username: v.username,
       ncin: v.ncin
     };
     if (v.password) upd.password = v.password;
@@ -158,11 +158,10 @@ export class SettingsComponent implements OnInit {
           this.session.setUser(u);
         },
         error: err => {
-          if (err.status === 409) {
-            this.snack.open('Username déjà utilisé.', 'Fermer', { duration: 2000 });
-          } else {
-            this.snack.open('Erreur sauvegarde.', 'Fermer', { duration: 2000 });
-          }
+          const msg = err.status === 409
+            ? 'Username déjà utilisé.'
+            : 'Erreur sauvegarde.';
+          this.snack.open(msg, 'Fermer', { duration: 2000 });
         }
       });
   }

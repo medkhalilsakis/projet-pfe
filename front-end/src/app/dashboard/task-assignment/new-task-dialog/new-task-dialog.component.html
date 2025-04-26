@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>Créer une nouvelle tâche</h2>
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Nom</mat-label>
+    <input matInput formControlName="name">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Outils</mat-label>
+    <input matInput formControlName="outils">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Deadline</mat-label>
+    <input matInput type="date" formControlName="deadline">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="status">
+      <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Assigné à</mat-label>
+    <mat-select formControlName="assignedTo">
+      <mat-option *ngFor="let u of users" [value]="u.id">
+        {{ u.prenom }} {{ u.nom }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div>
+    <label>Fichier cahier de charges (PDF)*</label><br>
+    <input type="file" accept=".pdf" (change)="onProjectPdfChange($event)">
+  </div>
+  <div>
+    <label>Autres pièces (optionnel)</label><br>
+    <input type="file" multiple (change)="onAttachmentsChange($event)">
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">Créer</button>
+</mat-dialog-actions>

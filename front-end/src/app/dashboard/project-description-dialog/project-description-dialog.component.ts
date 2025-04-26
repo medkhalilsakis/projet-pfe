@@ -8,7 +8,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { SessionStorageService } from '../../services/session-storage.service';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface User {
