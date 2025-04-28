@@ -71,7 +71,7 @@
       </mat-sidenav>
 
       <!-- Contenu principal -->
-      <mat-sidenav-content class="content-area">
+      <!--<mat-sidenav-content class="content-area">
         <ng-container [ngSwitch]="currentView()">
           <app-overview            *ngSwitchCase="'overview'"></app-overview>
           <app-task-assignment     *ngSwitchCase="'tâches'"></app-task-assignment>
@@ -84,7 +84,11 @@
           <app-designation-testeur *ngSwitchCase="'designation'"></app-designation-testeur>
           <app-user-management *ngSwitchCase="'users'"></app-user-management>
         </ng-container>
+      </mat-sidenav-content>-->
+      <mat-sidenav-content class="content-area">
+        <router-outlet></router-outlet>
       </mat-sidenav-content>
+      
     </mat-sidenav-container>
   </div>
 

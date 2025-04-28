@@ -1,0 +1,162 @@
+/* — Grid principal à deux colonnes et quatre rangées — */
+.project-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows:
+    auto    /* row1 : infos + invités */
+    auto    /* row2 : actions + contenu */
+    auto    /* row3 :     ""    + chat    */
+    auto;   /* row4 :     ""    + stats   */
+  grid-template-areas:
+    "info-card    invites-card"
+    "actions-card content-card"
+    "actions-card chat-card"
+    "actions-card stats-card";
+  gap: 24px;
+  padding: 24px;
+  background: #f5f7fa;
+  width: 1200px;
+}
+
+/* Attribution des aires */
+.info-card    { grid-area: info-card; }
+.invites-card { grid-area: invites-card; }
+.actions-card { grid-area: actions-card; }
+.content-card { grid-area: content-card; }
+.chat-card    { grid-area: chat-card; }
+.stats-card   { grid-area: stats-card; }
+
+/* — Styles communs aux cartes — */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* — En-tête des infos principales — */
+.info-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg,#e8f0fe,#ffffff);
+}
+.icon-wrapper {
+  background: white;
+  border-radius: 50%;
+  padding: 8px;
+  margin-right: 16px;
+}
+.project-icon { font-size: 32px; color: #3f51b5; }
+.title-wrapper mat-card-title    { font-size: 1.6rem; font-weight: 600; }
+.title-wrapper mat-card-subtitle { font-size: 1rem; opacity: 0.85; }
+
+/* — Grille d’informations — */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 16px;
+  padding: 16px;
+}
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.info-item mat-icon {
+  font-size: 24px;
+  color: #3f51b5;
+}
+.info-item .text {
+  display: flex;
+  flex-direction: column;
+}
+.info-item .label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+.info-item .value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+.desc { grid-column: span 2; }
+
+/* — Lien “Voir plus” — */
+.link {
+  color: #3f51b5;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+.link:hover { text-decoration: underline; }
+
+/* — Puce de visibilité — */
+mat-chip[selected] { font-weight: 500; }
+
+/* — Statut + feu tricolore — */
+.status-item .status-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.traffic-light {
+  display: flex;
+  flex-direction: column;
+  background: #333;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+}
+.light {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #555;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.light.red.active    { background: #f44336; box-shadow: 0 0 4px #f44336; }
+.light.yellow.active { background: #ffeb3b; box-shadow: 0 0 4px #ffeb3b; }
+.light.green.active  { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+
+/* — Cartes Invités, Contenu, Chat, Statistiques ajustées — */
+.invites-card,
+.content-card,
+.chat-card,
+.stats-card {
+  padding: 0;
+}
+.invites-card mat-card-header,
+.content-card mat-card-header,
+.chat-card mat-card-header,
+.stats-card mat-card-header {
+  background: #3f51b5;
+  color: white;
+  padding: 16px;
+}
+.actions-card .actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+.actions-card button {
+  background-color: #1976d2;
+  color: white;
+  border-radius: 50%;
+  padding: 10px;
+  transition: background-color 0.3s;
+}
+.actions-card button:hover {
+  background-color: #155a9a;
+}
+
+/* — Arborescence et chat — */
+mat-tree {
+  margin: 16px;
+}

@@ -1,12 +1,10 @@
 package com.projet.pp.model;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.sound.midi.Receiver;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,45 +13,44 @@ import java.util.List;
 @Table(name = "chat_messages")
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Chaque message appartient à un projet
+    // Destinataire
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User receiver;
 
-    // L'expéditeur du message (un utilisateur)
+    // Expéditeur
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User sender;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    @Setter
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Constructeur, getters & setters
-    public ChatMessage() {
-        this.createdAt = LocalDateTime.now();
-    }
+    /** --- NOUVEAU CHAMP attachments --- */
+    @OneToMany(mappedBy="chatMessage", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+    private List<ChatAttachment> attachments = new ArrayList<>();
 
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
-    }
 
-    public void setSender(User sender) {
+    // Constructeur minimal
+    public ChatMessage(User sender, User receiver, String message, LocalDateTime createdAt) {
         this.sender = sender;
-    }
-
-    public void setMessage(String message) {
+        this.receiver = receiver;
         this.message = message;
+        this.createdAt = createdAt;
     }
-
 }

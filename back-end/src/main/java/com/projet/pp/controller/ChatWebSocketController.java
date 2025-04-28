@@ -1,5 +1,5 @@
+// src/main/java/com/projet/pp/controller/ChatWebSocketController.java
 package com.projet.pp.controller;
-
 
 import com.projet.pp.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,9 @@ public class ChatWebSocketController {
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage) {
-        // Enregistrer le message dans la base de données si nécessaire
         messagingTemplate.convertAndSend(
                 "/topic/messages/" + chatMessage.getReceiver().getId(),
                 chatMessage
         );
     }
-
 }

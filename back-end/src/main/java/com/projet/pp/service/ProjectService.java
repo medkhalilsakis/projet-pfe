@@ -1,6 +1,8 @@
 package com.projet.pp.service;
 
+import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
+import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.*;
 import com.projet.pp.repository.ProjectClosureRepository;
 import com.projet.pp.repository.ProjectFileRepository;
@@ -20,6 +22,7 @@ import java.io.InputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -460,6 +463,34 @@ public class ProjectService {
         proj.setStatus(status);
         proj.setUpdatedAt(LocalDateTime.now());
         projectRepository.save(proj);
+    }
+
+
+    public ProjectStatsDTO getProjectStats(Long projectId) {
+        List<ProjectFile> files = projectFileRepository.findByProjectIdAndType(projectId, ItemType.FILE);
+        Map<String, Long> counts = files.stream()
+                .map(f -> {
+                    String name = f.getName();
+                    int i = name.lastIndexOf('.');
+                    return (i >= 0) ? name.substring(i + 1).toLowerCase() : "other";
+                })
+                .collect(Collectors.groupingBy(ext -> ext, Collectors.counting()));
+        long total = files.size();
+        return new ProjectStatsDTO(total, counts);
+    }
+
+    public List<InvitedUserDTO> getInvitedUsers(Long projectId) {
+        return projectInvitedUserRepository.findByProjectId(projectId)
+                .stream()
+                .map(inv -> InvitedUserDTO.builder()
+                        .id(inv.getId())
+                        .userId(inv.getUser().getId())
+                        .prenom(inv.getUser().getPrenom())
+                        .nom(inv.getUser().getNom())
+                        .status(inv.getStatus())
+                        .invitedAt(inv.getInvitedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 

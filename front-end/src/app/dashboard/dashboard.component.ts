@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { SessionStorageService } from '../services/session-storage.service';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
@@ -39,18 +39,7 @@ import { UserManagementComponent } from "./user-management/user-management.compo
     MatToolbarModule,
     MatListModule,
     MatIconModule,
-    MatExpansionModule,
-    NgSwitch,
-    NgSwitchCase,
-    OverviewComponent,
-    ProjectsComponent,
-    MessagesComponent,
-    UploadComponent,
-    AddUserComponent,
-    DesignationTesteurComponent,
-    SettingsComponent,
-    TaskAssignmentComponent,
-    UserManagementComponent
+    MatExpansionModule
 ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -69,6 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private snack = inject(MatSnackBar);
   private router = inject(Router);
+  private route            = inject(ActivatedRoute);
   private notificationService = inject(NotificationService);
   private profileImageService = inject(ProfileImageService);
 
@@ -136,9 +126,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.profileFileInput.nativeElement.click();
   }
 
+  //navigateTo(view: string): void {
+  //  this.currentView.set(view);
+  //  history.replaceState(null, '', '/dashboard');
+  //}
+
   navigateTo(view: string): void {
-    this.currentView.set(view);
-    history.replaceState(null, '', '/dashboard');
+    this.router.navigate([view], { relativeTo: this.route });
   }
 
   private loadNotifications(): void {

@@ -1,0 +1,136 @@
+<div class="project-details" *ngIf="project">
+  <!-- Infos principales -->
+  <mat-card class="info-card mat-elevation-z4">
+    <div class="info-header">
+      <div class="icon-wrapper">
+        <mat-icon class="project-icon">assignment</mat-icon>
+      </div>
+      <div class="title-wrapper">
+        <mat-card-title>{{ project.name }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-icon inline class="user-icon">person</mat-icon>
+          {{ project.user.prenom }} {{ project.user.nom }}
+        </mat-card-subtitle>
+      </div>
+    </div>
+    <mat-card-content>
+      <div class="info-grid">
+        <!-- Type -->
+        <div class="info-item">
+          <mat-icon>category</mat-icon>
+          <div class="text">
+            <div class="label">Type</div>
+            <div class="value">{{ project.type }}</div>
+          </div>
+        </div>
+        <!-- Description -->
+        <div class="info-item desc">
+          <mat-icon>description</mat-icon>
+          <div class="text">
+            <div class="label">Description</div>
+            <div class="value">
+              {{ project.description | slice:0:100 }}…
+              <a class="link" (click)="openDescription()">Voir plus</a>
+            </div>
+          </div>
+        </div>
+        <!-- Visibilité -->
+        <div class="info-item">
+          <mat-icon>visibility</mat-icon>
+          <div class="text">
+            <div class="label">Visibilité</div>
+            <mat-chip [color]="project.visibilite==='publique'?'primary':'default'" selected>
+              {{ project.visibilite }}
+            </mat-chip>
+          </div>
+        </div>
+        <!-- Créé le -->
+        <div class="info-item">
+          <mat-icon>calendar_today</mat-icon>
+          <div class="text">
+            <div class="label">Créé le</div>
+            <div class="value">{{ project.createdAt | date:'short' }}</div>
+          </div>
+        </div>
+        <!-- Statut + feu tricolore -->
+        <div class="info-item status-item">
+          <mat-icon>flag</mat-icon>
+          <div class="text">
+            <div class="label">Statut</div>
+            <div class="status-wrapper">
+              <div class="traffic-light">
+                <div class="light red"    [class.active]="isRed(project.status)"></div>
+                <div class="light yellow" [class.active]="isYellow(project.status)"></div>
+                <div class="light green"  [class.active]="isGreen(project.status)"></div>
+              </div>
+              <div class="value">{{ getStatusLabel(project.status) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Invités -->
+  <mat-card class="invites-card card mat-elevation-z2" *ngIf="invitedUsers.length">
+    <mat-card-header>
+      <mat-card-title>Invités</mat-card-title>
+    </mat-card-header>
+    <mat-list>
+      <mat-list-item *ngFor="let u of invitedUsers">
+        {{ u.prenom }} {{ u.nom }} — {{ u.status }}
+      </mat-list-item>
+    </mat-list>
+  </mat-card>
+
+  <!-- Actions -->
+  <mat-card class="actions-card card mat-elevation-z2">
+    <mat-card-header>
+      <mat-card-title>Actions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="actions">
+      <button mat-icon-button><mat-icon>edit</mat-icon></button>
+      <button mat-icon-button><mat-icon>delete</mat-icon></button>
+      <!-- … -->
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Contenu du projet -->
+  <mat-card class="content-card card mat-elevation-z2">
+    <mat-card-header><mat-card-title>Contenu du projet</mat-card-title></mat-card-header>
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        {{ node.name }}
+      </mat-tree-node>
+      <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+        <button mat-icon-button matTreeNodeToggle>
+          <mat-icon>
+            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+          </mat-icon>
+        </button>
+        {{ node.name }}
+      </mat-tree-node>
+    </mat-tree>
+  </mat-card>
+
+  <!-- Chat du projet -->
+  <mat-card class="chat-card card mat-elevation-z2">
+    <mat-card-header><mat-card-title>Chat du projet</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <!-- Votre composant de chat intégré 
+      <app-project-chat [projectId]="project.id"></app-project-chat>-->
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Statistiques -->
+  <mat-card class="stats-card card mat-elevation-z2">
+    <mat-card-header><mat-card-title>Statistiques</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div *ngFor="let entry of stats.counts | keyvalue">
+        {{ entry.key }} : {{ entry.value }}
+        ({{ (entry.value / stats.total * 100) | number:'1.0-0' }}%)
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

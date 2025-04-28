@@ -1,5 +1,4 @@
 <div class="messagerie-container">
-
   <!-- SIDEBAR UTILISATEURS -->
   <aside class="sidebar" *ngIf="!isMobile || !selectedUser">
     <mat-form-field appearance="outline" class="search-bar">
@@ -10,25 +9,13 @@
     <div class="user-list">
       <mat-card *ngFor="let user of filteredUsers()"
                 class="user-card"
-                [class.selected]="user.id===selectedUser?.id"
+                [class.selected]="user.id === selectedUser?.id"
                 (click)="selectUser(user)">
         <div class="user-card-content">
-
-          <!-- si l'utilisateur a un avatar en base, on l'affiche, sinon avatar par défaut -->
-          <ng-container *ngIf="user.hasImage; else defaultAvatarTpl">
-            <img
-              [src]="user.avatarUrl"
-              class="avatar"
-              alt="avatar"
-              (error)="user.avatarUrl = 'https://i.imgur.com/vtrfxgY.png'">
-          </ng-container>
-          <ng-template #defaultAvatarTpl>
-            <img
-              src="https://i.imgur.com/vtrfxgY.png"
-              class="avatar"
-              alt="avatar">
-          </ng-template>
-
+          <img [src]="'http://localhost:8080' + user.avatarUrl"
+               class="avatar"
+               alt="avatar"
+               (error)="user.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
           <div class="user-info">
             <h3>{{ user.prenom }} {{ user.nom }}</h3>
             <p class="status">{{ user.status }}</p>
@@ -45,61 +32,116 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <div class="chat-user-info">
-
-        <!-- avatar de l'utilisateur sélectionné ou avatar par défaut en cas d'erreur/404 -->
-        <ng-container *ngIf="selectedUser.hasImage; else defaultSelAvatarTpl">
-          <img
-            [src]="selectedUser.avatarUrl"
-            class="avatar-sm"
-            alt="avatar"
-            (error)="selectedUser.avatarUrl = 'https://i.imgur.com/vtrfxgY.png'">
-        </ng-container>
-        <ng-template #defaultSelAvatarTpl>
-          <img
-            src="https://i.imgur.com/vtrfxgY.png"
-            class="avatar-sm"
-            alt="avatar">
-        </ng-template>
-
+        <img [src]="'http://localhost:8080' + selectedUser.avatarUrl"
+             class="avatar-sm"
+             alt="avatar"
+             (error)="selectedUser.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
         <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
-      </div>
-      <div class="chat-actions">
-        <button mat-icon-button><mat-icon>info</mat-icon></button>
-        <button mat-icon-button><mat-icon>more_vert</mat-icon></button>
       </div>
     </header>
 
     <div class="messages" #scrollContainer>
       <div *ngFor="let m of messages"
-           [ngClass]="m.sentBy==='me' ? 'msg-sent' : 'msg-received'">
-        <div class="bubble">
-          <p>{{ m.text }}</p>
-          <span class="time">{{ m.date | date:'HH:mm' }}</span>
-        </div>
+           class="msg-row"
+           [class.sent]="m.sentBy==='me'"
+           [class.received]="m.sentBy==='other'">
+
+        <!-- Messages reçus : avatar à gauche -->
+        <ng-container *ngIf="m.sentBy==='other'">
+          <img [src]="'http://localhost:8080' + m.avatarUrl"
+               class="avatar msg-avatar"
+               alt="avatar"
+               (error)="m.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
+          <div class="bubble">
+            <p>{{ m.text }}</p>
+
+            <div class="attachments" *ngIf="m.attachments?.length">
+              <ng-container *ngFor="let att of m.attachments">
+                <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                  <!-- Image : lien cliquable + vignette -->
+                  <a *ngSwitchCase="'image'"
+                     [href]="'http://localhost:8080' + att.filePath"
+                     target="_blank"
+                     class="attachment-img-link">
+                    <img [src]="'http://localhost:8080' + att.filePath"
+                         class="attachment-img"
+                         [alt]="att.fileName">
+                  </a>
+                  <!-- Autres fichiers : téléchargement -->
+                  <a *ngSwitchDefault
+                     [href]="'http://localhost:8080' + att.filePath"
+                     download
+                     class="attachment-file">
+                    <mat-icon>insert_drive_file</mat-icon>
+                    {{ att.fileName }}
+                  </a>
+                </ng-container>
+              </ng-container>
+            </div>
+
+            <span class="time">{{ m.date | date:'HH:mm' }}</span>
+          </div>
+        </ng-container>
+
+        <!-- Messages envoyés : bulle puis avatar -->
+        <ng-container *ngIf="m.sentBy==='me'">
+          <div class="bubble">
+            <p>{{ m.text }}</p>
+
+            <div class="attachments" *ngIf="m.attachments?.length">
+              <ng-container *ngFor="let att of m.attachments">
+                <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                  <a *ngSwitchCase="'image'"
+                     [href]="'http://localhost:8080' + att.filePath"
+                     target="_blank"
+                     class="attachment-img-link">
+                    <img [src]="'http://localhost:8080' + att.filePath"
+                         class="attachment-img"
+                         [alt]="att.fileName">
+                  </a>
+                  <a *ngSwitchDefault
+                     [href]="'http://localhost:8080' + att.filePath"
+                     download
+                     class="attachment-file">
+                    <mat-icon>insert_drive_file</mat-icon>
+                    {{ att.fileName }}
+                  </a>
+                </ng-container>
+              </ng-container>
+            </div>
+
+            <span class="time">{{ m.date | date:'HH:mm' }}</span>
+          </div>
+          <img [src]="'http://localhost:8080' + m.avatarUrl"
+               class="avatar msg-avatar"
+               alt="avatar"
+               (error)="m.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
+        </ng-container>
+
       </div>
     </div>
 
     <footer class="chat-input">
+      <input #fileInput
+             type="file"
+             multiple
+             hidden
+             (change)="onAttachmentChange($event)">
+      <button mat-icon-button (click)="fileInput.click()">
+        <mat-icon>attach_file</mat-icon>
+      </button>
       <mat-form-field appearance="outline" class="input-box">
         <input matInput
                [(ngModel)]="newMessage"
                (keyup.enter)="sendMessage()"
                placeholder="Écrire un message…">
       </mat-form-field>
+      <button mat-icon-button matTooltip="Emoji">
+        <mat-icon>emoji_emotions</mat-icon>
+      </button>
       <button mat-fab color="primary" (click)="sendMessage()">
         <mat-icon>send</mat-icon>
       </button>
     </footer>
   </section>
-
-  <!-- PANEL INFO (optionnel) -->
-  <aside class="info-panel" *ngIf="selectedUser && !isMobile">
-    <mat-card>
-      <mat-card-title>Profil</mat-card-title>
-      <mat-card-content>
-        <!-- détails supplémentaires ici -->
-      </mat-card-content>
-    </mat-card>
-  </aside>
-
 </div>

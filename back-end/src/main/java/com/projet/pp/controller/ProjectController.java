@@ -1,8 +1,11 @@
 package com.projet.pp.controller;
 
+import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
+import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.ProjectFile;
+import com.projet.pp.model.ProjectInvitedUser;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -243,4 +247,19 @@ public class ProjectController {
     }
 
 
+    @GetMapping("/{projectId}/stats")
+    public ResponseEntity<ProjectStatsDTO> getStats(@PathVariable Long projectId) {
+        ProjectStatsDTO stats = projectService.getProjectStats(projectId);
+        return ResponseEntity.ok(stats);
+    }
+
+    // Dans ProjectController.java
+    @GetMapping("/{projectId}/invite")
+    public ResponseEntity<List<InvitedUserDTO>> getInvitedUsers(
+            @PathVariable Long projectId) {
+
+        List<InvitedUserDTO> invites =
+                projectService.getInvitedUsers(projectId);
+        return ResponseEntity.ok(invites);
+    }
 }

@@ -72,8 +72,16 @@
   background: #f5f5f5;
   border-right: 1px solid #eee;
 }
+.sidenav-container {
+  display: flex;
+  flex: 1;               /* prend tout l’espace disponible */
+  height: 100%;          /* pour propager la hauteur à mat-sidenav-content */
+}
 
 .content-area {
+  flex: 1;               /* pousse / remplit horizontalement */
+  height: 100%;          /* pousse verticalement jusqu’au bas */
+  overflow: auto;        /* scroll interne si besoin */
   padding: 24px;
   background: white;
 }

@@ -1,145 +1,118 @@
-.project-list-container {
-    margin: 20px;
-    padding: 20px;
-  }
-  
-  .project-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .status-indicator {
-    margin-right: 20px;
-    min-width: 40px;
-  }
-  
-  .status-indicator mat-icon {
-    font-size: 24px;
-  }
-  
-  .project-content {
-    flex: 1;
-  }
-  
-  .project-content h3 {
-    margin: 0 0 5px 0;
-    color: #3f51b5;
-  }
-  
-  .description {
-    color: #666;
-    margin: 0 0 10px 0;
-  }
-  
-  .project-meta {
-    display: flex;
-    gap: 15px;
-    color: #888;
-    font-size: 0.9em;
-  }
-  
-  .project-actions {
-    display: flex;
-    gap: 10px;
-  }
+/* Conteneur global */
+.projects-container {
+  padding: 16px;
+  background: #f5f7f5;
+}
 
-  /* Conteneur global de la liste */
-.project-list-container {
+/* Barre de recherche */
+.search-bar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.search-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Liste de cartes projets */
+.project-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
-  background-color: #f5f5f5;
+  gap: 16px;
   justify-content: center;
 }
 
 /* Carte projet */
 .project-card {
-  width: 320px;
+  width: 300px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
+  background: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .project-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
 
-/* En-tête de la carte */
+/* En-tête */
 .project-card mat-card-header {
+  background: #e3f2fd;
   padding: 16px;
-  background-color: #e3f2fd;
 }
 
-/* Titre du projet */
+/* Titre & sous-titres */
 .project-card mat-card-title {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #333;
 }
-
-/* Sous-titre : dates */
 .project-card mat-card-subtitle {
-  font-size: 14px;
-  color: #777;
+  font-size: 0.875rem;
+  color: #666;
   margin-top: 4px;
 }
 
-/* Contenu de la carte */
+/* Contenu */
 .project-card mat-card-content {
   padding: 0 16px 16px;
-  font-size: 14px;
-  color: #555;
+  font-size: 0.875rem;
+  color: #444;
 }
 
-/* Nouveau conteneur pour le champ Status */
-.status-container {
-  margin-top: 10px;
+/* Statut : feu tricolore + label */
+.status-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 12px;
 }
 
-.status-circle {
-  width: 16px;
-  height: 16px;
+/* Feu tricolore horizontal */
+.traffic-light.horizontal {
+  display: flex;
+  gap: 6px;
+  background: #333;       /* fond sombre */
+  padding: 4px;
+  border-radius: 4px;
+}
+.light {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 1px solid #ccc;
+  background: #555;       /* éteint */
+  transition: background 0.3s, box-shadow 0.3s;
 }
+.light.red.active    { background: #f44336; box-shadow: 0 0 4px #f44336; }
+.light.yellow.active { background: #ffeb3b; box-shadow: 0 0 4px #ffeb3b; }
+.light.green.active  { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
 
+/* Libellé du statut */
 .status-label {
-  font-size: 14px;
-  color: #333;
   font-weight: 500;
+  color: #333;
 }
 
-/* Actions (boutons) */
+/* Actions */
 .project-card mat-card-actions {
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  padding: 8px 16px;
-  border-top: 1px solid #eee;
-  background-color: #fafafa;
+  background: #fafafa;
+  padding: 8px;
 }
-
 .project-card mat-card-actions button {
   transition: background-color 0.3s ease;
 }
-
 .project-card mat-card-actions button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0,0,0,0.05);
 }
 
-/* Responsive pour petits écrans */
-@media screen and (max-width: 768px) {
-  .project-list-container {
-    flex-direction: column;
-    align-items: center;
+/* Responsive petits écrans */
+@media (max-width: 768px) {
+  .project-card {
+    width: 100%;
+    max-width: 400px;
   }
 }

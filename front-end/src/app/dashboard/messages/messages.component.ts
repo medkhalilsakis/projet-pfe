@@ -1,25 +1,46 @@
+// messages.component.ts
 import { Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SessionStorageService } from '../../services/session-storage.service';
-import { FormsModule } from '@angular/forms';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatSelectModule } from '@angular/material/select';
 import SockJS from 'sockjs-client';
 import { Client, IMessage } from '@stomp/stompjs';
-import { forkJoin } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatSelectModule } from '@angular/material/select';
+
+interface ChatMessage {
+  id: number;
+  sender: { id: number; prenom: string; nom: string; };
+  receiver: any;
+  message: string;
+  createdAt: string;
+  attachments?: { fileName: string; filePath: string; mimeType: string; }[];
+}
+
+type SentBy = 'me' | 'other';
+
+interface DisplayMessage {
+  text:       string;
+  sentBy:     SentBy;
+  date:       Date;
+  avatarUrl:  string;
+  attachments?: { fileName: string; filePath: string; mimeType: string; }[];
+}
 
 @Component({
   selector: 'app-messages',
   standalone: true,
+  templateUrl: './messages.component.html',
+  styleUrls: ['./messages.component.css'],
   imports: [
     CommonModule,
     FormsModule,
@@ -31,20 +52,24 @@ import { of } from 'rxjs';
     MatCardModule,
     MatSelectModule
   ],
-  templateUrl: './messages.component.html',
-  styleUrls: ['./messages.component.css']
 })
 export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+
   users: any[] = [];
   selectedUser: any = null;
-  messages: { text: string; sentBy: 'me'|'other'; date: Date }[] = [];
+  messages: DisplayMessage[] = [];
+
   newMessage = '';
+  selectedFiles: File[] = [];
   searchQuery = '';
+
   currentUserId!: number;
+  currentUserAvatar = '';
+
   stompClient!: Client;
   isMobile = window.innerWidth < 768;
-  private subscription: any;  // Track the current subscription
+  private subscription: any;
 
   constructor(
     private http: HttpClient,
@@ -52,7 +77,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     private session: SessionStorageService
   ) {
     const u = this.session.getUser();
-    this.currentUserId = u?.id;
+    this.currentUserId     = u?.id;
+    this.currentUserAvatar = u?.profileImageUrl || 'https://i.imgur.com/vtrfxgY.png';
     this.loadUsers();
   }
 
@@ -66,12 +92,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.stompClient) {
-      this.stompClient.deactivate();
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.stompClient?.deactivate();
+    this.subscription?.unsubscribe();
   }
 
   private connectWebSocket() {
@@ -79,7 +101,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      connectHeaders: { 'X-User-Id': this.currentUserId.toString(), }
+      connectHeaders: { 'X-User-Id': `${this.currentUserId}` }
     });
     this.stompClient.onConnect = () => console.log('WS connected');
     this.stompClient.activate();
@@ -87,161 +109,125 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private loadUsers() {
     this.http.get<any[]>('http://localhost:8080/api/users')
-      .pipe(
-        catchError(err => {
-          this.snackBar.open('Erreur chargement users', 'Fermer', { duration: 3000 });
-          return of([]); // on continue avec une liste vide
-        })
-      )
+      .pipe(catchError(() => {
+        this.snackBar.open('Erreur chargement users', 'Fermer', { duration: 3000 });
+        return of([]);
+      }))
       .subscribe(users => {
-        this.users = users
-          .filter(u => u.id !== this.currentUserId)
-          .map(u => ({
-            ...u,
-            // par défaut, on utilise l’image ImgURl
-            avatarUrl: 'https://i.imgur.com/vtrfxgY.png',
-            initials: `${u.prenom[0]}${u.nom[0]}`.toUpperCase()
-          }));
-  
-        // pour chacun, on tente de récupérer le meta
+        this.users = users.filter(u => u.id !== this.currentUserId)
+                          .map(u => ({
+                            ...u,
+                            avatarUrl: 'https://i.imgur.com/vtrfxgY.png'
+                          }));
+        // Charger avatar réel…
         this.users.forEach(u => {
-          const metaUrl = `http://localhost:8080/api/users/${u.id}/profile-image/meta`;
-          this.http.get(metaUrl, { observe: 'response' })
-            .pipe(
-              catchError(err => {
-                // si 404 on ne fait rien, sinon on peut logger
-                if (err.status !== 404) {
-                  console.error(`Erreur inattendue pour avatar meta user ${u.id}`, err);
-                  this.snackBar.open(`Erreur chargement avatar de ${u.prenom}`, 'Fermer', { duration: 3000 });
-                }
-                return of(null);
-              })
-            )
+          this.http.get(`http://localhost:8080/api/users/${u.id}/profile-image/meta`, { observe: 'response' })
+            .pipe(catchError(() => of(null)))
             .subscribe(resp => {
-              if (resp && resp.status === 200) {
+              if (resp?.status === 200) {
                 u.avatarUrl = `http://localhost:8080/api/users/${u.id}/profile-image/raw`;
               }
             });
         });
       });
   }
-  
 
   filteredUsers() {
     const q = this.searchQuery.toLowerCase().trim();
     return this.users.filter(u =>
-      u.prenom.toLowerCase().includes(q) ||
-      u.nom.toLowerCase().includes(q)
+      u.prenom.toLowerCase().includes(q) || u.nom.toLowerCase().includes(q)
     );
   }
 
   selectUser(u: any) {
     this.selectedUser = u;
-    if (!this.selectedUser) {
-      this.snackBar.open('Utilisateur non sélectionné.', 'Fermer', { duration: 3000 });
-      return;
-    }
     if (this.isMobile) window.scrollTo(0, 0);
     this.loadMessages(u.id);
-  
-    // Assurez-vous que le WebSocket fonctionne correctement
-    if (!this.stompClient || !this.stompClient.connected) {
-      return;
-    }
-  
-    // Désabonnement précédent s'il existe
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  
-    // Souscription au topic du nouvel utilisateur sélectionné
+    this.subscription?.unsubscribe();
     const topic = `/topic/messages/${this.currentUserId}/${u.id}`;
-    this.subscription = this.stompClient.subscribe(topic, (message: IMessage) => {
-      const body = JSON.parse(message.body);
-      
-      // Vérification si senderId est présent (utilisation de senderId au lieu de sender)
-      if (!body.senderId) {
-        console.error('Erreur : senderId manquant', body);
-        return;
-      }
-    
-      // Utilisez senderId pour déterminer si c'est l'utilisateur actuel ou un autre utilisateur
-      const sentBy: 'me' | 'other' = body.senderId === this.currentUserId ? 'me' : 'other';
-    
-      this.messages.push({
-        text: body.message,
+    this.subscription = this.stompClient.subscribe(topic, (msg: IMessage) => {
+      const body: any = JSON.parse(msg.body);
+      const sentBy = body.senderId === this.currentUserId ? 'me' : 'other';
+      this.appendMessage({
+        text:       body.message,
         sentBy,
-        date: new Date(body.createdAt)
+        date:       new Date(body.createdAt),
+        avatarUrl:  sentBy === 'me' ? this.currentUserAvatar : this.selectedUser.avatarUrl,
+        attachments: body.attachments
       });
-    
-      this.scrollToBottom();
     });
-    
-  }
-  
-
-  deselectUser() {
-    this.selectedUser = null;
   }
 
   private loadMessages(receiverId: number) {
     const me = this.currentUserId;
-    const a$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${me}/${receiverId}`);
-    const b$ = this.http.get<any[]>(`http://localhost:8080/api/chat/history/${receiverId}/${me}`);
-    forkJoin([a$, b$]).subscribe({
-      next: ([as, bs]) => {
-        this.messages = [...as, ...bs]
-          .map(m => {
-            const sentBy: 'me' | 'other' = (m.sender.id === me ? 'me' : 'other');
-            return {
-              text: String(m.message),
-              sentBy,
-              date: new Date(m.createdAt)
-            };
-          })
-          .sort((a, b) => a.date.getTime() - b.date.getTime());
+    forkJoin([
+      this.http.get<ChatMessage[]>(`http://localhost:8080/api/chat/history/${me}/${receiverId}`),
+      this.http.get<ChatMessage[]>(`http://localhost:8080/api/chat/history/${receiverId}/${me}`)
+    ]).subscribe({
+      next: ([out, inb]) => {
+        const mappedOut = out.map(m => this.toDisplay(m, 'me'));
+        const mappedInb= inb.map(m => this.toDisplay(m, 'other'));
+        this.messages = [...mappedOut, ...mappedInb]
+          .sort((a,b) => a.date.getTime() - b.date.getTime());
       },
-      error: () => this.snackBar.open('Erreur chargement messages', 'Fermer', { duration: 3000 })
+      error: () => this.snackBar.open('Erreur chargement messages','Fermer',{duration:3000})
     });
   }
-  
 
-  sendMessage() {
-    if(!this.newMessage.trim() || !this.selectedUser) return;
-    const me = this.currentUserId;
-    const to = this.selectedUser.id;
-    const payload = {
-      message: this.newMessage,
-      senderId: me,
-      receiverId: to,
-      createdAt: new Date().toISOString()
+  private toDisplay(m: ChatMessage, who: SentBy): DisplayMessage {
+    return {
+      text: m.message,
+      sentBy: who,
+      date: new Date(m.createdAt),
+      avatarUrl: who === 'me' ? this.currentUserAvatar : this.selectedUser.avatarUrl!,
+      attachments: m.attachments
     };
-
-    this.http.post('http://localhost:8080/api/chat/send', payload).subscribe({
-      next: () => {
-        this.messages.push({ text: this.newMessage, sentBy: 'me', date: new Date() });
-        this.stompClient.publish({
-          destination: `/topic/messages/${to}/${me}`,
-          body: JSON.stringify(payload)
-        });
-        this.newMessage = '';
-      },
-      error: () => this.snackBar.open('Erreur envoi', 'Fermer', { duration: 3000 })
-    });
   }
 
-  scrollToBottom(): void {
-    try {
-      if (this.scrollContainer && this.scrollContainer.nativeElement) {
-        const el = this.scrollContainer.nativeElement;
-        el.scrollTop = el.scrollHeight;
-      }
-    } catch (err) {
-      console.error('Erreur lors du défilement automatique', err);
-    }
-  }
-
-  ngAfterViewChecked() {
+  /** Ajoute un message à l’affichage et scroll en bas */
+  private appendMessage(dm: DisplayMessage) {
+    this.messages.push(dm);
     this.scrollToBottom();
   }
+
+  onAttachmentChange(evt: Event) {
+    const inp = evt.target as HTMLInputElement;
+    this.selectedFiles = inp.files ? Array.from(inp.files) : [];
+  }
+
+  sendMessage() {
+    if (!this.newMessage.trim() && this.selectedFiles.length === 0) return;
+    const me = this.currentUserId, to = this.selectedUser.id;
+    const payload = {
+      sender:   { id: me },
+      receiver: { id: to },
+      message:  this.newMessage,
+      createdAt: new Date().toISOString()
+    };
+    const fd = new FormData();
+    fd.append('data', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+    this.selectedFiles.forEach(f => fd.append('attachments', f, f.name));
+
+    this.http.post<ChatMessage>('http://localhost:8080/api/chat/send', fd).subscribe({
+      next: m => {
+        this.appendMessage(this.toDisplay(m, 'me'));
+        this.newMessage = '';
+        this.selectedFiles = [];
+      },
+      error: () => this.snackBar.open('Erreur envoi','Fermer',{duration:2000})
+    });
+  }
+
+  deselectUser() { this.selectedUser = null; }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      try {
+        const el = this.scrollContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      } catch {}
+    });
+  }
+
+  ngAfterViewChecked() { this.scrollToBottom(); }
 }

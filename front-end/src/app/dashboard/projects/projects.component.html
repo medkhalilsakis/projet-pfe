@@ -25,8 +25,12 @@
       </mat-card-header>
       <mat-card-content>
         <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
-        <div class="status-container">
-          <div class="status-circle" [ngStyle]="{'background-color': getStatusColor(project.status)}"></div>
+        <div class="status-item">
+          <div class="traffic-light horizontal">
+            <div class="light red"    [class.active]="isRed(project.status)"></div>
+            <div class="light yellow" [class.active]="isYellow(project.status)"></div>
+            <div class="light green"  [class.active]="isGreen(project.status)"></div>
+          </div>
           <span class="status-label">{{ getStatusLabel(project.status) }}</span>
         </div>
       </mat-card-content>
@@ -60,14 +64,19 @@
         <button mat-icon-button color="primary" (click)="openSettings(project)">
           <mat-icon>settings</mat-icon>
         </button>
-        <button mat-icon-button color="warn" (click)="deleteProject(project)">
+        <!--<button mat-icon-button color="warn" (click)="deleteProject(project)">
           <mat-icon>delete</mat-icon>
-        </button>
+        </button>-->
         <!-- ... dans mat-card-actions ... -->
+        
         <button mat-icon-button color="warn" (click)="viewStatus(project)" matTooltip="Voir le statut">
           <mat-icon>info</mat-icon>
         </button>
 
+        <button mat-icon-button color="warn" (click)="viewProject(project)" matTooltip="Voir les détails">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      
       </mat-card-actions>
     </mat-card>
   </div>

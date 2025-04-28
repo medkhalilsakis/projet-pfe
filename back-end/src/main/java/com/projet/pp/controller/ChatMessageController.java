@@ -1,16 +1,18 @@
+// src/main/java/com/projet/pp/controller/ChatMessageController.java
 package com.projet.pp.controller;
 
-import com.projet.pp.model.User;
+import com.projet.pp.dto.ChatMessageDTO;
 import com.projet.pp.model.ChatMessage;
 import com.projet.pp.service.ChatMessageService;
 import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -18,41 +20,56 @@ public class ChatMessageController {
 
     @Autowired
     private ChatMessageService chatMessageService;
+
     @Autowired
     private UserService userService;
 
-
-    // Store a chat message
-    @PostMapping("/send")
-    public ResponseEntity<ChatMessage> sendMessage(
-            @RequestBody Map<String, String> body) {
-
+    /**
+     * Envoi d'un message (avec pièces jointes éventuelles).
+     */
+    @PostMapping(
+            path = "/send",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ChatMessageDTO> sendMessage(
+            @RequestPart("data") ChatMessageDTO data,
+            @RequestPart(name = "attachments", required = false) MultipartFile[] files
+    ) {
         try {
-            String message = body.get("message");
+            var sender   = userService.getUserById(data.getSender().getId());
+            var receiver = userService.getUserById(data.getReceiver().getId());
 
-            Long senderId = Long.parseLong(body.get("senderId"));
-            Long receiverId = Long.parseLong(body.get("receiverId"));LocalDateTime createdAt = LocalDateTime.now(); // Or parse from body if needed
-            User receiver =userService.getUserById(receiverId);
-            User sender =userService.getUserById(senderId);            // Use the service method to send the message
-            ChatMessage chatMessage = chatMessageService.sendMessage(receiver, sender, message, createdAt);
-            return ResponseEntity.ok(chatMessage);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            ChatMessage saved = chatMessageService.sendMessage(
+                    sender,
+                    receiver,
+                    data.getMessage(),
+                    data.getCreatedAt(),
+                    files
+            );
+
+            return ResponseEntity.ok(ChatMessageDTO.fromEntity(saved));
+
+        } catch (IOException e) {
+            // Log si nécessaire : logger.error("Erreur upload pièces jointes", e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(null);
         }
     }
-    @GetMapping("/history/{senderId}/{receiverId}")
-    public ResponseEntity<List<ChatMessage>> getChatHistory(@PathVariable Long senderId, @PathVariable Long receiverId) {
-        User receiver = userService.getUserById(receiverId);
-        User sender = userService.getUserById(senderId);
-        System.out.println("receiver.username");
 
-
-
-        List<ChatMessage> messages = chatMessageService.getChatHistory(senderId, receiverId);
-        System.out.println(messages);
-        return ResponseEntity.ok(messages);
+    /**
+     * Récupère l'historique complet entre deux utilisateurs.
+     */
+    @GetMapping(path = "/history/{senderId}/{receiverId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ChatMessageDTO>> getChatHistory(
+            @PathVariable Long senderId,
+            @PathVariable Long receiverId
+    ) {
+        List<ChatMessage> msgs = chatMessageService.getChatHistory(senderId, receiverId);
+        List<ChatMessageDTO> dtos = msgs.stream()
+                .map(ChatMessageDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
-
-    // Retrieve chat history between two users
-
 }

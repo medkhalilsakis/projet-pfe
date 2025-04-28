@@ -1,7 +1,7 @@
-// ProjectChatWebSocketController.java
+// src/main/java/com/projet/pp/controller/ProjectChatWebSocketController.java
 package com.projet.pp.controller;
 
-import com.projet.pp.dto.ChatMessageDto;
+import com.projet.pp.dto.ChatMessageDTO;
 import com.projet.pp.model.ProjectChatMessage;
 import com.projet.pp.service.ProjectChatService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -23,7 +23,7 @@ public class ProjectChatWebSocketController {
     public ProjectChatWebSocketController(ProjectChatService svc,
                                           SimpMessagingTemplate template) {
         this.chatService = svc;
-        this.template     = template;
+        this.template    = template;
     }
 
     @MessageMapping("/pchats/{projectId}/public")
@@ -32,22 +32,19 @@ public class ProjectChatWebSocketController {
         Long senderId = Long.valueOf(payload.get("senderId"));
         String text   = payload.get("message");
 
-        // 1) Sauvegarde en base
         ProjectChatMessage saved = chatService.sendPublicMessage(projectId, senderId, text);
 
-        // 2) Projection dans un DTO plat
-        ChatMessageDto dto = new ChatMessageDto(
-                saved.getId(),
-                saved.getMessage(),
-                saved.getCreatedAt().format(fmt),
-                new ChatMessageDto.SenderDto(
+        ChatMessageDTO dto = ChatMessageDTO.builder()
+                .id(saved.getId())
+                .message(saved.getMessage())
+                .createdAt(saved.getCreatedAt())
+                .sender(new ChatMessageDTO.SenderDTO(
                         saved.getSender().getId(),
                         saved.getSender().getPrenom(),
                         saved.getSender().getNom()
-                )
-        );
+                ))
+                .build();
 
-        // 3) Diffuse uniquement le DTO
         template.convertAndSend(
                 "/topic/pchats/" + projectId + "/public",
                 dto
@@ -59,18 +56,19 @@ public class ProjectChatWebSocketController {
                           @Payload Map<String,String> payload) {
         Long senderId = Long.valueOf(payload.get("senderId"));
         String text   = payload.get("message");
+
         ProjectChatMessage saved = chatService.sendPrivateMessage(projectId, senderId, text);
 
-        ChatMessageDto dto = new ChatMessageDto(
-                saved.getId(),
-                saved.getMessage(),
-                saved.getCreatedAt().format(fmt),
-                new ChatMessageDto.SenderDto(
+        ChatMessageDTO dto = ChatMessageDTO.builder()
+                .id(saved.getId())
+                .message(saved.getMessage())
+                .createdAt(saved.getCreatedAt())
+                .sender(new ChatMessageDTO.SenderDTO(
                         saved.getSender().getId(),
                         saved.getSender().getPrenom(),
                         saved.getSender().getNom()
-                )
-        );
+                ))
+                .build();
 
         template.convertAndSend(
                 "/topic/pchats/" + projectId + "/private",

@@ -157,6 +157,10 @@ export class ProjectsComponent implements OnInit {
     }
   }
 
+  viewProject(project: Project): void {
+    this.router.navigate(['/dashboard/projects', project.id]);
+  }
+
   setPrivate(project: Project) {
     const user = this.sessionStorage.getUser();
     this.http.put<string>(
@@ -189,22 +193,31 @@ export class ProjectsComponent implements OnInit {
 
   getStatusColor(status: number): string {
     switch(status) {
-      case 0: return 'grey';   // Brouillon
-      case 1: return '#DE2E4B';    // Clôturé/Suspendu
-      case 2: return 'orange'; // En cours (testing)
-      case 3: return 'blue';   // En attente d'approbation finale
-      case 4: return 'green';  // Accepté
+      case 1: return 'red';   
+      case 2: return 'yellow';    
+      case 3: return 'green'; 
       default: return 'black';
     }
   }
 
+  isRed(status: number): boolean {
+    return [0, 1, 99].includes(status);
+  }
+  isYellow(status: number): boolean {
+    return [2, 3, 55].includes(status);
+  }
+  isGreen(status: number): boolean {
+    return status === 4;
+  }
   getStatusLabel(status: number): string {
     switch(status) {
       case 0: return 'Brouillon : projet non publié';
       case 1: return 'En attente de désignation du testeur';
       case 2: return 'En phase de test';
-      case 3: return 'Projet cloturé';
-      case 4: return 'Accepté';
+      case 3: return 'En phase d\'acceptation';
+      case 4: return 'Projet approuvé et mis en ligne';
+      case 55: return 'Projet mis en pause';
+      case 99: return 'Projet cloturé';
       default: return 'Inconnu';
     }
   }
