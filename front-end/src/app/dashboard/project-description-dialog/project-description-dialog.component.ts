@@ -1,4 +1,5 @@
-import { Component, Inject } from '@angular/core';
+// src/app/project-description-dialog/project-description-dialog.component.ts
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -32,14 +33,18 @@ export interface User {
   template: `
     <h1 mat-dialog-title>Finalisez votre projet</h1>
     <div mat-dialog-content>
-    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" style="width: 100%;">
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        <!-- Nom du projet -->
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Nom du projet</mat-label>
-          <input matInput formControlName="name" required>
-          <mat-error *ngIf="projectForm.get('name')?.invalid">Ce champ est obligatoire</mat-error>
+          <input matInput formControlName="name">
+          <mat-error *ngIf="projectForm.get('name')?.hasError('required')">
+            Le nom est obligatoire
+          </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width: 100%;">
+        <!-- Type de projet -->
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Type de projet</mat-label>
           <mat-select formControlName="type">
             <mat-option value="WEB">Application Web</mat-option>
@@ -49,12 +54,25 @@ export interface User {
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width: 100%;">
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Description</mat-label>
           <textarea matInput formControlName="description" rows="4"></textarea>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width: 100%;">
+        <!-- Sélection d’une tâche libre -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Tâche à associer (facultatif)</mat-label>
+          <mat-select formControlName="taskId">
+            <mat-option [value]="null">— Aucune —</mat-option>
+            <mat-option *ngFor="let t of tasks" [value]="t.id">
+              {{ t.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Visibilité -->
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Visibilité</mat-label>
           <mat-select formControlName="visibilite">
             <mat-option value="public">Public</mat-option>
@@ -62,10 +80,11 @@ export interface User {
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width: 100%;">
+        <!-- Invitations -->
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Inviter des utilisateurs (optionnel)</mat-label>
-          <!-- barre de recherche interne -->
-          <input matInput placeholder="Rechercher" [(ngModel)]="userFilter" [ngModelOptions]="{ standalone: true }">
+          <input matInput placeholder="Rechercher" [(ngModel)]="userFilter"
+                 [ngModelOptions]="{ standalone: true }">
           <mat-select formControlName="users" multiple>
             <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
               {{ u.prenom }} {{ u.nom }}
@@ -76,18 +95,24 @@ export interface User {
         <div mat-dialog-actions align="end">
           <button mat-button type="button" (click)="onCancel()">Annuler</button>
           <button mat-raised-button color="primary" type="submit"
-                  [disabled]="projectForm.get('name')?.invalid || projectForm.get('type')?.invalid">
+                  [disabled]="projectForm.invalid">
             Finaliser
           </button>
         </div>
       </form>
     </div>
-  `
+  `,
+  styles: [`
+    .full { width: 100%; margin-bottom: 1rem; }
+  `]
 })
-export class ProjectDescriptionDialogComponent {
+export class ProjectDescriptionDialogComponent implements OnInit {
   projectForm: FormGroup;
   users: User[] = [];
+  tasks: { id: number; name: string }[] = [];
   userFilter = '';
+
+  private readonly API = 'http://localhost:8080/api';
 
   constructor(
     private fb: FormBuilder,
@@ -97,27 +122,37 @@ export class ProjectDescriptionDialogComponent {
     private http: HttpClient
   ) {
     this.projectForm = this.fb.group({
-      name: ['', Validators.required],
-      type: ['WEB', Validators.required],
+      name:        ['', Validators.required],
+      type:        ['WEB', Validators.required],
       description: [''],
-      visibilite: ['prive', Validators.required],
-      users: [[]]
+      visibilite:  ['prive', Validators.required],
+      users:       [[]],
+      taskId:      [null]
     });
+  }
+
+  ngOnInit() {
     this.loadUsers();
+    this.loadFreeTasks();
   }
 
   private loadUsers() {
-    this.http.get<User[]>('http://localhost:8080/api/users')
+    this.http.get<User[]>(`${this.API}/users`)
       .pipe(
         map(list => list.filter(u => u.id !== this.session.getUser()?.id))
       )
       .subscribe(users => this.users = users);
   }
 
+  private loadFreeTasks() {
+    this.http.get<{ id:number; name:string }[]>(`${this.API}/taches/free`)
+      .subscribe(tasks => this.tasks = tasks);
+  }
+
   get filteredUsers(): User[] {
-    const f = this.userFilter.toLowerCase().trim();
+    const q = this.userFilter.toLowerCase().trim();
     return this.users.filter(u =>
-      `${u.prenom} ${u.nom}`.toLowerCase().includes(f)
+      `${u.prenom} ${u.nom}`.toLowerCase().includes(q)
     );
   }
 

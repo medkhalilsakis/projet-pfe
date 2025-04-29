@@ -1,65 +1,46 @@
+<!-- src/app/dashboard/project-files/project-files.component.html -->
 <mat-toolbar color="primary" class="toolbar">
   <button mat-icon-button (click)="onClose()">
     <mat-icon>arrow_back</mat-icon>
   </button>
   <span class="toolbar-title">{{ data.project.name }}</span>
-
   <span class="spacer"></span>
-
-  <!-- Créer un nouveau dossier -->
   <button mat-raised-button color="accent" (click)="openNewFolderDialog()">
-    <mat-icon>create_new_folder</mat-icon> Nouveau dossier
+    <mat-icon>create_new_folder</mat-icon>
+    Nouveau dossier
   </button>
-  
-
-  <!-- Bouton d'upload -->
   <button mat-icon-button matTooltip="Uploader des fichiers" (click)="fileInput.click()">
     <mat-icon>upload_file</mat-icon>
   </button>
-  <input
-    #fileInput
-    type="file"
-    multiple
-    (change)="onFilesSelected($event)"
-    hidden
-  />
+  <input #fileInput type="file" multiple (change)="onFilesSelected($event)" hidden>
 </mat-toolbar>
 
 <div class="container">
-  <!-- Fil d’Ariane -->
-  <div class="breadcrumb">
-    <ng-container *ngFor="let bc of breadcrumbs; let last = last">
-      <a *ngIf="!last" class="crumb" (click)="navigateTo(bc)">{{ bc.name }}</a>
+  <nav class="breadcrumb">
+    <ng-container *ngFor="let bc of breadcrumbs; let last=last">
+      <a *ngIf="!last" (click)="navigateTo(bc)">{{ bc.name }}</a>
       <span *ngIf="last" class="current">{{ bc.name }}</span>
       <mat-icon *ngIf="!last" class="sep">chevron_right</mat-icon>
     </ng-container>
-  </div>
+  </nav>
 
-  <!-- Recherche -->
   <mat-form-field appearance="outline" class="search-field">
-    <mat-label>Rechercher dans « {{ breadcrumbs[breadcrumbs.length-1].name }} »</mat-label>
-    <input
-      matInput
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="filterFiles()"
-      placeholder="Nom de fichier ou dossier"
-    />
+    <mat-label>Recherche dans « {{ breadcrumbs[breadcrumbs.length-1].name }} »</mat-label>
+    <input matInput [(ngModel)]="searchTerm" (ngModelChange)="filterFiles()">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
-  <!-- Grille responsive -->
-  <div class="grid">
-    <mat-progress-bar *ngIf="uploading"
-                  mode="determinate"
-                  [value]="progress"
-                  style="margin-bottom: 16px">
+  <mat-progress-bar *ngIf="uploading"
+    mode="determinate" [value]="progress"
+    class="upload-bar">
   </mat-progress-bar>
 
-    <div class="file-tile" *ngFor="let file of files" (dblclick)="onItemClick(file)">
+  <div class="grid">
+    <div class="file-tile" *ngFor="let f of files" (dblclick)="onItemClick(f)">
       <mat-icon class="file-icon">
-        {{ file.type === 'FOLDER' ? 'folder' : 'insert_drive_file' }}
+        {{ f.type==='FOLDER' ? 'folder' : 'insert_drive_file' }}
       </mat-icon>
-      <div class="file-name">{{ getDisplayName(file.name) }}</div>
+      <div class="file-name">{{ getDisplayName(f.name) }}</div>
     </div>
   </div>
 </div>

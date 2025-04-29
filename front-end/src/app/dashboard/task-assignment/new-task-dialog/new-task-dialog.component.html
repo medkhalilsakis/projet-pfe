@@ -1,52 +1,77 @@
-<h2 mat-dialog-title>Créer une nouvelle tâche</h2>
-<mat-dialog-content [formGroup]="form">
-  <mat-form-field appearance="outline" style="width:100%">
+<!-- src/app/dashboard/task-assignment/new-task-dialog/new-task-dialog.component.html -->
+<h2 mat-dialog-title>Nouvelle tâche</h2>
+
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+
+  <mat-form-field appearance="outline" class="full">
     <mat-label>Nom</mat-label>
-    <input matInput formControlName="name">
+    <input matInput formControlName="name" />
   </mat-form-field>
 
-  <mat-form-field appearance="outline" style="width:100%">
+  <mat-form-field appearance="outline" class="full">
     <mat-label>Description</mat-label>
     <textarea matInput formControlName="description" rows="3"></textarea>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" style="width:100%">
-    <mat-label>Outils</mat-label>
-    <input matInput formControlName="outils">
-  </mat-form-field>
+  <div class="row">
+    <mat-form-field appearance="outline">
+      <mat-label>Deadline</mat-label>
+      <input matInput type="date" formControlName="deadline" />
+    </mat-form-field>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Deadline</mat-label>
-    <input matInput type="date" formControlName="deadline">
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Status</mat-label>
-    <mat-select formControlName="status">
-      <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" style="width:100%">
+  <mat-form-field appearance="outline" class="full">
     <mat-label>Assigné à</mat-label>
-    <mat-select formControlName="assignedTo">
+    <mat-select formControlName="assignedTo" multiple>
       <mat-option *ngFor="let u of users" [value]="u.id">
         {{ u.prenom }} {{ u.nom }}
       </mat-option>
     </mat-select>
   </mat-form-field>
 
-  <div>
-    <label>Fichier cahier de charges (PDF)*</label><br>
-    <input type="file" accept=".pdf" (change)="onProjectPdfChange($event)">
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Outils &amp; Technologies</mat-label>
+    <mat-chip-grid #chipGrid>
+      <mat-chip-row
+        *ngFor="let outil of outilsList"
+        (removed)="removeOutil(outil)"
+        removable
+      >
+        {{ outil }}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+      <input
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        placeholder="Ajouter un outil…"
+        (matChipInputTokenEnd)="addOutil($event)"
+      />
+    </mat-chip-grid>
+  </mat-form-field>
+
+  <div class="file-input">
+    <label>PDF cahier de charge*</label><br />
+    <input type="file" accept=".pdf" (change)="onProjectPdfChange($event)" />
   </div>
-  <div>
-    <label>Autres pièces (optionnel)</label><br>
-    <input type="file" multiple (change)="onAttachmentsChange($event)">
+
+  <div class="file-input">
+    <label>Autres pièces</label><br />
+    <input type="file" multiple (change)="onAttachmentsChange($event)" />
   </div>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">Créer</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="form.invalid"
+    (click)="submit()"
+  >
+    <mat-icon>check</mat-icon>
+    Créer
+  </button>
 </mat-dialog-actions>

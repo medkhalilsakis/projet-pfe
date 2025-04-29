@@ -1,0 +1,67 @@
+<main class="detail-page">
+
+    <div *ngIf="!task" class="loading">Chargement…</div>
+  
+    <div *ngIf="task">
+      <h1>{{ task.name }}</h1>
+  
+      <section class="meta">
+        <span class="status-badge">{{ getStatusLabel(task.status) }}</span>
+        <span class="meta-item">
+          <mat-icon>calendar_today</mat-icon>
+          Deadline : {{ task.deadline | date:'fullDate' }}
+        </span>
+        <span class="meta-item">
+          <mat-icon>publish</mat-icon>
+          Publiée : {{ task.publishedAt | date:'fullDate' }}
+        </span>
+      </section>
+  
+      <section class="description">
+        <h2>Description</h2>
+        <p>{{ task.description }}</p>
+      </section>
+  
+      <section *ngIf="task.outils">
+        <h2>Outils &amp; Technologies</h2>
+        <div class="badges">
+          <span class="badge" *ngFor="let o of task.outils.split(',')">
+            {{ o.trim() }}
+          </span>
+        </div>
+      </section>
+  
+      <section>
+        <h2>Assigné à</h2>
+        <ul class="assignees">
+          <li *ngFor="let u of task.assignedTo">
+            {{ u.prenom }} {{ u.nom }}
+          </li>
+        </ul>
+      </section>
+  
+      <section *ngIf="pdfUrl" class="pdf-viewer">
+        <h2>PDF Cahier des charges</h2>
+        <ngx-extended-pdf-viewer
+            [src]="pdfUrl"
+            useBrowserLocale="true"
+            [minifiedJSLibraries]="false"
+            height="500px"
+            [showSidebarButton]="true">
+        </ngx-extended-pdf-viewer>
+      </section>
+  
+      <section *ngIf="otherAttachments.length">
+        <h2>Autres pièces jointes</h2>
+        <mat-list>
+          <mat-list-item *ngFor="let a of otherAttachments">
+            <mat-icon>insert_drive_file</mat-icon>
+            <a [href]="API + '/taches/attachments/' + a.id" target="_blank">
+              {{ a.fileName }}
+            </a>
+          </mat-list-item>
+        </mat-list>
+      </section>
+    </div>
+  </main>
+  

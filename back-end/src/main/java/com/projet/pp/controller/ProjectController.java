@@ -262,4 +262,10 @@ public class ProjectController {
                 projectService.getInvitedUsers(projectId);
         return ResponseEntity.ok(invites);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
+        projectService.deleteProject(id);
+        return ResponseEntity.noContent().build();
+    }
 }

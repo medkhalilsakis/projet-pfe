@@ -12,6 +12,7 @@ import { SettingsComponent } from './dashboard/settings/settings.component';
 import { TaskAssignmentComponent } from './dashboard/task-assignment/task-assignment.component';
 import { UploadComponent } from './dashboard/upload/upload.component';
 import { UserManagementComponent } from './dashboard/user-management/user-management.component';
+import { TaskDetailComponent } from './dashboard/task-assignment/task-detail/task-detail.component';
 
 export const routes: Routes = [
   { 
@@ -26,6 +27,7 @@ export const routes: Routes = [
       { path: 'settings', component: SettingsComponent },
       { path: 'users',    component: UserManagementComponent },
       { path: 'tâches',   component: TaskAssignmentComponent },
+      { path: 'tâches/:id',      component: TaskDetailComponent  },
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },

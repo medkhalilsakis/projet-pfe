@@ -1,26 +1,22 @@
+<!-- src/app/dashboard/project-files/file-viewer-dialog.component.html -->
 <h2 mat-dialog-title>Éditeur : {{ data.file.name }}</h2>
 
 <mat-dialog-content class="editor-content">
   <ng-container *ngIf="isText; else binaryTpl">
-    <div class="code-editor-container">
-      <div #gutter class="line-numbers"></div>
-      <textarea
-        #codeArea
-        class="code-input"
-        [(ngModel)]="content"
-        (scroll)="syncScroll($event)"
-        spellcheck="false"
-      ></textarea>
-    </div>
+    <ngx-codemirror
+      class="editor-container"
+      [(ngModel)]="content"
+      [options]="editorOptions">
+    </ngx-codemirror>
   </ng-container>
 
   <ng-template #binaryTpl>
-    <div class="media-preview-container">
+    <div class="media-preview">
       <ng-container [ngSwitch]="data.file.mimeType.split('/')[0]">
         <img *ngSwitchCase="'image'" [src]="blobUrl" />
         <video *ngSwitchCase="'video'" [src]="blobUrl" controls></video>
         <audio *ngSwitchCase="'audio'" [src]="blobUrl" controls></audio>
-        <object *ngSwitchDefault [data]="blobUrl" type="{{ data.file.mimeType }}">
+        <object *ngSwitchDefault [data]="blobUrl" [type]="data.file.mimeType">
           <a [href]="blobUrl" download>{{ data.file.name }}</a>
         </object>
       </ng-container>
@@ -32,13 +28,7 @@
   <button mat-icon-button color="warn" (click)="delete()" matTooltip="Supprimer">
     <mat-icon>delete</mat-icon>
   </button>
-  <button
-    mat-icon-button
-    color="primary"
-    *ngIf="isText"
-    (click)="save()"
-    matTooltip="Enregistrer"
-  >
+  <button mat-icon-button color="primary" *ngIf="isText" (click)="save()" matTooltip="Enregistrer">
     <mat-icon>save</mat-icon>
   </button>
   <button mat-button (click)="close()">Fermer</button>

@@ -1,147 +1,156 @@
 <div class="messagerie-container">
-  <!-- SIDEBAR UTILISATEURS -->
-  <aside class="sidebar" *ngIf="!isMobile || !selectedUser">
+
+  <!-- Sidebar utilisateurs -->
+  <aside class="sidebar">
+    <div class="logo-bar"><h1>MyChat</h1></div>
     <mat-form-field appearance="outline" class="search-bar">
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="searchQuery" placeholder="Rechercher">
+      <input matInput [(ngModel)]="searchQuery" placeholder="Rechercher un contact">
     </mat-form-field>
 
-    <div class="user-list">
-      <mat-card *ngFor="let user of filteredUsers()"
-                class="user-card"
-                [class.selected]="user.id === selectedUser?.id"
-                (click)="selectUser(user)">
-        <div class="user-card-content">
-          <img [src]="'http://localhost:8080' + user.avatarUrl"
-               class="avatar"
-               alt="avatar"
-               (error)="user.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
-          <div class="user-info">
-            <h3>{{ user.prenom }} {{ user.nom }}</h3>
-            <p class="status">{{ user.status }}</p>
-          </div>
+    <mat-nav-list class="user-list">
+      <mat-list-item *ngFor="let u of filteredUsers()"
+                     (click)="selectUser(u)"
+                     [class.selected]="u.id === selectedUser?.id">
+        <img matListAvatar
+             [src]="u.avatarUrl"
+             alt="{{u.prenom}}"
+        />
+        <div matLine class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+        <div matLine class="user-status">
+          <span [class.online]="u.online" [class.offline]="!u.online"></span>
+          {{ u.online ? 'En ligne' : 'Hors-ligne' }}
         </div>
-      </mat-card>
-    </div>
+      </mat-list-item>
+    </mat-nav-list>
   </aside>
 
-  <!-- CHAT AREA -->
+  <!-- Zone de chat -->
   <section class="chat-area" *ngIf="selectedUser">
     <header class="chat-header">
       <button mat-icon-button *ngIf="isMobile" (click)="deselectUser()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <div class="chat-user-info">
-        <img [src]="'http://localhost:8080' + selectedUser.avatarUrl"
-             class="avatar-sm"
-             alt="avatar"
-             (error)="selectedUser.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
-        <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
+      <div class="chat-recipient">
+        <img class="avatar-sm" [src]="selectedUser.avatarUrl" alt="{{selectedUser.nom}}">
+        <div>
+          <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
+          <small>{{ selectedUser.online
+                    ? 'Actif maintenant'
+                    : ('Vu ' + (selectedUser.lastSeen | date:'short')) }}</small>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button><mat-icon>phone</mat-icon></button>
+        <button mat-icon-button><mat-icon>videocam</mat-icon></button>
+        <button mat-icon-button (click)="openContactDetails()">
+          <mat-icon>info</mat-icon>
+        </button>
       </div>
     </header>
 
     <div class="messages" #scrollContainer>
-      <div *ngFor="let m of messages"
-           class="msg-row"
-           [class.sent]="m.sentBy==='me'"
-           [class.received]="m.sentBy==='other'">
-
-        <!-- Messages reçus : avatar à gauche -->
-        <ng-container *ngIf="m.sentBy==='other'">
-          <img [src]="'http://localhost:8080' + m.avatarUrl"
-               class="avatar msg-avatar"
-               alt="avatar"
-               (error)="m.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
-          <div class="bubble">
-            <p>{{ m.text }}</p>
-
-            <div class="attachments" *ngIf="m.attachments?.length">
-              <ng-container *ngFor="let att of m.attachments">
-                <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                  <!-- Image : lien cliquable + vignette -->
-                  <a *ngSwitchCase="'image'"
-                     [href]="'http://localhost:8080' + att.filePath"
-                     target="_blank"
-                     class="attachment-img-link">
-                    <img [src]="'http://localhost:8080' + att.filePath"
-                         class="attachment-img"
-                         [alt]="att.fileName">
-                  </a>
-                  <!-- Autres fichiers : téléchargement -->
-                  <a *ngSwitchDefault
-                     [href]="'http://localhost:8080' + att.filePath"
-                     download
-                     class="attachment-file">
-                    <mat-icon>insert_drive_file</mat-icon>
-                    {{ att.fileName }}
-                  </a>
-                </ng-container>
+      <ng-container *ngFor="let m of messages">
+        <div class="msg-row" [ngClass]="m.sentBy">
+          <!-- reçu -->
+          <ng-container *ngIf="m.sentBy==='other'">
+            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
+            <div class="bubble">
+              <p>{{ m.text }}</p>
+              <ng-container *ngIf="m.attachments?.length">
+                <div class="attachments">
+                  <ng-container *ngFor="let att of m.attachments">
+                    <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                      <img *ngSwitchCase="'image'" class="att-img"
+                           [src]="att.filePath">
+                      <video *ngSwitchCase="'video'" class="att-video" controls
+                             [src]="att.filePath"></video>
+                      <a *ngSwitchDefault class="att-file"
+                         [href]="att.filePath" download>
+                        <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                      </a>
+                    </ng-container>
+                  </ng-container>
+                </div>
               </ng-container>
+              <div class="msg-info">
+                <span class="time">{{ m.date | date:'HH:mm' }}</span>
+                <button mat-icon-button class="react-btn">
+                  <mat-icon>thumb_up_off_alt</mat-icon>
+                </button>
+              </div>
             </div>
+          </ng-container>
 
-            <span class="time">{{ m.date | date:'HH:mm' }}</span>
-          </div>
-        </ng-container>
-
-        <!-- Messages envoyés : bulle puis avatar -->
-        <ng-container *ngIf="m.sentBy==='me'">
-          <div class="bubble">
-            <p>{{ m.text }}</p>
-
-            <div class="attachments" *ngIf="m.attachments?.length">
-              <ng-container *ngFor="let att of m.attachments">
-                <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                  <a *ngSwitchCase="'image'"
-                     [href]="'http://localhost:8080' + att.filePath"
-                     target="_blank"
-                     class="attachment-img-link">
-                    <img [src]="'http://localhost:8080' + att.filePath"
-                         class="attachment-img"
-                         [alt]="att.fileName">
-                  </a>
-                  <a *ngSwitchDefault
-                     [href]="'http://localhost:8080' + att.filePath"
-                     download
-                     class="attachment-file">
-                    <mat-icon>insert_drive_file</mat-icon>
-                    {{ att.fileName }}
-                  </a>
-                </ng-container>
+          <!-- envoyé -->
+          <ng-container *ngIf="m.sentBy==='me'">
+            <div class="bubble">
+              <p>{{ m.text }}</p>
+              <ng-container *ngIf="m.attachments?.length">
+                <div class="attachments">
+                  <ng-container *ngFor="let att of m.attachments">
+                    <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                      <img *ngSwitchCase="'image'" class="att-img"
+                           [src]="att.filePath">
+                      <video *ngSwitchCase="'video'" class="att-video" controls
+                             [src]="att.filePath"></video>
+                      <a *ngSwitchDefault class="att-file"
+                         [href]="att.filePath" download>
+                        <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                      </a>
+                    </ng-container>
+                  </ng-container>
+                </div>
               </ng-container>
+              <div class="msg-info">
+                <button mat-icon-button class="react-btn">
+                  <mat-icon>thumb_up_off_alt</mat-icon>
+                </button>
+                <span class="time">{{ m.date | date:'HH:mm' }}</span>
+              </div>
             </div>
-
-            <span class="time">{{ m.date | date:'HH:mm' }}</span>
-          </div>
-          <img [src]="'http://localhost:8080' + m.avatarUrl"
-               class="avatar msg-avatar"
-               alt="avatar"
-               (error)="m.avatarUrl='https://i.imgur.com/vtrfxgY.png'">
-        </ng-container>
-
-      </div>
+            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
+          </ng-container>
+        </div>
+      </ng-container>
     </div>
 
     <footer class="chat-input">
-      <input #fileInput
-             type="file"
-             multiple
-             hidden
-             (change)="onAttachmentChange($event)">
       <button mat-icon-button (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
       </button>
+      <input #fileInput type="file" multiple hidden (change)="onAttachmentChange($event)">
       <mat-form-field appearance="outline" class="input-box">
         <input matInput
                [(ngModel)]="newMessage"
                (keyup.enter)="sendMessage()"
                placeholder="Écrire un message…">
       </mat-form-field>
-      <button mat-icon-button matTooltip="Emoji">
-        <mat-icon>emoji_emotions</mat-icon>
-      </button>
+      <button mat-icon-button><mat-icon>emoji_emotions</mat-icon></button>
       <button mat-fab color="primary" (click)="sendMessage()">
         <mat-icon>send</mat-icon>
       </button>
     </footer>
   </section>
+
+  <!-- Détails contact dans sidebar droite (desktop) -->
+  <aside class="detail-sidebar" *ngIf="selectedUser && !isMobile && showContactDetails">
+    <mat-card>
+      <mat-card-header><mat-card-title>Détails du contact</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <img class="avatar-lg" [src]="selectedUser.avatarUrl" alt="avatar">
+        <h3>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h3>
+        <p>Status : <strong>{{ selectedUser.online ? 'En ligne' : 'Hors-ligne' }}</strong></p>
+        <p>Dernière connexion : {{ selectedUser.lastSeen | date:'fullDate HH:mm' }}</p>
+        <mat-divider></mat-divider>
+        <button mat-stroked-button color="primary" class="full-width">
+          <mat-icon>person_add</mat-icon> Ajouter aux favoris
+        </button>
+        <button mat-stroked-button color="warn" class="full-width">
+          <mat-icon>block</mat-icon> Bloquer
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </aside>
+
 </div>

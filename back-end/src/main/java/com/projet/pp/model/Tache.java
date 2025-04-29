@@ -5,18 +5,15 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "taches")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @ToString
 public class Tache {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
@@ -25,7 +22,6 @@ public class Tache {
     private String description;
 
     private LocalDate deadline;
-
     private String outils;
 
     @Column(name = "creationDate")
@@ -35,27 +31,32 @@ public class Tache {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "assignedTo", referencedColumnName = "id")
-    private User assignedTo;
-    @ManyToOne
-    @JoinColumn(name = "assignedBy", referencedColumnName = "id")
+    @JoinColumn(name = "assigned_by")
     private User assignedBy;
 
-    @Column(name = "project_details_pdf")
     private String projectDetailsPdf;
 
-    @Column(name = "test_cases_pdf")
-    private String testCasesPdf;
+    @ManyToMany
+    @JoinTable(
+            name = "tache_assigne",
+            joinColumns = @JoinColumn(name = "tache_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> assignedTo = new HashSet<>();
+
+    @OneToMany(mappedBy = "tache", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TacheAttachment> attachments = new HashSet<>();
+
 
     @OneToOne
-    @JoinColumn(name = "project_id", unique = true) // Ensures one-to-one
+    @JoinColumn(name = "project_id", unique = true)
     private Project project;
 
     public enum Status {
         a_developper,
         en_test,
         suspendu,
-        cloturé,
+        clôturé,
         terminé
     }
 }

@@ -30,6 +30,7 @@ import { forkJoin } from 'rxjs';
 })
 export class UploadComponent implements OnDestroy {
 
+  
   @Output() uploadCompleted = new EventEmitter<void>();
 
   files: File[] = [];
@@ -162,71 +163,98 @@ private updateIndividualProgress(event: any) {
 // … dans UploadComponent …
 
 private openProjectDescriptionDialog(projectId: number): void {
-  const dialogRef = this.dialog.open(ProjectDescriptionDialogComponent, {
-    width: '500px',
-    data: { projectId }
-  });
+  const dialogRef = this.dialog.open< ProjectDescriptionDialogComponent, {projectId:number}, ProjectFormData >(
+    ProjectDescriptionDialogComponent,
+    { width: '500px', data: { projectId } }
+  );
 
   dialogRef.afterClosed().subscribe(formData => {
     if (!formData) {
-      this.snackBar.open('Finalisation annulée', 'Fermer', { duration: 3000 });
-      this.resetState();
+      // ** Annulation : on supprime le draft côté serveur **
+      this.http.delete(`http://localhost:8080/api/projects/${projectId}`)
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Upload annulé, projet supprimé.', 'Fermer', { duration: 3000 });
+            this.resetState();
+          },
+          error: () => {
+            this.snackBar.open('Erreur suppression projet annulé.', 'Fermer', { duration: 3000 });
+            this.resetState();
+          }
+        });
       return;
     }
 
-    // 1) On commit d'abord le projet
+    // 1) Commit du projet
     const status = formData.visibilite === 'public' ? 1 : 0;
     const commitPayload = {
-      name: formData.name,
-      type: formData.type,
+      name:        formData.name,
+      type:        formData.type,
       description: formData.description || '',
-      visibilite: formData.visibilite,
+      visibilite:  formData.visibilite,
       status
     };
-
     const params = new HttpParams().set('projectId', projectId.toString());
+
     this.http.post('http://localhost:8080/api/projects/commit', commitPayload, { params, responseType: 'text' })
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Projet finalisé.', 'Fermer', { duration: 3000 });
+          this.snackBar.open('Projet finalisé.', 'Fermer',{duration:2000});
 
-          // 2) Si des invitations ont été sélectionnées, on les envoie en parallèle
+          // 2) Si l’utilisateur a sélectionné une tâche, on l’associe
+          const assignSteps$ = [];
+          if (formData.taskId) {
+            assignSteps$.push(
+              this.http.put(
+                `http://localhost:8080/api/taches/${formData.taskId}/assignProject`,
+                null,
+                { params: new HttpParams().set('projectId', projectId.toString()), responseType: 'text' }
+              )
+            );
+          }
+
+          // 3) Invitations d’utilisateurs
           const toInvite: number[] = formData.users || [];
-          if (toInvite.length) {
-            // un tableau d’observables POST d’invitation
-            const invites$ = toInvite.map(uid =>
+          toInvite.forEach(uid => {
+            assignSteps$.push(
               this.http.post(
                 `http://localhost:8080/api/projects/${projectId}/invite`,
                 { userId: uid, status: 'pending' },
                 { responseType: 'text' }
               )
             );
-            forkJoin(invites$).subscribe({
+          });
+
+          // Exécution parallèle de toutes les opérations post-commit
+          if (assignSteps$.length) {
+            forkJoin(assignSteps$).subscribe({
               next: () => {
-                this.snackBar.open('Invitations envoyées.', 'Fermer', { duration: 3000 });
+                this.snackBar.open('Tâche associée & invitations envoyées.', 'Fermer',{duration:2000});
                 this.uploadCompleted.emit();
                 this.resetState();
               },
               error: () => {
-                this.snackBar.open('Erreur lors des invitations', 'Fermer', { duration: 3000 });
+                this.snackBar.open('Problème lors de l’association/invitations', 'Fermer',{duration:2000});
                 this.uploadCompleted.emit();
                 this.resetState();
               }
             });
           } else {
-            // pas d’invitations -> on termine
+            // Ni tâche ni invitation
             this.uploadCompleted.emit();
             this.resetState();
           }
         },
         error: () => {
-          this.snackBar.open('Erreur finalisation projet', 'Fermer', { duration: 3000 });
+          this.snackBar.open('Erreur finalisation projet', 'Fermer',{duration:2000});
           this.uploadCompleted.emit();
           this.resetState();
         }
       });
   });
 }
+
 
 
 
@@ -250,3 +278,12 @@ interface FileProgress {
   size: number;
   uploaded: number;
 }
+interface ProjectFormData {
+  name: string;
+  type: string;
+  description?: string;
+  visibilite: 'public'|'prive';
+  users?: number[];
+  taskId?: number;          // ← nouveau
+}
+

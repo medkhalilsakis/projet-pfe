@@ -1,0 +1,27 @@
+import { Component, Input } from '@angular/core';
+import * as i0 from "@angular/core";
+import * as i1 from "../pdf-draw-editor/pdf-draw-editor.component";
+import * as i2 from "../pdf-highlight-editor/pdf-highlight-editor.component";
+import * as i3 from "../pdf-stamp-editor/pdf-stamp-editor.component";
+import * as i4 from "../pdf-text-editor/pdf-text-editor.component";
+export class PdfEditorComponent {
+    showDrawEditor = true;
+    showHighlightEditor = true;
+    showTextEditor = true;
+    showStampEditor = true;
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "17.3.12", ngImport: i0, type: PdfEditorComponent, deps: [], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "17.0.0", version: "17.3.12", type: PdfEditorComponent, selector: "pdf-editor", inputs: { showDrawEditor: "showDrawEditor", showHighlightEditor: "showHighlightEditor", showTextEditor: "showTextEditor", showStampEditor: "showStampEditor" }, ngImport: i0, template: "@if (!!showHighlightEditor || !!showStampEditor || !!showDrawEditor || !!showTextEditor) {\n<div id=\"editorModeButtons\" class=\"splitToolbarButton toggled\" role=\"radiogroup\">\n  <pdf-highlight-editor [show]=\"showHighlightEditor\"></pdf-highlight-editor>\n  <pdf-text-editor [show]=\"showTextEditor\"></pdf-text-editor>\n  <pdf-stamp-editor [show]=\"showStampEditor\"></pdf-stamp-editor>\n  <pdf-draw-editor [show]=\"showDrawEditor\"></pdf-draw-editor>\n</div>\n}", styles: ["button{padding:0}\n"], dependencies: [{ kind: "component", type: i1.PdfDrawEditorComponent, selector: "pdf-draw-editor", inputs: ["show"] }, { kind: "component", type: i2.PdfHighlightEditorComponent, selector: "pdf-highlight-editor", inputs: ["show"] }, { kind: "component", type: i3.PdfStampEditorComponent, selector: "pdf-stamp-editor", inputs: ["show"] }, { kind: "component", type: i4.PdfTextEditorComponent, selector: "pdf-text-editor", inputs: ["show"] }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "17.3.12", ngImport: i0, type: PdfEditorComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'pdf-editor', template: "@if (!!showHighlightEditor || !!showStampEditor || !!showDrawEditor || !!showTextEditor) {\n<div id=\"editorModeButtons\" class=\"splitToolbarButton toggled\" role=\"radiogroup\">\n  <pdf-highlight-editor [show]=\"showHighlightEditor\"></pdf-highlight-editor>\n  <pdf-text-editor [show]=\"showTextEditor\"></pdf-text-editor>\n  <pdf-stamp-editor [show]=\"showStampEditor\"></pdf-stamp-editor>\n  <pdf-draw-editor [show]=\"showDrawEditor\"></pdf-draw-editor>\n</div>\n}", styles: ["button{padding:0}\n"] }]
+        }], propDecorators: { showDrawEditor: [{
+                type: Input
+            }], showHighlightEditor: [{
+                type: Input
+            }], showTextEditor: [{
+                type: Input
+            }], showStampEditor: [{
+                type: Input
+            }] } });
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGRmLWVkaXRvci5jb21wb25lbnQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi9wcm9qZWN0cy9uZ3gtZXh0ZW5kZWQtcGRmLXZpZXdlci9zcmMvbGliL3Rvb2xiYXIvcGRmLWVkaXRvci9wZGYtZWRpdG9yLmNvbXBvbmVudC50cyIsIi4uLy4uLy4uLy4uLy4uLy4uL3Byb2plY3RzL25neC1leHRlbmRlZC1wZGYtdmlld2VyL3NyYy9saWIvdG9vbGJhci9wZGYtZWRpdG9yL3BkZi1lZGl0b3IuY29tcG9uZW50Lmh0bWwiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLFNBQVMsRUFBRSxLQUFLLEVBQUUsTUFBTSxlQUFlLENBQUM7Ozs7OztBQVFqRCxNQUFNLE9BQU8sa0JBQWtCO0lBRXRCLGNBQWMsR0FBeUIsSUFBSSxDQUFDO0lBRzVDLG1CQUFtQixHQUF5QixJQUFJLENBQUM7SUFHakQsY0FBYyxHQUF5QixJQUFJLENBQUM7SUFHNUMsZUFBZSxHQUF5QixJQUFJLENBQUM7d0dBWHpDLGtCQUFrQjs0RkFBbEIsa0JBQWtCLGtOQ1IvQixzZEFPQzs7NEZEQ1ksa0JBQWtCO2tCQUw5QixTQUFTOytCQUNFLFlBQVk7OEJBTWYsY0FBYztzQkFEcEIsS0FBSztnQkFJQyxtQkFBbUI7c0JBRHpCLEtBQUs7Z0JBSUMsY0FBYztzQkFEcEIsS0FBSztnQkFJQyxlQUFlO3NCQURyQixLQUFLIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQ29tcG9uZW50LCBJbnB1dCB9IGZyb20gJ0Bhbmd1bGFyL2NvcmUnO1xuaW1wb3J0IHsgUmVzcG9uc2l2ZVZpc2liaWxpdHkgfSBmcm9tICcuLi8uLi9yZXNwb25zaXZlLXZpc2liaWxpdHknO1xuXG5AQ29tcG9uZW50KHtcbiAgc2VsZWN0b3I6ICdwZGYtZWRpdG9yJyxcbiAgdGVtcGxhdGVVcmw6ICcuL3BkZi1lZGl0b3IuY29tcG9uZW50Lmh0bWwnLFxuICBzdHlsZVVybHM6IFsnLi9wZGYtZWRpdG9yLmNvbXBvbmVudC5jc3MnXSxcbn0pXG5leHBvcnQgY2xhc3MgUGRmRWRpdG9yQ29tcG9uZW50IHtcbiAgQElucHV0KClcbiAgcHVibGljIHNob3dEcmF3RWRpdG9yOiBSZXNwb25zaXZlVmlzaWJpbGl0eSA9IHRydWU7XG5cbiAgQElucHV0KClcbiAgcHVibGljIHNob3dIaWdobGlnaHRFZGl0b3I6IFJlc3BvbnNpdmVWaXNpYmlsaXR5ID0gdHJ1ZTtcblxuICBASW5wdXQoKVxuICBwdWJsaWMgc2hvd1RleHRFZGl0b3I6IFJlc3BvbnNpdmVWaXNpYmlsaXR5ID0gdHJ1ZTtcblxuICBASW5wdXQoKVxuICBwdWJsaWMgc2hvd1N0YW1wRWRpdG9yOiBSZXNwb25zaXZlVmlzaWJpbGl0eSA9IHRydWU7XG59XG4iLCJAaWYgKCEhc2hvd0hpZ2hsaWdodEVkaXRvciB8fCAhIXNob3dTdGFtcEVkaXRvciB8fCAhIXNob3dEcmF3RWRpdG9yIHx8ICEhc2hvd1RleHRFZGl0b3IpIHtcbjxkaXYgaWQ9XCJlZGl0b3JNb2RlQnV0dG9uc1wiIGNsYXNzPVwic3BsaXRUb29sYmFyQnV0dG9uIHRvZ2dsZWRcIiByb2xlPVwicmFkaW9ncm91cFwiPlxuICA8cGRmLWhpZ2hsaWdodC1lZGl0b3IgW3Nob3ddPVwic2hvd0hpZ2hsaWdodEVkaXRvclwiPjwvcGRmLWhpZ2hsaWdodC1lZGl0b3I+XG4gIDxwZGYtdGV4dC1lZGl0b3IgW3Nob3ddPVwic2hvd1RleHRFZGl0b3JcIj48L3BkZi10ZXh0LWVkaXRvcj5cbiAgPHBkZi1zdGFtcC1lZGl0b3IgW3Nob3ddPVwic2hvd1N0YW1wRWRpdG9yXCI+PC9wZGYtc3RhbXAtZWRpdG9yPlxuICA8cGRmLWRyYXctZWRpdG9yIFtzaG93XT1cInNob3dEcmF3RWRpdG9yXCI+PC9wZGYtZHJhdy1lZGl0b3I+XG48L2Rpdj5cbn0iXX0=

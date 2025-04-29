@@ -1,79 +1,140 @@
-import { Component, OnInit } from '@angular/core';
+// src/app/task-assignment/task-assignment.component.ts
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { NewTaskDialogComponent } from './new-task-dialog/new-task-dialog.component';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatRippleModule } from '@angular/material/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-task-assignment',
-  templateUrl: './task-assignment.component.html',
-  styleUrls: ['./task-assignment.component.css'],
+  standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCardModule,
-    MatGridListModule
-  ]
+    CommonModule, FormsModule,
+    MatToolbarModule, MatButtonModule, MatIconModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule,
+    MatCardModule, MatChipsModule, MatRippleModule,
+    MatPaginatorModule
+  ],
+  templateUrl: './task-assignment.component.html',
+  styleUrls: ['./task-assignment.component.css']
 })
 export class TaskAssignmentComponent implements OnInit {
-    tâches: Tache[] = [];
-    filtered: Tache[] = [];
-    search = '';
-    statusFilter = '';
-  
-    constructor(
-      private http: HttpClient,
-      private dialog: MatDialog
-    ) {}
-  
-    ngOnInit() {
-      this.load();
-    }
-  
-    load() {
-      let params = new HttpParams();
-      if (this.search)      params = params.set('q', this.search);
-      if (this.statusFilter)params = params.set('status', this.statusFilter);
-      this.http.get<Tache[]>('http://localhost:8080/api/taches', { params })
-        .subscribe(list => {
-          this.tâches = list;
-          this.filtered = list;
-        });
-    }
-  
-    onSearchChange() { this.load(); }
-    onStatusChange() { this.load(); }
-  
-    openNew() {
-      const ref = this.dialog.open(NewTaskDialogComponent, {
-        width: '500px',
-        data: null
-      });
-      ref.afterClosed().subscribe(res => {
-        if (res) this.load();
-      });
-    }
+  tâches: Tache[] = [];
+  filtered: Tache[] = [];
+  pageSlice: Tache[] = [];
+  search = '';
+  statusFilter = '';
+  // pagination
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  pageSize = 9;
+  pageIndex = 0;
+
+  statuses = [
+    { value: '',             label: 'Tous' },
+    { value: 'a_developper', label: 'À développer' },
+    { value: 'en_test',      label: 'En test' },
+    { value: 'suspendu',     label: 'Suspendu' },
+    { value: 'clôturé',      label: 'Clôturé' },
+    { value: 'terminé',      label: 'Terminé' }
+  ];
+
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private router: Router
+
+  ) {}
+
+  ngOnInit() {
+    this.load();
   }
+
+  private load() {
+    let params = new HttpParams();
+    if (this.search)       params = params.set('q', this.search.trim());
+    if (this.statusFilter) params = params.set('status', this.statusFilter);
+
+    this.http.get<Tache[]>('http://localhost:8080/api/taches', { params })
+      .subscribe(list => {
+        // tri descendant par date de publication
+        this.tâches = [...list].sort((a, b) =>
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
+        this.applyFilters();
+      });
+  }
+
+  applyFilters() {
+    this.filtered = this.tâches.filter(t =>
+      (!this.statusFilter || t.status === this.statusFilter) &&
+      (!this.search ||
+        t.name.toLowerCase().includes(this.search.toLowerCase()) ||
+        this.getAssignedNames(t)
+          .toLowerCase().includes(this.search.toLowerCase())
+      )
+    );
+    // réinitialise la pagination
+    this.paginator.firstPage();
+    this.updatePageSlice();
+  }
+
+  onSearchChange() { this.applyFilters(); }
+  onStatusChange() { this.applyFilters(); }
+
+  onPageChange(event: PageEvent) {
+    this.pageSize  = event.pageSize;
+    this.pageIndex = event.pageIndex;
+    this.updatePageSlice();
+  }
+
+  private updatePageSlice() {
+    const start = this.pageIndex * this.pageSize;
+    this.pageSlice = this.filtered.slice(start, start + this.pageSize);
+  }
+
+  openNew() {
+    const ref = this.dialog.open(NewTaskDialogComponent, {
+      width: '520px',
+      panelClass: 'new-task-dialog'
+    });
+    ref.afterClosed().subscribe(created => {
+      if (created) this.load();
+    });
+  }
+
+  selectTask(t: Tache) {
+    this.router.navigate(['/dashboard/tâches', t.id]);
+  }
+
+  getAssignedNames(t: Tache): string {
+    return t.assignedTo.map(u => `${u.prenom} ${u.nom}`).join(', ');
+  }
+
+  getStatusLabel(status: Tache['status']): string {
+    return this.statuses.find(x => x.value === status)?.label || status;
+  }
+}
+
+export interface SimpleUser { id: number; prenom: string; nom: string; }
 
 export interface Tache {
   id: number;
   name: string;
-  status: string;
-  assignedTo: { nom: string; prenom: string };
+  status: 'a_developper'|'en_test'|'suspendu'|'clôturé'|'terminé';
+  assignedTo: SimpleUser[];
+  publishedAt: string;
   deadline: string;
 }

@@ -1,45 +1,68 @@
-<mat-toolbar color="primary">
-  <span>Gérer les tâches</span>
+<!-- src/app/task-assignment/task-assignment.component.html -->
+<mat-toolbar color="primary" class="top-bar">
+  <span class="title">Gérer les tâches</span>
   <span class="spacer"></span>
-  <button mat-flat-button (click)="openNew()">
-    <mat-icon>add</mat-icon> Nouvelle tâche
+  <button mat-flat-button color="accent" (click)="openNew()">
+    <mat-icon>add</mat-icon>
+    Nouvelle tâche
   </button>
 </mat-toolbar>
 
-<div class="filters">
-  <mat-form-field appearance="outline">
+<div class="controls">
+  <mat-form-field appearance="outline" class="ctrl">
     <mat-label>Recherche</mat-label>
-    <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()">
-    <button mat-icon-button matSuffix (click)="search=''; onSearchChange()">
+    <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Nom, assigné à…">
+    <button matSuffix mat-icon-button *ngIf="search" (click)="search=''; onSearchChange()">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Filtrer par statut</mat-label>
+  <mat-form-field appearance="outline" class="ctrl status">
+    <mat-label>Statut</mat-label>
     <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
-      <mat-option value="">Tous</mat-option>
-      <mat-option *ngFor="let s of ['a_developper','en_test','suspendu','cloturé','terminé']"
-                  [value]="s">{{ s }}</mat-option>
+      <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
 
 <div class="grid">
-  <mat-grid-list cols="3" gutterSize="16px" rowHeight="1:1">
-    <mat-grid-tile *ngFor="let t of filtered">
-      <mat-card class="task-card">
+  <ng-container *ngIf="pageSlice.length; else noTasks">
+    <div class="task-grid">
+      <mat-card *ngFor="let t of pageSlice" class="task-card mat-elevation-z3" ripple (click)="selectTask(t)">
         <mat-card-header>
           <mat-card-title>{{ t.name }}</mat-card-title>
-          <mat-card-subtitle>
-            {{ t.assignedTo.prenom }} {{ t.assignedTo.nom }}
-          </mat-card-subtitle>
+          <mat-card-subtitle>{{ getAssignedNames(t) }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p><strong>Status:</strong> {{ t.status }}</p>
-          <p><strong>Deadline:</strong> {{ t.deadline | date:'shortDate' }}</p>
+          <div class="info">
+            <mat-icon>flag</mat-icon>
+            <mat-chip>{{ getStatusLabel(t.status) }}</mat-chip>
+          </div>
+          <div class="info">
+            <mat-icon>calendar_today</mat-icon>
+            <span>Deadline: {{ t.deadline | date:'shortDate' }}</span>
+          </div>
+          <div class="info">
+            <mat-icon>publish</mat-icon>
+            <span>Publiée: {{ t.publishedAt | date:'short' }}</span>
+          </div>
         </mat-card-content>
       </mat-card>
-    </mat-grid-tile>
-  </mat-grid-list>
+    </div>
+  </ng-container>
+
+  <ng-template #noTasks>
+    <div class="no-tasks">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Aucune tâche trouvée.</p>
+    </div>
+  </ng-template>
 </div>
+
+<mat-paginator
+  [length]="filtered.length"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[9, 12, 15]"
+  (page)="onPageChange($event)"
+  showFirstLastButtons>
+</mat-paginator>

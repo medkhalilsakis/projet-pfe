@@ -12,6 +12,7 @@ import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,23 +81,27 @@ public class ProjectService {
             for (MultipartFile file : files) {
                 decompressArchive(file, projectStorage, project);
             }
-        } else {
+        } else{
             for (MultipartFile file : files) {
-                // Supposons que file.getOriginalFilename() contient le chemin relatif (ex: "test/A/C/test.txt")
                 String relativePath = file.getOriginalFilename();
                 if (relativePath == null) continue;
                 String[] parts = relativePath.split("/");
-                // Le dernier élément est le nom du fichier
-                String fileName = parts[parts.length - 1];
+                // On saute toujours le premier segment (le dossier "uploadé")
+                int startIndex = (parts.length > 1 ? 1 : 0);
                 Long currentParentId = null;
-                // Pour chaque dossier du chemin, on crée ou récupère le dossier
-                for (int i = 0; i < parts.length - 1; i++) {
-                    String folderName = parts[i];
-                    currentParentId = getOrCreateFolder(project, projectStorage, currentParentId, folderName);
+                // À partir de parts[startIndex] jusqu'à l'avant-dernier, ce sont les sous-dossiers
+                for (int i = startIndex; i < parts.length - 1; i++) {
+                    currentParentId = getOrCreateFolder(
+                            project,
+                            projectStorage,
+                            currentParentId,
+                            parts[i]
+                    );
                 }
-                // Enregistrer le fichier avec le parent déterminé
+                // On crée le fichier final
                 saveFileWithParent(file, projectStorage, project, currentParentId);
             }
+
         }
 
         return project.getId();
@@ -145,22 +150,37 @@ public class ProjectService {
             while ((zipEntry = zis.getNextEntry()) != null) {
                 String relativePath = zipEntry.getName();
                 if (!zipEntry.isDirectory()) {
+                    // Lire le contenu
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int len;
                     while ((len = zis.read(buffer)) > 0) {
                         baos.write(buffer, 0, len);
                     }
-                    byte[] fileContent = baos.toByteArray();
-                    // Pour le décompressé, on suppose que la structure du zip correspond à l'arborescence
-                    // Ici, on peut appeler saveFileWithParent en découpant relativePath comme dans uploadProject
+                    byte[] content = baos.toByteArray();
+
+                    // On décompose le chemin
                     String[] parts = relativePath.split("/");
+                    int startIndex = (parts.length > 1 ? 1 : 0);
                     Long currentParentId = null;
-                    for (int i = 0; i < parts.length - 1; i++) {
-                        String folderName = parts[i];
-                        currentParentId = getOrCreateFolder(project, projectStorage, currentParentId, folderName);
+                    // Créer ou récupérer les dossiers enfants
+                    for (int i = startIndex; i < parts.length - 1; i++) {
+                        currentParentId = getOrCreateFolder(
+                                project,
+                                projectStorage,
+                                currentParentId,
+                                parts[i]
+                        );
                     }
-                    saveFileWithParent(fileContent, zipEntry.getName(), zipEntry.getSize(), projectStorage, project, currentParentId);
+                    // Sauvegarder le fichier décompressé
+                    saveFileWithParent(
+                            content,
+                            parts[parts.length - 1],
+                            content.length,
+                            projectStorage,
+                            project,
+                            currentParentId
+                    );
                 }
                 zis.closeEntry();
             }
@@ -415,7 +435,7 @@ public class ProjectService {
         closureRepo.save(closure);
 
         // 2) Mettre à jour le statut du projet
-        proj.setStatus(3);
+        proj.setStatus(99);
         projectRepository.save(proj);
     }
 
@@ -494,4 +514,23 @@ public class ProjectService {
     }
 
 
+    @Transactional
+    public void deleteProject(Long projectId) {
+        // 1) Supprimez les fichiers sur disque
+        Path projectDir = baseStorage.resolve(projectId.toString());
+        if (Files.exists(projectDir)) {
+            try {
+                FileSystemUtils.deleteRecursively(projectDir);
+            } catch (IOException e) {
+                // Vous pouvez soit remonter en RuntimeException pour rollback,
+                // soit logger et continuer si la suppression disque n’est pas critique.
+                throw new RuntimeException(
+                        "Erreur lors de la suppression des fichiers du projet " + projectId, e
+                );
+            }
+        }
+
+        // 2) Supprimez l’entité projet en base
+        projectRepository.deleteById(projectId);
+    }
 }

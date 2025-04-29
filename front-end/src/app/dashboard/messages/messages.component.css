@@ -1,118 +1,148 @@
-/* Conteneur global : deux colonnes, 100% hauteur */
+/* === Layout général === */
 .messagerie-container {
-  display: flex;
-  height: 80vh;        /* ou height: 100vh; si vous voulez la hauteur totale */
-  width: 100%;          /* prend toute la largeur de son parent */
-  max-width: 1150px;    /* facultatif : plafonne la largeur à 1150px */
-  margin: 0 auto;       /* centre si on a un max-width */
-  background: #fafafa;
-  font-family: sans-serif;
-  color: #333;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100vh;
+  background: #f5f6fa;
+}
+@media (max-width: 900px) {
+  .messagerie-container {
+    grid-template-columns: 300px 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .messagerie-container {
+    display: block;
+  }
 }
 
-/* Sidebar fixe à gauche */
+/* === Sidebar gauche === */
 .sidebar {
-  flex: 0 0 300px;             /* largeur fixe */
   background: #fff;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
 }
-
-.search-bar {
-  margin: 16px;
+.logo-bar {
+  padding: 16px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
 }
-
+.search-bar {
+  margin: 12px;
+}
 .user-list {
   flex: 1;
   overflow-y: auto;
 }
-
-.user-card {
-  margin: 8px 16px;
+mat-list-item {
   cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-.user-card.selected {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-.user-card-content {
+  transition: background 0.2s;
   display: flex;
   align-items: center;
 }
-.avatar {
-  width: 36px;
-  height: 36px;
+mat-list-item:hover {
+  background: #f0f0f0;
+}
+mat-list-item.selected {
+  background: #e3f2fd;
+}
+
+/* Avatar des contacts dans la liste */
+mat-list-item img[matListAvatar] {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 12px;
 }
-.initials {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #3f51b5;
-  color: #fff;
+
+/* Texte */
+.user-name {
+  font-weight: 500;
+}
+.user-status {
+  font-size: 0.75rem;
+  color: #777;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-right: 12px;
+}
+.user-status .online,
+.user-status .offline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.user-status .online {
+  background: #4caf50;
+}
+.user-status .offline {
+  background: #f44336;
 }
 
-.user-info h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-.user-info .status {
-  font-size: 0.75rem;
-  color: #666;
-}
-
-/* Zone de chat à droite, prend tout l'espace restant */
+/* === Chat central === */
 .chat-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  background: #fcfcfc;
 }
-
-/* En-tête de chat */
 .chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 12px 16px;
   background: #fff;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0;
 }
-.chat-user-info {
+.chat-recipient {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
-.avatar-sm {
-  width: 24px;
-  height: 24px;
+.chat-recipient img.avatar-sm {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 8px;
 }
-.chat-user-info h2 {
+.chat-recipient h2 {
   margin: 0;
   font-size: 1.1rem;
 }
+.chat-recipient small {
+  color: #777;
+}
+.header-actions button {
+  margin-left: 4px;
+}
 
-/* Contenu des messages */
+/* Messages */
 .messages {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
-
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .msg-row {
   display: flex;
   align-items: flex-end;
-  margin-bottom: 12px;
+  gap: 8px;
+  animation: fadeIn 0.2s ease;
 }
 .msg-row.sent {
   justify-content: flex-end;
@@ -121,23 +151,22 @@
   justify-content: flex-start;
 }
 
-.msg-avatar {
-  width: 24px;
-  height: 24px;
+/* Avatar dans les bulles */
+.msg-row img.msg-avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 0 8px;
-  align-self: flex-end;
 }
 
 /* Bulles */
 .bubble {
   position: relative;
-  max-width: 70%;
-  padding: 12px;
+  max-width: 65%;
+  padding: 12px 16px;
   border-radius: 16px;
   background: #fff;
-  transition: background 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
 }
 .msg-row.sent .bubble {
   background: #dcf8c6;
@@ -159,59 +188,76 @@
 }
 .bubble p {
   margin: 0;
+  word-wrap: break-word;
 }
-.bubble .time {
-  position: absolute;
-  bottom: 4px;
-  right: 8px;
+.msg-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+  gap: 4px;
+}
+.time {
   font-size: 0.7rem;
   color: #666;
+}
+.react-btn mat-icon {
+  font-size: 16px;
+  color: #888;
+}
+.react-btn:hover mat-icon {
+  color: #ffb300;
 }
 
 /* Pièces jointes */
 .attachments {
-  margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 8px;
 }
-.attachment-img {
-  max-width: 100px;
-  border-radius: 8px;
+/* Images attachées */
+.att-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
 }
-.attachment-video {
-  max-width: 150px;
-  border-radius: 8px;
+/* Vidéos attachées (miniature circulaire) */
+.att-video {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
 }
-.attachment-file {
+/* Fichiers attachés */
+.att-file {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 8px;
-  background: #eee;
+  background: #f1f0f0;
   border-radius: 4px;
   text-decoration: none;
   color: #333;
 }
 
-/* Pied de page (champ + boutons) */
+/* Footer d’envoi */
 .chat-input {
   display: flex;
   align-items: center;
   padding: 8px 16px;
   background: #fff;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #e0e0e0;
 }
-.chat-input .input-box {
+.input-box {
   flex: 1;
   margin: 0 8px;
 }
-.chat-input .input-box input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 24px;
+.input-box input {
+  padding: 10px 16px;
+  border-radius: 20px;
   border: 1px solid #ccc;
-}
-
-/* Animation apparitions */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
 }

@@ -1,50 +1,37 @@
-:host {
-    display: block;
-    width: 100%;
-  }
-  
-  mat-dialog-content {
-    display: flex;
-    flex-direction: column;
-    padding: 24px 0;
-  }
-  
-  mat-dialog-content .full-width {
-    width: 100%;
-    margin-bottom: 16px;
-  }
-  
-  mat-dialog-content .full-width mat-form-field {
-    width: 100%;
-  }
-  
-  mat-dialog-actions {
-    padding: 16px 0 0;
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  mat-dialog-actions button {
-    margin-left: 8px;
-    text-transform: uppercase;
-    height: 36px;
-  }
-  
-  mat-dialog-actions button[mat-flat-button] {
-    background-color: #3f51b5;
-    color: #fff;
-  }
-  
-  mat-dialog-actions button[mat-flat-button]:hover {
-    background-color: #303f9f;
-  }
-  
-  .mat-form-field-appearance-fill .mat-form-field-flex {
-    background: #f5f5f5;
-    border-radius: 4px;
-    transition: background 0.3s;
-  }
-  
-  .mat-form-field-appearance-fill.mat-focused .mat-form-field-flex {
-    background: #e8eaf6;
-  }
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 400px;
+}
+
+.full { width: 100%; }
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.file-input {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* new-task-dialog.component.css */
+.full {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.file-input {
+  margin: 16px 0;
+}
+
+.dialog-content {
+  max-height: 70vh;
+  overflow: auto;
+}

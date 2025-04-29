@@ -1,64 +1,34 @@
-/* Container général */
+/* Basic dialog layout */
 .editor-content {
+  min-height: 400px;
   display: flex;
   flex-direction: column;
+}
+
+/* CodeMirror editor container */
+.editor-container {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-/* Code editor */
-.code-editor-container {
+/* Media preview sizing */
+.media-preview {
   display: flex;
-  position: relative;
-  height: 60vh;
-  border: 1px solid #ccc;
-  font-family: 'Source Code Pro', monospace;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
   background: #fafafa;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
 }
-
-/* Gutter (numéros de ligne) */
-.line-numbers {
-  counter-reset: line;
-  width: 40px;
-  padding: 8px 4px;
-  background: #eee;
-  text-align: right;
-  user-select: none;
-  overflow: hidden;
-}
-.line-numbers span {
-  display: block;
-  counter-increment: line;
-  padding: 0 4px;
-  line-height: 1.4;
-}
-
-/* Zone de saisie */
-.code-input {
-  position: absolute;
-  top: 0;
-  left: 40px;
-  width: calc(100% - 40px);
-  height: 100%;
-  border: none;
-  padding: 8px;
-  resize: none;
-  background: transparent;
-  color: #333;
-  font-family: inherit;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  outline: none;
-  overflow: auto;
-}
-
-/* Preview médias */
-.media-preview-container {
-  text-align: center;
-}
-.media-preview-container img,
-.media-preview-container video,
-.media-preview-container audio,
-.media-preview-container object {
+.preview-media {
   max-width: 100%;
-  max-height: 60vh;
+  max-height: 100%;
+}
+
+/* Adjust dialog actions */
+mat-dialog-actions {
+  margin-top: 8px;
 }
