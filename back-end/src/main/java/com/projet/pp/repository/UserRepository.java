@@ -9,7 +9,12 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
     Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);         // ← Ajouté pour reset password
+
     List<User> findByUsernameContainingIgnoreCase(String query);
+
     List<User> findByRoleId(Long roleId);
 }

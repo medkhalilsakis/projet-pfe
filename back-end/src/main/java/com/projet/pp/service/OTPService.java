@@ -69,4 +69,15 @@ public class OTPService {
                 })
                 .orElse(false);
     }
+
+
+
+    public boolean validateOTP(User utilisateur, String code) {
+        return otpRepository
+                .findTopByUtilisateurAndIsUsedOrderByExpiresAtDesc(utilisateur, false)
+                .filter(otp -> otp.getCode().equals(code))
+                .filter(otp -> otp.getExpiresAt().isAfter(LocalDateTime.now()))
+                .isPresent();
+    }
+
 }

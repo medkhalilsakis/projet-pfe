@@ -2,92 +2,172 @@
   <div class="network-lines"></div>
   <div class="floating-dots"></div>
   <div class="glowing-effects"></div>
+
   <mat-card class="login-container">
-  <mat-card-header>
-    <mat-card-title class="text-center">
-      {{ showOtpSection ? 'Vérification OTP' : 'Connexion' }}
-    </mat-card-title>
-  </mat-card-header>
+    <!-- HEADER -->
+    <mat-card-header>
+      <mat-card-title class="text-center">
+        <!-- Titre dynamique selon le mode -->
+        <ng-container [ngSwitch]="mode">
+          <span *ngSwitchCase="'login'">Se connecter</span>
+          <span *ngSwitchCase="'forgot'">Mot de passe oublié</span>
+          <span *ngSwitchCase="'otp'">Vérification OTP</span>
+          <span *ngSwitchCase="'reset'">Nouveau mot de passe</span>
+        </ng-container>
+      </mat-card-title>
 
-  <mat-card-content>
-    <!-- Formulaire de connexion -->
-    <form *ngIf="!showOtpSection" [formGroup]="loginForm" (ngSubmit)="onSubmitCredentials()">
-      <mat-form-field appearance="outline">
-        <mat-label>Nom d'utilisateur</mat-label>
-        <input matInput formControlName="username">
-        <mat-icon matSuffix>person</mat-icon>
-        <mat-error>Champ obligatoire</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Mot de passe</mat-label>
-        <input matInput 
-               type="password" 
-               formControlName="password"
-               [type]="hidePassword ? 'password' : 'text'">
-        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-        <mat-error>Champ obligatoire</mat-error>
-      </mat-form-field>
-
-      <button mat-raised-button 
-              color="primary" 
-              type="submit"
-              [disabled]="loginForm.invalid || isLoading"
-              class="submit-button">
-        <span *ngIf="!isLoading">Se connecter</span>
-        <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
-      </button>
-    </form>
-
-    <!-- Formulaire OTP -->
-    <form *ngIf="showOtpSection" [formGroup]="otpForm" (ngSubmit)="onSubmitOtp()">
-      <p class="otp-instructions">
-        Un code de vérification à 6 chiffres a été envoyé à votre adresse email.
+      <!-- Sous-phrase uniquement en mode login -->
+      <p class="login-subtitle" *ngIf="mode === 'login'">
+        Heureux de vous revoir ! Connectez-vous à votre espace.
       </p>
+    </mat-card-header>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Code OTP</mat-label>
-        <input matInput 
-               formControlName="code" 
-               maxlength="6"
-               inputmode="numeric">
-        <mat-icon matSuffix>lock</mat-icon>
-        <mat-error *ngIf="otpForm.get('code')?.hasError('required')">
-          Code obligatoire
-        </mat-error>
-        <mat-error *ngIf="otpForm.get('code')?.hasError('pattern')">
-          Format invalide (6 chiffres requis)
-        </mat-error>
-      </mat-form-field>
+    <mat-card-content>
+      <!-- Barre de progression en chargement global -->
+      <mat-progress-bar class="global-progress-bar" mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+      <!-- 1) LOGIN FORM -->
+      <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="onSubmitCredentials()">
+        <mat-form-field appearance="outline">
+          <mat-label>Nom d'utilisateur</mat-label>
+          <input matInput formControlName="username" />
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error>Champ obligatoire</mat-error>
+        </mat-form-field>
 
-      <div class="button-group">
-        <button mat-stroked-button 
-                type="button"
-                (click)="showOtpSection = false">
-          Retour
-        </button>
-        
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput 
+                 [type]="hidePassword ? 'password' : 'text'" 
+                 formControlName="password" />
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>Champ obligatoire</mat-error>
+        </mat-form-field>
+
+        <!-- Lien mot de passe oublié -->
+        <div class="footer-links">
+          <a class="forgot-link" (click)="mode='forgot'">Mot de passe oublié ?</a>
+        </div>
+
         <button mat-raised-button 
                 color="primary" 
-                type="submit"
-                [disabled]="otpForm.invalid || isLoading"
+                type="submit" 
+                [disabled]="loginForm.invalid || isLoading" 
                 class="submit-button">
-          <span *ngIf="!isLoading">Vérifier</span>
+          <span *ngIf="!isLoading">Se connecter</span>
           <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
         </button>
-      </div>
-    </form>
+      </form>
 
-    <!--<div class="register-link">
-      <a mat-button routerLink="/register">
-        <mat-icon>person_add</mat-icon>
-        Créer un compte
-      </a>
-    </div>-->
-  </mat-card-content>
+      <!-- 2) FORGOT PASSWORD FORM -->
+      <form *ngIf="mode === 'forgot'" [formGroup]="forgotForm" (ngSubmit)="onForgot()">
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse email</mat-label>
+          <input matInput formControlName="email" />
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error>Veuillez entrer un email valide</mat-error>
+        </mat-form-field>
 
-  <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+        <div class="button-group">
+          <button mat-stroked-button 
+                  type="button" 
+                  (click)="mode='login'">
+            Annuler
+          </button>
+          <button mat-raised-button 
+                  color="accent" 
+                  type="submit" 
+                  [disabled]="forgotForm.invalid || isLoading" 
+                  class="submit-button">
+            <span *ngIf="!isLoading">Envoyer code OTP</span>
+            <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+          </button>
+        </div>
+      </form>
+
+      <!-- 3) OTP VERIFICATION FORM -->
+      <form *ngIf="mode === 'otp'" [formGroup]="otpForm" (ngSubmit)="onSubmitOtp()">
+        <p class="otp-instructions">
+          Un code de vérification à 6 chiffres a été envoyé à votre adresse email.
+        </p>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Code OTP</mat-label>
+          <input matInput 
+                 formControlName="code" 
+                 maxlength="6" 
+                 inputmode="numeric" />
+          <mat-icon matSuffix>lock</mat-icon>
+          <mat-error *ngIf="otpForm.get('code')?.hasError('required')">
+            Code obligatoire
+          </mat-error>
+          <mat-error *ngIf="otpForm.get('code')?.hasError('pattern')">
+            Format invalide (6 chiffres requis)
+          </mat-error>
+        </mat-form-field>
+
+        <div class="button-group">
+          <button mat-stroked-button 
+                  type="button" 
+                  (click)="mode='login'">
+            Annuler
+          </button>
+          <button mat-raised-button 
+                  color="primary" 
+                  type="submit" 
+                  [disabled]="otpForm.invalid || isLoading" 
+                  class="submit-button">
+            <span *ngIf="!isLoading">Vérifier</span>
+            <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+          </button>
+        </div>
+      </form>
+
+      <!-- 4) RESET PASSWORD FORM -->
+      <form *ngIf="mode === 'reset'" [formGroup]="resetForm" (ngSubmit)="onResetPassword()">
+        <mat-form-field appearance="outline">
+          <mat-label>Nouveau mot de passe</mat-label>
+          <input matInput 
+                 type="password" 
+                 formControlName="newPassword" />
+          <mat-error *ngIf="resetForm.get('newPassword')?.hasError('required')">
+            Champ obligatoire
+          </mat-error>
+          <mat-error *ngIf="resetForm.get('newPassword')?.hasError('minlength')">
+            Minimum 6 caractères
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmer mot de passe</mat-label>
+          <input matInput 
+                 type="password" 
+                 formControlName="confirmPwd" />
+          <mat-error *ngIf="resetForm.hasError('mismatch')">
+            Les mots de passe ne correspondent pas
+          </mat-error>
+        </mat-form-field>
+
+        <div class="button-group">
+          <button mat-stroked-button 
+                  type="button" 
+                  (click)="mode='login'">
+            Annuler
+          </button>
+          <button mat-raised-button 
+                  color="primary" 
+                  type="submit" 
+                  [disabled]="resetForm.invalid || isLoading" 
+                  class="submit-button">
+            <span *ngIf="!isLoading">Valider</span>
+            <mat-spinner *ngIf="isLoading" diameter="24"></mat-spinner>
+          </button>
+        </div>
+      </form>
+
+    </mat-card-content>
+
+
 </mat-card>
 </div>

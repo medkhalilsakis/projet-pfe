@@ -1,13 +1,7 @@
-/* login.component.css */
 .cyber-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed; inset: 0;
   background: #0a192f;
-  overflow: hidden;
-  z-index: 0;
+  overflow: hidden; z-index: 0;
 }
 
 .network-lines {
@@ -72,110 +66,197 @@
   100% { background-position: 20% 80%, 80% 20%; }
 }
 
-/* Styles pour le formulaire */
-.login-container {
-  position: relative;
-  z-index: 1;
-  width: 90%;
-  max-width: 500px;
-  margin: 2rem auto;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transform: translateZ(0);
+/* ===========================================
+   2. Conteneur principal du formulaire (sans border)
+   =========================================== */
+   .login-container {
+    position: relative;
+    z-index: 1;
+    max-width: 380px;
+    width: 92%;
+    margin: 10vh auto;
+    padding: 2.5rem 2rem;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.85), rgba(220,220,255,0.65)),
+      rgba(255,255,255,0.30);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .login-container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* ===========================================
+     3. Titre & sous-titre (stacked)
+     =========================================== */
+     mat-card-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 1rem;
+    }
+    mat-card-title {
+      font-size: 1.85rem !important;
+      font-weight: 700 !important;
+      color: #0a192f;
+      margin: 0;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .login-subtitle {
+      font-size: 0.95rem;
+      color: #444;
+      margin: 0.25rem 0 1.25rem;
+      text-align: center;
+      width: 100%;
+    }
+  
+  /* ===========================================
+     4. Champs de formulaire
+     =========================================== */
+  mat-form-field {
+    width: 100%; margin-bottom: 1.3rem;
+  }
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    border-color: #bbb;
+  }
+  .mat-form-field.mat-focused .mat-form-field-outline-thick {
+    border-color: #0066ff !important;
+    border-width: 2px !important;
+  }
+  .mat-form-field .mat-form-field-flex {
+    background: #fff; border-radius: 8px;
+    padding: 0 0.5rem;
+  }
+  .mat-form-field .mat-form-field-label {
+    color: #555; font-weight: 500;
+  }
+  .mat-form-field input {
+    color: #222;
+  }
+  .mat-form-field .mat-icon {
+    color: #888;
+  }
+  
+  /* ===========================================
+     5. Bouton « Se connecter » (bleu)
+     =========================================== */
+  .submit-button {
+    width: 100%; height: 48px;
+    margin-top: 0.6rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #0066ff, #00ccff);
+    color: #fff; border: none; border-radius: 24px;
+    position: relative; overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .submit-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(0, 204, 255, 0.4);
+  }
+  .submit-button::after {
+    content: "";
+    position: absolute; inset: -50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 70%);
+    animation: ripple 1.6s ease-out infinite;
+  }
+  @keyframes ripple {
+    from { transform: scale(0.6); opacity: 0.6; }
+    to   { transform: scale(2);   opacity: 0;   }
+  }
+  
+  /* ===========================================
+     6. Instructions OTP
+     =========================================== */
+  .otp-instructions {
+    text-align: center; color: #333;
+    margin-bottom: 1rem; font-size: 0.95rem;
+  }
+  
+  /* ===========================================
+     7. Alignement et style boutons OTP
+     =========================================== */
+  /* 1. Assurer un même box-sizing pour l’inclusion des bordures */
+.button-group button {
+  box-sizing: border-box;
 }
 
-.mat-form-field {
-  margin: 1rem 0;
-}
-
-.mat-card-title {
-  color: #0a192f;
-  font-size: 2rem !important;
-  font-weight: 700 !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.submit-button {
-  transition: all 0.3s ease;
-  background: linear-gradient(45deg, #0066ff, #00ccff);
-  position: relative;
-  overflow: hidden;
-}
-
-.submit-button::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, 
-    transparent 25%,
-    rgba(255,255,255,0.2) 50%,
-    transparent 75%);
-  animation: buttonGlow 3s infinite linear;
-}
-
-@keyframes buttonGlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-
-.login-container {
-  max-width: 500px;
-  margin: 2rem auto;
-  padding: 2rem;
-}
-
-mat-card-title {
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin-bottom: 2rem !important;
-}
-
-mat-form-field {
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-.submit-button {
-  width: 100%;
-  height: 45px;
-  margin-top: 1rem;
-}
-
+/* 2. Flex & centrage vertical/horizontal */
 .button-group {
   display: flex;
+  justify-content: space-between; /* garde retour à gauche, vérifier à droite */
+  align-items: center;            /* aligne verticalement */
   gap: 1rem;
-  margin-top: 1.5rem;
 }
 
+/* 3. Même hauteur & centrage du contenu */
 .button-group button {
   flex: 1;
-}
-
-.code-instructions {
-  margin: 1.5rem 0;
-  text-align: center;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.register-link {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.register-link a {
-  text-decoration: none;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  height: 44px;    /* identique pour les deux */
+  padding: 0 1rem;
+  border-radius: 22px;
 }
 
-.text-center {
-  text-align: center;
+/* 4. Style du bouton Retour (outline vert) */
+.button-group .mat-stroked-button {
+  border: 2px solid #28a745;
+  background: none;
+  color: #28a745;
+}
+
+/* 5. Style du bouton Vérifier (dégradé vert) */
+.button-group .submit-button {
+  background: linear-gradient(135deg, #28a745, #85e085);
+  color: #fff;
+  border: none;
+}
+/* ===============================
+   8. Style et position du lien "Mot de passe oublié ?"
+   =============================== */
+   .footer-links {
+    text-align: center;
+    margin-bottom: 0.5rem;      /* espace sous les champs */
+  }
+  
+  .forgot-link {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #0066ff;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  
+  .forgot-link:hover {
+    color: #004bb5;
+  }
+
+
+/* barre de chargement positionnée en haut du contenu, espacée */
+.global-progress-bar {
+  display: block;
+  width: 100%;
+  height: 5px;
+  margin-bottom: 1.5rem;       /* espace entre la barre et le début du formulaire */
+  border-radius: 3px;          /* coins arrondis */
+  overflow: hidden;
+}
+
+/* couleur du fill */
+.global-progress-bar .mat-progress-bar-fill::after {
+  background-color: #00ccff !important;
+}
+
+/* légère ombre portée pour plus de relief */
+.global-progress-bar {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }

@@ -147,6 +147,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { label: 'Messagerie',      icon: 'message',      action: () => this.navigateTo('messages') },
       { label: 'Notifications',   icon: 'notifications',action: () => this.navigateTo('notifications') },
       { label: 'Paramètres',      icon: 'settings',     action: () => this.navigateTo('settings') },
+      { label: 'Analytics',      icon: 'analytics',     action: () => this.navigateTo('analytics') },
     ];
 
     if (role === 3) {
@@ -164,7 +165,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { label: 'Projets terminés',     action: () => this.navigateTo('projects/completed') }
           ]
         },
-        { label: 'Ajouter Utilisateur',   icon: 'add',    action: () => this.navigateTo('add-user') },
         { label: 'Gestion Utilisateurs',  icon: 'people', action: () => this.navigateTo('users') }
       ];
     }
