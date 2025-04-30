@@ -1,11 +1,14 @@
 package com.projet.pp.service;
 
 import com.projet.pp.model.Project;
+import com.projet.pp.model.TestOutcome;
+
 import com.projet.pp.model.ProjectTesterAssignment;
 import com.projet.pp.model.TestStatus;
 import com.projet.pp.model.User;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.ProjectTesterAssignmentRepository;
+import com.projet.pp.repository.TestResultRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TesterAssignmentService {
@@ -26,6 +33,8 @@ public class TesterAssignmentService {
 
     @Autowired
     private ProjectTesterAssignmentRepository assignRepo;
+    @Autowired
+    private TestResultRepository testResultRepo;
 
     public List<Project> getPendingProjects() {
         return projectRepo.findByStatus(1);
@@ -144,6 +153,40 @@ public class TesterAssignmentService {
         project.setStatus(2);
         projectRepo.save(project);
     }
+    public List<Long> getProjectIdsByTesterId(Long testerId) {
+        List<ProjectTesterAssignment> assignments = assignRepo.findByTesteur_Id(testerId);
+        List<Long> projectIds = new ArrayList<>();
 
+        for (ProjectTesterAssignment assignment : assignments) {
+            projectIds.add(assignment.getProject().getId()); // Assure-toi que getProject() renvoie bien un objet Project
+        }
+
+        return projectIds;
+    }
+
+    public Map<String, Object> getTestStats() {
+            long total   = testResultRepo.count();
+            long success = testResultRepo.countByTestOutcome(TestOutcome.success);
+            long failed  = testResultRepo.countByTestOutcome(TestOutcome.failure);
+
+            Map<String, Object> stats = new LinkedHashMap<>();
+            stats.put("total",   total);
+            stats.put("success", success);
+            stats.put("failed",  failed);
+            return stats;
+        }
+    public Map<String, Object> getTesterStats(long id) {
+        long total   = testResultRepo.countByAssignment_Testeur_Id(id);
+        long success = testResultRepo.countByAssignment_Testeur_IdAndTestOutcome(id,TestOutcome.success);
+        long failed  = testResultRepo.countByAssignment_Testeur_IdAndTestOutcome(id,TestOutcome.failure);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("total",   total);
+        stats.put("success", success);
+        stats.put("failed",  failed);
+        return stats;
+    }
 
 }
+
+

@@ -19,6 +19,7 @@ import { AddUserComponent } from './add-user/add-user.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { DesignationTesteurComponent } from './projects/designation-testeur/designation-testeur.component';
 import { TaskDetailComponent } from './task-boad/task-detail/task-detail.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -45,7 +46,8 @@ import { TaskDetailComponent } from './task-boad/task-detail/task-detail.compone
     UploadComponent,
     AddUserComponent,
     MatExpansionModule,
-    DesignationTesteurComponent
+    DesignationTesteurComponent,
+    AnalyticsComponent
   ],
 })
 export class DashboardComponent {
@@ -78,7 +80,10 @@ export class DashboardComponent {
     const role = this.currentUser.role.id;
     const baseMenu = [
       { label: 'Vue d\'ensemble', icon: 'dashboard', action: () => this.navigateTo('overview') },
-      { label: 'Upload Projet', icon: 'cloud_upload', action: () => this.navigateTo('upload') },
+      { label: 'Upload Projet', icon: 'cloud_upload', action: () =>{
+        this.selectedTask.set(null); // Clear task when from menu
+        this.navigateTo('upload') }
+      } ,
       { label: 'Messagerie', icon: 'message', action: () => this.navigateTo('messages') },
       { label: 'Analytics', icon: 'insights', action: () => this.navigateTo('analytics') },
       { label: 'Notifications', icon: 'notifications', action: () => this.navigateTo('notifications') },
@@ -118,7 +123,7 @@ export class DashboardComponent {
             icon: 'list_alt',
             subMenu: [
 
-              { label: 'Projets à tester', icon: 'assignment', action: () => this.navigateTo('projects?type=to-test') },
+              { label: 'Projets à tester', icon: 'assignment', action: () => this.navigateTo('projects') },
     
               { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects?type=in-progress') },
               { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects?type=completed') }

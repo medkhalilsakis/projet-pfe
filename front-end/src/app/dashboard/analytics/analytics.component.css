@@ -1,0 +1,308 @@
+        .dashboard {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            flex-direction: column;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .dashboard-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .export-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .export-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 20px;
+        }
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+           width: 550px;
+            flex-direction: column;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .summary-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .metric-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .metric {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .metric-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .metric-label {
+            display: block;
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .sub-metrics {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .sub-metrics h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        
+        
+        .chart-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 18px;
+        }
+        
+        .wide-card {
+            grid-column: span 2;
+            
+        }
+        
+        
+        
+        .performance-section {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .performance-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 18px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tabs button {
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            margin-right: 5px;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tabs button.active {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .performance-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .performance-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .performance-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .performance-metric {
+            text-align: center;
+        }
+        
+        .performance-metric .metric-value {
+            font-size: 18px;
+            color: #3498db;
+        }
+        
+        .performance-metric .metric-label {
+            font-size: 11px;
+            color: #95a5a6;
+        }
+        @media print {
+            .dashboard {
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            grid-template-columns: 1fr !important; /* Force single column */  
+            margin: 0 !important;
+            padding: 10px !important;  
+            }
+            .summary-card {
+                width: 100% !important;
+                margin-bottom: 20px;
+              }
+              
+            
+            ngx-charts-line-chart {
+                width: 100% !important; /* Make the chart take full width in the PDF */
+                height: calc(100% - 100px) !important; /* Account for title */
+                min-height: 400px !important; /* Ensure a reasonable minimum height */
+                display: flex;
+
+              }
+              .chart-card, .performance-section {
+                width: 100% !important;
+                margin-bottom: 20px;
+              }
+            
+              ngx-charts-advanced-pie-chart, ngx-charts-pie-chart {
+                width: 400px !important; /* Fixed width for consistency */
+                height: 300px !important;
+              }
+            
+              /* Hide non-essential elements */
+              .export-btn, .tabs button {
+                display: none !important;
+              }
+            
+            .chart-card {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            height: fit-content !important; /* Prevent overflow */
+            }
+            
+            .performance-section {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            page-break-before: always !important; /* Start on new page */
+
+
+            }
+            .performance-grid {
+                page-break-inside: avoid;
+                display: flex;
+                break-inside: avoid-page !important;
+                grid-template-columns: 1fr !important; /* Single column */
+                gap: 12px !important;
+                margin-bottom: 8px !important;
+
+                  }
+                  .metric-group{
+                    margin-bottom: 8px !important;
+                  }
+                  .metric-value {
+                    font-size: 20px !important; /* Smaller text for tight spaces */
+                  }
+        
+        body * {
+            visibility: hidden;
+        }
+        #dashboard-content, #dashboard-content * {
+            visibility: visible;
+        }
+        #dashboard-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        ngx-charts-advanced-pie-chart, 
+        ngx-charts-pie-chart,
+        ngx-charts-bar-vertical,
+        ngx-charts-line-chart {
+          width: 100% !important;
+          height: 300px !important; /* Fixed height */
+          min-height: unset !important;
+        }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        

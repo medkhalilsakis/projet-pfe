@@ -77,6 +77,11 @@ export class ProjectsComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+  isdeveloper(){
+    let user = this.sessionStorage.getUser();
+    this.userRole = user.role.id;
+    return this.userRole===1;
+  }
   
 
   loadProjects(): void {
@@ -100,8 +105,10 @@ export class ProjectsComponent implements OnInit {
     this.http.get<Project[]>(endpoint)
       .subscribe({
         next: (data: Project[]) => {
+          console.log(data);
           this.projects = data;
           this.filteredProjects = data; // initialement, aucun filtre
+          console.log(this.filteredProjects);
           this.loading = false;
         },
         error: (err) => {
@@ -171,4 +178,43 @@ export class ProjectsComponent implements OnInit {
       default: return 'Inconnu';
     }
   }
+  downloadTestCase(project:Project){
+    this.http.get<any[]>(`http://localhost:8080/api/taches`).subscribe({
+      next: (data) => {
+        let tasks = data;
+        for (let task of tasks){
+          console.log(task.project)
+          console.log(project)
+          if (task.project && task.project.id==project.id){
+            console.log(task.testCasesPdf)
+
+            const filePath = task.testCasesPdf;
+          if (filePath) {
+            this.downloadFile(filePath);
+          }
+        }
+      }
+    }
+  })
+  }
+
+
+  downloadFile(filePath: string) {
+    console.log(filePath);
+    let normalizedPath = filePath.replace(/^uploads[\\/]/, '');
+    normalizedPath=normalizedPath+".pdf";
+
+    const downloadUrl = `http://localhost:8080/api/taches/download?filePath=${encodeURIComponent(normalizedPath)}`;
+    
+    // Create a hidden anchor tag to trigger download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank';
+    link.download = normalizedPath.split('/').pop() || 'download.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+  
+  
 }

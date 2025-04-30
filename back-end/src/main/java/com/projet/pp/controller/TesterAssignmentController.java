@@ -16,6 +16,8 @@ public class TesterAssignmentController {
 
     @Autowired
     private TesterAssignmentService service;
+    @Autowired
+    private TesterAssignmentService testerAssignmentService;
 
     // 1) Projets en attente (status = 1)
     @GetMapping("/pending-projects")
@@ -89,6 +91,21 @@ public class TesterAssignmentController {
         service.resumeTestingPhase(projectId, testerIds, superviseurId);
         return ResponseEntity.ok("Phase de testing relancée pour le projet");
     }
+    @GetMapping("stats")
+    public ResponseEntity<Map<String, Object>> stats() {
+        Map<String, Object> testStats = testerAssignmentService.getTestStats();
+        System.out.println(testStats);
+
+        return ResponseEntity.ok(testStats);
+    }
+    @GetMapping("stats/{id}")
+    public ResponseEntity<Map<String, Object>> testerStats(@PathVariable Long id) {
+        Map<String, Object> testStats = testerAssignmentService.getTesterStats(id);
+        System.out.println(testStats);
+
+        return ResponseEntity.ok(testStats);
+    }
+
 
 
 

@@ -5,6 +5,9 @@
     </mat-card-header>
   
     <mat-card-content>
+      <mat-card-title>
+        {{ task ? 'Upload Project for Task: ' + task.name : 'Upload New Project' }}
+      </mat-card-title>
       <div class="drop-zone" 
            (drop)="onDrop($event)"
            (dragover)="$event.preventDefault()"

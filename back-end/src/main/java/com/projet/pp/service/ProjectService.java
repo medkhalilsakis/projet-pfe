@@ -1,5 +1,6 @@
 package com.projet.pp.service;
 
+import com.projet.pp.controller.TesterAssignmentController;
 import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.ProjectFile;
@@ -7,6 +8,7 @@ import com.projet.pp.model.User;
 import com.projet.pp.model.ItemType;
 import com.projet.pp.repository.ProjectFileRepository;
 import com.projet.pp.repository.ProjectRepository;
+import com.projet.pp.repository.ProjectTesterAssignmentRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ public class ProjectService {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private ProjectTesterAssignmentRepository projectTesterAssignmentRepo;
 
     @Autowired
     private ProjectFileRepository projectFileRepository;
@@ -307,5 +312,144 @@ public class ProjectService {
     public List<ProjectFile> getFilesByProjectIdAndParentId(Long projectId, Long parentId) {
         return projectFileRepository.findByProjectIdAndParentId(projectId, parentId);
     }
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id).orElse(null);
+    }
+    public long getWeek() {
+        return countByStatusInLastDays(5, 7);
+    }
+
+    /** Completed projects in the last 30 days */
+    public long getMonth() {
+        return countByStatusInLastDays(5, 30);
+    }
+
+    /** Completed projects in the last 365 days */
+    public long getYear() {
+        return countByStatusInLastDays(5, 365);
+    }
+
+    /** Projects that entered “Testing” (status = 4) in the last 7 days */
+    public long getToTestingWeek() {
+        return countByStatusInLastDays(2, 7);
+    }
+
+    /** Projects that entered “Testing” in the last 30 days */
+    public long getToTestingMonth() {
+        return countByStatusInLastDays(2, 30);
+    }
+
+    /** Projects that entered “Testing” in the last 365 days */
+    public long getToTestingYear() {
+        return countByStatusInLastDays(2, 365);
+    }
+
+    /** Total number of projects in the database */
+    public long getTotalProjects() {
+        return projectRepository.count();
+    }
+
+
+
+    public long getWeekAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(5, 7 ,id);
+    }
+
+    /** Completed projects in the last 30 days */
+    public long getMonthAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(5, 30,id);
+    }
+
+    /** Completed projects in the last 365 days */
+    public long getYearAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(5, 365,id);
+    }
+
+    /** Projects that entered “Testing” (status = 4) in the last 7 days */
+    public long getToTestingWeekAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(2, 7,id);
+    }
+
+    /** Projects that entered “Testing” in the last 30 days */
+    public long getToTestingMonthAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(2, 30,id);
+    }
+
+    /** Projects that entered “Testing” in the last 365 days */
+    public long getToTestingYearAndUserId(long id) {
+        return countByStatusInLastDaysAndUserId(2, 365,id);
+    }
+
+    /** Total number of projects in the database */
+    public long getTotalProjectsAndUserId() {
+        return projectRepository.count();
+    }
+
+    // ——— Private Helper ———
+
+    /**
+     * DRY helper: count projects by `status` whose updatedAt timestamp
+     * falls within [now − days, now].
+     */
+
+
+
+
+    public long getWeekAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(5, 7 ,id);
+    }
+
+    /** Completed projects in the last 30 days */
+    public long getMonthAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(5, 30,id);
+    }
+
+    /** Completed projects in the last 365 days */
+    public long getYearAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(5, 365,id);
+    }
+
+    /** Projects that entered “Testing” (status = 4) in the last 7 days */
+    public long getToTestingWeekAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(2, 7,id);
+    }
+
+    /** Projects that entered “Testing” in the last 30 days */
+    public long getToTestingMonthAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(2, 30,id);
+    }
+
+    /** Projects that entered “Testing” in the last 365 days */
+    public long getToTestingYearAndTesteurId(long id) {
+        return countByStatusInLastDaysAndTesteurId(2, 365,id);
+    }
+
+    /** Total number of projects in the database */
+    public long getTotalProjectsAndTesteurId() {
+        return projectRepository.count();
+    }
+
+
+
+
+    private long countByStatusInLastDays(int status, int days) {
+        LocalDateTime now  = LocalDateTime.now();
+        LocalDateTime from = now.minusDays(days);
+        return projectRepository.countByStatusAndUpdatedAtBetween(status, from, now);
+    }
+    private long countByStatusInLastDaysAndUserId(int status, int days ,long id) {
+        LocalDateTime now  = LocalDateTime.now();
+        LocalDateTime from = now.minusDays(days);
+        return projectRepository.countByUser_IdAndStatusAndUpdatedAtBetween(id ,status, from, now);
+    }
+
+    private long countByStatusInLastDaysAndTesteurId(int projectStatus, int days ,long id) {
+        LocalDateTime now  = LocalDateTime.now();
+        LocalDateTime from = now.minusDays(days);
+        return projectTesterAssignmentRepo.countProjectsByTesteur_IdAndProject_StatusAndProject_UpdatedAtBetween(id ,projectStatus, from, now);
+    }
+
+
+
 
 }

@@ -4,6 +4,9 @@ import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.ProjectFile;
 import com.projet.pp.service.ProjectService;
+import com.projet.pp.service.TacheService;
+import com.projet.pp.service.TesterAssignmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -21,6 +22,11 @@ public class ProjectController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private TesterAssignmentService testerAssignmentService;
+    @Autowired
+    private TacheService tacheService;
 
     @GetMapping
     public ResponseEntity<List<Project>> getAllProjects() {
@@ -30,6 +36,7 @@ public class ProjectController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadProject(@RequestParam("files") MultipartFile[] files,
+                                           @RequestParam(value = "taskId", required = false) Long taskId,
                                            @RequestParam(value = "decompress", defaultValue = "false") boolean decompress,
                                            @RequestParam("userId") Long userId) {
         try {
@@ -37,6 +44,11 @@ public class ProjectController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Fichiers uploadés avec succès");
             response.put("projectId", projectId);
+            System.out.println("task" + taskId);
+            if (taskId != null) {
+                Project project = projectService.getProjectById(projectId);
+                tacheService.linkTaskToProject(taskId, project);
+            }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +83,27 @@ public class ProjectController {
         try {
             List<Project> projects = projectService.getProjectsByUserId(userId);
             return ResponseEntity.ok(projects);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Erreur lors de la récupération des projets : " + e.getMessage());
+        }
+    }
+    @GetMapping("/tester/{userId}")
+    public ResponseEntity<?> getProjectsByTester(@PathVariable("userId") Long userId) {
+        try {
+            List<Long> ids = testerAssignmentService.getProjectIdsByTesterId(userId);
+            List<Project> projects = new ArrayList<>();
+
+            for (Long id : ids) {
+                Project project = projectService.getProjectById(id); // suppose que cette méthode existe
+                if (project != null) {
+                    projects.add(project);
+                }
+            }
+
+            return ResponseEntity.ok(projects);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)
@@ -167,4 +200,54 @@ public class ProjectController {
         List<ProjectFile> saved = projectService.addFiles(projectId, parentId, files);
         return ResponseEntity.ok(saved);
     }
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String,Object>> getProjectStats() {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeek(),
+                "month", projectService.getToTestingMonth(),
+                "year",  projectService.getToTestingYear()
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeek());
+        root.put("month",           projectService.getMonth());
+        root.put("year",            projectService.getYear());
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<Map<String,Object>> getProjectStats(@PathVariable Long id) {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeekAndUserId(id),
+                "month", projectService.getToTestingMonthAndUserId(id),
+                "year",  projectService.getToTestingYearAndUserId(id)
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeekAndUserId( id));
+        root.put("month",           projectService.getMonthAndUserId(id));
+        root.put("year",            projectService.getYearAndUserId(id));
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+    @GetMapping("/stats/tester/{id}")
+    public ResponseEntity<Map<String,Object>> getProjectTesterStats(@PathVariable Long id) {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeekAndTesteurId(id),
+                "month", projectService.getToTestingMonthAndTesteurId(id),
+                "year",  projectService.getToTestingYearAndTesteurId(id)
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeekAndTesteurId( id));
+        root.put("month",           projectService.getMonthAndTesteurId(id));
+        root.put("year",            projectService.getYearAndTesteurId(id));
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+
 }

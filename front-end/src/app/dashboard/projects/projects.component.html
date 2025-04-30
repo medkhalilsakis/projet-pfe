@@ -24,8 +24,13 @@
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <p>{{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}</p>
-        <div class="status-container">
+        <p *ngIf="project.description">
+          {{ project.description | slice:0:100 }}{{ project.description.length > 100 ? '...' : '' }}
+        </p>
+        <p *ngIf="!project.description">
+          Aucune description
+        </p>
+                <div class="status-container">
           <div class="status-circle" [ngStyle]="{'background-color': getStatusColor(project.status)}"></div>
           <span class="status-label">{{ getStatusLabel(project.status) }}</span>
         </div>
@@ -43,6 +48,9 @@
         <button mat-icon-button color="warn" (click)="deleteProject(project)">
           <mat-icon>delete</mat-icon>
         </button>
+        <button *ngIf="!isdeveloper()" mat-icon-button color="warn" (click)="downloadTestCase(project)">
+          <mat-icon>checklist</mat-icon>
+        </button> 
       </mat-card-actions>
     </mat-card>
 

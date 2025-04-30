@@ -31,7 +31,36 @@ public class SecurityConfig {
 
                         // vos autres règles existantes...
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/projects/upload", "/api/assignments/**","/api/assignments/testing-projects", "/api/chat/**" ,"/api/projects/user/**", "/api/users/**", "/api/users/signup","/api/users/send-otp**", "/api/users/verify-otp", "api/taches" ,"api/taches/create**", "api/taches/update/**","api/taches/download").permitAll()
+                        .requestMatchers("/api/projects/upload",
+                                "/api/projects/**",
+                                "/api/projects",
+                                "/api/projects/tester/**",
+                                "/api/assignments/**",
+                                "/api/assignments/testing-projects",
+                                "/api/chat/**" ,
+                                "/api/projects/user/**",
+                                "/api/users/**",
+                                "/api/users/signup",
+                                "/api/users/send-otp**",
+                                "/api/users/verify-otp",
+                                "/api/taches" ,
+                                "/api/taches/create**",
+                                "/api/taches/update/**",
+                                "/api/taches/download",
+                                "/api/test/stats",    // if you have thi
+                                "/api/projects/stats**",
+                                "/api/taches/stats**",
+                                "/api/test/stats**",
+                                "/api/users/devstats/**",    // Corrected pattern
+                                "/api/users/testerstats/**",
+                                "/api/users/testerstats**",
+                                "/api/users/devstats**",
+                                "/api/taches/stats/**",
+                                "/api/projects/stats/tester/**",
+                                "/api/assignments/stats/**",
+                                "/api/users/testerstats**",
+                                "/api/users/testerstats/**"
+                                ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

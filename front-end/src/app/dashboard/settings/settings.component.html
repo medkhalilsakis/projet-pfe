@@ -1,0 +1,100 @@
+<mat-card class="form-card">
+    <!-- Title 1: Personal Info -->
+    <mat-card-title>Modifier les données personnelles</mat-card-title>
+    <form [formGroup]="updateUserForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom" required />
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="prenom" required />
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline">
+        <mat-label>Numéro carte d'identité</mat-label>
+        <input matInput formControlName="ncin" />
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline">
+        <mat-label>Nom d'utilisateur</mat-label>
+        <input matInput formControlName="username" required />
+      </mat-form-field>
+  
+      <button mat-raised-button color="primary" type="submit" [disabled]="updateUserForm.invalid">
+        Mettre à jour les informations
+      </button>
+    </form>
+  
+    <!-- Title 2: Change Email -->
+    <mat-divider class="my-4"></mat-divider>
+    <mat-card-title>Modifier l' email</mat-card-title>
+  
+    <div *ngIf="!emailStepStarted">
+      <button mat-stroked-button color="accent" (click)="startEmailChange()">Changer l'email</button>
+    </div>
+  
+    <div *ngIf="emailStepStarted && !emailVerified">
+      <mat-form-field appearance="outline">
+        <mat-label>Email actuel</mat-label>
+        <input matInput [(ngModel)]="currentEmailInput" name="currentEmailInput" />
+      </mat-form-field>
+      <button mat-button (click)="verifyCurrentEmail()">Vérifier</button>
+    </div>
+  
+    <div *ngIf="emailVerified && !otpVerifiedEmail">
+      <p>Un OTP a été envoyé à votre adresse e-mail actuelle.</p>
+      <mat-form-field appearance="outline">
+        <mat-label>Code OTP</mat-label>
+        <input matInput [(ngModel)]="otpEmailInput" name="otpEmailInput" />
+      </mat-form-field>
+      <button mat-button (click)="verifyOtpForEmail()">Vérifier OTP</button>
+    </div>
+  
+    <div *ngIf="otpVerifiedEmail">
+      <mat-form-field appearance="outline">
+        <mat-label>Nouvel Email</mat-label>
+        <input matInput [(ngModel)]="newEmailInput" name="newEmailInput" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="confirmNewEmail()">Confirmer</button>
+    </div>
+  
+    <!-- Title 3: Change Password -->
+    <mat-divider class="my-4"></mat-divider>
+    <h2>Modifier le mot de passe</h2>
+  
+    <div *ngIf="!passwordStepStarted">
+      <button mat-stroked-button color="accent" (click)="startPasswordChange()">Changer le mot de passe</button>
+    </div>
+  
+    <div *ngIf="passwordStepStarted && !passwordVerified">
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe actuel</mat-label>
+        <input matInput type="password" [(ngModel)]="currentPasswordInput" name="currentPasswordInput" />
+      </mat-form-field>
+      <button mat-button (click)="verifyCurrentPassword()">Vérifier</button>
+    </div>
+  
+    <div *ngIf="passwordVerified && !otpVerifiedPassword">
+      <p>Un OTP a été envoyé à votre e-mail.</p>
+      <mat-form-field appearance="outline">
+        <mat-label>Code OTP</mat-label>
+        <input matInput [(ngModel)]="otpPasswordInput" name="otpPasswordInput" />
+      </mat-form-field>
+      <button mat-button (click)="verifyOtpForPassword()">Vérifier OTP</button>
+    </div>
+  
+    <div *ngIf="otpVerifiedPassword">
+      <mat-form-field appearance="outline">
+        <mat-label>Nouveau mot de passe</mat-label>
+        <input matInput type="password" [(ngModel)]="newPasswordInput" name="newPasswordInput" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmer le mot de passe</mat-label>
+        <input matInput type="password" [(ngModel)]="confirmPasswordInput" name="confirmPasswordInput" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="confirmNewPassword()">Confirmer</button>
+    </div>
+  </mat-card>
+  

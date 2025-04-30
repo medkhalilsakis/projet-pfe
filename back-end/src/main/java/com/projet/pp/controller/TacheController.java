@@ -1,6 +1,7 @@
 package com.projet.pp.controller;
 import com.projet.pp.model.Tache;
 import com.projet.pp.model.User;
+import com.projet.pp.model.TestStatus;
 import com.projet.pp.service.TacheService;
 import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 @RestController
@@ -232,5 +230,34 @@ public class TacheController {
             System.err.println(e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String,Object>> getTacheStats() {
+
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("completed",            tacheService.getByStatus(Tache.Status.terminé));
+        root.put("inDev",           tacheService.getByStatus(Tache.Status.a_developper));
+        root.put("inTest",            tacheService.getByStatus(Tache.Status.en_test));
+        root.put("closed",       tacheService.getByStatus(Tache.Status.cloturé));
+        root.put("blocked",       tacheService.getByStatus(Tache.Status.suspendu));
+
+
+        return ResponseEntity.ok(root);
+    }
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<Map<String,Object>> getTacheStats(@PathVariable Long id) {
+
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("completed",            tacheService.getByStatusAndAssignedTo(id,Tache.Status.terminé));
+        root.put("inDev",           tacheService.getByStatusAndAssignedTo(id,Tache.Status.a_developper));
+        root.put("inTest",            tacheService.getByStatusAndAssignedTo(id,Tache.Status.en_test));
+        root.put("closed",       tacheService.getByStatusAndAssignedTo(id,Tache.Status.cloturé));
+        root.put("blocked",       tacheService.getByStatusAndAssignedTo(id,Tache.Status.suspendu));
+
+
+        return ResponseEntity.ok(root);
     }
 }

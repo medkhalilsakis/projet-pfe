@@ -1,5 +1,5 @@
 import { HttpClient, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy,Input, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -30,6 +30,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class UploadComponent implements OnDestroy {
 
   @Output() uploadCompleted = new EventEmitter<void>();
+  @Input() task: any;
 
   files: File[] = [];
   uploadProgress: FileProgress[] = [];
@@ -68,7 +69,11 @@ export class UploadComponent implements OnDestroy {
   }
 
 startUpload() {
-  
+  if (this.task) {
+    console.log('Uploading for task:', this.task.name);
+  } else {
+    console.log('General project upload');
+  }
   if (this.files.length === 0) return;
   this.isUploading = true;
   this.startTime = Date.now();
@@ -102,6 +107,9 @@ public getFileIcon(fileName: string): string {
 private uploadFilesSequentially(userId: number) {
   const user = this.sessionStorage.getUser();
   const formData = new FormData();
+  if (this.task?.id) {
+    formData.append('taskId', this.task.id.toString());
+  }
   this.files.forEach(file => formData.append('files', file));
 
   const isArchive = this.files.some(file => 
