@@ -1,135 +1,594 @@
+/* Import de la police Bebas Neue */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+/* Réinitialisation minimale */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body, html {
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+  background-color: #fafafa;
+  color: #212121;
+}
+
+/* Conteneur principal du dashboard */
 .dashboard-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: #fafafa;
 }
 
+/* Barre supérieure */
 .top-toolbar {
-  height: 64px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 2;
-}
-
-.toolbar-content {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 24px;
-}
-
-.app-name {
-  font-size: 1.5rem;
-  font-weight: 500;
-}
-
-.toolbar-actions {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-/* Cercle d'initiales */
-.profile-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  height: 64px;
+  padding: 0 16px;
   background-color: #3f51b5;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  cursor: pointer;
-}
-.profile-circle.large {
-  width: 56px;
-  height: 56px;
-  font-size: 1.5rem;
+  color: #ffffff;
+  z-index: 10;
 }
 
-/* Images de profil */
-.profile-img-small {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+/* Titre Projexia */
+.top-toolbar .app-name {
+  font-family: 'Bebas Neue', cursive !important;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  cursor: default;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
-.profile-img-large {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
+.top-toolbar .app-name:hover {
+  color: #e91e63;
+  transform: scale(1.05);
 }
 
-.main-content {
+/* Barre de recherche */
+.top-toolbar .toolbar-search {
   flex: 1;
-  display: flex;
+  max-width: 400px;
+  margin: 0 24px;
+}
+.top-toolbar .toolbar-search input {
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+.top-toolbar .toolbar-search input::placeholder {
+  color: #666666;
+}
+.top-toolbar .toolbar-search input:focus {
+  box-shadow: 0 0 0 2px #e91e63;
 }
 
+/* ========================================
+   MENU VERTICAL AMÉLIORÉ (sans variables)
+   ======================================== */
+
+/* Conteneur principal */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background-color: #fafafa;
+}
+
+/* 1. Sidebar container */
 .side-nav {
-  width: 240px;
-  background: #f5f5f5;
-  border-right: 1px solid #eee;
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  display: flex;              /* déjà présent, on renforce */
+  flex-direction: column;     /* colonne */
+  justify-content: space-between;
+  padding-top: 16px;
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  z-index: 10;
 }
-.sidenav-container {
+
+
+
+.side-nav .main-menu {
+  flex: 1;
+  overflow-y: auto; /* si besoin */
+}
+
+/* 3) Menu bas : pieds de page de la sidenav */
+.side-nav .bottom-menu {
+  border-top: 1px solid rgba(0,0,0,0.12);
+  padding-top: 8px;
+}
+
+/* 4) Style cohérent pour les deux items */
+.side-nav .bottom-menu a {
+  font-size: 0.95rem;
+  color: #212121;
+  padding: 8px 16px;
+  transition: background 0.2s;
+}
+.side-nav .bottom-menu a:hover {
+  background-color: #f2f4ff;
+}
+.side-nav .bottom-menu a mat-icon {
+  color: #5c6bc0;
+}
+
+/* 5) Séparateur au-dessus du bas-menu */
+.side-nav .bottom-menu {
+  padding-top: 8px;
+}
+
+/* Animation d'entrée */
+@keyframes slideInMenu {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 2. Liste de navigation */
+.side-nav .mat-nav-list {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: slideInMenu 0.4s forwards;
+}
+
+/* 3. Items de menu principaux */
+.side-nav .mat-list-item {
   display: flex;
-  flex: 1;               /* prend tout l’espace disponible */
-  height: 100%;          /* pour propager la hauteur à mat-sidenav-content */
-}
-
-.content-area {
-  flex: 1;               /* pousse / remplit horizontalement */
-  height: 100%;          /* pousse verticalement jusqu’au bas */
-  overflow: auto;        /* scroll interne si besoin */
-  padding: 24px;
-  background: white;
-}
-
-.notification-menu {
-  width: 350px;
-  padding: 16px;
-}
-
-.notification-header {
-  margin: 0 0 16px 0;
-  color: #3f51b5;
-}
-
-.notification-item {
-  display: flex;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-.notification-item:last-child {
-  border-bottom: none;
-}
-
-.profile-menu {
-  width: 280px;
-  padding: 16px;
-}
-
-.profile-header {
-  display: flex;
-  gap: 16px;
   align-items: center;
-  margin-bottom: 16px;
+  padding: 0 20px;
+  margin: 6px 10px;
+  border-radius: 10px;
+  color: #424242;
+  font-size: 0.95rem;
+  font-weight: 500;
+  height: 48px !important;
+  position: relative;
+  transition: 
+    background 0.2s cubic-bezier(0.4,0,0.2,1),
+    transform 0.2s cubic-bezier(0.4,0,0.2,1),
+    color 0.2s cubic-bezier(0.4,0,0.2,1),
+    box-shadow 0.2s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
 }
 
-.profile-info h3 {
-  margin: 0;
+/* Effet “ripple” au clic */
+.side-nav .mat-list-item::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 5px; height: 5px;
+  background: rgba(255,255,255,0.5);
+  opacity: 0;
+  border-radius: 50%;
+  transform: scale(1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+.side-nav .mat-list-item:active::after {
+  animation: ripple 0.6s ease-out;
+}
+@keyframes ripple {
+  0% {
+    transform: scale(0) translate(-50%, -50%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20) translate(-50%, -50%);
+    opacity: 0;
+  }
+}
+
+/* 4. Icônes du menu */
+.side-nav mat-icon {
+  font-size: 22px;
+  width: 22px; height: 22px;
+  line-height: 22px;
+  margin-right: 16px;
+  color: #5c6bc0;
+  transition: 
+    color 0.2s cubic-bezier(0.4,0,0.2,1),
+    transform 0.2s cubic-bezier(0.4,0,0.2,1),
+    margin 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* 5. Texte des éléments */
+.side-nav .mat-list-item span {
+  white-space: nowrap;
+  opacity: 1;
+  font-weight: 500;
+  transition: 
+    opacity 0.3s cubic-bezier(0.4,0,0.2,1),
+    transform 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* 6. Hover state */
+.side-nav .mat-list-item:hover {
+  background-color: #f2f4ff;
+  transform: translateX(4px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.side-nav .mat-list-item:hover mat-icon {
+  color: #5c6bc0;
+  transform: scale(1.1);
+}
+
+/* 7. Active state */
+.side-nav .mat-list-item.active {
+  background: linear-gradient(135deg, #3f51b5 0%, #3949ab 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(63,81,181,0.4);
+  font-weight: 500;
+  transform: translateX(4px);
+}
+.side-nav .mat-list-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px;
+  height: calc(100% - 16px);
+  width: 4px;
+  background: #e91e63;
+  border-radius: 0 4px 4px 0;
+}
+.side-nav .mat-list-item.active mat-icon {
+  color: #ffffff;
+}
+
+/* 8. Panneaux d'expansion (sous-menus) */
+.menu-panel {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  margin: 4px 10px !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+.menu-panel .mat-expansion-panel-header {
+  padding: 0 20px !important;
+  height: 48px !important;
+  border-radius: 10px !important;
+  transition: background 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.menu-panel .mat-expansion-panel-body {
+  padding: 0 !important;
+  background-color: #f9faff;
+  border-radius: 0 0 10px 10px;
+}
+.menu-panel .mat-panel-title {
+  display: flex;
+  align-items: center;
+  color: #424242;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.menu-panel .mat-panel-title mat-icon {
+  margin-right: 16px;
+  color: #5c6bc0;
+  transition: 
+    color 0.2s cubic-bezier(0.4,0,0.2,1),
+    transform 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.menu-panel .mat-expansion-panel-header:hover {
+  background-color: #f2f4ff;
+}
+.menu-panel .mat-expansion-panel-header:hover .mat-panel-title mat-icon {
+  transform: scale(1.1);
+}
+
+/* 9. Indicator rotation */
+.menu-panel .mat-expansion-indicator {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.menu-panel.mat-expanded .mat-expansion-indicator {
+  transform: rotate(90deg);
+}
+
+/* 10. Sous-menu items */
+.menu-panel .mat-nav-list {
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+.menu-panel .mat-nav-list .mat-list-item {
+  padding-left: 16px;
+  margin: 4px 12px;
+  font-size: 0.9rem;
+  height: 42px !important;
+  font-weight: 400;
+}
+.menu-panel .mat-nav-list .mat-list-item mat-icon {
+  font-size: 18px;
+  color: #9fa8da;
+  margin-right: 8px;
+}
+.menu-panel .mat-nav-list .mat-list-item.active {
+  background: linear-gradient(135deg, #3f51b5 0%, #3949ab 100%);
+  color: #ffffff;
+}
+.menu-panel .mat-nav-list .mat-list-item.active mat-icon {
+  color: #ffffff;
+}
+
+/* 11. Scrollbar personnalisée */
+.side-nav .mat-nav-list::-webkit-scrollbar {
+  width: 6px;
+}
+.side-nav .mat-nav-list::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+.side-nav .mat-nav-list::-webkit-scrollbar-thumb {
+  background: rgba(63,81,181,0.2);
+  border-radius: 3px;
+  transition: background 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.side-nav .mat-nav-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(63,81,181,0.5);
+}
+
+/* 12. Mode réduit (collapsed) */
+.side-nav.collapsed {
+  width: 72px;
+  overflow: visible;
+}
+.side-nav.collapsed .mat-list-item {
+  justify-content: center;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px !important;
+  margin: 8px auto;
+  transform: none;
+}
+.side-nav.collapsed .mat-list-item span {
+  opacity: 0;
+  width: 0;
+  transform: translateX(20px);
+}
+.side-nav.collapsed mat-icon {
+  margin-right: 0;
+  font-size: 24px;
+}
+.side-nav.collapsed .mat-list-item:hover mat-icon {
+  transform: scale(1.2);
+}
+
+/* 13. Tooltips en collapsed */
+.side-nav.collapsed .mat-list-item::before {
+  position: absolute;
+  content: attr(data-title);
+  top: 50%; left: 100%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  background: #424242;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 1000;
+}
+.side-nav.collapsed .mat-list-item::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 100%;
+  margin-top: -5px; margin-left: -5px;
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid #424242;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 1000;
+}
+.side-nav.collapsed .mat-list-item:hover::before,
+.side-nav.collapsed .mat-list-item:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 14. Responsive */
+@media (max-width: 768px) {
+  .side-nav {
+    width: 72px;
+  }
+  .side-nav .mat-list-item span {
+    opacity: 0;
+    width: 0;
+  }
+  .side-nav mat-icon {
+    margin-right: 0;
+  }
+  .side-nav.expanded {
+    width: 260px;
+    position: absolute;
+    height: 100%;
+    z-index: 100;
+  }
+  .side-nav.expanded .mat-list-item span {
+    opacity: 1;
+  }
+  .side-nav.expanded mat-icon {
+    margin-right: 16px;
+  }
+}
+
+
+/* Zone de contenu principale */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+
+/* Menus contextuels (notifications & profil) */
+.notification-menu,
+.profile-menu {
+  width: 300px;
+  padding: 16px;
+  background-color: #ffffff;
+}
+.notification-header {
+  margin-bottom: 8px;
+  color: #3f51b5;
   font-size: 1.1rem;
 }
 
-.profile-info p {
-  margin: 4px 0 0 0;
-  color: #666;
-  font-size: 0.9rem;
-}
+/* UTILITAIRES */
+.hidden { display: none !important; }
+.scrollable { overflow-y: auto; }
 
-.active {
-  background-color: #f0f0f0 !important;
-  border-left: 4px solid #3f51b5;
-}
+
+/* ─────────────────────────────────────────────
+   1) Conteneur des actions (notifications + profil)
+   ───────────────────────────────────────────── */
+   .top-toolbar .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  /* ─────────────────────────────────────────────
+     2) Base “action-icon” pour span/img/div cliquables
+     ───────────────────────────────────────────── */
+  .top-toolbar .toolbar-actions .action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;                    /* aire de clic confortable */
+    cursor: pointer;
+    background: none;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+  .top-toolbar .toolbar-actions .action-icon:hover {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+  }
+  
+  /* ─────────────────────────────────────────────
+     3) Icône Notifications
+     ───────────────────────────────────────────── */
+  .top-toolbar .toolbar-actions .action-icon.mat-badge-host {
+    position: relative;
+  }
+  .top-toolbar .toolbar-actions .action-icon mat-icon {
+    font-size: 22px;                 /* un peu plus fin */
+    color: #fff;                     /* blanc net */
+  }
+  /* Badge : petit cercle rouge vif */
+  .top-toolbar .toolbar-actions .action-icon .mat-badge-content {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 0.65rem !important;
+    top: 5px !important;
+    right: -5px !important;
+    left: 25px !important;
+    line-height: 16px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background-color: #ff5252 !important;  /* rouge clair */
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+  }
+  
+  /* ─────────────────────────────────────────────
+     4) Barre de recherche (rafraîchie)
+     ───────────────────────────────────────────── */
+  .top-toolbar .toolbar-search {
+    flex: 1;
+    max-width: 480px;
+    position: relative;
+    margin: 0 24px;
+  }
+  .top-toolbar .toolbar-search input {
+    width: 100%;
+    padding: 8px 40px 8px 16px;
+    border: none;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 0.95rem;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .top-toolbar .toolbar-search input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+  .top-toolbar .toolbar-search input:focus {
+    background: rgba(255,255,255,0.28);
+    box-shadow: 0 0 0 2px rgba(255,82,82,0.4);
+    outline: none;
+  }
+  /* loupe intégrée */
+  .top-toolbar .toolbar-search::before {
+    content: 'search';
+    font-family: 'Material Icons';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    pointer-events: none;
+  }
+  
+  /* ─────────────────────────────────────────────
+     5) Avatar utilisateur (image)
+     ───────────────────────────────────────────── */
+  .top-toolbar .toolbar-actions img.action-icon {
+    width: 45px !important;         /* augmenté de 32 -> 40 */
+    height: 45px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .top-toolbar .toolbar-actions img.action-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border-color: #ff5252;
+  }
+  
+  /* ─────────────────────────────────────────────
+     6) Cercle d’initiales (fallback)
+     ───────────────────────────────────────────── */
+  .top-toolbar .toolbar-actions .action-icon.profile-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #283593;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .top-toolbar .toolbar-actions .action-icon.profile-circle:hover {
+    background-color: #ff5252;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  

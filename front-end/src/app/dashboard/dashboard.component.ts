@@ -146,7 +146,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { label: 'Upload Projet',   icon: 'cloud_upload', action: () => this.navigateTo('upload')   },
       { label: 'Messagerie',      icon: 'message',      action: () => this.navigateTo('messages') },
       { label: 'Notifications',   icon: 'notifications',action: () => this.navigateTo('notifications') },
-      { label: 'Paramètres',      icon: 'settings',     action: () => this.navigateTo('settings') },
       { label: 'Analytics',      icon: 'analytics',     action: () => this.navigateTo('analytics') },
     ];
 
