@@ -13,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { forkJoin } from 'rxjs';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-upload',
@@ -23,7 +24,8 @@ import { forkJoin } from 'rxjs';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    FileSizePipe
+    FileSizePipe,
+    FlexLayoutModule 
   ],
   templateUrl: './upload.component.html',
   styleUrls: ['./upload.component.css']

@@ -1,10 +1,6 @@
 @import "codemirror/lib/codemirror.css";
 @import "codemirror/theme/material.css";
 
-  
-html, body {
-    height: 100%;
-}
 
 body, .mat-typography, *:not(mat-icon) {
     font-family: 'Nunito', sans-serif !important;
@@ -13,3 +9,5 @@ body, .mat-typography, *:not(mat-icon) {
 body {
     margin: 0;
 }
+
+  

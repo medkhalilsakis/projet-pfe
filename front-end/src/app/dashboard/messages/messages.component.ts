@@ -20,6 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 const API = 'http://localhost:8080/api';
 
@@ -48,7 +49,7 @@ interface DisplayMessage {
   imports: [
     CommonModule, FormsModule, MatListModule, MatIconModule,
     MatButtonModule, MatInputModule, MatFormFieldModule,
-    MatCardModule, MatSelectModule, MatDialogModule
+    MatCardModule, MatSelectModule, MatDialogModule, FlexLayoutModule
   ],
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.css'],
@@ -70,9 +71,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   private stompClient!: Client;
   isMobile = window.innerWidth < 768;
   private subscription: any;
-
-  showContactDetails = false;
-
 
   constructor(
     private http: HttpClient,
@@ -141,7 +139,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   selectUser(u: any) {
     this.selectedUser = u;
-    this.showContactDetails = false;
     if (this.isMobile) window.scrollTo(0, 0);
     this.loadMessages(u.id);
 
@@ -239,13 +236,10 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   ngAfterViewChecked() { this.scrollToBottom(); }
 
   openContactDetails() {
-    if (this.isMobile) {
-      this.dialog.open(ContactDetailsDialogComponent, {
-        data: this.selectedUser
-      });
-    } else {
-      this.showContactDetails = true;
-    }
+    this.dialog.open(ContactDetailsDialogComponent, {
+      width: '320px',
+      data: this.selectedUser
+    });
   }
   
 }

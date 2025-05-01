@@ -1,46 +1,91 @@
-<div class="messagerie-container">
+<!-- messages.component.html -->
+<div class="messagerie-container"
+     fxLayout="row"
+     fxLayout.xs="column"
+     fxLayoutAlign="stretch stretch">
 
-  <!-- Sidebar utilisateurs -->
-  <aside class="sidebar">
-    <div class="logo-bar"><h1>MyChat</h1></div>
-    <mat-form-field appearance="outline" class="search-bar">
+  <!-- ===== Sidebar utilisateurs ===== -->
+  <aside class="sidebar"
+         fxFlex="250px"
+         fxFlex.xs="100%"
+         fxLayout="column">
+
+    <div class="logo-bar" fxFlex="none">
+      <h1>MyChat</h1>
+    </div>
+
+    <mat-form-field appearance="outline"
+                    class="search-bar"
+                    fxFlex="none">
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="searchQuery" placeholder="Rechercher un contact">
+      <input matInput
+             [(ngModel)]="searchQuery"
+             placeholder="Rechercher un contact">
     </mat-form-field>
 
-    <mat-nav-list class="user-list">
+    <mat-nav-list class="user-list"
+                  fxFlex>
       <mat-list-item *ngFor="let u of filteredUsers()"
                      (click)="selectUser(u)"
-                     [class.selected]="u.id === selectedUser?.id">
+                     [class.selected]="u.id === selectedUser?.id"
+                     fxLayout="row" fxLayoutAlign="start center">
         <img matListAvatar
              [src]="u.avatarUrl"
              alt="{{u.prenom}}"
-        />
-        <div matLine class="user-name">{{ u.prenom }} {{ u.nom }}</div>
-        <div matLine class="user-status">
-          <span [class.online]="u.online" [class.offline]="!u.online"></span>
-          {{ u.online ? 'En ligne' : 'Hors-ligne' }}
+             class="avatar-sm">
+        <div class="user-details" fxFlex>
+          <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+          <div class="user-status">
+            <span [class.online]="u.online"
+                  [class.offline]="!u.online"></span>
+            {{ u.online ? 'En ligne' : 'Hors-ligne' }}
+          </div>
         </div>
       </mat-list-item>
     </mat-nav-list>
+
   </aside>
 
-  <!-- Zone de chat -->
-  <section class="chat-area" *ngIf="selectedUser">
-    <header class="chat-header">
-      <button mat-icon-button *ngIf="isMobile" (click)="deselectUser()">
+
+  <!-- ===== Zone de chat ===== -->
+  <section class="chat-area"
+           *ngIf="selectedUser"
+           fxFlex
+           fxLayout="column">
+
+    <!-- En-tête -->
+    <header class="chat-header"
+            fxLayout="row"
+            fxLayoutAlign="space-between center"
+            fxFlex="none">
+      <button mat-icon-button
+              *ngIf="isMobile"
+              (click)="deselectUser()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <div class="chat-recipient">
-        <img class="avatar-sm" [src]="selectedUser.avatarUrl" alt="{{selectedUser.nom}}">
+
+      <div class="chat-recipient"
+           fxLayout="row"
+           fxLayoutAlign="start center"
+           fxFlex>
+        <img class="avatar-sm"
+             [src]="selectedUser.avatarUrl"
+             alt="{{selectedUser.nom}}">
         <div>
           <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
-          <small>{{ selectedUser.online
-                    ? 'Actif maintenant'
-                    : ('Vu ' + (selectedUser.lastSeen | date:'short')) }}</small>
+          <small>
+            {{ selectedUser.online
+                ? 'Actif maintenant'
+                : ('Vu ' + (selectedUser.lastSeen | date:'short')) }}
+          </small>
         </div>
       </div>
-      <div class="header-actions">
+
+      <div class="header-actions"
+           fxLayout="row"
+           fxLayoutAlign="end center"
+           fxLayoutGap="8px"
+           fxFlex="none">
         <button mat-icon-button><mat-icon>phone</mat-icon></button>
         <button mat-icon-button><mat-icon>videocam</mat-icon></button>
         <button mat-icon-button (click)="openContactDetails()">
@@ -49,108 +94,114 @@
       </div>
     </header>
 
-    <div class="messages" #scrollContainer>
+    <!-- Messages -->
+    <div class="messages"
+         #scrollContainer
+         fxFlex
+         fxLayout="column"
+         fxLayoutGap="12px">
       <ng-container *ngFor="let m of messages">
-        <div class="msg-row" [ngClass]="m.sentBy">
-          <!-- reçu -->
-          <ng-container *ngIf="m.sentBy==='other'">
-            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
-            <div class="bubble">
+        <div class="msg-row"
+             [ngClass]="m.sentBy"
+             fxLayout="row"
+             fxLayoutAlign="{{ m.sentBy==='me' ? 'end start' : 'start start' }}">
+          <ng-container *ngIf="m.sentBy === 'other'">
+            <img class="msg-avatar"
+                 [src]="m.avatarUrl"
+                 alt="avatar">
+            <div class="bubble" fxFlex="none">
               <p>{{ m.text }}</p>
               <ng-container *ngIf="m.attachments?.length">
-                <div class="attachments">
+                <div class="attachments" fxLayout="row" fxLayoutGap="8px" fxLayoutWrap>
                   <ng-container *ngFor="let att of m.attachments">
                     <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                      <img *ngSwitchCase="'image'" class="att-img"
+                      <img *ngSwitchCase="'image'"
+                           class="att-img"
                            [src]="att.filePath">
-                      <video *ngSwitchCase="'video'" class="att-video" controls
+                      <video *ngSwitchCase="'video'"
+                             class="att-video"
+                             controls
                              [src]="att.filePath"></video>
-                      <a *ngSwitchDefault class="att-file"
-                         [href]="att.filePath" download>
-                        <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                      <a *ngSwitchDefault
+                         class="att-file"
+                         [href]="att.filePath"
+                         download>
+                        <mat-icon>insert_drive_file</mat-icon>
+                        {{att.fileName}}
                       </a>
                     </ng-container>
                   </ng-container>
                 </div>
               </ng-container>
-              <div class="msg-info">
-                <span class="time">{{ m.date | date:'HH:mm' }}</span>
-                <button mat-icon-button class="react-btn">
-                  <mat-icon>thumb_up_off_alt</mat-icon>
-                </button>
-              </div>
             </div>
           </ng-container>
 
-          <!-- envoyé -->
-          <ng-container *ngIf="m.sentBy==='me'">
-            <div class="bubble">
+          <ng-container *ngIf="m.sentBy === 'me'">
+            <div class="bubble" fxFlex="none">
               <p>{{ m.text }}</p>
               <ng-container *ngIf="m.attachments?.length">
-                <div class="attachments">
+                <div class="attachments" fxLayout="row" fxLayoutGap="8px" fxLayoutWrap>
                   <ng-container *ngFor="let att of m.attachments">
                     <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                      <img *ngSwitchCase="'image'" class="att-img"
+                      <img *ngSwitchCase="'image'"
+                           class="att-img"
                            [src]="att.filePath">
-                      <video *ngSwitchCase="'video'" class="att-video" controls
+                      <video *ngSwitchCase="'video'"
+                             class="att-video"
+                             controls
                              [src]="att.filePath"></video>
-                      <a *ngSwitchDefault class="att-file"
-                         [href]="att.filePath" download>
-                        <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                      <a *ngSwitchDefault
+                         class="att-file"
+                         [href]="att.filePath"
+                         download>
+                        <mat-icon>insert_drive_file</mat-icon>
+                        {{att.fileName}}
                       </a>
                     </ng-container>
                   </ng-container>
                 </div>
               </ng-container>
-              <div class="msg-info">
-                <button mat-icon-button class="react-btn">
-                  <mat-icon>thumb_up_off_alt</mat-icon>
-                </button>
-                <span class="time">{{ m.date | date:'HH:mm' }}</span>
-              </div>
             </div>
-            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
+            <img class="msg-avatar"
+                 [src]="m.avatarUrl"
+                 alt="avatar">
           </ng-container>
         </div>
       </ng-container>
     </div>
 
-    <footer class="chat-input">
-      <button mat-icon-button (click)="fileInput.click()">
+    <!-- Pied de page / saisie -->
+    <footer class="chat-input"
+            fxFlex="none"
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            fxLayoutGap="8px">
+      <button mat-icon-button
+              (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
       </button>
-      <input #fileInput type="file" multiple hidden (change)="onAttachmentChange($event)">
-      <mat-form-field appearance="outline" class="input-box">
+      <input #fileInput
+             type="file"
+             multiple
+             hidden
+             (change)="onAttachmentChange($event)">
+
+      <mat-form-field appearance="outline"
+                      class="input-box"
+                      fxFlex>
         <input matInput
                [(ngModel)]="newMessage"
                (keyup.enter)="sendMessage()"
                placeholder="Écrire un message…">
       </mat-form-field>
+
       <button mat-icon-button><mat-icon>emoji_emotions</mat-icon></button>
-      <button mat-fab color="primary" (click)="sendMessage()">
+      <button mat-fab
+              color="primary"
+              (click)="sendMessage()">
         <mat-icon>send</mat-icon>
       </button>
     </footer>
+
   </section>
-
-  <!-- Détails contact dans sidebar droite (desktop) -->
-  <aside class="detail-sidebar" *ngIf="selectedUser && !isMobile && showContactDetails">
-    <mat-card>
-      <mat-card-header><mat-card-title>Détails du contact</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <img class="avatar-lg" [src]="selectedUser.avatarUrl" alt="avatar">
-        <h3>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h3>
-        <p>Status : <strong>{{ selectedUser.online ? 'En ligne' : 'Hors-ligne' }}</strong></p>
-        <p>Dernière connexion : {{ selectedUser.lastSeen | date:'fullDate HH:mm' }}</p>
-        <mat-divider></mat-divider>
-        <button mat-stroked-button color="primary" class="full-width">
-          <mat-icon>person_add</mat-icon> Ajouter aux favoris
-        </button>
-        <button mat-stroked-button color="warn" class="full-width">
-          <mat-icon>block</mat-icon> Bloquer
-        </button>
-      </mat-card-content>
-    </mat-card>
-  </aside>
-
 </div>

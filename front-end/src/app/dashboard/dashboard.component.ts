@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatDrawerContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,6 +26,7 @@ import { TaskAssignmentComponent } from './task-assignment/task-assignment.compo
 
 import { Subscription } from 'rxjs';
 import { UserManagementComponent } from "./user-management/user-management.component";
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,14 +34,16 @@ import { UserManagementComponent } from "./user-management/user-management.compo
   imports: [
     CommonModule,
     RouterModule,
+    FlexLayoutModule,      // pour fxLayout / fxFlex
+    MatSidenavModule,
     MatMenuModule,
     MatBadgeModule,
-    MatSidenavModule,
+    MatMenuModule,
     MatToolbarModule,
     MatListModule,
     MatIconModule,
     MatExpansionModule
-],
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -49,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   profileFileInput!: ElementRef<HTMLInputElement>;
 
   currentView = signal<string>('overview');
+  sideNavOpen = signal(true);
   notifications = signal<any[]>([]);
   profileImageUrl: string|null = null;
   currentUser: any;
@@ -83,6 +87,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  toggleSideNav() {
+    this.sideNavOpen.update(open => !open);
   }
 
   private loadProfileImage(): void {
