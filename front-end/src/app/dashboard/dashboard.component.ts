@@ -14,6 +14,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
 import { NotificationService } from '../services/notification.service';
 import { ProfileImageService } from '../services/profile-image.service';
+import { PresenceService, PresenceUpdate } from '../services/presence.service';
 
 import { OverviewComponent } from './overview/overview.component';
 import { ProjectsComponent } from './projects/projects.component';
@@ -51,6 +52,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('profileFileInput', { read: ElementRef }) 
   profileFileInput!: ElementRef<HTMLInputElement>;
 
+  presenceMap = new Map<number, PresenceUpdate>();
+
   currentView = signal<string>('overview');
   sideNavOpen = signal(true);
   notifications = signal<any[]>([]);
@@ -65,6 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private route            = inject(ActivatedRoute);
   private notificationService = inject(NotificationService);
   private profileImageService = inject(ProfileImageService);
+  private presenceService = inject(PresenceService);
 
   private sub!: Subscription;
 
@@ -83,10 +87,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.sub = this.profileImageService.imageUrl$.subscribe(url => {
       this.profileImageUrl = url;
     });
+
+
+    this.presenceService.updatePresence(this.currentUser.id, true);
   }
+
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.presenceService.updatePresence(this.currentUser.id, false, new Date().toISOString());
   }
 
   toggleSideNav() {

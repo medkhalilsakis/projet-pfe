@@ -6,8 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SessionStorageService } from '../../services/session-storage.service';
 import SockJS from 'sockjs-client';
-import { Client, IMessage } from '@stomp/stompjs';
-import { forkJoin, of } from 'rxjs';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +21,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { PresenceService, PresenceUpdate } from '../../services/presence.service';
+import { CallSignal, WebRtcService } from '../../services/webrtc.service';
+import { IncomingCallDialogComponent } from './incoming-call-dialog/incoming-call-dialog.component';
 
 const API = 'http://localhost:8080/api';
 
@@ -49,40 +52,66 @@ interface DisplayMessage {
   imports: [
     CommonModule, FormsModule, MatListModule, MatIconModule,
     MatButtonModule, MatInputModule, MatFormFieldModule,
-    MatCardModule, MatSelectModule, MatDialogModule, FlexLayoutModule
+    MatCardModule, MatSelectModule, MatDialogModule, FlexLayoutModule, IncomingCallDialogComponent
   ],
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.css'],
 })
 export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('scrollContainer', { static: true }) scrollContainer!: ElementRef;
+  @ViewChild('localVideo') localVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('remoteVideo') remoteVideo!: ElementRef<HTMLVideoElement>;
 
   users: any[] = [];
   selectedUser: any = null;
-  messages: DisplayMessage[] = [];
-
+  messages: any[] = [];
   newMessage = '';
   selectedFiles: File[] = [];
   searchQuery = '';
 
   currentUserId!: number;
   currentUserAvatarUrl!: string;
+  isMobile = window.innerWidth < 768;
 
   private stompClient!: Client;
-  isMobile = window.innerWidth < 768;
-  private subscription: any;
+  private msgSub?: any;
+  private callSub?: Subscription;
+  private subscription?: StompSubscription;
 
   constructor(
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private session: SessionStorageService,
-    private dialog: MatDialog
+    private presenceService: PresenceService,
+    private dialog: MatDialog,
+    private webRtc: WebRtcService
   ) {
     const u = this.session.getUser();
     this.currentUserId = u.id;
-    // Toujours point vers le raw endpoint : renvoie avatar perso ou fallback par défaut
     this.currentUserAvatarUrl = `${API}/users/${this.currentUserId}/profile-image/raw`;
     this.loadUsers();
+  }
+
+  ngOnInit() {
+    this.connectWebSocket();
+    this.presenceService.updatePresence(this.currentUserId, true);
+
+    // Signaling pour WebRTC
+    this.webRtc.connectSignaling(this.currentUserId);
+    this.callSub = this.webRtc.incomingCallSignal$.subscribe(signal => this.promptIncomingCall(signal));
+    this.webRtc.remoteStream$.subscribe(stream => {
+      if (stream && this.remoteVideo) {
+        this.remoteVideo.nativeElement.srcObject = stream;
+      }
+    });
+  }
+  
+
+  ngOnDestroy() {
+    this.stompClient?.deactivate();
+    this.msgSub?.unsubscribe();
+    this.callSub?.unsubscribe();
+    this.presenceService.updatePresence(this.currentUserId, false, new Date().toISOString());
   }
 
   @HostListener('window:resize', ['$event'])
@@ -90,25 +119,50 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.isMobile = (e.target as Window).innerWidth < 768;
   }
 
-  ngOnInit() {
-    this.connectWebSocket();
-  }
-
-  ngOnDestroy() {
-    this.stompClient?.deactivate();
-    this.subscription?.unsubscribe();
-  }
-
   private connectWebSocket() {
-    const socket = new SockJS(`${API.replace('/api','')}/ws`);
-    this.stompClient = new Client({
-      webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      connectHeaders: { 'X-User-Id': `${this.currentUserId}` }
-    });
-    this.stompClient.onConnect = () => console.log('WS connected');
-    this.stompClient.activate();
+  const socket = new SockJS(`${API.replace('/api','')}/ws`);
+  this.stompClient = new Client({
+    webSocketFactory: () => socket,
+    reconnectDelay: 5000,
+    connectHeaders: { 'X-User-Id': `${this.currentUserId}` }
+  });
+  this.stompClient.onConnect = () => {
+    console.log("connecté");
+    // *** uniquement messages ici ***
+    //this.subscribeToMessages();
+  };
+  this.stompClient.activate();
+}
+
+
+  getStatus(u: { online: boolean; lastSeen?: Date }): string {
+    if (u.online) {
+      return 'Connecté';
+    }
+    if (!u.lastSeen) {
+      return 'Hors ligne';
+    }
+  
+    const now = Date.now();
+    const last = new Date(u.lastSeen).getTime();
+    const diffMs = now - last;
+    const diffH = diffMs / (1000 * 60 * 60);
+  
+    if (diffH < 24) {
+      if (diffH < 1) {
+        const diffMin = Math.floor(diffMs / (1000 * 60));
+        return `En ligne il y a ${diffMin} min`;
+      }
+      const h = Math.floor(diffH);
+      const m = Math.floor((diffH - h) * 60);
+      return m > 0
+        ? `En ligne il y a ${h} h ${m} min`
+        : `En ligne il y a ${h} h`;
+    }
+  
+    return 'Hors ligne';
   }
+  
 
   private loadUsers() {
     this.http.get<any[]>(`${API}/users`)
@@ -117,17 +171,28 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
         return of([]);
       }))
       .subscribe(users => {
+        // 1) Charger les users depuis l'API
         this.users = users
           .filter(u => u.id !== this.currentUserId)
           .map(u => ({
             ...u,
-            // on pointe TOUJOURS vers /profile-image/raw : backend servira par défaut si besoin
             avatarUrl: `${API}/users/${u.id}/profile-image/raw`,
-            online: u.online,        // présumé fourni par votre API users
-            lastSeen: u.lastSeen     // idem
+            // on utilise d’abord les valeurs par défaut de l'API
+            online:    u.online,
+            lastSeen:  u.lastSeen
           }));
+  
+        // 2) Récupérer les dernières mises à jour live
+        this.presenceService.presenceHistory.forEach((upd) => {
+          const user = this.users.find(x => x.id === upd.userId);
+          if (user) {
+            user.online   = upd.online;
+            user.lastSeen = upd.lastSeen ? new Date(upd.lastSeen) : undefined;
+          }
+        });
       });
   }
+  
 
   filteredUsers() {
     const q = this.searchQuery.toLowerCase().trim();
@@ -158,6 +223,33 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
                      : this.selectedUser.avatarUrl,
         attachments: body.attachments
       });
+    });
+  }
+
+  async startAudioCall() {
+    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    this.localVideo.nativeElement.srcObject = local;
+    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
+  }
+
+  /** Bouton vidéo */
+  async startVideoCall() {
+    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    this.localVideo.nativeElement.srcObject = local;
+    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
+  }
+
+
+  private promptIncomingCall(signal: CallSignal) {
+    const dialogRef = this.dialog.open(IncomingCallDialogComponent, { data: signal, panelClass: 'call-dialog' });
+    dialogRef.afterClosed().subscribe(async accepted => {
+      if (accepted) {
+        const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: signal.sdp?.includes('m=video') });
+        this.localVideo.nativeElement.srcObject = local;
+        this.webRtc.answerCall(local, signal, this.currentUserId);
+      } else {
+        this.webRtc.endCall(signal.fromUserId, this.currentUserId, 'missed');
+      }
     });
   }
 

@@ -1,8 +1,9 @@
 // src/app/services/user.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { PresenceService, PresenceUpdate } from './presence.service';
 
 export interface User {
   id?: number;
@@ -16,6 +17,9 @@ export interface User {
   role_id: number;
   ncin: string;
   genre: string;
+
+  online?: boolean;
+  lastSeen?: Date;
 }
 
 @Injectable({
@@ -23,8 +27,17 @@ export interface User {
 })
 export class UserService {
   private base = 'http://localhost:8080/api/users';
+  private usersSubject = new BehaviorSubject<User[]>([]);
+  public users$ = this.usersSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private presenceService: PresenceService) {
+    this.loadUsers();
+    this.presenceService.presence$.subscribe(update => {
+      if (update) {
+        this.updateUserPresence(update);
+      }
+    });
+  }
 
   // Récupérer tous les utilisateurs depuis /api/users
   getAllUsers(): Observable<User[]> {
@@ -52,5 +65,32 @@ export class UserService {
   /** Crée un nouvel utilisateur */
   createUser(data: User): Observable<User> {
     return this.http.post<User>(`${this.base}/signup`, data);
+  }
+
+  private loadUsers() {
+    this.http.get<User[]>(this.base).pipe(
+      map(users => users.map(u => ({
+        ...u,
+        avatarUrl: `${this.base}/${u.id}/profile-image/raw`,
+        online: u.online,
+        lastSeen: u.lastSeen ? new Date(u.lastSeen) : undefined
+      })))
+    ).subscribe(users => {
+      this.usersSubject.next(users);
+    });
+  }
+
+  private updateUserPresence(update: any) {
+    const users = this.usersSubject.getValue();
+    const userIndex = users.findIndex(u => u.id === update.userId);
+    if (userIndex >= 0) {
+      const updatedUsers = [...users];
+      updatedUsers[userIndex] = {
+        ...updatedUsers[userIndex],
+        online: update.online,
+        lastSeen: update.lastSeen ? new Date(update.lastSeen) : undefined
+      };
+      this.usersSubject.next(updatedUsers);
+    }
   }
 }

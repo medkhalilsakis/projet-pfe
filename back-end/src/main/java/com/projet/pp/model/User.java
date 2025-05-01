@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "utilisateur")
@@ -48,6 +49,10 @@ public class User{
 
     @Column(nullable = false)
     private String genre;
+
+
+    private boolean online;
+    private LocalDateTime lastSeen;
 
     public User(String nom, String prenom, String username, String email, String password,
                 LocalDate dateEmbauche, double salaire, Role role, String ncin, String genre) {

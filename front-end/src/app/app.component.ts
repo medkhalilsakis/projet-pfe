@@ -6,6 +6,7 @@ import { Inject, PLATFORM_ID } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
+import { PresenceService } from './services/presence.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ import { FooterComponent } from './footer/footer.component';
 export class AppComponent implements OnInit {
 
   constructor(
+    private presenceService: PresenceService,
     @Inject(DOCUMENT) private document: Document,
     @Inject(PLATFORM_ID) private platformId: object) {
   }

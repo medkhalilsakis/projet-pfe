@@ -1,12 +1,11 @@
-<!-- messages.component.html -->
-<div class="messagerie-container"
-     fxLayout="row"
-     fxLayout.xs="column"
-     fxLayoutAlign="stretch stretch">
+<div class="messagerie-container" fxLayout="row" fxLayout.xs="column" fxLayoutFill>
+    <ng-template #callDialog>
+      <app-incoming-call-dialog></app-incoming-call-dialog>
+    </ng-template>
 
-  <!-- ===== Sidebar utilisateurs ===== -->
+  <!-- Sidebar utilisateurs (30%) -->
   <aside class="sidebar"
-         fxFlex="250px"
+         fxFlex="30%"
          fxFlex.xs="100%"
          fxLayout="column">
 
@@ -28,7 +27,8 @@
       <mat-list-item *ngFor="let u of filteredUsers()"
                      (click)="selectUser(u)"
                      [class.selected]="u.id === selectedUser?.id"
-                     fxLayout="row" fxLayoutAlign="start center">
+                     fxLayout="row"
+                     fxLayoutAlign="start center">
         <img matListAvatar
              [src]="u.avatarUrl"
              alt="{{u.prenom}}"
@@ -36,58 +36,37 @@
         <div class="user-details" fxFlex>
           <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
           <div class="user-status">
-            <span [class.online]="u.online"
-                  [class.offline]="!u.online"></span>
-            {{ u.online ? 'En ligne' : 'Hors-ligne' }}
-          </div>
+            <span [class.online]="u.online" [class.offline]="!u.online"></span>
+            {{ getStatus(u) }}
+          </div>                    
         </div>
       </mat-list-item>
     </mat-nav-list>
 
   </aside>
 
-
-  <!-- ===== Zone de chat ===== -->
+  <!-- Zone de chat (70%) -->
   <section class="chat-area"
            *ngIf="selectedUser"
-           fxFlex
+           fxFlex="70%"
+           fxFlex.xs="100%"
            fxLayout="column">
 
-    <!-- En-tête -->
-    <header class="chat-header"
-            fxLayout="row"
-            fxLayoutAlign="space-between center"
-            fxFlex="none">
-      <button mat-icon-button
-              *ngIf="isMobile"
-              (click)="deselectUser()">
+    <!-- En-tête conversation -->
+    <header class="chat-header" fxFlex="none">
+      <button mat-icon-button *ngIf="isMobile" (click)="deselectUser()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-
-      <div class="chat-recipient"
-           fxLayout="row"
-           fxLayoutAlign="start center"
-           fxFlex>
-        <img class="avatar-sm"
-             [src]="selectedUser.avatarUrl"
-             alt="{{selectedUser.nom}}">
+      <div class="chat-recipient" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
+        <img class="avatar-sm" [src]="selectedUser.avatarUrl" alt="{{selectedUser.nom}}">
         <div>
           <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
-          <small>
-            {{ selectedUser.online
-                ? 'Actif maintenant'
-                : ('Vu ' + (selectedUser.lastSeen | date:'short')) }}
-          </small>
         </div>
       </div>
+      <div class="header-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+        <button mat-icon-button (click)="startVideoCall()"><mat-icon>phone</mat-icon></button>
+        <button mat-icon-button (click)="startVideoCall()"><mat-icon>videocam</mat-icon></button>
 
-      <div class="header-actions"
-           fxLayout="row"
-           fxLayoutAlign="end center"
-           fxLayoutGap="8px"
-           fxFlex="none">
-        <button mat-icon-button><mat-icon>phone</mat-icon></button>
-        <button mat-icon-button><mat-icon>videocam</mat-icon></button>
         <button mat-icon-button (click)="openContactDetails()">
           <mat-icon>info</mat-icon>
         </button>
@@ -95,113 +74,65 @@
     </header>
 
     <!-- Messages -->
-    <div class="messages"
-         #scrollContainer
-         fxFlex
-         fxLayout="column"
-         fxLayoutGap="12px">
+    <div class="messages" #scrollContainer fxFlex>
       <ng-container *ngFor="let m of messages">
-        <div class="msg-row"
-             [ngClass]="m.sentBy"
-             fxLayout="row"
-             fxLayoutAlign="{{ m.sentBy==='me' ? 'end start' : 'start start' }}">
-          <ng-container *ngIf="m.sentBy === 'other'">
-            <img class="msg-avatar"
-                 [src]="m.avatarUrl"
-                 alt="avatar">
-            <div class="bubble" fxFlex="none">
+        <div class="msg-row" [ngClass]="m.sentBy" fxLayout="row" fxLayoutAlign="{{ m.sentBy==='me' ? 'end center' : 'start center' }}">
+          <ng-container *ngIf="m.sentBy==='other'">
+            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
+            <div class="bubble">
               <p>{{ m.text }}</p>
               <ng-container *ngIf="m.attachments?.length">
-                <div class="attachments" fxLayout="row" fxLayoutGap="8px" fxLayoutWrap>
-                  <ng-container *ngFor="let att of m.attachments">
-                    <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                      <img *ngSwitchCase="'image'"
-                           class="att-img"
-                           [src]="att.filePath">
-                      <video *ngSwitchCase="'video'"
-                             class="att-video"
-                             controls
-                             [src]="att.filePath"></video>
-                      <a *ngSwitchDefault
-                         class="att-file"
-                         [href]="att.filePath"
-                         download>
-                        <mat-icon>insert_drive_file</mat-icon>
-                        {{att.fileName}}
-                      </a>
-                    </ng-container>
+                <ng-container *ngFor="let att of m.attachments">
+                  <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                    <img *ngSwitchCase="'image'" class="att-img" [src]="att.filePath">
+                    <video *ngSwitchCase="'video'" class="att-video" controls [src]="att.filePath"></video>
+                    <a *ngSwitchDefault class="att-file" [href]="att.filePath" download>
+                      <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                    </a>
                   </ng-container>
-                </div>
+                </ng-container>
               </ng-container>
             </div>
           </ng-container>
 
-          <ng-container *ngIf="m.sentBy === 'me'">
-            <div class="bubble" fxFlex="none">
+          <ng-container *ngIf="m.sentBy==='me'">
+            <div class="bubble">
               <p>{{ m.text }}</p>
               <ng-container *ngIf="m.attachments?.length">
-                <div class="attachments" fxLayout="row" fxLayoutGap="8px" fxLayoutWrap>
-                  <ng-container *ngFor="let att of m.attachments">
-                    <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                      <img *ngSwitchCase="'image'"
-                           class="att-img"
-                           [src]="att.filePath">
-                      <video *ngSwitchCase="'video'"
-                             class="att-video"
-                             controls
-                             [src]="att.filePath"></video>
-                      <a *ngSwitchDefault
-                         class="att-file"
-                         [href]="att.filePath"
-                         download>
-                        <mat-icon>insert_drive_file</mat-icon>
-                        {{att.fileName}}
-                      </a>
-                    </ng-container>
+                <ng-container *ngFor="let att of m.attachments">
+                  <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+                    <img *ngSwitchCase="'image'" class="att-img" [src]="att.filePath">
+                    <video *ngSwitchCase="'video'" class="att-video" controls [src]="att.filePath"></video>
+                    <a *ngSwitchDefault class="att-file" [href]="att.filePath" download>
+                      <mat-icon>insert_drive_file</mat-icon>{{att.fileName}}
+                    </a>
                   </ng-container>
-                </div>
+                </ng-container>
               </ng-container>
             </div>
-            <img class="msg-avatar"
-                 [src]="m.avatarUrl"
-                 alt="avatar">
+            <img class="msg-avatar" [src]="m.avatarUrl" alt="avatar">
           </ng-container>
         </div>
       </ng-container>
     </div>
 
-    <!-- Pied de page / saisie -->
-    <footer class="chat-input"
-            fxFlex="none"
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            fxLayoutGap="8px">
-      <button mat-icon-button
-              (click)="fileInput.click()">
+    <!-- Saisie de nouveau message -->
+    <footer class="chat-input" fxFlex="none" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
+      <button mat-icon-button (click)="fileInput.click()">
         <mat-icon>attach_file</mat-icon>
       </button>
-      <input #fileInput
-             type="file"
-             multiple
-             hidden
-             (change)="onAttachmentChange($event)">
-
-      <mat-form-field appearance="outline"
-                      class="input-box"
-                      fxFlex>
+      <input #fileInput type="file" multiple hidden (change)="onAttachmentChange($event)">
+      <mat-form-field appearance="outline" class="input-box" fxFlex>
         <input matInput
                [(ngModel)]="newMessage"
                (keyup.enter)="sendMessage()"
                placeholder="Écrire un message…">
       </mat-form-field>
-
       <button mat-icon-button><mat-icon>emoji_emotions</mat-icon></button>
-      <button mat-fab
-              color="primary"
-              (click)="sendMessage()">
+      <button mat-fab color="primary" (click)="sendMessage()">
         <mat-icon>send</mat-icon>
       </button>
     </footer>
-
   </section>
+
 </div>

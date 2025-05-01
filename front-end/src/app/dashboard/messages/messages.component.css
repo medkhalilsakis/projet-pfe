@@ -1,7 +1,4 @@
-/* messages.component.css */
-
 /* ============= Structure globale corrigée ============= */
-/* Utiliser 100% de la hauteur du parent (content-area) */
 .messagerie-container {
   height: 100%;
   width: 100%;
@@ -10,8 +7,7 @@
   background: #f4f7fc;
 }
 
-/* ----- Sidebar ----- */
-/* Passez à 30% de la largeur */
+/* ----- Sidebar (30%) ----- */
 .sidebar {
   flex: 0 0 30%;
   max-width: 30%;
@@ -25,7 +21,6 @@
   height: 100%;
 }
 
-/* Logo et barre de recherche fixes */
 .logo-bar {
   text-align: center;
   font-size: 1.5rem;
@@ -34,20 +29,65 @@
   margin-bottom: 16px;
   flex: 0 0 auto;
 }
+
 .search-bar {
   width: 100%;
   margin-bottom: 16px;
   flex: 0 0 auto;
 }
 
-/* Liste des utilisateurs prend tout le reste */
 .user-list {
   flex: 1 1 auto;
   overflow-y: auto;
 }
 
-/* ----- Zone de chat ----- */
-/* Passez à 70% de la largeur */
+/* Liste utilisateur */
+mat-list-item {
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+mat-list-item:hover {
+  background: #e8eaf6;
+}
+mat-list-item.selected {
+  background: #c5cae9;
+}
+
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details {
+  margin-left: 12px;
+}
+.user-name {
+  font-weight: 500;
+  color: #333;
+}
+.user-status {
+  font-size: 0.75rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+.user-status span {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.user-status .online {
+  background: #4caf50;
+}
+.user-status .offline {
+  background: #f44336;
+}
+
+/* ----- Zone de chat (70%) ----- */
 .chat-area {
   flex: 1 1 70%;
   display: flex;
@@ -58,10 +98,13 @@
 
 /* En-tête fixe */
 .chat-header {
+  flex: 0 0 auto;
   padding: 12px 24px;
   border-bottom: 1px solid #e0e0e0;
   background: #fafafa;
-  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Messages défilants */
@@ -74,55 +117,31 @@
   gap: 12px;
 }
 
-/* Pied de page / saisie fixe */
-.chat-input {
-  padding: 12px 24px;
-  border-top: 1px solid #e0e0e0;
-  background: #fafafa;
-  flex: 0 0 auto;
+/* Style des bulles */
+.msg-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-end;
 }
-
-/* ===== Styles restants (inchangés) ===== */
-mat-list-item {
-  border-radius: 8px;
-  transition: background 0.2s;
+.msg-row.received .bubble {
+  background: #e8eaf6;
+  border-radius: 12px 12px 12px 0;
 }
-mat-list-item:hover { background: #e8eaf6; }
-mat-list-item.selected { background: #c5cae9; }
-
-.avatar-sm {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+.msg-row.sent .bubble {
+  background: #c5cae9;
+  border-radius: 12px 12px 0 12px;
 }
-
-.user-details { margin-left: 12px; }
-.user-name   { font-weight: 500; color: #333; }
-.user-status { font-size: 0.75rem; color: #666; display: flex; align-items: center; }
-.user-status span { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-.user-status .online { background: #4caf50; }
-.user-status .offline{ background: #f44336; }
-
-.msg-row { display: flex; align-items: flex-end; }
-.msg-row.received .bubble { background: #e8eaf6; border-radius: 12px 12px 12px 0; }
-.msg-row.sent     .bubble { background: #c5cae9; border-radius: 12px 12px 0 12px; }
-
 .bubble {
   padding: 12px 16px;
   max-width: 60%;
   position: relative;
 }
 
+/* Joints */
 .att-img, .att-video {
   max-width: 100px;
   max-height: 80px;
   border-radius: 8px;
 }
-
 .att-file {
   display: inline-flex;
   align-items: center;
@@ -133,4 +152,15 @@ mat-list-item.selected { background: #c5cae9; }
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
+}
+
+/* Pied de saisie fixe */
+.chat-input {
+  flex: 0 0 auto;
+  padding: 12px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
