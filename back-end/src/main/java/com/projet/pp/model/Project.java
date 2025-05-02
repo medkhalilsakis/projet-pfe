@@ -19,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class Project {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -55,6 +54,11 @@ public class Project {
 
     @Column(name = "status")
     private Integer status;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<ProjectTesterAssignment> assignments = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference  // Sérialise la liste des fichiers

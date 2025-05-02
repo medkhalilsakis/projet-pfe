@@ -1,1 +1,108 @@
-<p>parametres-projet works!</p>
+<mat-card class="param-card">
+  <!-- HEADER -->
+  <mat-card-header class="header">
+    <div class="header-content">
+      <mat-card-title>Paramètres du projet</mat-card-title>
+      <div class="spacer"></div>
+      <button mat-icon-button class="close-btn" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </mat-card-header>
+
+  <!-- CONTENT -->
+  <mat-card-content class="content">
+    <!-- FORM -->
+    <form *ngIf="projectForm"
+          [formGroup]="projectForm"
+          (ngSubmit)="onSubmit()"
+          class="form">
+
+      <div class="row">
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Nom du projet</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Type</mat-label>
+          <input matInput formControlName="type" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="field full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field small">
+        <mat-label>Visibilité</mat-label>
+        <mat-select formControlName="visibilite">
+          <mat-option value="privée">Privé</mat-option>
+          <mat-option value="public">Public</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-flat-button color="accent" class="btn-save" type="submit" [disabled]="projectForm.invalid">
+          <mat-icon>save</mat-icon>
+          Enregistrer
+        </button>
+      </div>
+    </form>
+
+    <mat-divider></mat-divider>
+
+    <!-- INVITÉS -->
+    <section class="invites">
+      <h3>Utilisateurs invités</h3>
+      <div *ngIf="invitedUsers.length; else noInvites">
+        <ul class="invite-list">
+          <li *ngFor="let u of invitedUsers" class="invite-item">
+            <span class="col name">{{ u.prenom }} {{ u.nom }}</span>
+            <span class="col email">{{ u.email }}</span>
+            <span class="col status" [ngClass]="{'pending': u.status==='pending', 'accepted': u.status==='accepted'}">
+              {{ u.status==='pending' ? 'En attente' : 'Accepté' }}
+            </span>
+            <button mat-icon-button color="warn" (click)="removeInvitedUser(u)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noInvites>
+        <p class="empty">Aucun invité</p>
+      </ng-template>
+    </section>
+
+    <mat-divider></mat-divider>
+
+    <!-- AJOUT D'INVITÉ -->
+    <section class="add-invite">
+      <h3>Ajouter un invité</h3>
+      <mat-form-field appearance="outline" class="field full-width">
+        <mat-label>Rechercher utilisateur</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Nom ou email" />
+        <button mat-icon-button matSuffix>
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <ul class="invite-list" *ngIf="availableUsers.length">
+        <li *ngFor="let u of availableUsers" class="invite-item">
+          <span class="col name">{{ u.prenom }} {{ u.nom }}</span>
+          <span class="col email">{{ u.email }}</span>
+          <button mat-icon-button color="primary" (click)="inviteUser(u)">
+            <mat-icon>person_add</mat-icon>
+          </button>
+        </li>
+      </ul>
+      <p *ngIf="!availableUsers.length && searchQuery" class="empty">Aucun résultat</p>
+    </section>
+  </mat-card-content>
+
+  <!-- FOOTER -->
+  <mat-card-actions align="end">
+    <button mat-stroked-button class="btn-close" (click)="close()">Fermer</button>
+  </mat-card-actions>
+</mat-card>

@@ -1,43 +1,21 @@
-:host {
-  display: block;
-  padding: 16px;
-  font-family: Roboto, sans-serif;
-  color: #424242;
-}
-
-.project-card {
+.card {
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
   padding: 16px;
-  margin-bottom: 16px;
-  background-color: #fafafa;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin: 8px 0;
+  border-radius: 4px;
 }
-
-.assignment-actions {
+.assign-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
-
-.assignment-item {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 8px;
-  margin-bottom: 8px;
-  background-color: #fff;
+.form-block {
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-
-.phase-actions {
-  margin-top: 12px;
-}
-
-mat-form-field {
-  width: 200px;
-}
-
-button {
-  text-transform: none;
+textarea {
+  width: 100%;
+  min-height: 60px;
 }

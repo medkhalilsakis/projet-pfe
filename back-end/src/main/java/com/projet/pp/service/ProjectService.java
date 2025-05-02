@@ -4,7 +4,6 @@ import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.*;
-import com.projet.pp.repository.ProjectClosureRepository;
 import com.projet.pp.repository.ProjectFileRepository;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.projectInvitedUserRepository;
@@ -39,8 +38,6 @@ public class ProjectService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ProjectClosureRepository closureRepo;
 
     @Autowired
     private projectInvitedUserRepository projectInvitedUserRepository;
@@ -422,25 +419,6 @@ public class ProjectService {
         return projectFileRepository.findByProjectIdAndParentId(projectId, parentId);
     }
 
-    @Transactional
-    public void closeProject(Long projectId, Long supervisorId, String reason) {
-        Project proj = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        User sup = userRepository.findById(supervisorId)
-                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
-
-        // 1) Enregistrer la raison
-        ProjectClosure closure = new ProjectClosure();
-        closure.setProject(proj);
-        closure.setSupervisor(sup);
-        closure.setReason(reason);
-        closureRepo.save(closure);
-
-        // 2) Mettre à jour le statut du projet
-        proj.setStatus(99);
-        projectRepository.save(proj);
-    }
-
 
     @Transactional
     public void inviteUser(Long projectId, Long userId, String status) {
@@ -534,5 +512,14 @@ public class ProjectService {
 
         // 2) Supprimez l’entité projet en base
         projectRepository.deleteById(projectId);
+    }
+
+
+    @Transactional
+    public void archiveProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+        project.setStatus(-1);
+        projectRepository.save(project);
     }
 }

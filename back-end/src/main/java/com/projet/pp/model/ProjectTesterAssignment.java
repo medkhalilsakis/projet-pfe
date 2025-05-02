@@ -1,5 +1,6 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,9 @@ public class ProjectTesterAssignment {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne @JoinColumn(name="project_id", nullable=false)
+    @ManyToOne
+    @JoinColumn(name="project_id", nullable=false)
+    @JsonBackReference
     private Project project;
 
     @ManyToOne @JoinColumn(name="testeur_id", nullable=false)

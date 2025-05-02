@@ -1,134 +1,82 @@
-:host {
-    --circle-size: 2.4rem;
-  }
-  
-  /* STEPper */
-  .stepper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    /* on s’assure que la variable existe, même si Angular ne l’injecte pas */
-    --progress-width: 0;
-  }
-  
-  .stepper::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: calc(var(--circle-size) / 2);
-    right: calc(var(--circle-size) / 2);
-    height: 4px;
-    background: #ccc;
-    transform: translateY(-50%);
-    z-index: 0;
-  }
-  
-  .stepper::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: calc(var(--circle-size) / 2);
-    height: 4px;
-    background: #4caf50;
-    transform: translateY(-50%);
-    /* On utilise désormais la variable CSS injectée par Angular : */
-    width: calc((100% - var(--circle-size)) * var(--progress-width) / 100);
-    z-index: 1;
-  }
-  
-  .step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 2;
-  }
-  .circle {
-    width: var(--circle-size);
-    height: var(--circle-size);
-    border-radius: 50%;
-    border: 3px solid #ccc;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color .3s, background .3s;
-  }
-  .circle mat-icon { font-size: 1.4rem; }
-  .label {
-    margin-top: .4rem;
-    font-size: .875rem;
-    color: #666;
-    text-align: center;
-  }
-  .step.completed .circle {
-    border-color: #4caf50;
-    background: #4caf50;
-    color: white;
-  }
-  .step.active .circle {
-    border-color: #ff9800;
-  }
-  .step.active .circle mat-icon {
-    color: #ff9800;
-    animation: spin 1.2s linear infinite;
-  }
-  .step.active .label {
-    color: #ff9800;
-    font-weight: 600;
-  }
-  @keyframes spin {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Bloc "raison" */
-  .reason-block {
-    margin: 16px;
-    padding: 16px;
-    border-radius: 6px;
-    background: #f9f9f9;
-    border-left: 6px solid;
-  }
-  .reason-block.pause   { border-color: #ff9800; }
-  .reason-block.closure { border-color: #f44336; }
-  .reason-block h3 {
-    margin-top: 0;
-    font-size: 1.1rem;
-  }
-  .reason-text {
-    margin: 8px 0;
-    white-space: pre-wrap;
-  }
-  .attachments {
-    margin-top: 12px;
-  }
-  .attachments .att-list a {
-    display: block;
-    color: #1976d2;
-    text-decoration: none;
-    margin-bottom: 4px;
-  }
-  .attachments .att-list a:hover {
-    text-decoration: underline;
-  }
-  
-  /* Responsive vertical */
-  @media (max-width: 600px) {
-    .stepper {
-      flex-direction: column;
-    }
-    .stepper::before,
-    .stepper::after {
-      top: calc(var(--circle-size) / 2);
-      left: 50%;
-      height: calc(100% - var(--circle-size));
-      width: 4px;
-      transform: translateX(-50%);
-    }
-    .step {
-      margin-bottom: 1rem;
-    }
-  }
-  
+.stepper-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 20%;
+}
+
+.step .circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.step .label {
+  font-size: 12px;
+  text-align: center;
+}
+
+.step.active .circle {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+.step.completed .circle {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+mat-progress-bar {
+  width: 100%;
+  margin-top: 20px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.reason-block {
+  margin-top: 20px;
+}
+
+.reason-block h3 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.reason-block p {
+  font-size: 14px;
+  color: #757575;
+}
+
+.attachments {
+  margin-top: 10px;
+}
+
+.att-list a {
+  display: block;
+  font-size: 14px;
+  color: #1976d2;
+  text-decoration: none;
+  margin-bottom: 5px;
+}
+
+.att-list a:hover {
+  text-decoration: underline;
+}

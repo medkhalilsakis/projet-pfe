@@ -1,25 +1,32 @@
 package com.projet.pp.service;
 
-import com.projet.pp.model.Project;
-import com.projet.pp.model.ProjectTesterAssignment;
-import com.projet.pp.model.TestStatus;
-import com.projet.pp.model.User;
+import com.projet.pp.model.*;
+import com.projet.pp.repository.ProjectPauseRepository;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.ProjectTesterAssignmentRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TesterAssignmentService {
 
     @Autowired
     private ProjectRepository projectRepo;
+
+    @Autowired
+    private ProjectPauseService pauseService;
+
+    @Autowired
+    private ProjectPauseRepository pauseRepository;
 
     @Autowired
     private UserRepository userRepo;
@@ -106,9 +113,11 @@ public class TesterAssignmentService {
         projectRepo.save(project);
     }
 
+    @Transactional
     public List<Project> getTestingProjects() {
-        return projectRepo.findByStatus(2);
+        return projectRepo.findProjectsByStatusWithAssignments(2); // statut = 2 pour "en testing"
     }
+
 
 
     @Transactional
@@ -145,5 +154,38 @@ public class TesterAssignmentService {
         projectRepo.save(project);
     }
 
+    @Transactional(readOnly = true)
+    public List<Project> getProjectsByStatuses(List<Integer> statuses) {
+        return projectRepo.findByStatusIn(statuses);
+    }
 
+    @Transactional
+    public void pauseTestingPhase(Long projectId, Long supervisorId, String reason, MultipartFile[] files) {
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        User sup = userRepo.findById(supervisorId)
+                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
+
+        // Optionnel : enregistrer la raison et les fichiers dans une entité ProjectPause
+        ProjectPause pause = new ProjectPause();
+        pause.setProject(project);
+        pause.setSupervisor(sup);
+        pause.setReason(reason);
+        pauseRepository.save(pause);
+
+        // Si des fichiers sont joints, on peut les stocker de la même façon que pour les closures
+        if (files != null) {
+            for (MultipartFile file : files) {
+                pauseService.storePauseAttachment(pause, file);
+            }
+        }
+
+        // Supprime toutes les affectations en cours
+        assignRepo.deleteByProjectId(projectId);
+
+        // Passe le projet en status "pause"
+        project.setStatus(55);
+        projectRepo.save(project);
+    }
 }

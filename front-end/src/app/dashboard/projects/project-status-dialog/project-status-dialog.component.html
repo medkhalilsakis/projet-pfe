@@ -1,21 +1,22 @@
 <h2 mat-dialog-title>Statut du projet</h2>
-<mat-dialog-content>
 
-  <!-- Stepper -->
-  <div class="stepper"
-     [style.--progress-width]="(current / (stages.length - 1) * 100)">
-    <ng-container *ngFor="let s of stages; let i = index">
-      <div class="step"
-           [ngClass]="{ 'completed': i < current, 'active': i === current }">
-        <div class="circle">
-          <mat-icon [color]="iconColor(i)">{{ iconName(i) }}</mat-icon>
+<mat-dialog-content>
+  <!-- Barre de progression avec étapes -->
+  <div class="stepper-container">
+    <div class="stepper">
+      <ng-container *ngFor="let s of stages; let i = index">
+        <div class="step" [ngClass]="{'completed': i < current, 'active': i === current}">
+          <div class="circle">
+            <mat-icon>{{ iconName(i) }}</mat-icon>
+          </div>
+          <div class="label">{{ s.label }}</div>
         </div>
-        <div class="label">{{ s.label }}</div>
-      </div>
-    </ng-container>
+      </ng-container>
+    </div>
+    <mat-progress-bar mode="determinate" [value]="(current / (stages.length - 1)) * 100"></mat-progress-bar>
   </div>
 
-  <!-- Bloc raison pour mise en pause -->
+  <!-- Raison de mise en pause -->
   <div *ngIf="showPauseReason" class="reason-block pause">
     <h3>Projet mis en pause</h3>
     <p class="reason-text">{{ data.project.pauseReason }}</p>
@@ -28,12 +29,11 @@
     </div>
   </div>
 
-  <!-- Bloc raison pour clôture -->
+  <!-- Raison de clôture -->
   <div *ngIf="showClosureReason" class="reason-block closure">
     <h3>Projet clôturé</h3>
     <p class="reason-text">{{ data.project.closureReason }}</p>
   </div>
-
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

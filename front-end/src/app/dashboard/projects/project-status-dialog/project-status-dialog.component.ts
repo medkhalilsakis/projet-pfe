@@ -8,6 +8,7 @@ import {
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 export interface Project {
   id: number;
@@ -27,7 +28,8 @@ export interface Project {
     MatDialogModule,
     MatListModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatProgressBarModule
   ],
   templateUrl: './project-status-dialog.component.html',
   styleUrls: ['./project-status-dialog.component.css']

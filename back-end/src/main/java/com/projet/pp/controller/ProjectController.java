@@ -205,16 +205,6 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/{projectId}/close")
-    public ResponseEntity<String> closeProject(
-            @PathVariable Long projectId,
-            @RequestBody Map<String,String> body) {
-        Long supId = Long.valueOf(body.get("supervisorId"));
-        String reason = body.get("reason");
-        projectService.closeProject(projectId, supId, reason);
-        return ResponseEntity.ok("Projet clôturé avec succès");
-    }
-
 
     @PutMapping(
             path = "/{projectId}/files/{fileId}/content",

@@ -1,0 +1,212 @@
+/* Carte globale sans margin */
+.param-card {
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+/* Header coloré */
+.header {
+  background: #1976d2;
+  color: #fff;
+  padding: 0;
+}
+.header .mat-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+
+/* Contenu scrollable si trop long */
+.content {
+  padding: 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Formulaire */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.field {
+  flex: 1;
+}
+.small {
+  flex: 0 0 180px;
+}
+.full-width {
+  width: 100%;
+}
+
+/* Style des boutons */
+.btn-save {
+  background: #388e3c;
+  color: #fff;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-save:hover {
+  background: #2e7d32;
+  transform: translateY(-2px);
+}
+
+/* Sections */
+h3 {
+  margin: 24px 0 12px;
+  font-size: 1.1rem;
+  color: #333;
+  border-left: 4px solid #1976d2;
+  padding-left: 8px;
+}
+
+/* Listes d’invités */
+.invite-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.invite-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  gap: 12px;
+}
+.invite-item:last-child {
+  border-bottom: none;
+}
+.col {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status.pending {
+  color: #f57c00;
+  font-style: italic;
+}
+.status.accepted {
+  color: #388e3c;
+  font-weight: 600;
+}
+
+/* Boutons de suppression/invitation */
+.invite-item button {
+  transition: background 0.2s, transform 0.1s;
+}
+.invite-item button:hover {
+  background: rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+/* Ajout invité suggestions */
+.add-invite .invite-list .invite-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.add-invite .invite-list .invite-item:hover {
+  background: #f9f9f9;
+}
+
+/* Champ recherche */
+.add-invite .mat-form-field {
+  margin-bottom: 16px;
+}
+
+/* Vide */
+.empty {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  margin: 16px 0;
+}
+
+/* Footer */
+mat-card-actions {
+  padding: 8px 16px;
+  background: #fafafa;
+}
+.btn-close {
+  color: #1976d2;
+  transition: background 0.2s;
+}
+.btn-close:hover {
+  background: rgba(25, 118, 210, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .row { flex-direction: column; }
+  .small { flex: 1; }
+}
+
+
+
+/* Conteneur flex dans l'en-tête */
+.header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+}
+
+/* Espaceur pour pousser le bouton à droite */
+.spacer {
+  flex: 1;
+}
+
+/* Bouton "close" plus discret, rond et lumineux au survol */
+.close-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+/* Icône centrée */
+.close-btn mat-icon {
+  font-size: 20px;
+  color: rgba(255,255,255,0.8);
+  transition: color 0.2s ease;
+}
+
+/* Halo animé au survol */
+.close-btn::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.close-btn:hover::before {
+  opacity: 1;
+}
+
+.close-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.1);
+}
+
+.close-btn:hover mat-icon {
+  color: #ffffff;
+}
