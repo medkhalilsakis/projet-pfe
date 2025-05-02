@@ -1,0 +1,13 @@
+<mat-nav-list>
+  <ng-container *ngIf="(notifications$ | async)?.length; else noneTpl">
+    <mat-list-item *ngFor="let n of notifications$ | async">
+      <!-- votre rendu -->
+    </mat-list-item>
+  </ng-container>
+  <ng-template #noneTpl>
+    <mat-list-item disabled>
+      <mat-icon>notifications_off</mat-icon>
+      <span>Aucune notification</span>
+    </mat-list-item>
+  </ng-template>
+</mat-nav-list>

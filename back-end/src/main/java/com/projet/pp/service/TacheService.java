@@ -9,6 +9,7 @@ import com.projet.pp.repository.TacheAttachmentRepository;
 import com.projet.pp.repository.TacheRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -17,12 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class TacheService {
@@ -55,9 +60,39 @@ public class TacheService {
         return tacheRepository.findById(id);
     }
 
+    // src/main/java/com/projet/pp/service/TacheService.java
+    @Transactional
     public void deleteTache(Long id) {
-        tacheRepository.deleteById(id);
+        // 1) charger la tâche avec ses pièces jointes et assignations
+        Tache t = tacheRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tâche introuvable"));
+
+        // 2) nettoyage des fichiers sur disque
+        Path taskDir = baseStorage.resolve(t.getId().toString());
+        try {
+            if (Files.exists(taskDir)) {
+                Files.walk(taskDir)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+        } catch (IOException e) {
+            // logguez si nécessaire, mais on continue
+        }
+
+        // 3) suppression des attachments en base (cascade via orphanRemoval)
+        t.getAttachments().clear();
+
+        // 4) suppression des assignations dans la table de jointure
+        t.getAssignedTo().clear();
+
+        // 5) on persiste les deux clear() pour que JPA exécute DELETE sur join table et attachments
+        tacheRepository.save(t);
+
+        // 6) enfin on supprime la tâche elle-même
+        tacheRepository.delete(t);
     }
+
 
     public List<Tache> search(String q, Tache.Status status, Long assignedTo) {
         if (q != null && status != null && assignedTo != null) {
@@ -152,6 +187,7 @@ public class TacheService {
             }
         }
 
+
         // Mise à jour finale de la tâche
         return tacheRepository.save(t);
     }
@@ -187,4 +223,121 @@ public class TacheService {
         t.setProject(p);
         tacheRepository.save(t);
     }
+
+
+    // src/main/java/com/projet/pp/service/TacheService.java
+    @Transactional
+    public Tache update(
+            Long id,
+            Map<String,Object> data,
+            MultipartFile projectPdf,
+            MultipartFile[] attachments,
+            List<Long> removeAttIds
+    ) throws IOException {
+        // 1) charger l’entité existante
+        Tache t = tacheRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tâche introuvable"));
+
+        // 2) mettre à jour les champs simples
+        t.setName((String) data.get("name"));
+        t.setDescription((String) data.get("description"));
+        t.setOutils((String) data.get("outils"));
+        t.setDeadline(LocalDate.parse((String) data.get("deadline")));
+        t.setStatus(Tache.Status.valueOf(((String)data.get("status")).toLowerCase()));
+
+        // 3) assignedBy
+        Long assignedById = Long.valueOf(data.get("assignedBy").toString());
+        User assignedBy = userRepository.findById(assignedById)
+                .orElseThrow(() -> new RuntimeException("Utilisateur assigné par non trouvé"));
+        t.setAssignedBy(assignedBy);
+
+        // 4) assignedTo (ManyToMany)
+        @SuppressWarnings("unchecked")
+        List<Object> toIds = (List<Object>) data.get("assignedTo");
+        Set<User> assignees = toIds.stream()
+                .map(obj -> obj instanceof Number
+                        ? ((Number)obj).longValue()
+                        : Long.valueOf(obj.toString()))
+                .map(uid -> userRepository.findById(uid)
+                        .orElseThrow(() -> new RuntimeException("Utilisateur assigné non trouvé")))
+                .collect(Collectors.toSet());
+        t.setAssignedTo(assignees);
+
+        // 5) supprimer les attachments demandés
+        if (removeAttIds != null) {
+            for (Long attId : removeAttIds) {
+                attachmentRepository.findById(attId).ifPresent(att -> {
+                    try {
+                        Files.deleteIfExists(Paths.get(att.getFilePath()));
+                    } catch (IOException e) { /* loger */ }
+                    attachmentRepository.delete(att);
+                });
+            }
+        }
+
+        // 6) gérer le PDF principal si nouveau upload
+        Path taskDir = baseStorage.resolve(t.getId().toString());
+        Files.createDirectories(taskDir);
+        if (projectPdf != null) {
+            // écraser l’ancien
+            Path pdfPath = taskDir.resolve("projectDetails.pdf");
+            projectPdf.transferTo(pdfPath);
+            t.setProjectDetailsPdf(pdfPath.toString());
+
+            // mettre à jour l’attachement PDF en base
+            TacheAttachment pdfAtt = attachmentRepository.findByTache_IdAndFileType(t.getId(), "application/pdf")
+                    .orElseGet(() -> {
+                        TacheAttachment a = new TacheAttachment();
+                        a.setTache(t);
+                        return a;
+                    });
+            pdfAtt.setFileName(projectPdf.getOriginalFilename());
+            pdfAtt.setFilePath(pdfPath.toString());
+            pdfAtt.setFileType(projectPdf.getContentType());
+            pdfAtt.setFileSize(projectPdf.getSize());
+            attachmentRepository.save(pdfAtt);
+        }
+
+        // 7) gérer les nouveaux autres attachments
+        if (attachments != null) {
+            for (MultipartFile file : attachments) {
+                String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                Path dest = taskDir.resolve(filename);
+                file.transferTo(dest);
+                TacheAttachment att = new TacheAttachment();
+                att.setTache(t);
+                att.setFileName(file.getOriginalFilename());
+                att.setFilePath(dest.toString());
+                att.setFileType(file.getContentType());
+                att.setFileSize(file.getSize());
+                attachmentRepository.save(att);
+            }
+        }
+
+        // 8) sauver et retourner
+        return tacheRepository.save(t);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Resource getAllAttachmentsAsZip(Long taskId) throws IOException {
+        // Récupère toutes les pièces jointes de la tâche
+        List<TacheAttachment> atts = attachmentRepository.findByTache_Id(taskId);
+
+        // Crée le ZIP en mémoire
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (TacheAttachment att : atts) {
+                Path path = Paths.get(att.getFilePath());
+                ZipEntry entry = new ZipEntry(att.getFileName());
+                zos.putNextEntry(entry);
+                Files.copy(path, zos);
+                zos.closeEntry();
+            }
+        }
+
+        return new ByteArrayResource(baos.toByteArray());
+    }
+
+
 }

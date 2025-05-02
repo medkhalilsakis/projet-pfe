@@ -1,11 +1,15 @@
+// src/app/task-detail/task-detail.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute }    from '@angular/router';
-import { HttpClient }        from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule }      from '@angular/common';
 import { MatChipsModule }    from '@angular/material/chips';
 import { MatIconModule }     from '@angular/material/icon';
 import { MatListModule }     from '@angular/material/list';
+import { FlexLayoutModule }  from '@angular/flex-layout';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { EditTaskDialogComponent } from '../edit-task-dialog/edit-task-dialog.component';
 
 interface TacheDetailDTO {
   id: number;
@@ -25,40 +29,51 @@ interface TacheDetailDTO {
   standalone: true,
   imports: [
     CommonModule,
+    MatDialogModule,
     MatChipsModule,
     MatIconModule,
     MatListModule,
+    FlexLayoutModule,
     NgxExtendedPdfViewerModule
   ],
   templateUrl: './task-detail.component.html',
   styleUrls: ['./task-detail.component.css']
 })
 export class TaskDetailComponent implements OnInit {
+
   task!: TacheDetailDTO;
   pdfUrl?: string;
-  otherAttachments: { id: number; fileName: string; fileType: string; }[] = [];
+  pdfAttachments: any[] = [];
+  imageAttachments: any[] = [];
+  videoAttachments: any[] = [];
+  otherAttachments: any[] = [];
   readonly API = 'http://localhost:8080/api';
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
+    this.loadTask();
+  }
+
+  private loadTask() {
     const id = this.route.snapshot.params['id'];
     this.http.get<TacheDetailDTO>(`${this.API}/taches/${id}`)
       .subscribe(t => {
         this.task = t;
-        const pdfAtt = t.attachments.find(a => a.fileType === 'application/pdf');
-        if (pdfAtt) {
-          // URL REST pour stream
-          this.pdfUrl = `${this.API}/taches/attachments/${pdfAtt.id}`;
-          //this.pdfUrl = `https://www.ecam.fr/wp-content/uploads/2016/06/Exemple-fichier-PDF-1.pdf`;
+        // classer par type
+        this.pdfAttachments = t.attachments.filter(a => a.fileType === 'application/pdf');
+        this.imageAttachments = t.attachments.filter(a => a.fileType?.startsWith('image/'));
+        this.videoAttachments = t.attachments.filter(a => a.fileType?.startsWith('video/'));
+        this.otherAttachments = t.attachments.filter(a => ![...this.pdfAttachments, ...this.imageAttachments, ...this.videoAttachments].includes(a));
+        if (this.pdfAttachments.length) {
+          // afficher le premier PDF dans viewer
         }
-        this.otherAttachments = t.attachments.filter(a => a.fileType !== 'application/pdf');
       });
   }
-  
 
   getStatusLabel(status: string) {
     const map: Record<string,string> = {
@@ -76,5 +91,23 @@ export class TaskDetailComponent implements OnInit {
     return this.task.outils.split(',')
                .map(s => s.trim())
                .filter(s => !!s);
+  }
+
+  editTask() {
+    const dialogRef = this.dialog.open(EditTaskDialogComponent, {
+      width: '600px',
+      data: { id: this.task.id }
+    });
+
+    dialogRef.afterClosed().subscribe(updated => {
+      if (updated) {
+        this.loadTask();
+      }
+    });
+  }
+
+  downloadAll() {
+    const id = this.task.id;
+    window.open(`${this.API}/taches/${id}/attachments/zip`, '_blank');
   }
 }

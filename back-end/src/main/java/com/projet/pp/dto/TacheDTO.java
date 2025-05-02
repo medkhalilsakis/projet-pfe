@@ -15,7 +15,7 @@ public class TacheDTO {
     private Long id;
     private String name;
 
-    // résumé (list) : ces champs restent à null
+    // résumé (list) : ces champs restent à null en mode liste
     private String description;
     private String outils;
 
@@ -29,16 +29,11 @@ public class TacheDTO {
     /** Toujours présent, même en résumé */
     private List<SimpleUser> assignedTo;
 
+    /** Créateur de la tâche */
+    private SimpleUser assignedBy;
+
     /** Présent uniquement en détail */
     private List<AttachmentDTO> attachments;
-
-    @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class SimpleUser {
-        private Long id;
-        private String prenom;
-        private String nom;
-    }
 
     @Getter @Setter
     @NoArgsConstructor @AllArgsConstructor @Builder
@@ -46,5 +41,13 @@ public class TacheDTO {
         private Long id;
         private String fileName;
         private String fileType;
+    }
+
+    @Getter @Setter
+    @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class SimpleUser {
+        private Long id;
+        private String prenom;
+        private String nom;
     }
 }

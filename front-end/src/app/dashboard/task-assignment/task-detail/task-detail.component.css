@@ -1,69 +1,144 @@
+/* src/app/task-detail/task-detail.component.css */
+
+/* —— Conteneur principal —— */
 .detail-page {
-    padding: 24px;
-    max-width: 900px;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 24px;
+  background-color: #fafafa;
+  color: #212121;
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* —— Chargement —— */
+.loading {
+  font-size: 1.1rem;
+  color: #616161;
+  opacity: 0.8;
+}
+
+/* —— Titres —— */
+.task-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #3f51b5;
+  margin: 0;
+}
+section h2 {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+  color: #3f51b5;
+  position: relative;
+}
+section h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background-color: #ff4081;
+  margin-top: 4px;
+}
+
+/* —— Métadonnées —— */
+.meta .meta-item {
+  font-size: 0.95rem;
+  color: #616161;
+}
+.meta .meta-item mat-icon {
+  color: #3f51b5;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+/* —— Badge de statut —— */
+.status-badge {
+  background-color: #e8eaf6;
+  color: #3f51b5;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* —— Description —— */
+.description p {
+  line-height: 1.6;
+  color: #424242;
+}
+
+/* —— Outils & Technologies —— */
+.tools-section .badges {
+  margin-top: 8px;
+}
+.tools-section .badge {
+  display: inline-block;
+  background-color: #ff4081;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.tools-section .badge:hover {
+  background-color: #f50057;
+  transform: translateY(-2px);
+}
+
+/* —— Assignations —— */
+.assignees .custom-chip {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  color: #616161;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.assignees .custom-chip:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+/* —— PDF Viewer —— */
+.pdf-section {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.pdf-section ngx-extended-pdf-viewer {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* —— Autres pièces jointes —— */
+mat-list-item {
+  transition: background-color 0.2s;
+}
+mat-list-item:hover {
+  background-color: rgba(0,0,0,0.02);
+}
+mat-list-item mat-icon {
+  color: #3f51b5;
+  margin-right: 8px;
+}
+
+/* —— Responsive —— */
+@media (max-width: 768px) {
+  .detail-page {
+    padding: 16px;
   }
-  
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    align-items: center;
-    margin-bottom: 24px;
+  .task-title {
+    font-size: 1.75rem;
   }
-  
-  .status-badge {
-    background: #c8e6c9;
-    color: #1b5e20;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 500;
+  /* Force colonne sur petits écrans */
+  section{
+    flex-direction: column !important;
   }
-  
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #555;
-    font-size: 0.9rem;
-  }
-  
-  .description, section {
-    margin-bottom: 24px;
-  }
-  
-  .badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .badge {
-    display: inline-block;
-    background: #e0f7fa;
-    color: #006064;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.875rem;
-  }
-  
-  .assignees {
-    list-style: none;
-    padding: 0;
-  }
-  .assignees li {
-    padding: 6px 0;
-    border-bottom: 1px solid #eee;
-    color: #333;
-  }
-  
-  .pdf-viewer {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
+}

@@ -1,67 +1,117 @@
-<main class="detail-page">
+<!-- src/app/task-detail/task-detail.component.html -->
+<main fxLayout="column" fxLayoutGap="24px" fxFill class="detail-page">
 
-    <div *ngIf="!task" class="loading">Chargement…</div>
-  
-    <div *ngIf="task">
-      <h1>{{ task.name }}</h1>
-  
-      <section class="meta">
-        <span class="status-badge">{{ getStatusLabel(task.status) }}</span>
-        <span class="meta-item">
-          <mat-icon>calendar_today</mat-icon>
-          Deadline : {{ task.deadline | date:'fullDate' }}
-        </span>
-        <span class="meta-item">
-          <mat-icon>publish</mat-icon>
-          Publiée : {{ task.publishedAt | date:'fullDate' }}
-        </span>
-      </section>
-  
-      <section class="description">
+  <!-- Spinner -->
+  <div *ngIf="!task" fxFlex fxLayout="row" fxLayoutAlign="center center" class="loading">
+    <span class="loading-text">Chargement…</span>
+  </div>
+
+  <!-- Contenu de la tâche -->
+  <div *ngIf="task" fxLayout="column" fxLayoutGap="24px">
+
+    <!-- Titre et actions -->
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <h1 class="task-title">{{ task.name }}</h1>
+      <button mat-icon-button (click)="editTask()">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
+    <!-- Métadonnées -->
+    <section fxLayout="row wrap" fxLayoutAlign="start center" fxLayoutGap="16px" class="meta">
+      <span class="status-badge">{{ getStatusLabel(task.status) }}</span>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="4px" class="meta-item">
+        <mat-icon>calendar_today</mat-icon>
+        <span>Deadline : {{ task.deadline | date:'fullDate' }}</span>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="4px" class="meta-item">
+        <mat-icon>publish</mat-icon>
+        <span>Publiée : {{ task.publishedAt | date:'fullDate' }}</span>
+      </div>
+    </section>
+
+    <!-- Description & Outils -->
+    <section fxLayout="column" fxLayoutGap="24px">
+      <div class="description" fxFlex>
         <h2>Description</h2>
         <p>{{ task.description }}</p>
-      </section>
-  
-      <section *ngIf="task.outils">
+      </div>
+      <div *ngIf="task.outils" class="tools-section" fxFlex>
         <h2>Outils &amp; Technologies</h2>
-        <div class="badges">
-          <span class="badge" *ngFor="let o of task.outils.split(',')">
-            {{ o.trim() }}
-          </span>
+        <div fxLayout="row wrap" fxLayoutGap="8px" class="badges">
+          <span class="badge" *ngFor="let o of getOutilsList()">{{ o }}</span>
         </div>
-      </section>
-  
-      <section>
-        <h2>Assigné à</h2>
-        <ul class="assignees">
-          <li *ngFor="let u of task.assignedTo">
-            {{ u.prenom }} {{ u.nom }}
-          </li>
-        </ul>
-      </section>
-  
-      <section *ngIf="pdfUrl" class="pdf-viewer">
-        <h2>PDF Cahier des charges</h2>
+      </div>
+    </section>
+
+    <!-- Assigné à -->
+    <section>
+      <h2>Assigné à</h2>
+      <div fxLayout="row wrap" fxLayoutGap="12px" class="assignees">
+        <div *ngFor="let u of task.assignedTo" class="custom-chip">
+          {{ u.prenom }} {{ u.nom }}
+        </div>
+      </div>
+    </section>
+
+    <!-- Cahier des charges (PDF principal) -->
+    <section *ngIf="pdfAttachments.length" fxLayout="column" fxLayoutGap="16px">
+      <h2>Cahier des Charges (PDF)</h2>
+      <div *ngFor="let pdf of pdfAttachments" class="pdf-section">
         <ngx-extended-pdf-viewer
-            [src]="pdfUrl"
-            useBrowserLocale="true"
-            [minifiedJSLibraries]="false"
-            height="500px"
-            [showSidebarButton]="true">
+          [src]="API + '/taches/attachments/' + pdf.id"
+          useBrowserLocale="true"
+          [minifiedJSLibraries]="false"
+          height="600px"
+          [showSidebarButton]="true"
+          style="width: 100%;">
         </ngx-extended-pdf-viewer>
-      </section>
-  
-      <section *ngIf="otherAttachments.length">
-        <h2>Autres pièces jointes</h2>
-        <mat-list>
-          <mat-list-item *ngFor="let a of otherAttachments">
-            <mat-icon>insert_drive_file</mat-icon>
-            <a [href]="API + '/taches/attachments/' + a.id" target="_blank">
-              {{ a.fileName }}
-            </a>
-          </mat-list-item>
-        </mat-list>
-      </section>
-    </div>
-  </main>
-  
+      </div>
+    </section>
+
+    <!-- Images -->
+    <section *ngIf="imageAttachments.length">
+      <h2>Images</h2>
+      <div fxLayout="row wrap" fxLayoutGap="16px">
+        <img *ngFor="let img of imageAttachments"
+             [src]="API + '/taches/attachments/' + img.id"
+             [alt]="img.fileName"
+             class="preview-image">
+      </div>
+    </section>
+
+    <!-- Vidéos -->
+    <section *ngIf="videoAttachments.length">
+      <h2>Vidéos</h2>
+      <div fxLayout="column" fxLayoutGap="16px">
+        <video *ngFor="let vid of videoAttachments"
+               controls
+               [src]="API + '/taches/attachments/' + vid.id"
+               class="video-player">
+        </video>
+      </div>
+    </section>
+
+    <!-- Autres fichiers -->
+    <section *ngIf="otherAttachments.length">
+      <h2>Autres fichiers</h2>
+      <mat-list>
+        <mat-list-item *ngFor="let a of otherAttachments">
+          <mat-icon matListIcon>insert_drive_file</mat-icon>
+          <a [href]="API + '/taches/attachments/' + a.id" download>
+            {{ a.fileName }}
+          </a>
+        </mat-list-item>
+      </mat-list>
+    </section>
+
+    <!-- Téléchargement ZIP -->
+    <section fxLayout="row" fxLayoutAlign="end center">
+      <button mat-raised-button color="accent" (click)="downloadAll()">
+        <mat-icon>archive</mat-icon>
+        Tout télécharger (ZIP)
+      </button>
+    </section>
+
+  </div>
+</main>

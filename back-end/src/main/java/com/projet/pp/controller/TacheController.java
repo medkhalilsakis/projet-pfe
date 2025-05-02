@@ -1,10 +1,10 @@
+// src/main/java/com/projet/pp/controller/TacheController.java
 package com.projet.pp.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projet.pp.dto.TacheDTO;
 import com.projet.pp.model.Tache;
-import com.projet.pp.model.TacheAttachment;
 import com.projet.pp.service.TacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -20,11 +20,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/taches")
-@CrossOrigin(origins = "*")
 public class TacheController {
 
     @Autowired private TacheService tacheService;
-    private static final String API = "/api";
 
     /** Liste (summary) */
     @GetMapping
@@ -37,6 +35,7 @@ public class TacheController {
                 .map(t -> TacheDTO.builder()
                         .id(t.getId())
                         .name(t.getName())
+                        .outils(t.getOutils())
                         .status(t.getStatus().name())
                         .deadline(t.getDeadline())
                         .creationDate(t.getCreationDate())
@@ -47,6 +46,11 @@ public class TacheController {
                                         .nom(u.getNom())
                                         .build())
                                 .toList())
+                        .assignedBy(TacheDTO.SimpleUser.builder()
+                                .id(t.getAssignedBy().getId())
+                                .prenom(t.getAssignedBy().getPrenom())
+                                .nom(t.getAssignedBy().getNom())
+                                .build())
                         .build())
                 .toList();
     }
@@ -70,6 +74,11 @@ public class TacheController {
                                         .nom(u.getNom())
                                         .build())
                                 .toList())
+                        .assignedBy(TacheDTO.SimpleUser.builder()
+                                .id(t.getAssignedBy().getId())
+                                .prenom(t.getAssignedBy().getPrenom())
+                                .nom(t.getAssignedBy().getNom())
+                                .build())
                         .attachments(t.getAttachments().stream()
                                 .map(a -> TacheDTO.AttachmentDTO.builder()
                                         .id(a.getId())
@@ -110,52 +119,36 @@ public class TacheController {
                                 .nom(u.getNom())
                                 .build())
                         .toList())
+                .assignedBy(TacheDTO.SimpleUser.builder()
+                        .id(t.getAssignedBy().getId())
+                        .prenom(t.getAssignedBy().getPrenom())
+                        .nom(t.getAssignedBy().getNom())
+                        .build())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    /**
-     * Supprime une tâche existante.
-     */
+    /** Suppression */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         tacheService.deleteTache(id);
         return ResponseEntity.noContent().build();
     }
 
-
+    /** Téléchargement d’une pièce jointe */
     @GetMapping("/attachments/{attId}")
     public ResponseEntity<Resource> downloadAttachment(@PathVariable Long attId) throws IOException {
         Resource resource = tacheService.loadAttachmentAsResource(attId);
         String contentType = Files.probeContentType(Paths.get(resource.getURI()));
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                // passez de "attachment" à "inline" pour autoriser l'affichage en ligne
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
 
-    @GetMapping("/free")
-    public List<TacheDTO> freeTasks() {
-        return tacheService.getUnassignedTasks().stream()
-                .map(t -> TacheDTO.builder()
-                        .id(t.getId())
-                        .name(t.getName())
-                        .status(t.getStatus().name())
-                        .deadline(t.getDeadline())
-                        .creationDate(t.getCreationDate())
-                        .assignedTo(
-                                t.getAssignedTo().stream()
-                                        .map(u-> new TacheDTO.SimpleUser(u.getId(),u.getPrenom(),u.getNom()))
-                                        .toList()
-                        )
-                        .build()
-                ).toList();
-    }
-
-    /** 2) Assignation d’une tâche à un projet */
+    /** Assignation d’une tâche à un projet */
     @PutMapping("/{id}/assignProject")
     public ResponseEntity<Void> assignProject(
             @PathVariable Long id,
@@ -164,4 +157,63 @@ public class TacheController {
         tacheService.assignToProject(id, projectId);
         return ResponseEntity.ok().build();
     }
+
+
+    /** Mise à jour complète d’une tâche */
+    // src/main/java/com/projet/pp/controller/TacheController.java
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<TacheDTO> update(
+            @PathVariable Long id,
+            @RequestPart("data") String dataJson,
+            @RequestPart(name="projectPdf", required=false) MultipartFile projectPdf,
+            @RequestPart(name="attachments", required=false) MultipartFile[] attachments,
+            @RequestParam(name="removeAttIds", required=false) List<Long> removeAttIds
+    ) throws IOException {
+        // 1) parse JSON
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String,Object> map = mapper.readValue(dataJson, new TypeReference<>(){});
+        // 2) update via service
+        Tache t = tacheService.update(id, map, projectPdf, attachments, removeAttIds);
+        // 3) construire et renvoyer le DTO
+        TacheDTO dto = TacheDTO.builder()
+                .id(t.getId())
+                .name(t.getName())
+                .description(t.getDescription())
+                .outils(t.getOutils())
+                .status(t.getStatus().name())
+                .deadline(t.getDeadline())
+                .creationDate(t.getCreationDate())
+                .assignedTo(t.getAssignedTo().stream()
+                        .map(u -> TacheDTO.SimpleUser.builder()
+                                .id(u.getId())
+                                .prenom(u.getPrenom())
+                                .nom(u.getNom()).build())
+                        .toList())
+                .assignedBy(TacheDTO.SimpleUser.builder()
+                        .id(t.getAssignedBy().getId())
+                        .prenom(t.getAssignedBy().getPrenom())
+                        .nom(t.getAssignedBy().getNom()).build())
+                .attachments(t.getAttachments().stream()
+                        .map(a -> TacheDTO.AttachmentDTO.builder()
+                                .id(a.getId())
+                                .fileName(a.getFileName())
+                                .fileType(a.getFileType())
+                                .build())
+                        .toList())
+                .build();
+        return ResponseEntity.ok(dto);
+    }
+
+
+    @GetMapping("/{id}/attachments/zip")
+    public ResponseEntity<Resource> downloadAllAsZip(@PathVariable Long id) throws IOException {
+        Resource zip = tacheService.getAllAttachmentsAsZip(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"tache-" + id + "-files.zip\"")
+                .body(zip);
+    }
+
+
 }

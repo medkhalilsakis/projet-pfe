@@ -1,0 +1,23 @@
+/* src/app/task-assignment/edit-task-dialog/edit-task-dialog.component.css */
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .full {
+    width: 100%;
+  }
+  .file-input {
+    margin-top: 8px;
+  }
+  .existing-atts ul {
+    list-style: none;
+    padding: 0;
+  }
+  .existing-atts li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  

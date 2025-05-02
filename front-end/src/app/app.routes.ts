@@ -13,6 +13,8 @@ import { TaskAssignmentComponent } from './dashboard/task-assignment/task-assign
 import { UploadComponent } from './dashboard/upload/upload.component';
 import { UserManagementComponent } from './dashboard/user-management/user-management.component';
 import { TaskDetailComponent } from './dashboard/task-assignment/task-detail/task-detail.component';
+import { NotificationsComponent } from './dashboard/notifications/notifications.component';
+import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/project-explorer.component';
 
 export const routes: Routes = [
   { 
@@ -22,6 +24,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       { path: 'overview', component: OverviewComponent },
+      { path: 'notifications', component: NotificationsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
       { path: 'settings', component: SettingsComponent },
@@ -31,6 +34,7 @@ export const routes: Routes = [
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
+      { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
     ]
   },
   {

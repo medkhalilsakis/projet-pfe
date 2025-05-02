@@ -12,7 +12,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { NotificationService } from '../services/notification.service';
 import { ProfileImageService } from '../services/profile-image.service';
 import { PresenceService, PresenceUpdate } from '../services/presence.service';
 
@@ -66,7 +65,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private snack = inject(MatSnackBar);
   private router = inject(Router);
   private route            = inject(ActivatedRoute);
-  private notificationService = inject(NotificationService);
   private profileImageService = inject(ProfileImageService);
   private presenceService = inject(PresenceService);
 

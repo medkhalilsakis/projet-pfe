@@ -1,0 +1,166 @@
+<mat-sidenav-container class="explorer-shell">
+
+    <!-- Sidebar -->
+    <mat-sidenav mode="side" opened class="explorer-sidenav">
+  
+      <!-- Toolbar : racine + actions racine -->
+      <mat-toolbar color="primary" class="sidenav-header">
+        <button mat-icon-button (click)="resetToRoot()">
+          <mat-icon>home</mat-icon>
+        </button>
+        <span class="sidenav-title">Explorateur</span>
+        <span class="spacer"></span>
+  
+        <!-- créer dossier à la racine -->
+        <button mat-icon-button matTooltip="Créer dossier à la racine"
+                (click)="setTargetNode(null)">
+          <mat-icon>create_new_folder</mat-icon>
+        </button>
+        <!-- upload à la racine -->
+        <button mat-icon-button matTooltip="Uploader à la racine"
+                (click)="openUploadDialog(null)">
+          <mat-icon>upload_file</mat-icon>
+        </button>
+      </mat-toolbar>
+  
+      <mat-divider></mat-divider>
+  
+      <!-- Arborescence -->
+      <mat-tree [dataSource]="treeDataSource"
+                [treeControl]="treeControl"
+                class="file-tree">
+  
+        <!-- Dossier -->
+        <mat-tree-node *matTreeNodeDef="let node; when: isFolder"
+                       matTreeNodePadding>
+          <button mat-icon-button matTreeNodeToggle>
+            <mat-icon [class.expanded]="treeControl.isExpanded(node)">
+              folder
+            </mat-icon>
+          </button>
+          <span class="node-name" (click)="openFolder(node)">
+            {{ getBaseName(node.name) }}
+          </span>
+  
+          <!-- + créer sous ce dossier -->
+          <button mat-icon-button class="add-here-btn"
+                  matTooltip="Créer ici"
+                  (click)="setTargetNode(node)">
+            <mat-icon>add</mat-icon>
+          </button>
+          <!-- upload dans ce dossier -->
+          <button mat-icon-button class="add-here-btn"
+                  matTooltip="Uploader ici"
+                  (click)="openUploadDialog(node)">
+            <mat-icon>upload_file</mat-icon>
+          </button>
+  
+          <span class="node-actions">
+            <button mat-icon-button color="warn"
+                    (click)="deleteNode(node)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </span>
+        </mat-tree-node>
+  
+        <!-- Fichier -->
+        <mat-tree-node *matTreeNodeDef="let node; when: isFile"
+                       matTreeNodePadding>
+          <mat-icon class="file-icon">insert_drive_file</mat-icon>
+          <span class="node-name"
+                [class.disabled]="!isTextFile(node)"
+                (click)="isTextFile(node) && openFile(node)">
+            {{ getBaseName(node.name) }}
+          </span>
+          <span class="node-actions">
+            <button mat-icon-button color="warn"
+                    (click)="deleteNode(node)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </span>
+        </mat-tree-node>
+  
+      </mat-tree>
+  
+      <mat-progress-spinner *ngIf="loading"
+                           diameter="40" mode="indeterminate"
+                           class="loading-spinner">
+      </mat-progress-spinner>
+    </mat-sidenav>
+  
+    <!-- Main content / éditeur -->
+    <mat-sidenav-content class="explorer-content">
+  
+      <mat-toolbar color="accent"
+                   class="editor-header"
+                   *ngIf="selectedFileName">
+        <mat-icon>edit</mat-icon>
+        <span class="editor-title">{{ selectedFileName }}</span>
+        <span class="spacer"></span>
+        <button mat-flat-button color="primary"
+                (click)="saveFile()">
+          <mat-icon>save</mat-icon>
+          Enregistrer
+        </button>
+      </mat-toolbar>
+  
+      <div *ngIf="selectedFileContent !== null"
+           class="editor-container">
+        <ngx-codemirror [(ngModel)]="selectedFileContent"
+                        [options]="codeMirrorOptions"
+                        class="code-editor">
+        </ngx-codemirror>
+      </div>
+      <div *ngIf="selectedFileContent === null"
+           class="editor-placeholder">
+        <mat-icon class="placeholder-icon">description</mat-icon>
+        <p>Sélectionnez un fichier pour l’éditer</p>
+      </div>
+  
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  
+  <!-- Dialog: créer dossier -->
+  <ng-template #folderDialog>
+    <h2 mat-dialog-title>Nouveau dossier</h2>
+    <mat-dialog-content>
+      <p>
+        Dans :
+        <strong>
+          {{ selectedTargetNode
+             ? getBaseName(selectedTargetNode.name)
+             : 'Racine' }}
+        </strong>
+      </p>
+      <mat-form-field>
+        <mat-label>Nom du dossier</mat-label>
+        <input matInput [(ngModel)]="newFolderName">
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Annuler</button>
+      <button mat-button (click)="createFolder()">
+        Créer
+      </button>
+    </mat-dialog-actions>
+  </ng-template>
+  
+  <!-- Dialog: uploader -->
+  <ng-template #uploadDialog>
+    <h2 mat-dialog-title>Uploader des fichiers</h2>
+    <mat-dialog-content>
+      <p>
+        Dans :
+        <strong>
+          {{ selectedTargetNode
+             ? getBaseName(selectedTargetNode.name)
+             : 'Racine' }}
+        </strong>
+      </p>
+      <input type="file" multiple (change)="onUploadSelected($event)">
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Fermer</button>
+    </mat-dialog-actions>
+  </ng-template>
+  

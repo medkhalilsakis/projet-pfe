@@ -1,58 +1,109 @@
 <!-- src/app/task-assignment/task-assignment.component.html -->
-<mat-toolbar color="primary" class="top-bar">
+<mat-toolbar color="primary" class="top-bar" fxLayout="row" fxLayoutAlign="start center">
   <span class="title">Gérer les tâches</span>
-  <span class="spacer"></span>
-  <button mat-flat-button color="accent" (click)="openNew()">
+  <span fxFlex></span>
+  <button mat-flat-button color="accent" (click)="openNew()" fxLayout="row" fxLayoutAlign="center center">
     <mat-icon>add</mat-icon>
-    Nouvelle tâche
+    <span class="btn-text">Nouvelle tâche</span>
   </button>
 </mat-toolbar>
 
-<div class="controls">
-  <mat-form-field appearance="outline" class="ctrl">
+<div class="controls" fxLayout="row wrap" fxLayoutGap="16px">
+  <mat-form-field appearance="outline" class="ctrl" fxFlex.gt-sm="30%" fxFlex.xs="100%">
     <mat-label>Recherche</mat-label>
-    <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Nom, assigné à…">
-    <button matSuffix mat-icon-button *ngIf="search" (click)="search=''; onSearchChange()">
+    <input matInput
+           [(ngModel)]="search"
+           (ngModelChange)="onSearchChange()"
+           placeholder="Nom, assigned à…">
+    <button matSuffix mat-icon-button
+            *ngIf="search"
+            (click)="search=''; onSearchChange()">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="ctrl status">
+  <mat-form-field appearance="outline" class="ctrl status" fxFlex.gt-sm="20%" fxFlex.xs="100%">
     <mat-label>Statut</mat-label>
-    <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
-      <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
+    <mat-select
+      [(value)]="statusFilter"
+      (selectionChange)="onStatusChange()">
+      <mat-option *ngFor="let s of statuses" [value]="s.value">
+        {{ s.label }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
 </div>
 
-<div class="grid">
+<div class="grid" fxLayout="column" fxLayoutGap="24px">
   <ng-container *ngIf="pageSlice.length; else noTasks">
-    <div class="task-grid">
-      <mat-card *ngFor="let t of pageSlice" class="task-card mat-elevation-z3" ripple (click)="selectTask(t)">
-        <mat-card-header>
-          <mat-card-title>{{ t.name }}</mat-card-title>
-          <mat-card-subtitle>{{ getAssignedNames(t) }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="info">
-            <mat-icon>flag</mat-icon>
-            <mat-chip>{{ getStatusLabel(t.status) }}</mat-chip>
+    <div class="task-grid" fxLayout="row wrap" fxLayoutGap="24px">
+      <mat-card *ngFor="let t of pageSlice"
+                class="task-card"
+                fxFlex="1 1 calc(33% - 24px)"
+                fxFlex.xs="100%"
+                ripple
+                (click)="selectTask(t)">
+
+        <!-- Entête : avatar créateur + titre -->
+        <mat-card-header class="card-header" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
+          <div mat-card-avatar class="creator-avatar">
+            <mat-icon>person</mat-icon>
           </div>
-          <div class="info">
+          <div fxLayout="column">
+            <mat-card-title class="task-name">{{ t.name }}</mat-card-title>
+            <mat-card-subtitle class="task-creator">
+              Créée par {{ t.assignedBy.prenom }} {{ t.assignedBy.nom }}
+            </mat-card-subtitle>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content class="card-content" fxLayout="column" fxLayoutGap="12px">
+          <div class="info" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
+            <mat-icon>flag</mat-icon>
+            <span class="status-badge" [ngClass]="t.status">
+              {{ getStatusLabel(t.status) }}
+            </span>
+          </div>
+          <div class="info" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
             <mat-icon>calendar_today</mat-icon>
             <span>Deadline: {{ t.deadline | date:'shortDate' }}</span>
           </div>
-          <div class="info">
+          <div class="info" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
             <mat-icon>publish</mat-icon>
-            <span>Publiée: {{ t.publishedAt | date:'short' }}</span>
+            <span>Publié: {{ t.publishedAt | date:'short' }}</span>
+          </div>
+
+          <div *ngIf="t.outils" class="info tools" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
+            <mat-icon>build</mat-icon>
+            <div class="tool-badges" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="6px">
+              <span class="tool-badge"
+                    *ngFor="let tool of (t.outils.split(',') | slice:0:3)">
+                {{ tool }}
+              </span>
+              <span *ngIf="t.outils.split(',').length > 3" class="more-badge">
+                +{{ t.outils.split(',').length - 3 }}
+              </span>
+            </div>
           </div>
         </mat-card-content>
+
+        <mat-card-actions class="card-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+          <button mat-icon-button matTooltip="Voir" aria-label="Voir" (click)="$event.stopPropagation(); viewTask(t)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Éditer" aria-label="Éditer" (click)="$event.stopPropagation(); editTask(t)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Supprimer" aria-label="Supprimer" (click)="$event.stopPropagation(); deleteTask(t)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
       </mat-card>
     </div>
   </ng-container>
 
   <ng-template #noTasks>
-    <div class="no-tasks">
+    <div class="no-tasks" fxLayout="column" fxLayoutAlign="center center">
       <mat-icon>hourglass_empty</mat-icon>
       <p>Aucune tâche trouvée.</p>
     </div>
@@ -64,5 +115,6 @@
   [pageSize]="pageSize"
   [pageSizeOptions]="[9, 12, 15]"
   (page)="onPageChange($event)"
-  showFirstLastButtons>
+  showFirstLastButtons
+  class="paginator">
 </mat-paginator>

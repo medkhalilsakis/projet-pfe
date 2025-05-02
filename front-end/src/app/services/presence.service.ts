@@ -19,15 +19,22 @@ export class PresenceService {
   public presence$ = this.presenceSubject.asObservable();
 
   constructor(private session: SessionStorageService) {
-    this.connect();
   }
 
+  public init() {
+    const user = this.session.getUser();
+    if (!user?.id) {
+      console.warn('PresenceService: pas d’utilisateur en session, on ne se connecte pas.');
+      return;
+    }
+    this.connect(user.id);
+  }
+  
   public get presenceHistory(): PresenceUpdate[] {
     return [...this.history];
   }
 
-  private connect() {
-    const userId = this.session.getUser().id;
+  private connect(userId: number) {
     const socket = new SockJS('http://localhost:8080/ws');
     this.stompClient = new Client({
       webSocketFactory: () => socket,
@@ -36,10 +43,9 @@ export class PresenceService {
     });
 
     this.stompClient.onConnect = () => {
-      console.log('WebSocket connecté');
+      console.log('WebSocket présence connecté');
       this.stompClient.subscribe('/topic/presence', (msg: IMessage) => {
         const update: PresenceUpdate = JSON.parse(msg.body);
-        // Stocke dans l'historique de présence
         const idx = this.history.findIndex(u => u.userId === update.userId);
         if (idx >= 0) {
           this.history[idx] = update;

@@ -132,11 +132,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   viewDetails(project: Project): void {
-    this.dialog.open(ProjectFilesComponent, {
-      width: '80vw',
-      height: '80vh',
-      data: { project }
-    });
+    this.router.navigate(['/dashboard/projects', project.id, 'explorer']);
   }
   
 

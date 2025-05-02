@@ -1,46 +1,67 @@
-import { Component, Inject, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+// incoming-call-dialog.component.ts
+import { Component, Inject, ViewChild, ElementRef, AfterViewInit, OnDestroy }
+     from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef }
+     from '@angular/material/dialog';
+import { CallSignal, WebRtcService } from '../../../services/webrtc.service';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
-import { CallSignal } from '../../../services/webrtc.service';
 
 @Component({
   selector: 'app-incoming-call-dialog',
-  imports:[CommonModule, FormsModule, ReactiveFormsModule, MatIconModule],
-  template: `
-  <div class="call-popup" [ngClass]="{'video-call': isVideo}">
-    <div class="caller-info">
-      <img *ngIf="!isVideo" [src]="caller.avatarUrl" alt="avatar" class="caller-avatar">
-      <video *ngIf="isVideo" #videoPreview autoplay muted class="caller-video"></video>
-      <h3>{{ caller.prenom }} {{ caller.nom }}</h3>
-    </div>
-    <div class="actions">
-      <button mat-mini-fab color="warn" (click)="decline()"><mat-icon>call_end</mat-icon></button>
-      <button mat-mini-fab color="primary" (click)="accept()"><mat-icon>{{ isVideo ? 'videocam' : 'call' }}</mat-icon></button>
-    </div>
-  </div>`,
-  styles: [`
-    .call-popup { width: 300px; padding: 16px; text-align: center; }
-    .caller-avatar, .caller-video { width: 100px; height: 100px; border-radius: 50%; }
-    .actions { display: flex; justify-content: space-around; margin-top: 16px; }
-  `]
+  templateUrl: './incoming-call-dialog.component.html',
+  styleUrls: ['./incoming-call-dialog.component.css'],
+  imports:[CommonModule, FormsModule, ReactiveFormsModule]
 })
-export class IncomingCallDialogComponent implements OnInit {
-  caller!: any;
-  isVideo = false;
-  @ViewChild('videoPreview') videoPreview!: ElementRef<HTMLVideoElement>;
+export class IncomingCallDialogComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('localVideo',  { static: false }) localVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('remoteVideo', { static: false }) remoteVideo!: ElementRef<HTMLVideoElement>;
+
+  isVideo: boolean;
+  private subs: Subscription[] = [];
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: CallSignal,
-    private dialogRef: MatDialogRef<IncomingCallDialogComponent>
-  ) {}
-
-  ngOnInit() {
-    this.isVideo = this.data.type === 'offer' && !!this.data.sdp?.includes('m=video');
-    this.caller = { id: this.data.fromUserId, prenom: '...', nom: '...', avatarUrl: '...'};
+    private dialogRef: MatDialogRef<IncomingCallDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: IncomingCallDialogData,
+    private webRtc: WebRtcService
+  ) {
+    this.isVideo = !!data.sdp?.includes('m=video');
   }
 
-  accept() { this.dialogRef.close(true); }
+  ngAfterViewInit() {
+    if (!this.isVideo) return;
+
+    // 1) Afficher le stream local dès que disponible
+    this.subs.push(
+      this.webRtc.localStream$
+        .subscribe(stream => {
+          if (stream && this.localVideo?.nativeElement) {
+            this.localVideo.nativeElement.srcObject = stream;
+          }
+        })
+    );
+
+    // 2) Afficher le stream distant dès qu'il arrive
+    this.subs.push(
+      this.webRtc.remoteStream$
+        .subscribe(stream => {
+          if (stream && this.remoteVideo?.nativeElement) {
+            this.remoteVideo.nativeElement.srcObject = stream;
+          }
+        })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
+  accept()  { this.dialogRef.close(true);  }
   decline() { this.dialogRef.close(false); }
+}
+export interface IncomingCallDialogData extends CallSignal {
+  callerName:   string;
+  callerAvatar: string;
+  calleeAvatar: string;
 }

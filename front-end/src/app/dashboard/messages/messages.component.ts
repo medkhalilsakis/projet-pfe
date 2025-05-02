@@ -24,6 +24,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { PresenceService, PresenceUpdate } from '../../services/presence.service';
 import { CallSignal, WebRtcService } from '../../services/webrtc.service';
 import { IncomingCallDialogComponent } from './incoming-call-dialog/incoming-call-dialog.component';
+import { OutgoingCallDialogComponent } from './outgoing-call-dialog/outgoing-call-dialog.component';
 
 const API = 'http://localhost:8080/api';
 
@@ -52,15 +53,13 @@ interface DisplayMessage {
   imports: [
     CommonModule, FormsModule, MatListModule, MatIconModule,
     MatButtonModule, MatInputModule, MatFormFieldModule,
-    MatCardModule, MatSelectModule, MatDialogModule, FlexLayoutModule, IncomingCallDialogComponent
+    MatCardModule, MatSelectModule, MatDialogModule, FlexLayoutModule
   ],
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.css'],
 })
 export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('scrollContainer', { static: true }) scrollContainer!: ElementRef;
-  @ViewChild('localVideo') localVideo!: ElementRef<HTMLVideoElement>;
-  @ViewChild('remoteVideo') remoteVideo!: ElementRef<HTMLVideoElement>;
 
   users: any[] = [];
   selectedUser: any = null;
@@ -99,11 +98,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     // Signaling pour WebRTC
     this.webRtc.connectSignaling(this.currentUserId);
     this.callSub = this.webRtc.incomingCallSignal$.subscribe(signal => this.promptIncomingCall(signal));
-    this.webRtc.remoteStream$.subscribe(stream => {
-      if (stream && this.remoteVideo) {
-        this.remoteVideo.nativeElement.srcObject = stream;
-      }
-    });
   }
   
 
@@ -119,6 +113,50 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.isMobile = (e.target as Window).innerWidth < 768;
   }
 
+
+  async startAudioCall() {
+    const data: OutgoingCallDialogData = {
+      isVideo: false,
+      calleeName: `${this.selectedUser.prenom} ${this.selectedUser.nom}`,
+      calleeAvatar: this.selectedUser.avatarUrl,
+      timeoutMs: 20000
+    };
+  
+    const dialogRef = this.dialog.open(OutgoingCallDialogComponent, { data, panelClass: 'call-dialog', disableClose: true });
+  
+    // Dès que l’utilisateur visualise le dialog, récupère le flux local
+    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    // Inonde le service
+    this.webRtc.localStream$.next(local);
+  
+    // Lance l’offre
+    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
+  
+    // Quand le dialog se ferme, termine l’appel
+    dialogRef.afterClosed().subscribe(status => {
+      this.webRtc.endCall(this.selectedUser.id, this.currentUserId, status === 'answered' ? 'hangup' : 'missed');
+    });
+  }
+  
+  async startVideoCall() {
+    const data: OutgoingCallDialogData = {
+      isVideo: true,
+      calleeName: `${this.selectedUser.prenom} ${this.selectedUser.nom}`,
+      calleeAvatar: this.selectedUser.avatarUrl,
+      timeoutMs: 20000
+    };
+  
+    const dialogRef = this.dialog.open(OutgoingCallDialogComponent, { data, panelClass: 'call-dialog', disableClose: true });
+  
+    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    this.webRtc.localStream$.next(local);
+    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
+  
+    dialogRef.afterClosed().subscribe(status => {
+      this.webRtc.endCall(this.selectedUser.id, this.currentUserId, status === 'answered' ? 'hangup' : 'missed');
+    });
+  }
+  
   private connectWebSocket() {
   const socket = new SockJS(`${API.replace('/api','')}/ws`);
   this.stompClient = new Client({
@@ -226,30 +264,32 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 
-  async startAudioCall() {
-    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    this.localVideo.nativeElement.srcObject = local;
-    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
-  }
-
-  /** Bouton vidéo */
-  async startVideoCall() {
-    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    this.localVideo.nativeElement.srcObject = local;
-    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
-  }
 
 
   private promptIncomingCall(signal: CallSignal) {
-    const dialogRef = this.dialog.open(IncomingCallDialogComponent, { data: signal, panelClass: 'call-dialog' });
+    const data: IncomingCallDialogData = {
+      ...signal,
+      callerName:   this.selectedUser.prenom + ' ' + this.selectedUser.nom,
+      callerAvatar: this.selectedUser.avatarUrl,
+      calleeAvatar: this.currentUserAvatarUrl
+    };
+
+    const dialogRef = this.dialog.open(
+      IncomingCallDialogComponent,
+      { data, panelClass: 'call-dialog' }
+    );
+
     dialogRef.afterClosed().subscribe(async accepted => {
-      if (accepted) {
-        const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: signal.sdp?.includes('m=video') });
-        this.localVideo.nativeElement.srcObject = local;
-        this.webRtc.answerCall(local, signal, this.currentUserId);
-      } else {
+      if (!accepted) {
         this.webRtc.endCall(signal.fromUserId, this.currentUserId, 'missed');
+        return;
       }
+      const constraints = {
+        audio: true,
+        video: !!signal.sdp?.includes('m=video')
+      };
+      const local = await navigator.mediaDevices.getUserMedia(constraints);
+      this.webRtc.answerCall(local, signal, this.currentUserId);
     });
   }
 
@@ -334,4 +374,21 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
   
+}
+
+export interface IncomingCallDialogData extends CallSignal {
+  callerName:   string;
+  callerAvatar: string;
+  calleeAvatar: string;
+}
+
+export interface OutgoingCallDialogData {
+  /** true pour appel vidéo, false pour appel audio */
+  isVideo: boolean;
+  /** Nom complet de la personne appelée */
+  calleeName: string;
+  /** URL de l’avatar de la personne appelée */
+  calleeAvatar: string;
+  /** Durée max avant timeout (en ms) ; par défaut 30000 si non fourni */
+  timeoutMs?: number;
 }

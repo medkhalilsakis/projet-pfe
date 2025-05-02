@@ -67,4 +67,7 @@ public class User{
         this.ncin = ncin;
         this.genre = genre;
     }
+    public User(Long id) {
+        this.id = id;
+    }
 }

@@ -1,9 +1,10 @@
 // src/app/task-assignment/task-assignment.component.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { PageEvent, MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { NewTaskDialogComponent } from './new-task-dialog/new-task-dialog.component';
+import { EditTaskDialogComponent } from './edit-task-dialog/edit-task-dialog.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -15,8 +16,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatRippleModule } from '@angular/material/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { Router } from '@angular/router';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-task-assignment',
@@ -26,7 +27,9 @@ import { Router } from '@angular/router';
     MatToolbarModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,
     MatCardModule, MatChipsModule, MatRippleModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatDialogModule,
+    FlexLayoutModule
   ],
   templateUrl: './task-assignment.component.html',
   styleUrls: ['./task-assignment.component.css']
@@ -37,7 +40,6 @@ export class TaskAssignmentComponent implements OnInit {
   pageSlice: Tache[] = [];
   search = '';
   statusFilter = '';
-  // pagination
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 9;
   pageIndex = 0;
@@ -51,11 +53,12 @@ export class TaskAssignmentComponent implements OnInit {
     { value: 'terminé',      label: 'Terminé' }
   ];
 
+  readonly API = 'http://localhost:8080/api';
+
   constructor(
     private http: HttpClient,
     private dialog: MatDialog,
     private router: Router
-
   ) {}
 
   ngOnInit() {
@@ -67,9 +70,8 @@ export class TaskAssignmentComponent implements OnInit {
     if (this.search)       params = params.set('q', this.search.trim());
     if (this.statusFilter) params = params.set('status', this.statusFilter);
 
-    this.http.get<Tache[]>('http://localhost:8080/api/taches', { params })
+    this.http.get<Tache[]>(`${this.API}/taches`, { params })
       .subscribe(list => {
-        // tri descendant par date de publication
         this.tâches = [...list].sort((a, b) =>
           new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
         );
@@ -82,11 +84,9 @@ export class TaskAssignmentComponent implements OnInit {
       (!this.statusFilter || t.status === this.statusFilter) &&
       (!this.search ||
         t.name.toLowerCase().includes(this.search.toLowerCase()) ||
-        this.getAssignedNames(t)
-          .toLowerCase().includes(this.search.toLowerCase())
+        this.getAssignedNames(t).toLowerCase().includes(this.search.toLowerCase())
       )
     );
-    // réinitialise la pagination
     this.paginator.firstPage();
     this.updatePageSlice();
   }
@@ -107,16 +107,29 @@ export class TaskAssignmentComponent implements OnInit {
 
   openNew() {
     const ref = this.dialog.open(NewTaskDialogComponent, {
-      width: '520px',
-      panelClass: 'new-task-dialog'
+      width: '520px', panelClass: 'new-task-dialog'
     });
-    ref.afterClosed().subscribe(created => {
-      if (created) this.load();
+    ref.afterClosed().subscribe(created => { if (created) this.load(); });
+  }
+
+  viewTask(t: Tache) {
+    this.router.navigate(['/dashboard/tâches', t.id]);
+  }
+
+  editTask(t: Tache) {
+    const ref = this.dialog.open(EditTaskDialogComponent, {
+      width: '600px', data: { id: t.id }
     });
+    ref.afterClosed().subscribe(updated => { if (updated) this.load(); });
+  }
+
+  deleteTask(t: Tache) {
+    if (!confirm(`Supprimer la tâche "${t.name}" ?`)) return;
+    this.http.delete(`${this.API}/taches/${t.id}`).subscribe(() => this.load());
   }
 
   selectTask(t: Tache) {
-    this.router.navigate(['/dashboard/tâches', t.id]);
+    this.viewTask(t);
   }
 
   getAssignedNames(t: Tache): string {
@@ -128,13 +141,13 @@ export class TaskAssignmentComponent implements OnInit {
   }
 }
 
-export interface SimpleUser { id: number; prenom: string; nom: string; }
-
 export interface Tache {
   id: number;
   name: string;
   status: 'a_developper'|'en_test'|'suspendu'|'clôturé'|'terminé';
-  assignedTo: SimpleUser[];
+  assignedTo: { id: number; prenom: string; nom: string; }[];
+  assignedBy: { id: number; prenom: string; nom: string; };
   publishedAt: string;
+  outils: string;
   deadline: string;
 }

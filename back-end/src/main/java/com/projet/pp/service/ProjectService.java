@@ -230,8 +230,10 @@ public class ProjectService {
         try (FileOutputStream fos = new FileOutputStream(targetLocation.toFile())) {
             fos.write(content);
         }
+
         ProjectFile projectFile = new ProjectFile();
-        projectFile.setName(relativePath);
+        String baseName = Paths.get(relativePath).getFileName().toString();
+        projectFile.setName(baseName);
         projectFile.setFilePath(targetLocation.toString());
         projectFile.setFileSize(size);
         projectFile.setMimeType("application/octet-stream");
