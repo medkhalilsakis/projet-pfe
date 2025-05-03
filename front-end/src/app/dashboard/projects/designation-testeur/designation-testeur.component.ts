@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 export interface Assignment {
   id: number;
@@ -45,7 +46,7 @@ export interface Tester {
     MatSelectModule,
     MatOptionModule,
     MatIconModule,
-
+    FlexLayoutModule
 
   ]
 })
@@ -69,6 +70,10 @@ export class DesignationTesteurComponent implements OnInit {
   closeForm: FormGroup;
 
   supervisorId: number;
+
+  pendingPage = 1;
+  testingPage = 1;
+  closedPage = 1;
 
   constructor(
     private svc: AssignmentService,
@@ -175,4 +180,16 @@ export class DesignationTesteurComponent implements OnInit {
       () => { this.snack.open('Projet supprimé', 'Fermer', { duration: 3000 }); this.loadAll(); }
     );
   }
+
+
+  get pendingTotalPages(): number {
+    return Math.ceil(this.pendingProjects.length / 9) || 1;
+  }
+  get testingTotalPages(): number {
+    return Math.ceil(this.testingProjects.length / 9) || 1;
+  }
+  get closedTotalPages(): number {
+    return Math.ceil(this.closedProjects.length / 9) || 1;
+  }
+  
 }

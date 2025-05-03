@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -212,4 +213,31 @@ public class UserController {
         userService.updateUser(user.getId(), user);
         return ResponseEntity.ok(Map.of("message", "Mot de passe réinitialisé"));
     }
+
+
+    @DeleteMapping("/supervisor/{id}")
+    public ResponseEntity<Void> deleteBySupervisor(@PathVariable Long id) {
+        userService.deleteUserBySupervisor(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/supervisor/{id}")
+    public ResponseEntity<?> updateBySupervisor(
+            @PathVariable Long id,
+            @RequestBody Map<String,String> updateData,
+            Authentication auth
+    ) {
+        // Récupérez l'id du superviseur courant depuis le token JWT ou context
+        String username = auth.getName();
+        User current = userService.getUserByUsername(username);
+        try {
+            User updated = userService.updateBySupervisor(id, updateData, current.getId());
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", ex.getMessage()));
+        }
+    }
+
 }

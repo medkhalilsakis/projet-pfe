@@ -1,94 +1,251 @@
 <mat-tab-group>
-  <!-- En attente -->
+
+  <!-- Onglet En attente -->
   <mat-tab label="En attente">
-    <div *ngIf="!pendingProjects.length">Aucun projet en attente.</div>
-    <div *ngFor="let p of pendingProjects" class="card">
-      <h3>{{p.name}}</h3>
-      <p>{{p.description}}</p>
-      <small>Créé par {{p.user.prenom}} {{p.user.nom}} le {{p.createdAt | date}}</small>
-      <mat-form-field appearance="outline">
-        <mat-label>Testeurs</mat-label>
-        <mat-select multiple [(ngModel)]="selectedPending[p.id]">
-          <mat-option *ngFor="let t of testers" [value]="t.id" [disabled]="t.inProgressCount >= 2">
-            {{t.name}} ({{t.inProgressCount}})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="assignPending(p.id)">Désigner</button>
-    </div>
-  </mat-tab>
+    <ng-container *ngIf="!pendingProjects.length">
+      <div class="empty-state">Aucun projet en attente.</div>
+    </ng-container>
+    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+      <div
+        *ngFor="let p of pendingProjects | slice:(pendingPage-1)*9:(pendingPage*9)"
+        fxFlex="1 1 calc(33.333% - 24px)"
+      >
+        <div class="card">
+          <div class="card-header"><h3>{{ p.name }}</h3></div>
+          <div class="card-body">
+            <p>{{ p.description }}</p>
+            <small>
+              Créé par {{ p.user.prenom }} {{ p.user.nom }}
+              le {{ p.createdAt | date:'shortDate' }}
+            </small>
 
-  <!-- En testing -->
-  <mat-tab label="En testing">
-    <div *ngIf="!testingProjects.length">Aucun projet en test.</div>
-    <div *ngFor="let p of testingProjects" class="card">
-      <h3>{{p.name}}</h3>
-      <div *ngFor="let a of p.assignments" class="assign-item">
-        <span>{{a.testeur.prenom}} {{a.testeur.nom}}</span>
-        <button mat-icon-button color="warn" (click)="removeAssign(a,p)"><mat-icon>delete</mat-icon></button>
-        <mat-form-field appearance="outline">
-          <mat-label>Remplacer</mat-label>
-          <mat-select [(ngModel)]="selectedReplace[a.id]">
-            <mat-option *ngFor="let t of testers" [value]="t.id">{{t.name}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button mat-icon-button color="accent" (click)="replaceAssign(a)"><mat-icon>edit</mat-icon></button>
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Testeurs</mat-label>
+              <mat-select multiple [(ngModel)]="selectedPending[p.id]">
+                <mat-option
+                  *ngFor="let t of testers"
+                  [value]="t.id"
+                  [disabled]="t.inProgressCount >= 2"
+                >
+                  {{ t.name }} ({{ t.inProgressCount }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <button
+              mat-flat-button
+              color="primary"
+              class="action-button full-width"
+              (click)="assignPending(p.id)"
+            >
+              <mat-icon>person_add</mat-icon>
+              Désigner
+            </button>
+          </div>
+        </div>
       </div>
-      <mat-form-field appearance="outline">
-        <mat-label>Ajouter testeur</mat-label>
-        <mat-select [(ngModel)]="selectedAdd[p.id]">
-          <mat-option *ngFor="let t of testers" [value]="t.id" [disabled]="t.inProgressCount >= 2">
-            {{t.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-stroked-button (click)="addTester(p)">Ajouter</button>
+    </div>
 
-      <button mat-button color="warn" (click)="togglePauseForm(p.id)">Pause</button>
-      <form [formGroup]="pauseForm" class="form-block" *ngIf="showPauseForm[p.id]">
-  <mat-form-field appearance="outline">
-    <mat-label>Raison de la pause</mat-label>
-    <textarea matInput formControlName="reason" placeholder="Saisissez la raison"></textarea>
-    <mat-error *ngIf="pauseForm.get('reason')?.invalid">La raison est requise</mat-error>
-  </mat-form-field>
-  <div class="file-input-block">
-    <label>Fichiers (optionnel)</label>
-    <input type="file" multiple (change)="pauseForm.patchValue({ files: $any($event.target)?.files })">
-  </div>
-  <button mat-button color="primary" [disabled]="pauseForm.invalid" (click)="submitPause(p)">Valider Pause</button>
-</form>
+    <!-- Pagination -->
+    <div class="pagination">
+      <button
+        mat-icon-button
+        (click)="pendingPage = pendingPage - 1"
+        [disabled]="pendingPage === 1"
+      ><mat-icon>chevron_left</mat-icon></button>
 
-      <button mat-button color="warn" (click)="toggleCloseForm(p.id)">Clôturer</button>
-<form [formGroup]="closeForm" class="form-block" *ngIf="showCloseForm[p.id]">
-  <mat-form-field appearance="outline">
-    <mat-label>Raison de la clôture</mat-label>
-    <textarea matInput formControlName="reason" placeholder="Saisissez la raison"></textarea>
-    <mat-error *ngIf="closeForm.get('reason')?.invalid">La raison est requise</mat-error>
-  </mat-form-field>
-  <div class="file-input-block">
-    <label>Fichiers (optionnel)</label>
-    <input type="file" multiple (change)="closeForm.patchValue({ files: $any($event.target)?.files })">
-  </div>
-  <button mat-button color="primary" [disabled]="closeForm.invalid" (click)="submitClose(p)">Valider Clôture</button>
-</form>
+      <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
+
+      <button
+        mat-icon-button
+        (click)="pendingPage = pendingPage + 1"
+        [disabled]="pendingPage === pendingTotalPages"
+      ><mat-icon>chevron_right</mat-icon></button>
     </div>
   </mat-tab>
 
-  <!-- Clôturés -->
+  <!-- Onglet En testing -->
+  <mat-tab label="En testing">
+    <ng-container *ngIf="!testingProjects.length">
+      <div class="empty-state">Aucun projet en test.</div>
+    </ng-container>
+    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+      <div
+        *ngFor="let p of testingProjects | slice:(testingPage-1)*9:(testingPage*9)"
+        fxFlex="1 1 calc(33.333% - 24px)"
+      >
+        <div class="card">
+          <div class="card-header"><h3>{{ p.name }}</h3></div>
+          <div class="card-body">
+            <p>{{ p.description }}</p>
+            <small>
+              Créé par {{ p.user.prenom }} {{ p.user.nom }}
+              le {{ p.createdAt | date:'shortDate' }}
+            </small>
+
+            <!-- Liste des assignations -->
+            <div class="assign-list">
+              <div *ngFor="let a of p.assignments" class="assign-item">
+                <mat-icon>person</mat-icon>
+                <span>{{ a.testeur.prenom }} {{ a.testeur.nom }}</span>
+                <button mat-icon-button color="warn" (click)="removeAssign(a,p)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                <mat-form-field appearance="fill" class="small-select">
+                  <mat-label>Remplacer</mat-label>
+                  <mat-select [(ngModel)]="selectedReplace[a.id]">
+                    <mat-option *ngFor="let t of testers" [value]="t.id">
+                      {{ t.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button mat-icon-button color="accent" (click)="replaceAssign(a)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Ajouter un testeur -->
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Ajouter testeur</mat-label>
+              <mat-select [(ngModel)]="selectedAdd[p.id]">
+                <mat-option
+                  *ngFor="let t of testers"
+                  [value]="t.id"
+                  [disabled]="t.inProgressCount >= 2"
+                >
+                  {{ t.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button mat-stroked-button color="primary" class="action-button full-width"
+                    (click)="addTester(p)">
+              Ajouter
+            </button>
+
+            <!-- Actions Pause / Clôture -->
+            <div class="actions-row">
+              <button mat-flat-button color="warn"
+                      (click)="togglePauseForm(p.id)">
+                <mat-icon>pause</mat-icon> Pause
+              </button>
+              <button mat-flat-button color="warn"
+                      (click)="toggleCloseForm(p.id)">
+                <mat-icon>flag</mat-icon> Clôturer
+              </button>
+            </div>
+
+            <!-- Formulaire Pause -->
+            <form [formGroup]="pauseForm" class="form-block"
+                  *ngIf="showPauseForm[p.id]">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Raison de la pause</mat-label>
+                <textarea matInput formControlName="reason"></textarea>
+              </mat-form-field>
+              <div class="file-input-block">
+                <label>Fichiers (optionnel)</label>
+                <input
+                  type="file"
+                  multiple
+                  (change)="pauseForm.patchValue({ files: $any($event.target)?.files })"
+                />
+              </div>
+              <button mat-flat-button color="primary" [disabled]="pauseForm.invalid"
+                      (click)="submitPause(p)">
+                Valider Pause
+              </button>
+            </form>
+
+            <!-- Formulaire Clôture -->
+            <form [formGroup]="closeForm" class="form-block"
+                  *ngIf="showCloseForm[p.id]">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Raison de la clôture</mat-label>
+                <textarea matInput formControlName="reason"></textarea>
+              </mat-form-field>
+              <div class="file-input-block">
+                <label>Fichiers (optionnel)</label>
+                <input
+                  type="file"
+                  multiple
+                  (change)="closeForm.patchValue({ files: $any($event.target)?.files })"
+                />
+              </div>
+              <button mat-flat-button color="primary" [disabled]="closeForm.invalid"
+                      (click)="submitClose(p)">
+                Valider Clôture
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button mat-icon-button (click)="testingPage = testingPage - 1" [disabled]="testingPage === 1">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span>Page {{ testingPage }} / {{ testingTotalPages }}</span>
+      <button mat-icon-button (click)="testingPage = testingPage + 1"
+              [disabled]="testingPage === testingTotalPages">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </mat-tab>
+
+  <!-- Onglet Clôturés -->
   <mat-tab label="Clôturés">
-    <div *ngIf="!closedProjects.length">Aucun projet clôturé.</div>
-    <div *ngFor="let p of closedProjects" class="card">
-      <h3>{{p.name}}</h3>
-      <p>{{p.description}}</p>
-      <small>Statut: {{p.status}}</small>
-      <mat-form-field appearance="outline">
-        <mat-label>Relancer</mat-label>
-        <mat-select multiple [(ngModel)]="selectedClosed[p.id]">
-          <mat-option *ngFor="let t of testers" [value]="t.id">{{t.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="resume(p)">Relancer Test</button>
-      <button mat-button (click)="archive(p)">Archiver</button>
-      <button mat-icon-button color="warn" (click)="delete(p)"><mat-icon>delete_forever</mat-icon></button>
+    <ng-container *ngIf="!closedProjects.length">
+      <div class="empty-state">Aucun projet clôturé.</div>
+    </ng-container>
+    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+      <div
+        *ngFor="let p of closedProjects | slice:(closedPage-1)*9:(closedPage*9)"
+        fxFlex="1 1 calc(33.333% - 24px)"
+      >
+        <div class="card">
+          <div class="card-header"><h3>{{ p.name }}</h3></div>
+          <div class="card-body">
+            <p>{{ p.description }}</p>
+            <small>Statut: {{ p.status }}</small>
+
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Relancer</mat-label>
+              <mat-select multiple [(ngModel)]="selectedClosed[p.id]">
+                <mat-option *ngFor="let t of testers" [value]="t.id">
+                  {{ t.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="actions-row">
+              <button mat-flat-button color="primary" (click)="resume(p)">
+                Relancer Test
+              </button>
+              <button mat-stroked-button color="accent" (click)="archive(p)">
+                Archiver
+              </button>
+              <button mat-icon-button color="warn" (click)="delete(p)">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button mat-icon-button (click)="closedPage = closedPage - 1" [disabled]="closedPage === 1">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span>Page {{ closedPage }} / {{ closedTotalPages }}</span>
+      <button mat-icon-button (click)="closedPage = closedPage + 1"
+              [disabled]="closedPage === closedTotalPages">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   </mat-tab>
+
 </mat-tab-group>

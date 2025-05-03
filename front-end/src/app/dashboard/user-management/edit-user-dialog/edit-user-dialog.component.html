@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>Éditer utilisateur</h2>
+
+<mat-dialog-content [formGroup]="form">
+
+  <!-- WARNING MESSAGE (hors de tout mat-form-field) -->
+  <div class="warning-box">
+    <mat-icon>warning</mat-icon>
+    <span>
+      Attention : toute modification de données personnelles est soumise à la loi.  
+      La personne concernée sera automatiquement notifiée et pourra rejeter ces modifications.
+    </span>
+  </div>
+
+  <!-- Vos champs de formulaire -->
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Nom</mat-label>
+    <input matInput formControlName="nom" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Prénom</mat-label>
+    <input matInput formControlName="prenom" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Genre</mat-label>
+    <mat-select formControlName="genre">
+      <mat-option value="Homme">Homme</mat-option>
+      <mat-option value="Femme">Femme</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>NCIN</mat-label>
+    <input matInput formControlName="ncin" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Date Embauche</mat-label>
+    <input matInput type="date" formControlName="dateEmbauche" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Salaire</mat-label>
+    <input matInput type="number" formControlName="salaire" />
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-button color="primary" (click)="save()">Enregistrer</button>
+</mat-dialog-actions>

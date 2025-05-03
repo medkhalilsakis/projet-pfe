@@ -19,6 +19,7 @@ import { MatTableDataSource }             from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { AddUserDialogComponent } from './add-user-dialog/add-user-dialog.component';
+import { EditUserData, EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
 
 export interface User {
   id: number;
@@ -29,7 +30,7 @@ export interface User {
   email: string;
   dateEmbauche: string;   // ISO date
   salaire: number;
-  role: { libelle: string };
+  role: { id : number, libelle: string };
   avatarUrl?: string;
   genre: string;
 }
@@ -50,7 +51,7 @@ export interface User {
     MatTooltipModule
   ],
   templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.css']
+  styleUrls: ['./user-management.component.css'],
 })
 export class UserManagementComponent implements OnInit {
   displayedColumns = [
@@ -106,7 +107,35 @@ export class UserManagementComponent implements OnInit {
     this.dataSource.filter = filter;
   }
 
-  onEdit(u: User)    { this.router.navigate(['/dashboard/users',u.id,'edit']); }
+  onEdit(u: User) {
+    // interdire edit d'un autre superviseur
+    if (u.role.id === 3) {
+      this.snack.open("Vous ne pouvez pas modifier un autre superviseur",'Fermer',{duration:2000});
+      return;
+    }
+  
+    // ouvrir le dialog avec les données du user
+    const data: EditUserData = {
+      id: u.id,
+      nom: u.nom,
+      prenom: u.prenom,
+      email: u.email,
+      genre: u.genre,
+      ncin: u.ncin,
+      dateEmbauche: u.dateEmbauche,
+      salaire: u.salaire
+    };
+    const ref = this.dialog.open(EditUserDialogComponent, {
+      width: '600px',
+      data
+    });
+    ref.afterClosed().subscribe(updated => {
+      if (updated) {
+        this.loadUsers();
+      }
+    });
+  }
+  
   onDelete(u: User)  {
     if(!confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) return;
     this.http.delete(`http://localhost:8080/api/users/${u.id}`).subscribe(
