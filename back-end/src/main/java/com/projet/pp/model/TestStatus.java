@@ -4,5 +4,6 @@ public enum TestStatus {
     non_commence,
     en_cours,
     en_pause,
+    cloture,
     termine
 }

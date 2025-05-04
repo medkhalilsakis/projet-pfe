@@ -93,4 +93,8 @@ export class UserService {
       this.usersSubject.next(updatedUsers);
     }
   }
+
+  getUsersByRole(roleId: number): Observable<User[]> {
+    return this.http.get<User[]>(`${this.base}/role/${roleId}`);
+  }
 }

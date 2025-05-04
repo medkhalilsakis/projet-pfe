@@ -1,251 +1,127 @@
 <mat-tab-group>
 
-  <!-- Onglet En attente -->
+  <!-- Onglet EN ATTENTE -->
   <mat-tab label="En attente">
-    <ng-container *ngIf="!pendingProjects.length">
-      <div class="empty-state">Aucun projet en attente.</div>
-    </ng-container>
-    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-      <div
-        *ngFor="let p of pendingProjects | slice:(pendingPage-1)*9:(pendingPage*9)"
-        fxFlex="1 1 calc(33.333% - 24px)"
-      >
-        <div class="card">
-          <div class="card-header"><h3>{{ p.name }}</h3></div>
-          <div class="card-body">
-            <p>{{ p.description }}</p>
-            <small>
-              Créé par {{ p.user.prenom }} {{ p.user.nom }}
-              le {{ p.createdAt | date:'shortDate' }}
-            </small>
-
-            <mat-form-field appearance="fill" class="full-width">
+    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+      <ng-container *ngFor="let proj of pending">
+        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
+          <mat-card-header>
+            <mat-card-title>{{ proj.name }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Testeurs</mat-label>
-              <mat-select multiple [(ngModel)]="selectedPending[p.id]">
-                <mat-option
-                  *ngFor="let t of testers"
-                  [value]="t.id"
-                  [disabled]="t.inProgressCount >= 2"
-                >
-                  {{ t.name }} ({{ t.inProgressCount }})
-                </mat-option>
+              <mat-select multiple [value]="selectedTesteursMap[proj.id]" (selectionChange)="selectedTesteursMap[proj.id] = $event.value">
+                <mat-option *ngFor="let t of allTesteurs" [value]="t.id">{{ t.prenom }} {{ t.nom }}</mat-option>
               </mat-select>
             </mat-form-field>
-
-            <button
-              mat-flat-button
-              color="primary"
-              class="action-button full-width"
-              (click)="assignPending(p.id)"
-            >
-              <mat-icon>person_add</mat-icon>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-flat-button color="primary" (click)="assign(proj.id)">
               Désigner
             </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-      <button
-        mat-icon-button
-        (click)="pendingPage = pendingPage - 1"
-        [disabled]="pendingPage === 1"
-      ><mat-icon>chevron_left</mat-icon></button>
-
-      <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
-
-      <button
-        mat-icon-button
-        (click)="pendingPage = pendingPage + 1"
-        [disabled]="pendingPage === pendingTotalPages"
-      ><mat-icon>chevron_right</mat-icon></button>
+          </mat-card-actions>
+        </mat-card>
+      </ng-container>
     </div>
   </mat-tab>
 
-  <!-- Onglet En testing -->
-  <mat-tab label="En testing">
-    <ng-container *ngIf="!testingProjects.length">
-      <div class="empty-state">Aucun projet en test.</div>
-    </ng-container>
-    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-      <div
-        *ngFor="let p of testingProjects | slice:(testingPage-1)*9:(testingPage*9)"
-        fxFlex="1 1 calc(33.333% - 24px)"
-      >
-        <div class="card">
-          <div class="card-header"><h3>{{ p.name }}</h3></div>
-          <div class="card-body">
-            <p>{{ p.description }}</p>
-            <small>
-              Créé par {{ p.user.prenom }} {{ p.user.nom }}
-              le {{ p.createdAt | date:'shortDate' }}
-            </small>
-
-            <!-- Liste des assignations -->
-            <div class="assign-list">
-              <div *ngFor="let a of p.assignments" class="assign-item">
-                <mat-icon>person</mat-icon>
+  <!-- Onglet EN TEST -->
+  <mat-tab label="En test">
+    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+      <ng-container *ngFor="let proj of inTest">
+        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
+          <mat-card-header>
+            <mat-card-title>{{ proj.name }}</mat-card-title>
+          </mat-card-header>
+  
+          <mat-card-content>
+  
+            <!-- Liste des testeurs assignés -->
+            <div fxLayout="column" fxLayoutGap="8px">
+              <h4>Testeurs assignés :</h4>
+              <div *ngFor="let a of assignmentsMap[proj.id]" fxLayout="row" fxLayoutAlign="space-between center">
                 <span>{{ a.testeur.prenom }} {{ a.testeur.nom }}</span>
-                <button mat-icon-button color="warn" (click)="removeAssign(a,p)">
+                <button mat-icon-button color="warn"
+                        (click)="removeTesteur(proj.id, a.testeur.id)">
                   <mat-icon>delete</mat-icon>
                 </button>
-                <mat-form-field appearance="fill" class="small-select">
-                  <mat-label>Remplacer</mat-label>
-                  <mat-select [(ngModel)]="selectedReplace[a.id]">
-                    <mat-option *ngFor="let t of testers" [value]="t.id">
-                      {{ t.name }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <button mat-icon-button color="accent" (click)="replaceAssign(a)">
-                  <mat-icon>edit</mat-icon>
-                </button>
               </div>
             </div>
-
-            <!-- Ajouter un testeur -->
-            <mat-form-field appearance="fill" class="full-width">
-              <mat-label>Ajouter testeur</mat-label>
-              <mat-select [(ngModel)]="selectedAdd[p.id]">
-                <mat-option
-                  *ngFor="let t of testers"
-                  [value]="t.id"
-                  [disabled]="t.inProgressCount >= 2"
-                >
-                  {{ t.name }}
+  
+            <mat-divider class="my-2"></mat-divider>
+  
+            <!-- Ajout de nouveaux testeurs -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Ajouter des testeurs</mat-label>
+              <mat-select multiple
+                          [value]="newTesteursMap[proj.id]"
+                          (selectionChange)="newTesteursMap[proj.id] = $event.value">
+                <mat-option *ngFor="let t of allTesteurs"
+                            [value]="t.id"
+                            [disabled]="isTesteurAssigned(proj.id, t.id)">
+                  {{ t.prenom }} {{ t.nom }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <button mat-stroked-button color="primary" class="action-button full-width"
-                    (click)="addTester(p)">
+            
+          </mat-card-content>
+  
+          <mat-card-actions align="end">
+            <button mat-flat-button color="primary"
+                    (click)="addTesteurs(proj.id)">
               Ajouter
             </button>
-
-            <!-- Actions Pause / Clôture -->
-            <div class="actions-row">
-              <button mat-flat-button color="warn"
-                      (click)="togglePauseForm(p.id)">
-                <mat-icon>pause</mat-icon> Pause
-              </button>
-              <button mat-flat-button color="warn"
-                      (click)="toggleCloseForm(p.id)">
-                <mat-icon>flag</mat-icon> Clôturer
-              </button>
-            </div>
-
-            <!-- Formulaire Pause -->
-            <form [formGroup]="pauseForm" class="form-block"
-                  *ngIf="showPauseForm[p.id]">
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Raison de la pause</mat-label>
-                <textarea matInput formControlName="reason"></textarea>
-              </mat-form-field>
-              <div class="file-input-block">
-                <label>Fichiers (optionnel)</label>
-                <input
-                  type="file"
-                  multiple
-                  (change)="pauseForm.patchValue({ files: $any($event.target)?.files })"
-                />
-              </div>
-              <button mat-flat-button color="primary" [disabled]="pauseForm.invalid"
-                      (click)="submitPause(p)">
-                Valider Pause
-              </button>
-            </form>
-
-            <!-- Formulaire Clôture -->
-            <form [formGroup]="closeForm" class="form-block"
-                  *ngIf="showCloseForm[p.id]">
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Raison de la clôture</mat-label>
-                <textarea matInput formControlName="reason"></textarea>
-              </mat-form-field>
-              <div class="file-input-block">
-                <label>Fichiers (optionnel)</label>
-                <input
-                  type="file"
-                  multiple
-                  (change)="closeForm.patchValue({ files: $any($event.target)?.files })"
-                />
-              </div>
-              <button mat-flat-button color="primary" [disabled]="closeForm.invalid"
-                      (click)="submitClose(p)">
-                Valider Clôture
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-      <button mat-icon-button (click)="testingPage = testingPage - 1" [disabled]="testingPage === 1">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <span>Page {{ testingPage }} / {{ testingTotalPages }}</span>
-      <button mat-icon-button (click)="testingPage = testingPage + 1"
-              [disabled]="testingPage === testingTotalPages">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+            <button mat-stroked-button color="warn"
+                    (click)="pauseProject(proj.id)">
+              Mettre en pause
+            </button>
+            <button mat-flat-button color="accent"
+                    (click)="closeProject(proj.id)">
+              Clôturer
+            </button>
+          </mat-card-actions>
+          
+  
+        </mat-card>
+      </ng-container>
     </div>
   </mat-tab>
+  
 
-  <!-- Onglet Clôturés -->
-  <mat-tab label="Clôturés">
-    <ng-container *ngIf="!closedProjects.length">
-      <div class="empty-state">Aucun projet clôturé.</div>
-    </ng-container>
-    <div fxLayout="row wrap" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-      <div
-        *ngFor="let p of closedProjects | slice:(closedPage-1)*9:(closedPage*9)"
-        fxFlex="1 1 calc(33.333% - 24px)"
-      >
-        <div class="card">
-          <div class="card-header"><h3>{{ p.name }}</h3></div>
-          <div class="card-body">
-            <p>{{ p.description }}</p>
-            <small>Statut: {{ p.status }}</small>
-
-            <mat-form-field appearance="fill" class="full-width">
-              <mat-label>Relancer</mat-label>
-              <mat-select multiple [(ngModel)]="selectedClosed[p.id]">
-                <mat-option *ngFor="let t of testers" [value]="t.id">
-                  {{ t.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <div class="actions-row">
-              <button mat-flat-button color="primary" (click)="resume(p)">
-                Relancer Test
-              </button>
-              <button mat-stroked-button color="accent" (click)="archive(p)">
-                Archiver
-              </button>
-              <button mat-icon-button color="warn" (click)="delete(p)">
-                <mat-icon>delete_forever</mat-icon>
-              </button>
+  <!-- Onglet TERMINÉS / EN PAUSE -->
+  <mat-tab label="Terminés / Pause">
+    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+      <ng-container *ngFor="let proj of finishedDetails">
+        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
+          <mat-card-header>
+            <mat-card-title>{{ proj.name }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-divider></mat-divider>
+            <div>
+              <!-- Afficher l'icône et la date de pause ou de clôture -->
+              <mat-icon>{{ getStatusIcon(proj.status) }}</mat-icon>
+              <span>
+                {{ proj.status === 55 ? 'Mis en pause le' : 'Clôturé le' }} 
+                {{ getActionDate(proj) | date:'short' }}  <!-- Afficher la bonne date avec la méthode -->
+              </span>
+              <div>Superviseur : {{ proj.supervisorName }}</div>
+              <div>Testeurs : {{ proj.testerNames.join(', ') }}</div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-      <button mat-icon-button (click)="closedPage = closedPage - 1" [disabled]="closedPage === 1">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <span>Page {{ closedPage }} / {{ closedTotalPages }}</span>
-      <button mat-icon-button (click)="closedPage = closedPage + 1"
-              [disabled]="closedPage === closedTotalPages">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <!-- Relancer le projet -->
+            <button mat-flat-button color="primary" (click)="restartProject(proj.projectId)">
+              Relancer
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </ng-container>
     </div>
   </mat-tab>
+  
+
+  
 
 </mat-tab-group>

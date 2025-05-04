@@ -152,4 +152,8 @@ public class UserService {
         return userRepository.save(target);
     }
 
+
+    public List<User> getUsersByRoleId(Long roleId) {
+        return userRepository.findByRoleId(roleId);
+    }
 }

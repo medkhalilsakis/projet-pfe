@@ -60,6 +60,7 @@ public class Project {
     private List<ProjectTesterAssignment> assignments = new ArrayList<>();
 
 
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference  // Sérialise la liste des fichiers
     private List<ProjectFile> files = new ArrayList<>();

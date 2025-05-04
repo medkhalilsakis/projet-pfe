@@ -240,4 +240,11 @@ public class UserController {
         }
     }
 
+
+
+    @GetMapping("/role/{roleId}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable Long roleId) {
+        List<User> list = userService.getUsersByRoleId(roleId);
+        return ResponseEntity.ok(list);
+    }
 }

@@ -172,6 +172,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           label: 'Projets', icon: 'list_alt',
           subMenu: [
             { label: 'Vue d\'ensemble',      action: () => this.navigateTo('projects') },
+            { label: 'Mes Projets', action: () => this.navigateTo('my-projects') },
             { label: 'Désignation testeurs', action: () => this.navigateTo('designation') },
             { label: 'Projets en révision',  action: () => this.navigateTo('projects/revision') },
             { label: 'Réclamations',         action: () => this.navigateTo('projects/complaints') },
@@ -194,7 +195,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.menuItems = [
         ...baseMenu,
         { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
-        { label: 'Mes Projets', icon: 'folder',         action: () => this.navigateTo('projects') }
+        { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('my-projects') }
       ];
     }
   }

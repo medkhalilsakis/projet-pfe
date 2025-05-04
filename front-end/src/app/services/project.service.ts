@@ -11,12 +11,6 @@ export class ProjectService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Upload initial du projet.
-   * @param files      Fichiers à uploader
-   * @param decompress true pour décompression ZIP
-   * @param userId     ID de l'utilisateur uploadant
-   */
   uploadProject(
     files: File[],
     decompress: boolean,
@@ -196,13 +190,12 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Met à jour la visibilité d’un projet.
-   * @param projectId   ID du projet
-   * @param userId      ID de l'utilisateur
-   * @param visibilite  'public' ou 'privée'
-   * @param status      1 ou 0
-   */
+
+  deleteProject(projectId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${projectId}`);
+  }
+  
+
   updateVisibility(
     projectId: number,
     userId: number,
@@ -215,8 +208,6 @@ export class ProjectService {
       { responseType: 'text' as 'json' }
     );
   }
-
-  // Vous pouvez ajouter ici d'autres méthodes (invitation, stats, fermeture, etc.).
 }
 
 

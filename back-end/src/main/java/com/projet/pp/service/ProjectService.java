@@ -1,13 +1,12 @@
 package com.projet.pp.service;
 
+import com.projet.pp.dto.FinishedProjectDTO;
 import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.*;
-import com.projet.pp.repository.ProjectFileRepository;
-import com.projet.pp.repository.ProjectRepository;
-import com.projet.pp.repository.projectInvitedUserRepository;
-import com.projet.pp.repository.UserRepository;
+import com.projet.pp.repository.*;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +22,7 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,9 +38,17 @@ public class ProjectService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProjectPauseRepository pauseRepo;
+
+    @Autowired
+    private ProjectClosureRepository closeRepo;
 
     @Autowired
     private projectInvitedUserRepository projectInvitedUserRepository;
+
+    @Autowired
+    private ProjectTesterAssignmentRepository assignmentRepo;
 
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
@@ -83,10 +91,8 @@ public class ProjectService {
                 String relativePath = file.getOriginalFilename();
                 if (relativePath == null) continue;
                 String[] parts = relativePath.split("/");
-                // On saute toujours le premier segment (le dossier "uploadé")
                 int startIndex = (parts.length > 1 ? 1 : 0);
                 Long currentParentId = null;
-                // À partir de parts[startIndex] jusqu'à l'avant-dernier, ce sont les sous-dossiers
                 for (int i = startIndex; i < parts.length - 1; i++) {
                     currentParentId = getOrCreateFolder(
                             project,
@@ -95,7 +101,6 @@ public class ProjectService {
                             parts[i]
                     );
                 }
-                // On crée le fichier final
                 saveFileWithParent(file, projectStorage, project, currentParentId);
             }
 
@@ -110,12 +115,10 @@ public class ProjectService {
         if (parentFolderId != null) {
             parent = projectFileRepository.findById(parentFolderId).orElse(null);
         }
-        // On cherche un dossier dans le projet qui porte ce nom et qui a le même parent
         Optional<ProjectFile> optFolder = projectFileRepository.findByProjectAndNameAndParent(project, folderName, parent);
         if (optFolder.isPresent()) {
             return optFolder.get().getId();
         } else {
-            // Déterminer le chemin du nouveau dossier
             Path dir;
             if (parent != null) {
                 dir = Paths.get(parent.getFilePath()).resolve(folderName);
@@ -368,18 +371,12 @@ public class ProjectService {
         return projectFileRepository.save(pf);
     }
 
-
-    /**
-     * Ajoute des fichiers (upload) dans le dossier parent donné.
-     */
     @Transactional
     public List<ProjectFile> addFiles(Long projectId, Long parentId, MultipartFile[] files) throws IOException {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        // dossier racine du projet
         Path projectStorage = baseStorage.resolve(projectId.toString());
 
-        // on détermine le dossier cible
         ProjectFile parent = null;
         Path targetDir = projectStorage;
         if (parentId != null) {
@@ -391,16 +388,13 @@ public class ProjectService {
         List<ProjectFile> saved = new ArrayList<>();
         for (MultipartFile file : files) {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            // assure l’existence du dossier
             Files.createDirectories(targetDir);
             Path target = targetDir.resolve(filename);
 
-            // copie disque
             try (InputStream in = file.getInputStream()) {
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // enregistrement JPA
             ProjectFile pf = new ProjectFile();
             pf.setName(filename);
             pf.setType(ItemType.FILE);
@@ -447,23 +441,34 @@ public class ProjectService {
 
 
     @Transactional
-    public void updateVisibility(Long projectId, Long userId, String visibilite, Integer status) {
-        Project proj = projectRepository.findById(projectId)
+    public void updateVisibility(Long projectId, Long userId, String visibilite) {
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
 
-        // ne laisser faire que le propriétaire quand status est 1 ou 0
-        if (!proj.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Accès refusé");
-        }
-        if (!(proj.getStatus() == 1 || proj.getStatus() == 0)) {
-            throw new RuntimeException("Impossible de modifier la visibilité pour ce statut");
+        // Vérification si l'utilisateur est celui qui a uploadé le projet
+        if (!project.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Vous n'avez pas l'autorisation de modifier la visibilité de ce projet.");
         }
 
-        proj.setVisibilite(visibilite);
-        proj.setStatus(status);
-        proj.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(proj);
+        // Vérification du statut (0 ou 1 uniquement)
+        if (!(project.getStatus() == 0 || project.getStatus() == 1)) {
+            throw new RuntimeException("Le projet doit être en statut 0 ou 1 pour pouvoir modifier sa visibilité.");
+        }
+
+        // Mise à jour de la visibilité
+        if ("public".equals(visibilite)) {
+            project.setVisibilite("public");
+            project.setStatus(1);  // Change le statut en "1" pour "public"
+        } else if ("privée".equals(visibilite)) {
+            project.setVisibilite("privée");
+            project.setStatus(0);  // Change le statut en "0" pour "privée"
+        }
+
+        project.setUpdatedAt(LocalDateTime.now());
+
+        projectRepository.save(project);
     }
+
 
 
     public ProjectStatsDTO getProjectStats(Long projectId) {
@@ -496,24 +501,30 @@ public class ProjectService {
 
     @Transactional
     public void deleteProject(Long projectId) {
-        // 1) Supprimez les fichiers sur disque
-        Path projectDir = baseStorage.resolve(projectId.toString());
-        if (Files.exists(projectDir)) {
-            try {
-                FileSystemUtils.deleteRecursively(projectDir);
-            } catch (IOException e) {
-                // Vous pouvez soit remonter en RuntimeException pour rollback,
-                // soit logger et continuer si la suppression disque n’est pas critique.
-                throw new RuntimeException(
-                        "Erreur lors de la suppression des fichiers du projet " + projectId, e
-                );
+        try {
+            // Suppression du projet et de ses fichiers
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new RuntimeException("Le projet avec l'ID " + projectId + " n'a pas été trouvé"));
+
+            // Supprimer les fichiers associés au projet
+            Path projectDir = baseStorage.resolve(projectId.toString());
+            if (Files.exists(projectDir)) {
+                try {
+                    FileSystemUtils.deleteRecursively(projectDir); // Supprimer les fichiers du projet
+                } catch (IOException e) {
+                    throw new RuntimeException("Erreur lors de la suppression des fichiers du projet " + projectId, e);
+                }
             }
+
+            // Supprimer les invitations associées au projet
+            projectInvitedUserRepository.deleteByProjectId(projectId);  // Suppression des invitations
+
+            // Supprimer le projet
+            projectRepository.deleteById(projectId);
+        } catch (OptimisticLockException ex) {
+            throw new RuntimeException("Le projet a été modifié entre-temps par une autre transaction", ex);
         }
-
-        // 2) Supprimez l’entité projet en base
-        projectRepository.deleteById(projectId);
     }
-
 
     @Transactional
     public void archiveProject(Long projectId) {
@@ -521,5 +532,63 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
         project.setStatus(-1);
         projectRepository.save(project);
+    }
+
+
+
+    public List<FinishedProjectDTO> getFinishedDetails() {
+        // Recherche des projets mis en pause et clôturés
+        List<Project> list55 = projectRepository.findByStatus(55);  // projets en pause
+        List<Project> list99 = projectRepository.findByStatus(99);  // projets clôturés
+        List<Project> all = Stream.concat(list55.stream(), list99.stream()).collect(Collectors.toList());
+
+        List<FinishedProjectDTO> result = new ArrayList<>();
+        for (Project p : all) {
+            FinishedProjectDTO dto = new FinishedProjectDTO();
+            dto.setProjectId(p.getId());
+            dto.setName(p.getName());
+            dto.setStatus(p.getStatus());
+
+            // Récupérer les informations selon le statut (pauses ou clôtures)
+            if (p.getStatus() == 55) {  // Si le projet est en pause
+                ProjectPause pause = pauseRepo.findFirstByProjectIdOrderByPausedAtDesc(p.getId()).orElse(null);
+                if (pause != null) {
+                    dto.setPausedAt(pause.getPausedAt());  // Utilisation de pausedAt
+                    dto.setSupervisorName(pause.getSupervisor().getPrenom() + " " + pause.getSupervisor().getNom());
+                }
+            } else {  // Si le projet est clôturé
+                ProjectClosure closure = closeRepo.findFirstByProjectIdOrderByClosureAtDesc(p.getId()).orElse(null);
+                if (closure != null) {
+                    dto.setClosureAt(closure.getClosureAt());  // Utilisation de closureAt
+                    dto.setSupervisorName(closure.getSupervisor().getPrenom() + " " + closure.getSupervisor().getNom());
+                }
+            }
+
+            // Liste des testeurs associés au projet
+            List<String> testers = assignmentRepo.findByProjectId(p.getId())
+                    .stream()
+                    .map(a -> a.getTesteur().getPrenom() + " " + a.getTesteur().getNom())
+                    .collect(Collectors.toList());
+            dto.setTesterNames(testers);
+
+            result.add(dto);
+        }
+        return result;
+    }
+
+
+    // Relancer un projet en phase de test (remettre le statut à 2)
+    @Transactional
+    public void restartTestPhase(Long projectId) {
+        Project projet = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable"));
+
+        // Vérifier que le projet est en pause ou clôturé avant de le relancer
+        if (projet.getStatus() != 55 && projet.getStatus() != 99) {
+            throw new RuntimeException("Le projet n'est pas en statut 'en pause' ou 'clôturé'");
+        }
+        // Réinitialiser le statut à 2 (en test)
+        projet.setStatus(2);
+        projectRepository.save(projet);
     }
 }

@@ -1,6 +1,9 @@
 package com.projet.pp.controller;
 
+import com.projet.pp.dto.FinishedProjectDTO;
 import com.projet.pp.model.Project;
+import com.projet.pp.model.ProjectTesterAssignment;
+import com.projet.pp.model.TestStatus;
 import com.projet.pp.service.ProjectService;
 import com.projet.pp.service.TesterAssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,102 +17,83 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/assignments")
+@RequestMapping("/api/tester-assignments")
 public class TesterAssignmentController {
 
     @Autowired
-    private ProjectService projectService;
-
+    private ProjectService Pservice;
     @Autowired
     private TesterAssignmentService service;
 
-    // 1) Projets en attente (status = 1)
-    @GetMapping("/pending-projects")
-    public List<Project> pending() {
-        return service.getPendingProjects();
+    /** Liste des projets en attente (status=1) */
+    @GetMapping("/pending")
+    public ResponseEntity<List<Project>> getPendingProjects() {
+        List<Project> pendingProjects = service.findProjectsInPendingStateWithoutTesters();
+        return ResponseEntity.ok(pendingProjects);
     }
 
-    // 2) Testeurs avec nombre de projets en cours
-    @GetMapping("/testers")
-    public List<Map<String,Object>> testers() {
-        return service.getAllTesters().stream().map(u -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", u.getId());
-            map.put("name", u.getPrenom() + " " + u.getNom());
-            map.put("inProgressCount", service.countInProgress(u.getId()));
-            return map;
-        }).toList();
+    /** Liste des projets en cours de test (status=2) */
+    @GetMapping("/in-test")
+    public ResponseEntity<List<Project>> getInTestProjects() {
+        return ResponseEntity.ok(service.findProjectsByStatus(2));
+    }
+
+    /** Liste des projets pausés ou clôturés (status=55 ou 99) ET ayant au moins un testeur assigné */
+    @GetMapping("/finished")
+    public ResponseEntity<List<Project>> getFinishedOrPaused() {
+        // pour simplifier, on retourne tous ceux à 55 ou 99 ; côté front, on filtrera ceux sans assignations
+        List<Project> list55 = service.findProjectsByStatus(55);
+        List<Project> list99 = service.findProjectsByStatus(99);
+        list55.addAll(list99);
+        return ResponseEntity.ok(list55);
+    }
+
+    /** Désigner une nouvelle liste de testeurs et lancer la phase de test */
+    @PostMapping("/{projectId}/assign")
+    public ResponseEntity<Void> assignTesters(
+            @PathVariable Long projectId,
+            @RequestBody List<Long> testeurIds,
+            @RequestParam Long superviseurId
+    ) {
+        service.assignTesters(projectId, testeurIds, superviseurId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Mettre en pause ou clore la phase de test */
+    @PostMapping("/{projectId}/phase")
+    public ResponseEntity<Void> changePhase(
+            @PathVariable Long projectId,
+            @RequestParam("action") String action
+    ) {
+        TestStatus phase = switch (action) {
+            case "pause"   -> TestStatus.en_pause;
+            case "close"   -> TestStatus.cloture;
+            default        -> throw new IllegalArgumentException("Action invalide");
+        };
+        service.changeProjectTestPhase(projectId, phase);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Relancer la phase de test */
+    @PostMapping("/{projectId}/restart")
+    public ResponseEntity<Void> restartPhase(@PathVariable Long projectId) {
+        service.restartTestPhase(projectId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Récupérer les testeurs assignés pour un projet */
+    @GetMapping("/{projectId}/assignments")
+    public ResponseEntity<List<ProjectTesterAssignment>> getAssignments(
+            @PathVariable Long projectId
+    ) {
+        return ResponseEntity.ok(service.getAssignments(projectId));
     }
 
 
-    // 3) Assignation — on récupère superviseurId dans le body
-    @PostMapping("/assign")
-    public ResponseEntity<?> assign(@RequestBody Map<String,Long> body) {
-        try {
-            Long projectId = body.get("projectId");
-            Long testeurId = body.get("testeurId");
-            Long superviseurId = body.get("superviseurId");
-            service.assignTester(projectId, testeurId, superviseurId);
-            return ResponseEntity.ok("Testeur assigné");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/finished-details")
+    public ResponseEntity<List<FinishedProjectDTO>> getFinishedDetails() {
+        List<FinishedProjectDTO> list = Pservice.getFinishedDetails();
+        return ResponseEntity.ok(list);
     }
 
-
-
-    @DeleteMapping("/remove/{assignmentId}")
-    public ResponseEntity<?> removeTester(@PathVariable Long assignmentId) {
-        service.removeTester(assignmentId);
-        return ResponseEntity.ok("Testeur retiré");
-    }
-
-    // 5) Modifier une affectation
-    @PutMapping("/update")
-    public ResponseEntity<?> updateTester(@RequestBody Map<String, Long> body) {
-        Long assignmentId = body.get("assignmentId");
-        Long newTesterId = body.get("newTesterId");
-        service.updateTester(assignmentId, newTesterId);
-        return ResponseEntity.ok("Testeur modifié");
-    }
-
-    // 6) Interrompre la phase de test pour un projet
-    @PostMapping("/interrupt/{projectId}")
-    public ResponseEntity<?> interruptPhase(@PathVariable Long projectId) {
-        service.interruptTestingPhase(projectId);
-        return ResponseEntity.ok("Phase de test interrompue. Projet clôturé.");
-    }
-
-
-    @PostMapping("/resume/{projectId}")
-    public ResponseEntity<?> resumeTestingPhase(@PathVariable Long projectId, @RequestBody Map<String, Object> body) {
-        Long superviseurId = ((Number) body.get("superviseurId")).longValue();
-        // On attend dans le body un tableau de testeurIds sous forme de nombres
-        List<Integer> testerIdsInt = (List<Integer>) body.get("testerIds");
-        List<Long> testerIds = testerIdsInt.stream().map(Integer::longValue).toList();
-        service.resumeTestingPhase(projectId, testerIds, superviseurId);
-        return ResponseEntity.ok("Phase de testing relancée pour le projet");
-    }
-
-    @GetMapping("/closed-projects")
-    public List<Project> closed() {
-        return service.getProjectsByStatuses(Arrays.asList(55, 99));
-    }
-
-    @PostMapping("/pause/{projectId}")
-    public ResponseEntity<?> pause(@PathVariable Long projectId, @RequestParam Long supervisorId, @RequestParam String reason, @RequestParam(required=false) MultipartFile[] files) {
-        service.pauseTestingPhase(projectId, supervisorId, reason, files);
-        return ResponseEntity.ok("Phase de test mise en pause");
-    }
-
-    @PostMapping("/{projectId}/archive")
-    public ResponseEntity<String> archive(@PathVariable Long projectId) {
-        projectService.archiveProject(projectId);
-        return ResponseEntity.ok("Projet archivé");
-    }
-
-    @GetMapping("/testing-projects")
-    public List<Project> testingProjects() {
-        return service.getTestingProjects();
-    }
 }

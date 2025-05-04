@@ -18,4 +18,11 @@ public interface projectInvitedUserRepository extends JpaRepository<ProjectInvit
     @Transactional
     @Query("DELETE FROM ProjectInvitedUser iu WHERE iu.user.id = :userId")
     void deleteByInvitedUserId(@Param("userId") Long userId);
+
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM ProjectInvitedUser iu WHERE iu.project.id = :projectId")
+    void deleteByProjectId(@Param("projectId") Long projectId);
+
 }

@@ -226,15 +226,25 @@ public class ProjectController {
             @PathVariable Long projectId,
             @RequestBody Map<String, String> body) {
         try {
+            // Vérification du body pour s'assurer que les valeurs sont correctement extraites
             Long userId = Long.valueOf(body.get("userId"));
             String vis = body.get("visibilite");      // "public" ou "privée"
             Integer status = Integer.valueOf(body.get("status")); // 1 ou 0
-            projectService.updateVisibility(projectId, userId, vis, status);
+
+            // Vérification des valeurs extraites
+            if (userId == null || vis == null || status == null) {
+                throw new RuntimeException("Paramètres manquants ou invalides.");
+            }
+
+            // Mise à jour de la visibilité du projet
+            projectService.updateVisibility(projectId, userId, vis);
+
             return ResponseEntity.ok("Visibilité mise à jour avec succès");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
+
 
 
     @GetMapping("/{projectId}/stats")
@@ -258,4 +268,11 @@ public class ProjectController {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{projectId}/restart")
+    public ResponseEntity<Void> restartProject(@PathVariable Long projectId) {
+        projectService.restartTestPhase(projectId);
+        return ResponseEntity.ok().build();
+    }
+
 }

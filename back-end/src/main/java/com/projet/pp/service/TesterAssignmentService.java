@@ -1,10 +1,8 @@
 package com.projet.pp.service;
 
+import com.projet.pp.dto.FinishedProjectDTO;
 import com.projet.pp.model.*;
-import com.projet.pp.repository.ProjectPauseRepository;
-import com.projet.pp.repository.ProjectRepository;
-import com.projet.pp.repository.ProjectTesterAssignmentRepository;
-import com.projet.pp.repository.UserRepository;
+import com.projet.pp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TesterAssignmentService {
@@ -23,169 +22,103 @@ public class TesterAssignmentService {
     private ProjectRepository projectRepo;
 
     @Autowired
-    private ProjectPauseService pauseService;
-
-    @Autowired
-    private ProjectPauseRepository pauseRepository;
-
-    @Autowired
     private UserRepository userRepo;
 
     @Autowired
-    private ProjectTesterAssignmentRepository assignRepo;
+    private ProjectTesterAssignmentRepository assignmentRepo;
 
-    public List<Project> getPendingProjects() {
-        return projectRepo.findByStatus(1);
+    /**
+     * Retourne tous les projets au statut donné.
+     */
+    public List<Project> findProjectsByStatus(int status) {
+        return projectRepo.findByStatus(status);
     }
 
-    public List<User> getAllTesters() {
-        return userRepo.findByRoleId(2L);
+    /**
+     * Retourne toutes les désignations pour un projet.
+     */
+    public List<ProjectTesterAssignment> getAssignments(Long projectId) {
+        return assignmentRepo.findByProjectId(projectId);
     }
 
-    public long countInProgress(Long testeurId) {
-        return assignRepo.countByTesteurIdAndStatutTest(testeurId, TestStatus.en_cours);
-    }
-
+    /**
+     * Désigne un ou plusieurs testeurs sur un projet.
+     * Si on passe status = TestStatus.non_commence, on lève en attente,
+     * pour lancer la phase de test status projet -> 2.
+     */
     @Transactional
-    public void assignTester(Long projectId, Long testeurId, Long superviseurId) {
-        // Récupération des entités
-        Project project = projectRepo.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        User testeur = userRepo.findById(testeurId)
-                .orElseThrow(() -> new RuntimeException("Testeur non trouvé"));
+    public void assignTesters(Long projectId, List<Long> testeurIds, Long superviseurId) {
+        Project projet = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable"));
         User superviseur = userRepo.findById(superviseurId)
-                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
+                .orElseThrow(() -> new RuntimeException("Superviseur introuvable"));
 
-        // Vérifier si le testeur est déjà affecté pour ce projet
-        if (assignRepo.findByProjectIdAndTesteurId(projectId, testeurId).isPresent()) {
-            throw new RuntimeException("Ce testeur est déjà assigné à ce projet");
+        // 1) On supprime les anciennes désignations si on reprend à zéro
+        assignmentRepo.deleteByProjectId(projectId);
+
+        // 2) On recrée les désignations
+        int num = 1;
+        for (Long tid : testeurIds) {
+            User t = userRepo.findById(tid)
+                    .orElseThrow(() -> new RuntimeException("Testeur introuvable: " + tid));
+            ProjectTesterAssignment pa = new ProjectTesterAssignment();
+            pa.setProject(projet);
+            pa.setSuperviseur(superviseur);
+            pa.setTesteur(t);
+            pa.setDateDesignation(LocalDate.now());
+            pa.setNumeroTesteur(num++);
+            pa.setStatutTest(TestStatus.non_commence);
+            assignmentRepo.save(pa);
         }
 
-        // Calcul du numéro du testeur pour ce projet : incrémentation en fonction du nombre d'affectations existantes
-        int numero = assignRepo.findByProjectId(projectId).size() + 1;
-        if (numero > 2) {
-            throw new RuntimeException("Le maximum de 2 testeurs est déjà assigné à ce projet");
-        }
-
-        // Création de l'affectation
-        ProjectTesterAssignment assignment = new ProjectTesterAssignment();
-        assignment.setProject(project);
-        assignment.setTesteur(testeur);
-        assignment.setSuperviseur(superviseur);
-        assignment.setNumeroTesteur(numero);
-        assignment.setStatutTest(TestStatus.en_cours);
-        assignment.setDateDesignation(LocalDate.from(LocalDateTime.now()));
-        assignment.setCreatedAt(LocalDateTime.now());
-        assignment.setUpdatedAt(LocalDateTime.now());
-        assignRepo.save(assignment);
-
-        // Mise à jour du statut du projet : passage en testing (status = 2)
-        project.setStatus(2);
-        projectRepo.save(project);
+        // 3) On met à jour le statut du projet -> en phase de test
+        projet.setStatus(2);
+        projectRepo.save(projet);
     }
 
-
-
+    /**
+     * Met le projet en pause (status 55) ou clôture (99).
+     */
     @Transactional
-    public void removeTester(Long assignmentId) {
-        assignRepo.deleteById(assignmentId);
+    public void changeProjectTestPhase(Long projectId, TestStatus newPhase) {
+        Project projet = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable"));
+        int s = switch (newPhase) {
+            case en_pause -> 55;
+            case cloture -> 99;
+            default -> throw new IllegalArgumentException("Phase invalide pour pause/close");
+        };
+        projet.setStatus(s);
+        projectRepo.save(projet);
     }
 
+    /**
+     * Relance la phase de test (remet statut 2).
+     */
     @Transactional
-    public void updateTester(Long assignmentId, Long newTesterId) {
-        ProjectTesterAssignment assignment = assignRepo.findById(assignmentId)
-                .orElseThrow(() -> new RuntimeException("Affectation non trouvée"));
-        User newTester = userRepo.findById(newTesterId)
-                .orElseThrow(() -> new RuntimeException("Testeur non trouvé"));
-        assignment.setTesteur(newTester);
-        assignment.setUpdatedAt(LocalDateTime.now());
-        assignRepo.save(assignment);
-    }
+    public void restartTestPhase(Long projectId) {
+        Project projet = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable"));
 
-    @Transactional
-    public void interruptTestingPhase(Long projectId) {
-        Project project = projectRepo.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        // Supprime toutes les affectations pour ce projet
-        assignRepo.deleteByProjectId(projectId);
-        // Met à jour le statut du projet en "clôturé" (status = 3)
-        project.setStatus(3);
-        projectRepo.save(project);
-    }
-
-    @Transactional
-    public List<Project> getTestingProjects() {
-        return projectRepo.findProjectsByStatusWithAssignments(2); // statut = 2 pour "en testing"
+        // Réinitialise le statut à 2 (en phase de test)
+        projet.setStatus(2);
+        projectRepo.save(projet);
     }
 
 
+    public List<Project> findProjectsInPendingStateWithoutTesters() {
+        List<Project> projects = projectRepo.findByStatus(1);  // Trouver les projets en attente (status = 1)
 
-    @Transactional
-    public void resumeTestingPhase(Long projectId, List<Long> testerIds, Long superviseurId) {
-        Project project = projectRepo.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        int currentAssignments = assignRepo.findByProjectId(projectId).size();
-        // Pour chaque testeur sélectionné, on crée une affectation tant que le maximum (2) n'est pas atteint
-        for (Long testerId : testerIds) {
-            // Vérifier si le testeur est déjà affecté
-            if (assignRepo.findByProjectIdAndTesteurId(projectId, testerId).isPresent()) {
-                continue; // Passe au testeur suivant
-            }
-            if (currentAssignments >= 2) {
-                break;
-            }
-            User testeur = userRepo.findById(testerId)
-                    .orElseThrow(() -> new RuntimeException("Testeur non trouvé"));
-            User superviseur = userRepo.findById(superviseurId)
-                    .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
-            ProjectTesterAssignment assignment = new ProjectTesterAssignment();
-            assignment.setProject(project);
-            assignment.setTesteur(testeur);
-            assignment.setSuperviseur(superviseur);
-            assignment.setNumeroTesteur(++currentAssignments);
-            assignment.setStatutTest(TestStatus.en_cours);
-            assignment.setDateDesignation(LocalDate.from(LocalDateTime.now()));
-            assignment.setCreatedAt(LocalDateTime.now());
-            assignment.setUpdatedAt(LocalDateTime.now());
-            assignRepo.save(assignment);
-        }
-        // Mise à jour du statut du projet : passage en testing (status = 2)
-        project.setStatus(2);
-        projectRepo.save(project);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Project> getProjectsByStatuses(List<Integer> statuses) {
-        return projectRepo.findByStatusIn(statuses);
-    }
-
-    @Transactional
-    public void pauseTestingPhase(Long projectId, Long supervisorId, String reason, MultipartFile[] files) {
-        Project project = projectRepo.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-
-        User sup = userRepo.findById(supervisorId)
-                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
-
-        // Optionnel : enregistrer la raison et les fichiers dans une entité ProjectPause
-        ProjectPause pause = new ProjectPause();
-        pause.setProject(project);
-        pause.setSupervisor(sup);
-        pause.setReason(reason);
-        pauseRepository.save(pause);
-
-        // Si des fichiers sont joints, on peut les stocker de la même façon que pour les closures
-        if (files != null) {
-            for (MultipartFile file : files) {
-                pauseService.storePauseAttachment(pause, file);
+        // Filtrer les projets qui n'ont pas de testeurs assignés
+        List<Project> filteredProjects = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getAssignments().isEmpty()) {
+                filteredProjects.add(project);
             }
         }
-
-        // Supprime toutes les affectations en cours
-        assignRepo.deleteByProjectId(projectId);
-
-        // Passe le projet en status "pause"
-        project.setStatus(55);
-        projectRepo.save(project);
+        return filteredProjects;
     }
+
+
+
 }

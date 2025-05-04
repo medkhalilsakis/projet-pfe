@@ -1,102 +1,133 @@
+// src/app/services/assignment.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+/**
+ * Interface représentant un projet minimal pour la désignation.
+ * Vous pouvez l’enrichir avec d’autres champs (name, description, etc.).
+ */
+export interface ProjectLight {
+  id: number;
+  name: string;
+  status: number;
+}
+
+/**
+ * Interface pour un enregistrement d’assignation (ProjectTesterAssignment).
+ */
+export interface ProjectTesterAssignment {
+  id: number;
+  project: ProjectLight;
+  testeur: { id: number; nom: string; prenom: string };
+  superviseur: { id: number; nom: string; prenom: string };
+  dateDesignation: string;    // ex: "2025-05-04"
+  numeroTesteur: number;
+  casTestPath?: string;
+  statutTest: string;         // ex: "non_commence", "en_cours", etc.
+}
+
+// src/app/models/finished-detail.ts
+export interface FinishedProjectDetail {
+  projectId: number;
+  name: string;
+  status: number;               // 55 = pause, 99 = clôture
+  actionDate: string;           // ISO string
+  supervisorName: string;
+  testerNames: string[];
+}
+
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AssignmentService {
-  private base = 'http://localhost:8080/api/assignments';
-  private projectsBase = 'http://localhost:8080/api/projects';
 
-  constructor(private http: HttpClient) {}
+  private baseUrl = 'http://localhost:8080/api/tester-assignments';
 
-  // Pending
-  getPendingProjects(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/pending-projects`);
+  constructor(private http: HttpClient) { }
+
+  /** Récupère les projets en attente de désignation (status = 1) */
+  getPending(): Observable<ProjectLight[]> {
+    return this.http.get<ProjectLight[]>(`${this.baseUrl}/pending`);
   }
 
-  assignMultiple(projectId: number, supervisorId: number, testerIds: number[]): Observable<string> {
-    return this.http.post<string>(
-      `${this.base}/assign`,
-      { projectId, superviseurId: supervisorId, testerIds }
+  /** Récupère les projets en cours de test (status = 2) */
+  getInTest(): Observable<ProjectLight[]> {
+    return this.http.get<ProjectLight[]>(`${this.baseUrl}/in-test`);
+  }
+
+  /** Récupère les projets mis en pause (55) ou clôturés (99) */
+  getFinished(): Observable<ProjectLight[]> {
+    return this.http.get<ProjectLight[]>(`${this.baseUrl}/finished`);
+  }
+
+  /**
+   * Récupère les assignations actuelles d’un projet
+   * @param projectId ID du projet
+   */
+  getAssignments(projectId: number): Observable<ProjectTesterAssignment[]> {
+    return this.http.get<ProjectTesterAssignment[]>(
+      `${this.baseUrl}/${projectId}/assignments`
     );
   }
 
-  // Testing
-  getTestingProjects(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/testing-projects`);
-  }
-
-  assignOne(projectId: number, testeurId: number, supervisorId: number): Observable<string> {
-    return this.http.post<string>(
-      `${this.base}/assign`,
-      { projectId, testeurId, superviseurId: supervisorId }
+  /**
+   * Désigne une nouvelle liste de testeurs et lance la phase de test.
+   * @param projectId      ID du projet
+   * @param testeurIds     Tableau d’IDs des testeurs à assigner
+   * @param superviseurId  ID du superviseur qui désigne
+   */
+  assignTesters(
+    projectId: number,
+    testeurIds: number[],
+    superviseurId: number
+  ): Observable<void> {
+    // on passe superviseurId en query params
+    const params = new HttpParams().set('superviseurId', superviseurId.toString());
+    return this.http.post<void>(
+      `${this.baseUrl}/${projectId}/assign`,
+      testeurIds,
+      { params }
     );
   }
 
-  updateTester(assignmentId: number, newTesterId: number): Observable<string> {
-    return this.http.put<string>(
-      `${this.base}/update`,
-      { assignmentId, newTesterId }
+  /**
+   * Met en pause ou clôture la phase de test.
+   * @param projectId ID du projet
+   * @param action    'pause' ou 'close'
+   */
+  changePhase(
+    projectId: number,
+    action: 'pause'|'close'
+  ): Observable<void> {
+    const params = new HttpParams().set('action', action);
+    return this.http.post<void>(
+      `${this.baseUrl}/${projectId}/phase`,
+      null,
+      { params }
     );
   }
 
-  removeTester(assignmentId: number): Observable<string> {
-    return this.http.delete<string>(`${this.base}/remove/${assignmentId}`);
-  }
-
-  // src/app/services/assignment.service.ts
-
-pause(projectId: number, supervisorId: number, reason: string, files: FileList): Observable<string> {
-    const form = new FormData();
-    form.append('supervisorId', supervisorId.toString());
-    form.append('reason', reason);
-    if (files) {
-      Array.from(files).forEach(f => form.append('files', f));
-    }
-    // Ajout de responseType:'text'
-    return this.http.post(
-      `${this.base}/pause/${projectId}`,
-      form,
-      { responseType: 'text' }
+  /**
+   * Relance la phase de test (remet status en 2)
+   * @param projectId ID du projet
+   */
+  restartPhase(projectId: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/${projectId}/restart`,
+      null
     );
   }
+
   
-  closeProject(projectId: number, supervisorId: number, reason: string, files: FileList): Observable<string> {
-    const form = new FormData();
-    form.append('supervisorId', supervisorId.toString());
-    form.append('reason', reason);
-    if (files) {
-      Array.from(files).forEach(f => form.append('files', f));
-    }
-    return this.http.post(
-      `${this.base}/${projectId}/close`,
-      form,
-      { responseType: 'text' }
-    );
-  }
-  
-
-  // Closed
-  getClosedProjects(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/closed-projects`);
+  getFinishedDetails(): Observable<FinishedProjectDetail[]> {
+    return this.http.get<FinishedProjectDetail[]>(`${this.baseUrl}/finished-detail`);
   }
 
-  resume(projectId: number, supervisorId: number, testerIds: number[]): Observable<string> {
-    return this.http.post(
-      `${this.base}/resume/${projectId}`,
-      { superviseurId: supervisorId, testerIds },
-      { responseType: 'text' }
-    );
-  }
-  archive(projectId: number): Observable<string> {
-    return this.http.post<string>(`${this.base}/archive/${projectId}`, null);
+  // Relancer un projet
+  restartTestPhase(projectId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${projectId}/restart`, null);
   }
 
-  deleteProject(projectId: number): Observable<void> {
-    return this.http.delete<void>(`${this.projectsBase}/${projectId}`);
-  }
-
-  getTesters(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/testers`);
-  }
 }

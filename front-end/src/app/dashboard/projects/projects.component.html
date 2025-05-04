@@ -35,26 +35,6 @@
         </div>
       </mat-card-content>
       <mat-card-actions>
-                <button
-            *ngIf="userRole===1 && project.status===1"
-            mat-icon-button
-            color="warn"
-            (click)="setPrivate(project)"
-            matTooltip="Rendre privé"
-          >
-            <mat-icon>lock</mat-icon>
-          </button>
-
-          <!-- Et s’il est déjà privé (status=0), on peut le repasser en public -->
-          <button
-            *ngIf="userRole===1 && project.status===0"
-            mat-icon-button
-            color="primary"
-            (click)="setPublic(project)"
-            matTooltip="Rendre public"
-          >
-            <mat-icon>public</mat-icon>
-          </button>
         <button mat-icon-button color="primary" (click)="viewDetails(project)">
           <mat-icon>code</mat-icon>
         </button>
@@ -64,11 +44,7 @@
         <button mat-icon-button color="primary" (click)="openSettings(project)">
           <mat-icon>settings</mat-icon>
         </button>
-        <!--<button mat-icon-button color="warn" (click)="deleteProject(project)">
-          <mat-icon>delete</mat-icon>
-        </button>-->
-        <!-- ... dans mat-card-actions ... -->
-        
+             
         <button mat-icon-button color="warn" (click)="viewStatus(project)" matTooltip="Voir le statut">
           <mat-icon>info</mat-icon>
         </button>

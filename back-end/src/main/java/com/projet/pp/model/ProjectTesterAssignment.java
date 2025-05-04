@@ -1,6 +1,7 @@
 package com.projet.pp.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,17 +21,21 @@ public class ProjectTesterAssignment {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name="project_id", nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
     @JsonBackReference
     private Project project;
 
-    @ManyToOne @JoinColumn(name="testeur_id", nullable=false)
-    private User testeur;
 
     @ManyToOne
-    @JoinColumn(name="superviseur_id", nullable=false)
+    @JoinColumn(name="testeur_id", nullable=false)
+    private User testeur;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "superviseur_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User superviseur;
+
 
     @Column(name="date_designation", nullable=false)
     private LocalDate dateDesignation = LocalDate.now();
