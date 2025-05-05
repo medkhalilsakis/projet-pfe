@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  padding: 24px;
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+/* Titre */
+h1[mat-dialog-title] {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+
+/* Dialog content */
+mat-dialog-content {
+  overflow-y: auto;
+  max-height: 60vh;
+  padding-bottom: 8px;
+}
+
+/* Flex Layout ensures le champ mat-form-field prend la largeur */
+mat-form-field {
+  margin: 0;
+}
+
+/* Section Étapes */
+h3 {
+  margin-top: 24px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 4px;
+}
+
+/* Conteneur du tableau */
+.steps-table-wrapper {
+  position: relative;
+}
+
+/* Tableau d’étapes */
+table.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+th.mat-header-cell {
+  background: #fafafa;
+  font-weight: 600;
+}
+td.mat-cell {
+  border-bottom: none;
+  padding: 4px 8px;
+}
+.step-field {
+  width: 100%;
+  margin: 0;
+}
+
+/* Bouton Ajouter Étape */
+.add-step-btn {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Actions du dialog */
+mat-dialog-actions {
+  margin-top: 16px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  h1[mat-dialog-title] {
+    font-size: 1.4rem;
+  }
+  h3 {
+    font-size: 1.2rem;
+  }
+}

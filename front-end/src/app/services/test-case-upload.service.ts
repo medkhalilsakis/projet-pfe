@@ -25,6 +25,27 @@ export class TestCaseUploadService {
   }
 
   list(projectId: number): Observable<UploadedTestCase[]> {
-    return this.http.get<UploadedTestCase[]>(`${this.base}/${projectId}/test-cases/uploads`);
+    return this.http.get<UploadedTestCase[]>(
+      `${this.base}/${projectId}/test-cases/uploads`
+    );
+  }
+
+  /** URL de téléchargement */
+  downloadUrl(projectId: number, uploadId: number): string {
+    return `${this.base}/${projectId}/test-cases/uploads/${uploadId}/download`;
+  }
+
+  /** Suppression du upload */
+  delete(projectId: number, uploadId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/${projectId}/test-cases/uploads/${uploadId}`
+    );
+  }
+
+  downloadAllZip(projectId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.base}/${projectId}/test-cases/uploads/zip`,
+      { responseType: 'blob' }
+    );
   }
 }

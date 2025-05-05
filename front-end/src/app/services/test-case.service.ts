@@ -1,6 +1,6 @@
 // src/app/testing/services/test-case.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface TestCase {
@@ -31,13 +31,37 @@ export class TestCaseService {
     return this.http.get<TestCase[]>(`${this.base}/${projectId}/test-cases`);
   }
 
+  // test-case.service.ts
   create(projectId: number, tc: TestCase): Observable<TestCase> {
-    return this.http.post<TestCase>(`${this.base}/${projectId}/test-cases`, tc);
+    return this.http.post<TestCase>(
+      `${this.base}/${projectId}/test-cases`,
+      tc,
+      {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json'
+        })
+      }
+    );
   }
 
-  update(projectId: number, tc: TestCase): Observable<TestCase> {
-    return this.http.put<TestCase>(`${this.base}/${projectId}/test-cases/${tc.id}`, tc);
+  exists(projectId: number, caseNumber: string): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${this.base}/${projectId}/test-cases/exists`,
+      { params: { caseNumber } }
+    );
   }
+
+
+update(projectId: number, tc: TestCase): Observable<TestCase> {
+  return this.http.put<TestCase>(
+    `${this.base}/${projectId}/test-cases/${tc.id}`,
+    tc,
+    {
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
+}
+
 
   delete(projectId: number, tcId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${projectId}/test-cases/${tcId}`);

@@ -4,12 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Meeting {
+createdAt: string|number|Date;
   id?: number;
   subject: string;
   date: string;
-  participants: string[];
+  participants: string[] | null;
   description?: string;
-  attachments?: string[];
+  attachments?: File[] | FileList | null;  // accepte FileList aussi
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,7 +20,36 @@ export class MeetingService {
   constructor(private http: HttpClient) {}
 
   schedule(projectId: number, m: Meeting): Observable<Meeting> {
-    return this.http.post<Meeting>(`${this.base}/${projectId}/meetings`, m);
+    const url = `${this.base}/${projectId}/meetings`;
+    const form = new FormData();
+
+    // 1) Emballer le JSON dans un blob
+    const blob = new Blob([ JSON.stringify({
+      subject:      m.subject,
+      date:         m.date,
+      participants: m.participants,
+      description:  m.description
+    })], { type: 'application/json' });
+    form.append('data', blob);
+
+    // 2) Normaliser attachments en tableau de File
+    const filesArray: File[] = [];
+    if (m.attachments) {
+      if (m.attachments instanceof FileList) {
+        for (let i = 0; i < m.attachments.length; i++) {
+          const f = m.attachments.item(i);
+          if (f) filesArray.push(f);
+        }
+      } else {
+        filesArray.push(...m.attachments);
+      }
+    }
+
+    // 3) Ajouter chaque fichier au FormData
+    filesArray.forEach(file => form.append('attachments', file, file.name));
+
+    // 4) Envoyer le multipart/form-data
+    return this.http.post<Meeting>(url, form);
   }
 
   list(projectId: number): Observable<Meeting[]> {

@@ -1,0 +1,14 @@
+/* src/app/testing/components/bug-detail-dialog/bug-detail-dialog.component.css */
+mat-dialog-content {
+    max-height: 60vh;
+    overflow: auto;
+  }
+  
+  .pre-wrap {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+  }
+  

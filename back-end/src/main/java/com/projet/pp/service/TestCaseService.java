@@ -18,11 +18,27 @@ public class TestCaseService {
     private ProjectRepository projectRepo;
 
     public TestCase create(Long projectId, TestCase tc) {
+        // 1) Vérifier que le numéro n’est pas déjà pris
+        if (repo.existsByProjectIdAndCaseNumber(projectId, tc.getCaseNumber())) {
+            throw new IllegalArgumentException(
+                    "Le numéro de cas de test « "
+                            + tc.getCaseNumber()
+                            + " » existe déjà pour ce projet."
+            );
+        }
+
+        // 2) Attacher le projet et sauvegarder
         Project prj = projectRepo.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-        tc.setProject(prj);       // ← on fixe la relation avant save()
+        tc.setProject(prj);
+
         return repo.save(tc);
     }
+
+    public boolean existsByProjectAndCaseNumber(Long projectId, String caseNumber) {
+        return repo.existsByProjectIdAndCaseNumber(projectId, caseNumber);
+    }
+
 
     public List<TestCase> findByProject(Long projectId) {
         return repo.findByProjectId(projectId);

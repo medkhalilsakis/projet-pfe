@@ -5,11 +5,14 @@ import { Observable } from 'rxjs';
 
 export interface BugReport {
   id?: number;
-  level: 'critical'|'major'|'minor';
+  level: 'critical' | 'major' | 'minor';
   description: string;
   suggestions?: string;
-  attachments?: FileList;
+  attachments?: string[];    // ← URLs/noms renvoyés par le serveur
+  createdAt: string;         // ISO string
+  projectId: number;         // ajout pour reconstruire les URLs de téléchargement
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class BugReportService {
@@ -17,9 +20,27 @@ export class BugReportService {
 
   constructor(private http: HttpClient) {}
 
-  report(projectId: number, br: BugReport): Observable<BugReport> {
-    return this.http.post<BugReport>(`${this.base}/${projectId}/bugs`, br);
+  report(
+    projectId: number,
+    br: BugReport & { attachmentsInput?: FileList }
+  ): Observable<BugReport> {
+    const url = `${this.base}/${projectId}/bugs`;
+    const form = new FormData();
+  
+    form.append('level', br.level);
+    form.append('description', br.description);
+    if (br.suggestions) form.append('suggestions', br.suggestions);
+  
+    if (br.attachmentsInput) {
+      Array.from(br.attachmentsInput).forEach(file =>
+        form.append('attachments', file, file.name)
+      );
+    }
+  
+    return this.http.post<BugReport>(url, form);
   }
+  
+  
 
   list(projectId: number): Observable<BugReport[]> {
     return this.http.get<BugReport[]>(`${this.base}/${projectId}/bugs`);

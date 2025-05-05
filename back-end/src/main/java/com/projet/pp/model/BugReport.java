@@ -2,7 +2,9 @@ package com.projet.pp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,4 +19,8 @@ public class BugReport {
     @Column(columnDefinition="TEXT") private String description, suggestions;
     @ElementCollection private List<String> attachments;
     @ManyToOne @JoinColumn(name="project_id") private Project project;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }

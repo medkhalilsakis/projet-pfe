@@ -1,5 +1,6 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,8 @@ public class TestCase {
     @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private Project project;
 
+
     @OneToMany(mappedBy="testCase", cascade=CascadeType.ALL, orphanRemoval=true)
+    @JsonIgnore  // on n’a pas besoin de remonter à TestCase à partir des steps
     private List<TestCaseStep> steps = new ArrayList<>();
 }

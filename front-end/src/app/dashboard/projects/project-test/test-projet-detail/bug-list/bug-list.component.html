@@ -1,8 +1,0 @@
-<mat-list>
-    <mat-list-item *ngFor="let b of bugs">
-      <mat-icon matListIcon color="warn">bug_report</mat-icon>
-      <h4 matLine>{{ b.level | titlecase }} – {{ b.description }}</h4>
-      <p matLine *ngIf="b.suggestions"><strong>Suggestions:</strong> {{ b.suggestions }}</p>
-    </mat-list-item>
-  </mat-list>
-  

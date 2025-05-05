@@ -1,11 +1,16 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormArray, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormArray, Validators, ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOptionModule } from '@angular/material/core';
+import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
 import { Meeting } from '../../../../../services/meeting.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { User, UserService } from '../../../../../services/users.service';
+import { SessionStorageService } from '../../../../../services/session-storage.service';
 
 @Component({
   selector: 'app-meeting-dialog',
@@ -14,37 +19,72 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatFormFieldModule,
     MatOptionModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    FlexLayoutModule
   ]
 })
 export class MeetingDialogComponent {
   form;
-  allUsers: { id: number; name: string }[] = [];
+  searchControl = new FormControl('');
+  allUsers: User[] = [];
+  filteredUsers: User[] = [];
+  currentUserId!: number;
 
   constructor(
     private fb: FormBuilder,
+    private userService: UserService,
+    private session: SessionStorageService,
     public dialogRef: MatDialogRef<MeetingDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { allUsers: any[] }
+    @Inject(MAT_DIALOG_DATA) public data: { /* vous pouvez passer quoi que ce soit ici */ }
   ) {
-    this.allUsers = data.allUsers;
-
     this.form = this.fb.group({
-      subject: ['', Validators.required],
-      date: ['', Validators.required],
-      participants: [<string[]>[], Validators.required],
-      description: [''],
-      attachments: [null]
+      subject:       ['', Validators.required],
+      date:          ['', Validators.required],
+      participants:  [<string[]>[], Validators.required],
+      description:   [''],
+      attachments:   [null]
+    });
+    
+  }
+
+  ngOnInit(): void {
+    // Récupérer l'ID du testeur connecté
+    const me = this.session.getUser();
+    this.currentUserId = me?.id!;
+
+    // Charger tous les utilisateurs (côté serveur)
+    this.userService.getAllUsers().subscribe(users => {
+      // Exclure l'utilisateur courant
+      this.allUsers = users.filter(u => u.id !== this.currentUserId);
+      // Initialiser la liste filtrée
+      this.filteredUsers = [...this.allUsers];
+    });
+
+    // Réagir à la recherche
+    this.searchControl.valueChanges.subscribe(term => {
+      const filter = term?.toLowerCase() || '';
+      this.filteredUsers = this.allUsers.filter(u =>
+        `${u.nom} ${u.prenom}`.toLowerCase().includes(filter)
+      );
     });
   }
 
   save() {
-    if (this.form.valid) {
-      const m = this.form.value as Meeting;
-      this.dialogRef.close(m);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
     }
+    const raw = this.form.value as Meeting;
+    // s'assurer d'avoir un tableau même vide
+    raw.participants = raw.participants || [];
+    this.dialogRef.close(raw);
   }
+  
 
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;

@@ -54,7 +54,9 @@ export class ProjectTestComponent implements OnInit {
 
   /** Ouvre le détail de la désignation (fichier de test ou détail) */
   openAssignment(a: ProjectTesterAssignment) {
+    if (!a.project) return;
     this.session.saveCurrentProject(a.project.id);
-    this.router.navigate(['/projects', a.project.id, 'test']);
+    this.router.navigate(['/dashboard/projects-test', a.project.id]);
   }
+  
 }

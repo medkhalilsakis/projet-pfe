@@ -1,43 +1,160 @@
-<div class="actions-bar">
-  <button mat-raised-button color="primary" (click)="openTestCaseDialog()">+ Créer un cas</button>
-  <button mat-icon-button (click)="uploadTestCases()"><mat-icon>file_upload</mat-icon></button>
-  <button mat-raised-button color="warn" (click)="openBugDialog()">Signaler un bug</button>
-  <button mat-raised-button (click)="openMeetingDialog()">Demander réunion</button>
+<div class="container">
+
+  <!-- 1. Barre horizontale d’actions -->
+  <div class="top-bar">
+    <button mat-stroked-button color="primary" (click)="openTestCaseDialog()">
+      <mat-icon>add_circle</mat-icon> Créer un cas
+    </button>
+    <button mat-stroked-button color="accent" (click)="openBugDialog()">
+      <mat-icon>bug_report</mat-icon> Signaler un bug
+    </button>
+    <button mat-stroked-button color="warn" (click)="openMeetingDialog()">
+      <mat-icon>event</mat-icon> Demander réunion
+    </button>
+  </div>
+
+  <div class="main-content">
+
+    <!-- 2. Colonne gauche -->
+    <section class="left-col">
+
+      <!-- 2.1 Cas de test + Upload -->
+      <div class="card tests-block">
+
+        <div class="card-header">
+          <h2>Mes cas de test</h2>
+          <button mat-icon-button color="primary" class="upload-btn"
+                  (click)="uploadTestCases()">
+            <mat-icon class="shiny">cloud_upload</mat-icon>
+          </button>
+        </div>
+
+        <!-- Table custom ou component existant -->
+        <app-test-case-table
+          [data]="testCases"
+          (edit)="editTestCase($event)"
+          (delete)="deleteTestCase($event)"
+          (view)="viewTestCase($event)">
+        </app-test-case-table>
+      </div>
+
+      <!-- 2.2 Cas uploadés -->
+      <div class="card uploads-block">
+        <h3>Cas uploadés</h3>
+        <mat-list>
+          <mat-list-item *ngFor="let up of uploads">
+            <mat-icon matListIcon>insert_drive_file</mat-icon>
+            <div matLine class="filename">{{ up.originalFilename }}</div>
+            <div matLine class="date">
+              {{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}
+            </div>
+            <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
+              <mat-icon>download</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+      </div>
+
+      <!-- 2.3 Réunions planifiées & Bugs -->
+      <div class="row-two">
+
+        <div class="card meetings-block">
+          <h3>Réunions planifiées</h3>
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let m of meetings">
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ m.subject }}</mat-panel-title>
+                <mat-panel-description>
+                  {{ m.date | date:'yyyy-MM-dd HH:mm' }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <p><strong>Créée le :</strong> {{ m.createdAt | date:'short' }}</p>
+              <p><strong>Participants :</strong> {{ m.participants?.join(', ') ?? 'Aucun' }}</p>
+              <p>{{ m.description }}</p>
+              <div class="panel-actions">
+                <button mat-icon-button color="primary" (click)="editMeeting(m)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteMeeting(m)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+
+        <div class="card bugs-block">
+          <h3>Bugs signalés</h3>
+          <mat-list>
+            <mat-list-item *ngFor="let b of bugs">
+              <!-- titre cliquable qui ouvre le popup -->
+              <button mat-button class="bug-link" (click)="viewBug(b)">
+                Bug #{{ b.id }}
+              </button>
+              <span class="bug-level">{{ b.level | titlecase }}</span>
+            </mat-list-item>
+          </mat-list>
+        </div>
+        
+        
+
+      </div>
+    </section>
+
+    <!-- 3. Colonne droite -->
+    <aside class="right-col">
+
+      <mat-card class="block">
+        <mat-card-header>
+          <mat-card-title>Types de test</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="types-grid">
+            <mat-checkbox *ngFor="let t of testTypes"
+              [checked]="selectedTypes.has(t)"
+              (change)="selectedTypes.has(t)
+                ? selectedTypes.delete(t)
+                : selectedTypes.add(t)">
+              {{ t }}
+            </mat-checkbox>
+          </div>
+          <button mat-raised-button color="primary" (click)="saveTypes()">
+            Valider
+          </button>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="block levels-card">
+        <mat-card-header>
+          <mat-card-title>Niveaux de test</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="levels-list">
+            <div class="level-node" *ngFor="let lvl of testLevels">
+              <button mat-icon-button (click)="toggleLevel(lvl)">
+                <mat-icon>
+                  {{ levelStatus[lvl] ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+              </button>
+              <span (click)="toggleLevel(lvl)">{{ lvl }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </aside>
+  </div>
+
+  <!-- 4. Barre finale de décision -->
+  <div class="decision-bar">
+    <button mat-flat-button color="primary" (click)="approvePhase()">
+      <mat-icon>thumb_up</mat-icon> Approuver
+    </button>
+    <button mat-flat-button color="warn" (click)="rejectPhase()">
+      <mat-icon>thumb_down</mat-icon> Refuser
+    </button>
+  </div>
 </div>
-
-<app-test-case-table
-  [data]="testCases"
-  (edit)="editTestCase($event)"
-  (delete)="deleteTestCase($event)"
-  (view)="viewTestCase($event)">
-</app-test-case-table>
-
-<mat-divider></mat-divider>
-
-<h3>Cas uploadés</h3>
-<mat-list>
-  <mat-list-item *ngFor="let up of uploads">
-    <mat-icon matListIcon>insert_drive_file</mat-icon>
-    <h4 matLine>{{ up.originalFilename }}</h4>
-    <p matLine>Uploadé le {{ up.uploadedAt | date:'short' }}</p>
-  </mat-list-item>
-</mat-list>
-
-<mat-divider></mat-divider>
-
-<h3>Réunions planifiées</h3>
-<mat-accordion>
-  <mat-expansion-panel *ngFor="let m of meetings">
-    <mat-expansion-panel-header>
-      <mat-panel-title>{{ m.subject }}</mat-panel-title>
-      <mat-panel-description>{{ m.date | date:'short' }}</mat-panel-description>
-    </mat-expansion-panel-header>
-    <p><strong>Participants:</strong> {{ m.participants.join(', ') }}</p>
-    <p>{{ m.description }}</p>
-  </mat-expansion-panel>
-</mat-accordion>
-
-<mat-divider></mat-divider>
-
-<h3>Bugs signalés</h3>
-<app-bug-list [bugs]="bugs"></app-bug-list>

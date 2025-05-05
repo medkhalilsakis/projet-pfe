@@ -1,0 +1,82 @@
+/* meeting-dialog.component.css */
+
+/* Conteneur global */
+:host {
+    display: block;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+  }
+  
+  /* Titre du dialog */
+  h1[mat-dialog-title] {
+    margin: 0 0 16px;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+  
+  /* Zone de contenu */
+  [mat-dialog-content] {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  [mat-dialog-content] .mat-form-field {
+    width: 100%;
+  }
+  
+  [mat-dialog-content] .mat-form-field + .mat-form-field {
+    margin-top: 16px;
+  }
+  
+  /* Input file stylisé */
+  [mat-dialog-content] .file-input-wrapper {
+    margin-top: 16px;
+  }
+  
+  [mat-dialog-content] .file-input-wrapper input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f1f1f1;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  [mat-dialog-content] .file-input-wrapper input[type="file"]:hover {
+    background: #e0e0e0;
+  }
+  
+  /* Actions (boutons) */
+  [mat-dialog-actions] {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fafafa;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+  }
+  
+  [mat-dialog-actions] button {
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  
+  [mat-dialog-actions] button + button {
+    margin-left: 16px;
+  }
+  
+  /* Override des couleurs Material */
+  .mat-button.mat-primary,
+  .mat-raised-button.mat-primary {
+    background: #3f51b5;
+    color: white;
+  }
+  
+  .mat-button.mat-primary:hover,
+  .mat-raised-button.mat-primary:hover {
+    background: #3645a0; /* environ 10% plus foncé */
+  }
+  

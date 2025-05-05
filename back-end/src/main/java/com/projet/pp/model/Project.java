@@ -1,5 +1,6 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -55,10 +57,8 @@ public class Project {
     @Column(name = "status")
     private Integer status;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy="project", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
     private List<ProjectTesterAssignment> assignments = new ArrayList<>();
-
 
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -78,4 +78,5 @@ public class Project {
     public Project(Long id) {
         this.id = id;
     }
+
 }

@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -68,6 +71,25 @@ public class TestCaseUploadService {
         utc.setFilePath(target.toString());
         utc.setMimeType(file.getContentType());
         return repo.save(utc);
+    }
+
+    public Resource loadAsResource(Long projectId, Long uploadId) throws MalformedURLException {
+        UploadedTestCase utc = repo.findById(uploadId)
+                .orElseThrow(() -> new RuntimeException("Upload introuvable"));
+        Path filePath = Paths.get(utc.getFilePath());
+        return new UrlResource(filePath.toUri());
+    }
+
+    @Transactional
+    public void delete(Long projectId, Long uploadId) {
+        UploadedTestCase utc = repo.findById(uploadId)
+                .orElseThrow(() -> new RuntimeException("Upload introuvable"));
+        // Optionnel : vérifier projet
+        // supprimer fichier disque
+        try { Files.deleteIfExists(Paths.get(utc.getFilePath())); }
+        catch (IOException e) { /* log */ }
+        // supprimer bdd
+        repo.delete(utc);
     }
 
     public List<UploadedTestCase> listByProject(Long projectId) {

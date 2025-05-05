@@ -1,12 +1,27 @@
-import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormArray, Validators, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TestCase } from '../../../../../services/test-case.service';
+import { Component, Inject, ViewChild } from '@angular/core';
+import {
+  FormBuilder, FormArray, Validators, FormGroup,
+  ValidatorFn, AbstractControl, ValidationErrors,
+  AsyncValidatorFn
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
+} from '@angular/material/dialog';
+import { MatTable } from '@angular/material/table';
+import { TestCase, TestCaseService } from '../../../../../services/test-case.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-test-case-dialog',
@@ -17,79 +32,119 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatTableModule,
     MatDialogModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatNativeDateModule,
+    FlexLayoutModule
   ],
   templateUrl: './test-case-dialog.component.html'
 })
 export class TestCaseDialogComponent {
+  @ViewChild(MatTable) table!: MatTable<any>;
+
   form: FormGroup;
+  displayedColumns = ['stepDesc','action','expected','success','comment','remove'];
 
   constructor(
     private fb: FormBuilder,
+    private tcService: TestCaseService,
     public dialogRef: MatDialogRef<TestCaseDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: TestCase | null
+    @Inject(MAT_DIALOG_DATA) public data: {
+      projectId: number,
+      testCase: TestCase | null
+    }
   ) {
-    // 1) Initialiser le formGroup **avant** patchValue
+    const tc = data.testCase;
     this.form = this.fb.group({
-      caseNumber:    ['', Validators.required],
-      title:         ['', Validators.required],
-      subsystem:     [''],
-      description:   [''],
-      executionDate: ['', Validators.required],
-      preconditions: [''],
-      postconditions:[''],
-      steps:         this.fb.array([])
+      caseNumber: [
+        tc?.caseNumber || '',
+        {
+          validators: [
+            Validators.required,
+            Validators.pattern(/^[1-9]\d*$/)
+          ],
+          asyncValidators: [ this.caseNumberUniqueValidator() ],
+          updateOn: 'blur'
+        }
+      ],
+      title:         [tc?.title || '', Validators.required],
+      subsystem:     [tc?.subsystem || ''],
+      description:   [tc?.description || ''],
+      executionDate: [
+        tc?.executionDate || '',
+        [ Validators.required, this.maxTodayValidator() ]
+      ],
+      preconditions: [tc?.preconditions || ''],
+      postconditions:[tc?.postconditions || ''],
+      steps: this.fb.array([], [ Validators.required, Validators.minLength(1) ])
     });
 
-    // 2) Si on édite un cas existant, patcher les valeurs
-    if (data) {
-      this.form.patchValue({
-        caseNumber: data.caseNumber,
-        title:      data.title,
-        subsystem:  data.subsystem,
-        description:data.description,
-        executionDate: data.executionDate,
-        preconditions: data.preconditions,
-        postconditions:data.postconditions
-        // NB: pour les steps, vous pouvez patcher manuellement ou reconstruire le FormArray
-      });
-      // Optionnel : reconstruire les steps si data.steps présent
-      if (data.steps?.length) {
-        data.steps.forEach(s => {
-          this.steps.push(this.fb.group({
-            stepDesc: [s.stepDesc, Validators.required],
-            action:   [s.action,   Validators.required],
-            expected: [s.expected, Validators.required],
-            success:  [s.success],
-            comment:  [s.comment]
-          }));
-        });
-      }
+    // Reconstruire les étapes existantes
+    if (tc?.steps?.length) {
+      tc.steps.forEach(step => this.addStep(step));
     }
   }
 
-  get steps() {
+  get steps(): FormArray {
     return this.form.get('steps') as FormArray;
   }
 
-  addStep() {
-    this.steps.push(this.fb.group({
-      stepDesc: ['', Validators.required],
-      action:   ['', Validators.required],
-      expected: ['', Validators.required],
-      success:  [false],
-      comment:  ['']
-    }));
+  addStep(initial?: any) {
+    const fg = this.fb.group({
+      stepDesc: [initial?.stepDesc || '', Validators.required],
+      action:   [initial?.action   || '', Validators.required],
+      expected: [initial?.expected || '', Validators.required],
+      success:  [initial?.success  || false],
+      comment:  [initial?.comment  || '']
+    });
+    this.steps.push(fg);
+    Promise.resolve().then(() => this.table.renderRows());
+  }
+
+  removeStep(i: number) {
+    this.steps.removeAt(i);
+    Promise.resolve().then(() => this.table.renderRows());
   }
 
   save() {
+    this.form.markAllAsTouched();
     if (this.form.valid) {
-      const tc = this.form.value as TestCase;
-      if (this.data?.id) {
-        tc.id = this.data.id;
+      const tc: TestCase = this.form.value;
+      if (this.data.testCase?.id) {
+        tc.id = this.data.testCase.id;
       }
       this.dialogRef.close(tc);
     }
+  }
+
+  maxTodayValidator(): ValidatorFn {
+    return (ctrl: AbstractControl): ValidationErrors | null => {
+      if (!ctrl.value) return null;
+      const val = new Date(ctrl.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return val > today ? { maxToday: true } : null;
+    };
+  }
+
+  caseNumberUniqueValidator(): AsyncValidatorFn {
+    return (ctrl: AbstractControl) => {
+      const num = ctrl.value;
+      if (!num) return of(null);
+      // Si on est en édition et que le numéro n'a pas changé
+      if (this.data.testCase?.caseNumber === num) {
+        return of(null);
+      }
+      return this.tcService.exists(
+        this.data.projectId,
+        num
+      ).pipe(
+        map(exists => exists ? { caseNumberTaken: true } : null)
+      );
+    };
   }
 }

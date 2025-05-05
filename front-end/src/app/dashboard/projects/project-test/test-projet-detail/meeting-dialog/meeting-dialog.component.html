@@ -1,23 +1,52 @@
 <h1 mat-dialog-title>Planifier réunion</h1>
-<div mat-dialog-content [formGroup]="form">
-  <mat-form-field><mat-label>Objet</mat-label>
-    <input matInput formControlName="subject"/></mat-form-field>
-  <mat-form-field><mat-label>Date & heure</mat-label>
-    <input matInput [matDatepicker]="picker2" formControlName="date"/>
-    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-    <mat-datepicker #picker2 type="datetime"></mat-datepicker>
+
+<div mat-dialog-content [formGroup]="form" fxLayout="column" fxLayoutGap="20px">
+  <!-- Objet -->
+  <mat-form-field appearance="fill">
+    <mat-label>Objet</mat-label>
+    <input matInput formControlName="subject" />
   </mat-form-field>
-  <mat-form-field>
+
+  <!-- Date & Heure -->
+  <mat-form-field appearance="fill">
+    <mat-label>Date & heure</mat-label>
+    <input
+      matInput
+      type="datetime-local"
+      formControlName="date"
+      placeholder="AAAA-MM-JJ hh:mm"
+    />
+  </mat-form-field>
+
+  <!-- Recherche participants -->
+  <mat-form-field appearance="fill">
+    <mat-label>Rechercher participant</mat-label>
+    <input matInput [formControl]="searchControl" placeholder="Tapez un nom..." />
+  </mat-form-field>
+
+  <!-- Sélection multiple -->
+  <mat-form-field appearance="fill">
     <mat-label>Participants</mat-label>
     <mat-select formControlName="participants" multiple>
-      <mat-option *ngFor="let u of allUsers" [value]="u.name">{{ u.name }}</mat-option>
+      <mat-option *ngFor="let u of filteredUsers" [value]="u.nom + ' ' + u.prenom">
+        {{ u.nom }} {{ u.prenom }}
+      </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-form-field><mat-label>Description</mat-label>
-    <textarea matInput formControlName="description"></textarea></mat-form-field>
-  <input type="file" (change)="onFileChange($event)" multiple />
+
+  <!-- Description -->
+  <mat-form-field appearance="fill">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description"></textarea>
+  </mat-form-field>
+
+  <!-- Fichiers joints -->
+  <div fxLayout="row" fxLayoutAlign="start stretch">
+    <input type="file" (change)="onFileChange($event)" multiple />
+  </div>
 </div>
-<div mat-dialog-actions>
+
+<div mat-dialog-actions fxLayout="row" fxLayoutAlign="end center">
   <button mat-button (click)="dialogRef.close()">Annuler</button>
-  <button mat-button color="primary" (click)="save()">Planifier</button>
+  <button mat-flat-button color="primary" (click)="save()">Planifier</button>
 </div>

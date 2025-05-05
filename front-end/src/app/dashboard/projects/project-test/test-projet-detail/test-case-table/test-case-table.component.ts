@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-test-case-table',
@@ -14,7 +15,8 @@ import { MatTableModule } from '@angular/material/table';
     FormsModule,
     ReactiveFormsModule,
     MatTableModule,
-    MatIconModule
+    MatIconModule,
+    MatNativeDateModule
   ]
 })
 export class TestCaseTableComponent {

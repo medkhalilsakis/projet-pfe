@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface TestCaseRepository extends JpaRepository<TestCase,Long> {
     List<TestCase> findByProjectId(Long projectId);
+    boolean existsByProjectIdAndCaseNumber(Long projectId, String caseNumber);
 }

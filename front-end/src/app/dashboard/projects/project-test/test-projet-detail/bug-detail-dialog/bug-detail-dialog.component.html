@@ -1,0 +1,29 @@
+<!-- src/app/testing/components/bug-detail-dialog/bug-detail-dialog.component.html -->
+<h2 mat-dialog-title>Bug #{{ data.bug.id }} Détails</h2>
+
+<mat-dialog-content>
+  <p><strong>Créé le :</strong>
+    {{ data.bug.createdAt | date:'yyyy-MM-dd HH:mm' }}
+  </p>
+  <p><strong>Niveau :</strong> {{ data.bug.level | titlecase }}</p>
+  <p><strong>Description :</strong></p>
+  <pre class="pre-wrap">{{ data.bug.description }}</pre>
+
+  <ng-container *ngIf="data.bug.suggestions">
+    <p><strong>Suggestions :</strong></p>
+    <pre class="pre-wrap">{{ data.bug.suggestions }}</pre>
+  </ng-container>
+
+  <ng-container *ngIf="data.bug.attachments?.length">
+    <p><strong>Pièces jointes :</strong></p>
+    <mat-list>
+      <mat-list-item *ngFor="let file of data.bug.attachments">
+        <a [href]="getAttachmentUrl(file)" target="_blank">{{ file }}</a>
+      </mat-list-item>
+    </mat-list>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Fermer</button>
+</mat-dialog-actions>

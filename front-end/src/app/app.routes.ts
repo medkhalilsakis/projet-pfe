@@ -17,6 +17,7 @@ import { NotificationsComponent } from './dashboard/notifications/notifications.
 import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/project-explorer.component';
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
+import { TestProjetDetailComponent } from './dashboard/projects/project-test/test-projet-detail/test-projet-detail.component';
 
 export const routes: Routes = [
   { 
@@ -37,6 +38,7 @@ export const routes: Routes = [
       { path: 'projects',       component: ProjectsComponent },
       { path: 'my-projects',       component: MyProjectsComponent },
       { path: 'projects-test',       component: ProjectTestComponent },
+      { path: 'projects-test/:id',       component: TestProjetDetailComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
     ]
