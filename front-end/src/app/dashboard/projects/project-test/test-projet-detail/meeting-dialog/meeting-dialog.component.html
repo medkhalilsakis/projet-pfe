@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>Planifier réunion</h1>
+<div mat-dialog-content [formGroup]="form">
+  <mat-form-field><mat-label>Objet</mat-label>
+    <input matInput formControlName="subject"/></mat-form-field>
+  <mat-form-field><mat-label>Date & heure</mat-label>
+    <input matInput [matDatepicker]="picker2" formControlName="date"/>
+    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+    <mat-datepicker #picker2 type="datetime"></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Participants</mat-label>
+    <mat-select formControlName="participants" multiple>
+      <mat-option *ngFor="let u of allUsers" [value]="u.name">{{ u.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field><mat-label>Description</mat-label>
+    <textarea matInput formControlName="description"></textarea></mat-form-field>
+  <input type="file" (change)="onFileChange($event)" multiple />
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Annuler</button>
+  <button mat-button color="primary" (click)="save()">Planifier</button>
+</div>

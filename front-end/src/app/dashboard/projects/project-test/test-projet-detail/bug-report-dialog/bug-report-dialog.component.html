@@ -1,0 +1,28 @@
+<!-- bug-report-dialog.component.html -->
+<h1 mat-dialog-title>Signaler un bug</h1>
+<div mat-dialog-content [formGroup]="form">
+  <mat-form-field>
+    <mat-label>Niveau</mat-label>
+    <mat-select formControlName="level">
+      <mat-option value="critical">Critique</mat-option>
+      <mat-option value="major">Majeur</mat-option>
+      <mat-option value="minor">Mineur</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description"></textarea>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Suggestions</mat-label>
+    <textarea matInput formControlName="suggestions"></textarea>
+  </mat-form-field>
+
+  <input type="file" (change)="onFileChange($event)" multiple />
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Annuler</button>
+  <button mat-button color="warn" (click)="save()">Envoyer</button>
+</div>

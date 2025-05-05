@@ -16,6 +16,7 @@ import { TaskDetailComponent } from './dashboard/task-assignment/task-detail/tas
 import { NotificationsComponent } from './dashboard/notifications/notifications.component';
 import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/project-explorer.component';
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
+import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
 
 export const routes: Routes = [
   { 
@@ -35,6 +36,7 @@ export const routes: Routes = [
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
       { path: 'my-projects',       component: MyProjectsComponent },
+      { path: 'projects-test',       component: ProjectTestComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
     ]

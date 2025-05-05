@@ -186,8 +186,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     else if (role === 2) {
       this.menuItems = [
         ...baseMenu,
-        { label: 'Projets à tester', icon: 'assignment',      action: () => this.navigateTo('projects?type=to-test') },
-        { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects?type=in-progress') },
+        { label: 'Projets à tester', icon: 'assignment',      action: () => this.navigateTo('projects-test') },
+        { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects-in-progress') },
         { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects?type=completed') }
       ];
     }

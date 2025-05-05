@@ -22,9 +22,10 @@ public class ProjectTesterAssignment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    @JsonBackReference
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "assignments", "files", "invitedUsers" })
     private Project project;
+
 
 
     @ManyToOne

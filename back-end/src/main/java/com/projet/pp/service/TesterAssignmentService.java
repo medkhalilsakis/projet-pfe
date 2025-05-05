@@ -119,6 +119,7 @@ public class TesterAssignmentService {
         return filteredProjects;
     }
 
-
-
+    public List<ProjectTesterAssignment> getAssignmentsByTesteur(Long testeurId) {
+        return assignmentRepo.findByTesteurId(testeurId);
+    }
 }

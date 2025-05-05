@@ -1,0 +1,34 @@
+<div class="project-test-container">
+    <h2>Mes Projets à Tester</h2>
+  
+    <!-- Loading -->
+    <div *ngIf="loading" class="status">Chargement…</div>
+    <div *ngIf="!loading && errorMessage" class="status error">{{ errorMessage }}</div>
+    <div *ngIf="!loading && assignments.length === 0" class="status empty">
+      Aucun projet assigné pour le moment.
+    </div>
+  
+    <div *ngIf="!loading && assignments.length > 0" class="cards">
+      <div
+        class="card"
+        *ngFor="let a of assignments"
+        (click)="openAssignment(a)"
+      >
+        <div class="card-header">
+            <h3>{{ a.project.name }}</h3>
+            <span class="status-badge">{{ a.statutTest | titlecase }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Désigné le :</strong> {{ a.dateDesignation }}</p>
+          <p><strong>Numéro :</strong> {{ a.numeroTesteur }}</p>
+          <p><strong>Superviseur :</strong>
+            {{ a.superviseur.nom }} {{ a.superviseur.prenom }}
+          </p>
+        </div>
+        <div *ngIf="a.casTestPath" class="card-footer">
+          <a [href]="a.casTestPath" target="_blank">Télécharger cas de test</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -8,7 +8,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data                        // génère getters, setters, toString, equals/hashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

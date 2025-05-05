@@ -104,7 +104,8 @@
               <mat-icon>{{ getStatusIcon(proj.status) }}</mat-icon>
               <span>
                 {{ proj.status === 55 ? 'Mis en pause le' : 'Clôturé le' }} 
-                {{ getActionDate(proj) | date:'short' }}  <!-- Afficher la bonne date avec la méthode -->
+                <p>{{ getActionDateText(proj) }}</p>
+
               </span>
               <div>Superviseur : {{ proj.supervisorName }}</div>
               <div>Testeurs : {{ proj.testerNames.join(', ') }}</div>

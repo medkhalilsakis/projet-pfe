@@ -1,0 +1,43 @@
+<div class="actions-bar">
+  <button mat-raised-button color="primary" (click)="openTestCaseDialog()">+ Créer un cas</button>
+  <button mat-icon-button (click)="uploadTestCases()"><mat-icon>file_upload</mat-icon></button>
+  <button mat-raised-button color="warn" (click)="openBugDialog()">Signaler un bug</button>
+  <button mat-raised-button (click)="openMeetingDialog()">Demander réunion</button>
+</div>
+
+<app-test-case-table
+  [data]="testCases"
+  (edit)="editTestCase($event)"
+  (delete)="deleteTestCase($event)"
+  (view)="viewTestCase($event)">
+</app-test-case-table>
+
+<mat-divider></mat-divider>
+
+<h3>Cas uploadés</h3>
+<mat-list>
+  <mat-list-item *ngFor="let up of uploads">
+    <mat-icon matListIcon>insert_drive_file</mat-icon>
+    <h4 matLine>{{ up.originalFilename }}</h4>
+    <p matLine>Uploadé le {{ up.uploadedAt | date:'short' }}</p>
+  </mat-list-item>
+</mat-list>
+
+<mat-divider></mat-divider>
+
+<h3>Réunions planifiées</h3>
+<mat-accordion>
+  <mat-expansion-panel *ngFor="let m of meetings">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ m.subject }}</mat-panel-title>
+      <mat-panel-description>{{ m.date | date:'short' }}</mat-panel-description>
+    </mat-expansion-panel-header>
+    <p><strong>Participants:</strong> {{ m.participants.join(', ') }}</p>
+    <p>{{ m.description }}</p>
+  </mat-expansion-panel>
+</mat-accordion>
+
+<mat-divider></mat-divider>
+
+<h3>Bugs signalés</h3>
+<app-bug-list [bugs]="bugs"></app-bug-list>

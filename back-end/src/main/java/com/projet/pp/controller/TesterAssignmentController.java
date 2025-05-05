@@ -96,4 +96,11 @@ public class TesterAssignmentController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/my/{testeurId}")
+    public ResponseEntity<List<ProjectTesterAssignment>> getMyAssignments(
+            @PathVariable Long testeurId) {
+        List<ProjectTesterAssignment> assigns = service.getAssignmentsByTesteur(testeurId);
+        return ResponseEntity.ok(assigns);
+    }
+
 }

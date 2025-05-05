@@ -74,4 +74,8 @@ public class Project {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<User> invitedUsers = new ArrayList<>();
 
+
+    public Project(Long id) {
+        this.id = id;
+    }
 }

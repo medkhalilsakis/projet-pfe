@@ -32,7 +32,8 @@ export interface FinishedProjectDetail {
   projectId: number;
   name: string;
   status: number;               // 55 = pause, 99 = clôture
-  actionDate: string;           // ISO string
+  pausedAt: string;           // ISO string
+  closureAt: string;           // ISO string
   supervisorName: string;
   testerNames: string[];
 }
@@ -122,12 +123,23 @@ export class AssignmentService {
 
   
   getFinishedDetails(): Observable<FinishedProjectDetail[]> {
-    return this.http.get<FinishedProjectDetail[]>(`${this.baseUrl}/finished-detail`);
+    // ajoute le 's' manquant :
+    return this.http.get<FinishedProjectDetail[]>(
+      `${this.baseUrl}/finished-details`
+    );
   }
 
   // Relancer un projet
   restartTestPhase(projectId: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${projectId}/restart`, null);
   }
+
+  /** Récupère toutes les assignations (avec le projet) pour un testeur */
+getMyAssignments(testeurId: number): Observable<ProjectTesterAssignment[]> {
+  return this.http.get<ProjectTesterAssignment[]>(
+    `${this.baseUrl}/my/${testeurId}`
+  );
+}
+
 
 }
