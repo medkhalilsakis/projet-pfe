@@ -1,26 +1,10 @@
 // src/app/services/user.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { PresenceService, PresenceUpdate } from './presence.service';
-
-export interface User {
-  id?: number;
-  nom: string;
-  prenom: string;
-  username: string;
-  email: string;
-  password?: string;
-  dateEmbauche: string;
-  salaire: number;
-  role_id: number;
-  ncin: string;
-  genre: string;
-
-  online?: boolean;
-  lastSeen?: Date;
-}
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -97,4 +81,11 @@ export class UserService {
   getUsersByRole(roleId: number): Observable<User[]> {
     return this.http.get<User[]>(`${this.base}/role/${roleId}`);
   }
+
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${this.base}/${id}`);
+  }
+
 }
+
+

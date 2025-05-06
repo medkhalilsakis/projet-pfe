@@ -66,6 +66,10 @@ export class ProjectService {
     return this.http.get<any[]>(`${this.baseUrl}/user/${userId}`);
   }
 
+  getProjectById(projectId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${projectId}`);
+  }
+
   /**
    * Liste fichiers/dossiers d’un projet.
    * @param projectId  ID du projet
@@ -208,7 +212,19 @@ export class ProjectService {
       { responseType: 'text' as 'json' }
     );
   }
+
+
+  downloadProjectContent(projectId: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${projectId}/files/export`, { responseType: 'blob' });
+  }
+
+    
+  getInvitedUsers(projectId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/${projectId}/invite`);
+  }
 }
+
+
 
 
 // src/app/models/file-node.ts

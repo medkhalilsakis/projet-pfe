@@ -2,8 +2,8 @@ import { Component, OnInit }               from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef }                    from '@angular/material/dialog';
 import { map, catchError, of, throwError } from 'rxjs';
-import { UserService, User }               from '../../../services/users.service';
-import { RoleService, Role }               from '../../../services/role.service';
+import { UserService }               from '../../../services/users.service';
+import { RoleService }               from '../../../services/role.service';
 import { CommonModule }                    from '@angular/common';
 
 // Angular Material modules
@@ -12,6 +12,8 @@ import { MatInputModule }      from '@angular/material/input';
 import { MatSelectModule }     from '@angular/material/select';
 import { MatButtonModule }     from '@angular/material/button';
 import { MatTooltipModule }    from '@angular/material/tooltip';
+import { Role } from '../../../models/role.model';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-add-user-dialog',
@@ -102,7 +104,7 @@ export class AddUserDialogComponent implements OnInit {
       password:     fv.password!,
       dateEmbauche: dateString,
       salaire:      fv.salaire!,
-      role_id:      fv.role_id!,
+      role:      fv.role_id!,
       ncin:         fv.ncin!,
       genre:        fv.genre!
     };

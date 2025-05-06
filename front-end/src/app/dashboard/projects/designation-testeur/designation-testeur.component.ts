@@ -11,9 +11,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
-import { User, UserService } from '../../../services/users.service';
+import { UserService } from '../../../services/users.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { User } from '../../../models/user.model';
 
 interface Project {
   id: number;
@@ -76,13 +77,13 @@ export class DesignationTesteurComponent implements OnInit {
   }
 
   loadAll() {
-    this.svc.getPending().subscribe(p => this.pending = p);
-    this.svc.getInTest().subscribe(p => {
-      this.inTest = p;
+    //this.svc.getPending().subscribe(p => this.pending = p);
+    //this.svc.getInTest().subscribe(p => {
+    //  this.inTest = p;
       // pour chaque projet, charger ses assignations
-      p.forEach(proj => this.loadAssignments(proj.id));
-    });
-    this.svc.getFinished().subscribe(p => this.finished = p);
+    //  p.forEach(proj => this.loadAssignments(proj.id));
+    //});
+    //this.svc.getFinished().subscribe(p => this.finished = p);
   }
 
   refreshAll() {
@@ -204,11 +205,11 @@ isTesteurAssigned(projectId: number, testeurId?: number): boolean {
 
   // Relancer un projet
   pause(projectId: number) {
-    this.svc.changePhase(projectId, 'pause').subscribe(() => this.refreshAll());
+    this.svc.changePhase(projectId, 'en_pause').subscribe(() => this.refreshAll());
   }
   
   close(projectId: number) {
-    this.svc.changePhase(projectId, 'close').subscribe(() => this.refreshAll());
+    this.svc.changePhase(projectId, 'cloture').subscribe(() => this.refreshAll());
   }
   
   restart(projectId: number) {

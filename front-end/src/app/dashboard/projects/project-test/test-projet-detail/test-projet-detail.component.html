@@ -1,19 +1,74 @@
 <div class="container">
 
+  <div class="pause-banner" *ngIf="isPaused">
+    <mat-icon>warning</mat-icon>
+    La phase de test a été suspendue par le superviseur. Toutes les fonctionnalités sont désactivées.
+  </div>
+
   <!-- 1. Barre horizontale d’actions -->
   <div class="top-bar">
-    <button mat-stroked-button color="primary" (click)="openTestCaseDialog()">
+    <button mat-stroked-button color="primary" (click)="openTestCaseDialog()" [disabled]="isPaused">
       <mat-icon>add_circle</mat-icon> Créer un cas
     </button>
-    <button mat-stroked-button color="accent" (click)="openBugDialog()">
+    <button mat-stroked-button color="accent" (click)="openBugDialog()" [disabled]="isPaused">
       <mat-icon>bug_report</mat-icon> Signaler un bug
     </button>
-    <button mat-stroked-button color="warn" (click)="openMeetingDialog()">
+    <button mat-stroked-button color="warn" (click)="openMeetingDialog()" [disabled]="isPaused">
       <mat-icon>event</mat-icon> Demander réunion
+    </button>
+    <button mat-stroked-button color="primary" (click)="openPauseRequest()" [disabled]="isPaused">
+      <mat-icon>pause_circle_filled</mat-icon>
+      Demander de suspendre la phase de test
+    </button>
+    <button mat-stroked-button color="primary" *ngIf="canLaunchTest" (click)="launchTest()" [disabled]="isPaused">
+      <mat-icon>play_circle_filled</mat-icon> Lancer le test
     </button>
   </div>
 
   <div class="main-content">
+
+    <section class="project-details">
+      <h2>{{ project.name }}</h2>
+      <div class="info">
+        <p><strong>Utilisateur qui a téléchargé :</strong> {{ project.user.nom }} {{ project.user.prenom }}</p>
+        <p><strong>Date d'upload :</strong> {{ project.createdAt | date:'yyyy-MM-dd HH:mm' }}</p>
+    
+        <div *ngIf="project.invitedUsers?.length">
+          <p><strong>Utilisateurs invités (acceptés) :</strong></p>
+          <ul>
+            <li *ngFor="let user of project.invitedUsers">
+              {{ user?.nom }} {{ user?.prenom }}
+            </li>
+          </ul>
+        </div>
+        
+    
+        <div *ngIf="assignedTesters?.length">
+          <p><strong>Testeurs assignés :</strong></p>
+          <ul>
+            <li *ngFor="let tester of assignedTesters">{{ tester.nom }} {{ tester.prenom }}</li>
+          </ul>
+        </div>
+    
+        <div *ngIf="project.description">
+          <p><strong>Description du projet :</strong></p>
+          <p>{{ project.description | slice:0:150 }}...</p>
+        </div>
+    
+        <div *ngIf="project.task">
+          <p><strong>Tâche liée :</strong> {{ project.task }}</p>
+        </div>
+    
+        <p><strong>Type du projet :</strong> {{ project.type }}</p>
+      </div>
+    
+      <!-- Actions sur le projet -->
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="exploreProject()">Explorer le contenu</button>
+        <button mat-raised-button color="accent" (click)="exportProject()">Exporter en ZIP</button>
+      </div>
+    </section>
+    
 
     <!-- 2. Colonne gauche -->
     <section class="left-col">
@@ -42,21 +97,25 @@
       <div class="card uploads-block">
         <h3>Cas uploadés</h3>
         <mat-list>
-          <mat-list-item *ngFor="let up of uploads">
+          <mat-list-item *ngFor="let up of uploads" class="upload-item">
             <mat-icon matListIcon>insert_drive_file</mat-icon>
-            <div matLine class="filename">{{ up.originalFilename }}</div>
-            <div matLine class="date">
-              {{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}
+      
+            <div class="upload-details">
+              <div class="filename">{{ up.originalFilename }}</div>
+              <div class="date">{{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}</div>
+      
+              <!-- Boutons pour télécharger et supprimer -->
+              <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
-            <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
-              <mat-icon>download</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
-              <mat-icon>delete</mat-icon>
-            </button>
           </mat-list-item>
         </mat-list>
       </div>
+      
 
       <!-- 2.3 Réunions planifiées & Bugs -->
       <div class="row-two">
@@ -85,6 +144,7 @@
             </mat-expansion-panel>
           </mat-accordion>
         </div>
+  
 
         <div class="card bugs-block">
           <h3>Bugs signalés</h3>
@@ -98,10 +158,37 @@
             </mat-list-item>
           </mat-list>
         </div>
-        
-        
-
       </div>
+      <div class="row-one">
+        <div class="card pause-requests-block">
+          <h3>Demandes de suspension</h3>
+          <mat-list *ngIf="pauseRequests?.length; else none">
+            <mat-list-item *ngFor="let pr of pauseRequests">
+              <mat-icon matListIcon>pause_circle</mat-icon>
+      
+              <!-- Contenu principal de la demande -->
+              <div class="pause-request-content">
+                <div matLine>
+                  <span class="requester-name">Demande #{{ pr.id }} - {{ pr.requesterName }}</span>
+                </div>
+                <div matLine class="small">
+                  <span class="date">{{ pr.requestedAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                  — <em class="status">{{ pr.status | titlecase }}</em>
+                </div>
+              </div>
+      
+              <!-- Actions de chaque demande (détails) -->
+              <div matLine class="actions">
+                <button mat-button (click)="viewDetails(pr)">Voir les détails</button>
+              </div>
+            </mat-list-item>
+          </mat-list>
+          <ng-template #none>
+            <p class="none">Aucune demande de suspension.</p>
+          </ng-template>
+        </div>
+      </div>
+      
     </section>
 
     <!-- 3. Colonne droite -->
@@ -150,11 +237,16 @@
 
   <!-- 4. Barre finale de décision -->
   <div class="decision-bar">
-    <button mat-flat-button color="primary" (click)="approvePhase()">
+    <button mat-flat-button color="primary" (click)="approvePhase()" [disabled]="isPaused || !canSubmitDecision">
       <mat-icon>thumb_up</mat-icon> Approuver
     </button>
-    <button mat-flat-button color="warn" (click)="rejectPhase()">
+    <button mat-flat-button color="warn" (click)="rejectPhase()" [disabled]="isPaused || !canSubmitDecision">
       <mat-icon>thumb_down</mat-icon> Refuser
     </button>
+    <div class="file-upload">
+      <input type="file" (change)="onFileChange($event)" [disabled]="isPaused || !canSubmitDecision" />
+      <span *ngIf="rapportTestPath">Rapport téléchargé : {{ rapportTestPath }}</span>
+    </div>
   </div>
+  
 </div>

@@ -2,23 +2,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Project } from '../models/project.model';
+import { User } from '../models/user.model';
 
-/**
- * Interface représentant un projet minimal pour la désignation.
- * Vous pouvez l’enrichir avec d’autres champs (name, description, etc.).
- */
-export interface ProjectLight {
-  id: number;
-  name: string;
-  status: number;
-}
 
 /**
  * Interface pour un enregistrement d’assignation (ProjectTesterAssignment).
  */
 export interface ProjectTesterAssignment {
   id: number;
-  project: ProjectLight;
+  project: Project;
   testeur: { id: number; nom: string; prenom: string };
   superviseur: { id: number; nom: string; prenom: string };
   dateDesignation: string;    // ex: "2025-05-04"
@@ -49,18 +42,18 @@ export class AssignmentService {
   constructor(private http: HttpClient) { }
 
   /** Récupère les projets en attente de désignation (status = 1) */
-  getPending(): Observable<ProjectLight[]> {
-    return this.http.get<ProjectLight[]>(`${this.baseUrl}/pending`);
+  getPending(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/pending`);
   }
 
   /** Récupère les projets en cours de test (status = 2) */
-  getInTest(): Observable<ProjectLight[]> {
-    return this.http.get<ProjectLight[]>(`${this.baseUrl}/in-test`);
+  getInTest(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/in-test`);
   }
 
   /** Récupère les projets mis en pause (55) ou clôturés (99) */
-  getFinished(): Observable<ProjectLight[]> {
-    return this.http.get<ProjectLight[]>(`${this.baseUrl}/finished`);
+  getFinished(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/finished`);
   }
 
   /**
@@ -93,14 +86,10 @@ export class AssignmentService {
     );
   }
 
-  /**
-   * Met en pause ou clôture la phase de test.
-   * @param projectId ID du projet
-   * @param action    'pause' ou 'close'
-   */
+
   changePhase(
     projectId: number,
-    action: 'pause'|'close'
+    action: 'en_cours' | 'en_pause' | 'cloture' | 'termine'
   ): Observable<void> {
     const params = new HttpParams().set('action', action);
     return this.http.post<void>(
@@ -109,6 +98,14 @@ export class AssignmentService {
       { params }
     );
   }
+
+  uploadReport(assignmentId: number, formData: FormData): Observable<string> {
+    return this.http.post<string>(
+      `${this.baseUrl}/${assignmentId}/upload-report`, 
+      formData
+    );
+  }
+  
 
   /**
    * Relance la phase de test (remet status en 2)
@@ -139,6 +136,11 @@ getMyAssignments(testeurId: number): Observable<ProjectTesterAssignment[]> {
   return this.http.get<ProjectTesterAssignment[]>(
     `${this.baseUrl}/my/${testeurId}`
   );
+}
+
+getTesteursExcept(projectId: number, excludeTesterId: number): Observable<User[]> {
+  const params = new HttpParams().set('excludeTesterId', excludeTesterId.toString());
+  return this.http.get<User[]>(`${this.baseUrl}/${projectId}/testeurs`, { params });
 }
 
 

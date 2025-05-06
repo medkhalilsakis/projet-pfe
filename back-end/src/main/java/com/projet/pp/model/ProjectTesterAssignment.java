@@ -49,6 +49,14 @@ public class ProjectTesterAssignment {
     @Column(name="statut_test", nullable=false)
     private TestStatus statutTest = TestStatus.non_commence;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="decision", nullable=true)
+    private TestApproval decision;
+
+    @Column(name="rapport_test_path", nullable=true)
+    private String rapportTestPath;
+
     public void setUpdatedAt(LocalDateTime now) {
     }
 

@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Demande de suspension</h2>
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="fill" class="w-full">
+    <mat-label>Motif</mat-label>
+    <textarea matInput formControlName="reason" rows="4" placeholder="Expliquez pourquoi vous demandez une suspension..."></textarea>
+    <mat-error *ngIf="form.get('reason')?.hasError('required')">Le motif est requis</mat-error>
+    <mat-error *ngIf="form.get('reason')?.hasError('minlength')">Au moins 5 caractères requis</mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Envoyer</button>
+</mat-dialog-actions>

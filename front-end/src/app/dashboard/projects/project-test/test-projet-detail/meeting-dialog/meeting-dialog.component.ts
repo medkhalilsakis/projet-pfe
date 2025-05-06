@@ -9,8 +9,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { User, UserService } from '../../../../../services/users.service';
+import { UserService } from '../../../../../services/users.service';
 import { SessionStorageService } from '../../../../../services/session-storage.service';
+import { User } from '../../../../../models/user.model';
 
 @Component({
   selector: 'app-meeting-dialog',

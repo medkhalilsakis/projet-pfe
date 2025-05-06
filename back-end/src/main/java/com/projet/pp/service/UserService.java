@@ -156,4 +156,10 @@ public class UserService {
     public List<User> getUsersByRoleId(Long roleId) {
         return userRepository.findByRoleId(roleId);
     }
+
+
+    public List<User> getUsersByIds(List<Long> ids) {
+        return userRepository.findAllById(ids);  // Récupère les utilisateurs par leurs IDs
+    }
+
 }

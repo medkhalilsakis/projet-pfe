@@ -1,12 +1,12 @@
 package com.projet.pp.controller;
 
 import com.projet.pp.dto.FinishedProjectDTO;
-import com.projet.pp.model.Project;
-import com.projet.pp.model.ProjectTesterAssignment;
-import com.projet.pp.model.TestStatus;
+import com.projet.pp.model.*;
 import com.projet.pp.service.ProjectService;
 import com.projet.pp.service.TesterAssignmentService;
+import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +24,9 @@ public class TesterAssignmentController {
     private ProjectService Pservice;
     @Autowired
     private TesterAssignmentService service;
+
+    @Autowired
+    private UserService userService;
 
     /** Liste des projets en attente (status=1) */
     @GetMapping("/pending")
@@ -65,14 +68,29 @@ public class TesterAssignmentController {
             @PathVariable Long projectId,
             @RequestParam("action") String action
     ) {
-        TestStatus phase = switch (action) {
-            case "pause"   -> TestStatus.en_pause;
-            case "close"   -> TestStatus.cloture;
-            default        -> throw new IllegalArgumentException("Action invalide");
-        };
+        TestStatus phase;
+        switch (action) {
+            case "en_pause":
+                phase = TestStatus.en_pause;
+                break;
+            case "cloture":
+                phase = TestStatus.cloture;
+                break;
+            case "en_cours":
+                phase = TestStatus.en_cours;
+                break;
+            case "termine":
+                phase = TestStatus.termine;
+                break;
+            default:
+                throw new IllegalArgumentException("Action invalide");
+        }
+
+        // Changer l'état du projet selon la phase
         service.changeProjectTestPhase(projectId, phase);
         return ResponseEntity.ok().build();
     }
+
 
     /** Relancer la phase de test */
     @PostMapping("/{projectId}/restart")
@@ -103,5 +121,50 @@ public class TesterAssignmentController {
         return ResponseEntity.ok(assigns);
     }
 
+
+    @PutMapping("/{assignmentId}/decision")
+    public ResponseEntity<Void> updateTesterDecision(
+            @PathVariable Long assignmentId,
+            @RequestParam("decision") TestApproval decision,
+            @RequestParam("rapportTestPath") String rapportTestPath) {
+
+        service.updateTesterDecision(assignmentId, decision, rapportTestPath);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/approve-phase/{projectId}")
+    public ResponseEntity<Void> approvePhase(@PathVariable Long projectId) {
+        try {
+            service.approvePhase(projectId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
+
+    @PostMapping("/{assignmentId}/upload-report")
+    public ResponseEntity<String> uploadTestReport(
+            @PathVariable Long assignmentId,
+            @RequestParam("report") MultipartFile file) {
+
+        // Appeler le service pour uploader le fichier et récupérer le chemin
+        String filePath = service.uploadReport(assignmentId, file);
+
+        // Retourner le chemin du fichier
+        return ResponseEntity.ok(filePath);
+    }
+
+
+    @GetMapping("/{projectId}/testeurs")
+    public ResponseEntity<List<User>> getTesteursExcept(
+            @PathVariable Long projectId,
+            @RequestParam(value = "excludeTesterId", required = false) Long excludeTesterId
+    ) {
+        // Appeler le service pour récupérer la liste des testeurs excluant celui spécifié
+        List<User> testeurs = service.getTesteursExcept(projectId, excludeTesterId);
+        return ResponseEntity.ok(testeurs);
+    }
 
 }

@@ -534,8 +534,6 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-
-
     public List<FinishedProjectDTO> getFinishedDetails() {
         // Recherche des projets mis en pause et clôturés
         List<Project> list55 = projectRepository.findByStatus(55);  // projets en pause
