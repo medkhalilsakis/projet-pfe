@@ -40,6 +40,15 @@ public class TacheService {
 
         return tacheRepository.save(tache);
     }
+    public User getAssignedBy(Long tacheId) {
+        return tacheRepository.findById(tacheId)
+                .map(Tache::getAssignedBy)
+                .orElse(null);
+    }
+    public Optional<Tache> getTacheByProjectId(Long id) {
+        return tacheRepository.findByProject_Id(id);
+    }
+
 
     public Optional<Tache> getTacheById(Long id) {
         return tacheRepository.findById(id);

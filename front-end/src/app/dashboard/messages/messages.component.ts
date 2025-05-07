@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewChecked, OnInit, OnDestroy, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -37,6 +37,10 @@ import { Subscription } from 'rxjs'; // ✅ default import
 })
 export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  @Input() chatMessage: any;
+  notiSender: any = null;
+
+  
   users: any[] = [];
   messages: { text: string; sentBy: string; date: Date }[] = [];
   selectedUser: any = null;
@@ -50,6 +54,12 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnInit(): void {
+    this.connectWebSocket();
+    console.log(this.chatMessage)
+    if (this.chatMessage && this.chatMessage.sender) {
+      this.notiSender = this.chatMessage.sender;
+      this.selectUser(this.notiSender)
+    }
     this.connectWebSocket();
   }
 

@@ -1,7 +1,9 @@
 package com.projet.pp.controller;
+import com.projet.pp.model.Notification;
 import com.projet.pp.model.Tache;
 import com.projet.pp.model.User;
 import com.projet.pp.model.TestStatus;
+import com.projet.pp.service.NotificationService;
 import com.projet.pp.service.TacheService;
 import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,10 @@ public class TacheController {
     private TacheService tacheService;
     @Autowired
     private UserService userService;
+
     private final Path baseStorage = Paths.get("uploads/taches/").toAbsolutePath().normalize();
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public List<Tache> getAllTaches() {
@@ -138,8 +143,25 @@ public class TacheController {
             createdTache.setProjectDetailsPdf(projectDetailsPath);
             createdTache.setTestCasesPdf(testCasesPath);
             tacheService.createTache(createdTache);  // Update the DB
+            Optional<Tache> optionalTache = tacheService.getTacheById(tacheId);
 
+            Tache t = optionalTache.orElse(null); // or throw exception if needed
+
+            Notification noti = new Notification(
+                    null,
+                    assignedTo,
+                    Notification.RoleType.dev,
+                    "nouvelle tache",
+                    assignedBy.getNom()+"vous a assigné une nouvelle tache à faire nommée "+name,
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    t
+                    ,null
+            );
+            notificationService.createNoti(noti);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdTache);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating task: " + e.getMessage());
@@ -190,6 +212,19 @@ public class TacheController {
             Tache tache = optionalTache.get();
             tache.setStatus(newStatus);
             tacheService.createTache(tache); // or use `updateTache()` if you have one
+            Notification noti = new Notification(
+                    null,
+                    tache.getAssignedBy(),
+                    Notification.RoleType.admin,
+                    "Le statut d'une tâche est changé",
+                    "la nouvelle statut de la tâche "+ tache.getName()+"est "+ statusStr ,
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    tache
+                    ,null
+            );
+            notificationService.createNoti(noti);
             return ResponseEntity.ok(tache);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid status value");

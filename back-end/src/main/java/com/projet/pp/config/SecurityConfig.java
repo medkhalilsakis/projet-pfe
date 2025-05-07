@@ -59,8 +59,13 @@ public class SecurityConfig {
                                 "/api/projects/stats/tester/**",
                                 "/api/assignments/stats/**",
                                 "/api/users/testerstats**",
-                                "/api/users/testerstats/**"
-                                ).permitAll()
+                                "/api/users/testerstats/**",
+                                //"/api/notifications/user/**",
+                                "/api/notifications/**"
+                                //"/api/notifications/user**",
+                                //"/api/notifications/user/**"
+
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

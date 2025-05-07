@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface ProjectTesterAssignmentRepository extends JpaRepository<ProjectTesterAssignment, Long> {
     List<ProjectTesterAssignment> findByProjectId(Long projectId);
+    ProjectTesterAssignment findAssignmentByProjectId(Long projectId);
+
     long countByTesteurIdAndStatutTest(Long testeurId, TestStatus statutTest);
     void deleteByProjectId(Long projectId);
     Optional<ProjectTesterAssignment> findByProjectIdAndTesteurId(Long projectId, Long testeurId);

@@ -6,9 +6,9 @@
       
       <div class="toolbar-actions">
         <!-- Notifications -->
-        <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
-          <mat-icon [matBadge]="notifications().length" matBadgeColor="warn">notifications</mat-icon>
-        </button>
+          <button mat-icon-button [matMenuTriggerFor]="notificationsMenu">
+            <mat-icon [matBadge]="unreadCount()" matBadgeColor="warn">notifications</mat-icon>
+               </button>
         
         <!-- Profile -->
         <button mat-icon-button [matMenuTriggerFor]="profileMenu">
@@ -60,6 +60,7 @@
       <!-- Contenu principal -->
       <mat-sidenav-content class="content-area">
         <ng-container [ngSwitch]="currentView()">
+          <app-notification-popup (notiSelected)="viewNotiDetails($event)"></app-notification-popup>
           <app-overview *ngSwitchCase="'overview'"></app-overview>
           <app-analytics *ngSwitchCase="'analytics'"></app-analytics>
 
@@ -67,7 +68,10 @@
           <app-task-detail  *ngSwitchCase="'task-detail'" [task]="selectedTask()" [roleId]="currentUser?.roleId" (Selected)="goToUpload($event)"  (back)="navigateTo('tâches')"></app-task-detail>
 
           <app-projects *ngSwitchCase="'projects'"></app-projects>
-          <app-messages *ngSwitchCase="'messages'"></app-messages>
+          <app-messages [chatMessage]="selectedMessage()" *ngSwitchCase="'messages'"></app-messages>
+          <app-notification *ngSwitchCase="'notifications'"(notiSelected)="viewNotiDetails($event)"></app-notification>
+          <app-notifcation-detail  *ngSwitchCase="'notifcation-detail'" [notification]="selectedNoti()" (taskSelected)="viewTaskDetails($event)" (discussionSelected)="viewMessageDetails($event)"  (back)="navigateTo('notifications')"></app-notifcation-detail>
+
           <app-settings *ngSwitchCase="'settings'"></app-settings>
           <app-upload *ngSwitchCase="'upload'" [task]="selectedTask()" (uploadCompleted)="navigateTo('projects')"></app-upload>
           <app-add-user *ngSwitchCase="'add-user'"></app-add-user>
@@ -81,17 +85,19 @@
 
   <!-- Menu des notifications -->
   <mat-menu #notificationsMenu="matMenu">
-    <div class="notification-menu">
-      <h3 class="notification-header">Notifications ({{notifications().length}})</h3>
+    <div class="notification-menu" >
+      <h3 class="notification-header">Notifications ({{unreadCount()}})</h3>
       <div class="notification-list">
         <div *ngFor="let notification of notifications()" class="notification-item">
+          <div (click)="viewNotificationDetails(notification)" [class.read]="notification.read">
           <mat-icon>info</mat-icon>
           <div class="notification-content">
             <p class="notification-title">{{notification.title}}</p>
-            <p class="notification-time">{{notification.timestamp | date:'short'}}</p>
+            <p class="notification-time">{{notification.createdAt | date:'short'}}</p>
+          </div>
           </div>
         </div>
-        <div *ngIf="!notifications().length" class="no-notifications">
+        <div *ngIf="!notifications.length" class="no-notifications">
           Aucune nouvelle notification
         </div>
       </div>

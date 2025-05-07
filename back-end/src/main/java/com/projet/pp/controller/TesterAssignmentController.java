@@ -1,11 +1,23 @@
 package com.projet.pp.controller;
+import com.projet.pp.model.Tache;
+import com.projet.pp.model.User;
+
+import com.projet.pp.model.Notification;
 
 import com.projet.pp.model.Project;
+import com.projet.pp.service.UserService;
+
 import com.projet.pp.service.TesterAssignmentService;
+import com.projet.pp.service.ProjectService;
+import com.projet.pp.service.NotificationService;
+
+import com.projet.pp.service.TacheService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +30,14 @@ public class TesterAssignmentController {
     private TesterAssignmentService service;
     @Autowired
     private TesterAssignmentService testerAssignmentService;
-
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private NotificationService notificationservice;
+    @Autowired
+    private TacheService tacheService;
+    @Autowired
+    private UserService userService;
     // 1) Projets en attente (status = 1)
     @GetMapping("/pending-projects")
     public List<Project> pending() {
@@ -40,13 +59,32 @@ public class TesterAssignmentController {
 
     // 3) Assignation — on récupère superviseurId dans le body
     @PostMapping("/assign")
-    public ResponseEntity<?> assign(@RequestBody Map<String,Long> body) {
+    public ResponseEntity<?> assign(@RequestBody Map<String, Long> body) {
         try {
             Long projectId = body.get("projectId");
+            Project p = projectService.getProjectById(projectId);
+            Tache t = tacheService.getTacheByProjectId(projectId).orElse(null);
             Long testeurId = body.get("testeurId");
             Long superviseurId = body.get("superviseurId");
+
             service.assignTester(projectId, testeurId, superviseurId);
+            User tester = userService.getUserById(testeurId);
+            User superviseur = userService.getUserById(superviseurId);
+            Notification noti = new Notification(null,
+                    tester,
+                    Notification.RoleType.tester,
+                    "nouvelle tache",
+                    superviseur.getNom()+ "vous a assigné un nouveau projet à tester nommée"+ p.getName(),
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    t,
+                    null
+            );
+
+            notificationservice.createNoti(noti);
             return ResponseEntity.ok("Testeur assigné");
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

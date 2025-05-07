@@ -85,7 +85,11 @@ public class TesterAssignmentService {
         project.setStatus(2);
         projectRepo.save(project);
     }
-
+        public User getTesterByProjectId(Long projectId) {
+        ProjectTesterAssignment assignment =assignRepo.findAssignmentByProjectId(projectId);
+        User tester =assignment.getTesteur();
+        return tester;
+        }
 
 
     @Transactional

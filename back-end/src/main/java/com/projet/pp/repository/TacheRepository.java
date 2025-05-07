@@ -11,12 +11,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface TacheRepository extends JpaRepository<Tache, Long> {
     List<Tache> findByAssignedTo(User user);
     List<Tache> findByStatus(Tache.Status statut); // Optional: for 'to develop' or 'to test'
     long countByStatus(Tache.Status statut);
     long countByStatusAndAssignedTo(Tache.Status statut, User user);
+    Optional<Tache> findByProject_Id(Long id);
+
+
     @Query("""
       SELECT COUNT(t)
       FROM Tache t
