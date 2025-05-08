@@ -1,75 +1,71 @@
 // src/app/services/chat-stomp.service.ts
 import { Injectable } from '@angular/core';
-import { Client, IMessage } from '@stomp/stompjs';
+import { HttpClient } from '@angular/common/http';
 import SockJS from 'sockjs-client';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ChatMessage } from '../dashboard/projects/project-chat/project-chat.component';
+import { Client, over, Message } from 'stompjs';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+export interface ChatMessageDTO {
+  id: number;
+  message: string;
+  createdAt: string;
+  sender: { id: number; prenom: string; nom: string; };
+  attachments?: { id: number; fileName: string; mimeType: string; }[];
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ChatStompService {
-  private client: Client;
-  /** émet `true` dès que la connexion est prête */
-  public connected$ = new BehaviorSubject<boolean>(false);
+  private stompClient!: Client;
+  private readonly API = 'http://localhost:8080/api';
 
-  constructor() {
-    this.client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      reconnectDelay: 5000,
-      debug: str => console.debug('[STOMP]', str)
-    });
-
-    this.client.onConnect = () => this.connected$.next(true);
-    this.client.onStompError = frame => console.error('[STOMP error]', frame);
-
-    this.client.activate();
+  constructor(private http: HttpClient) {
+    const socket = new SockJS(`${this.API.replace('/api','')}/ws`);
+    this.stompClient = over(socket);
+    this.stompClient.connect(
+      { 'X-User-Id': localStorage.getItem('user_id') || '' },
+      () => console.log('[STOMP] connecté'),
+      err => console.error('[STOMP] erreur', err)
+    );
   }
 
-  /**
-   * Observe les messages “publics” (désormais tout est public)
-   * souscription propre : teardown des deux souscriptions
-   */
-  watchPublic(projectId: number): Observable<ChatMessage> {
-    return new Observable(subscriber => {
-      // 1) Souscription à l’état de connexion
-      const connSub = this.connected$.subscribe(ready => {
-        if (!ready) {
-          return;
-        }
-        // 2) Dès qu’on est connecté, on s’abonne au topic du projet
-        const stompSub = this.client.subscribe(
-          `/topic/pchats/${projectId}`,
-          (msg: IMessage) => {
-            const body: ChatMessage = JSON.parse(msg.body);
-            subscriber.next(body);
-          }
-        );
-        // On n’a plus besoin de la souscription “connected$”
-        connSub.unsubscribe();
-
-        // Quand l’observable est complété / unsubscribed, on nettoie la souscription STOMP
-        subscriber.add(() => {
-          stompSub.unsubscribe();
-        });
-      });
-
-      // Teardown : si l’abonné se désabonne avant connexion
-      return () => {
-        connSub.unsubscribe();
-      };
-    });
+  // REST : lister
+  list(projectId: number): Observable<ChatMessageDTO[]> {
+    return this.http.get<ChatMessageDTO[]>(
+      `${this.API}/projects/${projectId}/chat`
+    );
   }
 
-  /**
-   * Envoie un message “public” (tout est public)
-   */
-  sendMessage(projectId: number, payload: any) {
-    if (!this.connected$.value) {
-      console.warn('STOMP non connecté, message ignoré');
-      return;
-    }
-    this.client.publish({
-      destination: `/app/pchats/${projectId}`,
-      body: JSON.stringify(payload)
-    });
+  // REST : poster un message (avec pièces jointes)
+  postMessage(projectId: number, form: FormData): Observable<ChatMessageDTO> {
+    return this.http.post<ChatMessageDTO>(
+      `${this.API}/projects/${projectId}/chat`,
+      form
+    );
+  }
+
+  // REST : supprimer message
+  deleteMessage(projectId: number, msgId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API}/projects/${projectId}/chat/messages/${msgId}`
+    );
+  }
+
+  // REST : supprimer pièce jointe
+  deleteAttachment(projectId: number, attId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API}/projects/${projectId}/chat/attachments/${attId}`
+    );
+  }
+
+  // STOMP : souscrire
+  subscribe(dest: string, cb: (frame: Message) => void) {
+    this.stompClient.subscribe(dest, cb);
+  }
+
+  // STOMP : publier un payload JSON
+  publish(destination: string, payload: any) {
+    this.stompClient.send(destination, {}, JSON.stringify(payload));
   }
 }

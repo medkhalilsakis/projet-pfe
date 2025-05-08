@@ -1,64 +1,53 @@
+// src/main/java/com/projet/pp/ws/ProjectChatWebSocketController.java
 package com.projet.pp.controller;
 
 import com.projet.pp.dto.ProjectChatMessageDTO;
-import com.projet.pp.model.ProjectChatMessage;
 import com.projet.pp.service.ProjectChatService;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.security.Principal;
 
 @Controller
 public class ProjectChatWebSocketController {
+    @Autowired private ProjectChatService svc;
+    @Autowired private SimpMessagingTemplate broker;
 
-    private final ProjectChatService chatService;
-    private final SimpMessagingTemplate template;
-    private final DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-    public ProjectChatWebSocketController(ProjectChatService chatService,
-                                          SimpMessagingTemplate template) {
-        this.chatService = chatService;
-        this.template = template;
-    }
-
-    @MessageMapping("/pchats/{projectId}")
-    public void onMessage(
-            @DestinationVariable Long projectId,
-            @Payload Map<String, String> payload
-    ) {
-        Long senderId = Long.valueOf(payload.get("senderId"));
-        String text = payload.get("message");
-
-        // Enregistrer en base
-        ProjectChatMessage saved = chatService.sendMessage(projectId, senderId, text);
-
-        // Préparer le DTO à renvoyer
-        ProjectChatMessageDTO dto = ProjectChatMessageDTO.builder()
-                .id(saved.getId())
-                .message(saved.getMessage())
-                .createdAt(saved.getCreatedAt().format(fmt))  // Formatage de la date
-                .sender(new ProjectChatMessageDTO.SenderDTO(
-                        saved.getSender().getId(),
-                        saved.getSender().getPrenom(),
-                        saved.getSender().getNom()
-                ))
-                .attachments(chatService.getAttachments(saved.getId()).stream()
-                        .map(att -> new ProjectChatMessageDTO.AttachmentDTO(
-                                att.getId(),
-                                att.getFileName(),
-                                att.getMimeType()
-                        ))
-                        .toList())
-                .build();
-
-        // Diffuser à tous les abonnés du topic
-        template.convertAndSend(
-                "/topic/pchats/" + projectId,
-                dto
+    /**
+     * Reçoit les messages depuis le client STOMP (/app/chat.send)
+     * et rebroadcast sur /topic/chat.{projectId}
+     */
+    @MessageMapping("/chat.send")
+    public void receive(@Payload ChatPayload payload,
+                        Principal principal /*le user authentifié*/) throws Exception {
+        Long senderId = Long.valueOf(principal.getName());
+        ProjectChatMessageDTO dto = svc.postMessage(
+                payload.getProjectId(),
+                senderId,
+                payload.getMessage(),
+                payload.getFiles()
         );
+        broker.convertAndSend("/topic/chat." + payload.getProjectId(), dto);
     }
+
+    /** Payload STOMP pour l’envoi d’un message */
+    public static class ChatPayload {
+        private Long projectId;
+        private String message;
+        private MultipartFile[] files; // ou List<String> base64 si vous encodez côté client
+
+        public ChatPayload() {}
+        public Long getProjectId() { return projectId; }
+        public void setProjectId(Long projectId) { this.projectId = projectId; }
+
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+
+        public MultipartFile[] getFiles() { return files; }
+        public void setFiles(MultipartFile[] files) { this.files = files; }
+    }
+
 }

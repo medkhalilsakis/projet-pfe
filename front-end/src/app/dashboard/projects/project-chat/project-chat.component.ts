@@ -1,144 +1,147 @@
-import {
-  Component, Inject, OnInit,
-  AfterViewChecked, OnDestroy,
-  ViewChild, ElementRef
-} from '@angular/core';
-import {
-  MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
-} from '@angular/material/dialog';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Subscription, forkJoin } from 'rxjs';
+// src/app/.../project-chat.component.ts
+import { Component, Inject, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ChatStompService, ChatMessageDTO } from '../../../services/chat-stomp.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
-import { ChatStompService } from '../../../services/chat-stomp.service';
-import { ProjectChatAttachment } from '../../../models/project-chat-attachment.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-
-export interface ChatMessage {
-  id: number;
-  message: string;
-  createdAt: string;
-  sender: { id: number; prenom: string; nom: string };
-  attachments?: ProjectChatAttachment[];
-}
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-project-chat',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatIconModule, MatButtonModule, MatInputModule, MatDialogModule
+    CommonModule, FormsModule,
+    MatInputModule, MatIconModule,
+    MatDialogModule
   ],
   templateUrl: './project-chat.component.html',
   styleUrls: ['./project-chat.component.css']
 })
-export class ProjectChatComponent implements OnInit, AfterViewChecked, OnDestroy {
-  @ViewChild('scrollMe') private scrollContainer!: ElementRef;
-  publicMessages: ChatMessage[] = [];
-  newMessage = '';
-  selectedFiles: File[] = [];
-  projectId!: number;
-  userId!: number;
+export class ProjectChatComponent implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  projectId: number;
+  messages: ChatMessageDTO[] = [];
+  messageText = '';
+  attachments: File[] = [];
+  currentUserId!: number;
   readonly API = 'http://localhost:8080/api';
-  private subs = new Subscription();
 
   constructor(
-    private http: HttpClient,
+    private chatSvc: ChatStompService,
     private session: SessionStorageService,
-    private chatStomp: ChatStompService,
-    public dialogRef: MatDialogRef<ProjectChatComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { projectId: number }
+    private sanitizer: DomSanitizer,
+    private dialogRef: MatDialogRef<ProjectChatComponent>,
+    @Inject(MAT_DIALOG_DATA) data: { projectId: number}
   ) {
     this.projectId = data.projectId;
   }
 
   ngOnInit(): void {
     const u = this.session.getUser();
-    if (!u?.id) return this.dialogRef.close();
-    this.userId = u.id;
-    this.loadMessages();
-    const connSub = this.chatStomp.connected$.subscribe(ok => {
-      if (!ok) return;
-      this.subs.add(
-        this.chatStomp.watchPublic(this.projectId)
-          .subscribe(msg => {
-            this.decorateUrls([msg]);
-            this.publicMessages.push(msg);
-            this.scrollToBottom();
-          })
-      );
-      connSub.unsubscribe();
-    });
-  }
+    this.currentUserId = u?.id;
 
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    this.loadMessages();
+
+    // STOMP events pour suppression
+    this.chatSvc.subscribe(
+      `/topic/chat.${this.projectId}.delete`,
+      frame => {
+        const { messageId } = JSON.parse(frame.body);
+        this.messages = this.messages.filter(m => m.id !== messageId);
+      }
+    );
+    this.chatSvc.subscribe(
+      `/topic/chat.${this.projectId}.deleteAtt`,
+      frame => {
+        const { attachmentId } = JSON.parse(frame.body);
+        this.messages.forEach(m => {
+          if (m.attachments) {
+            m.attachments = m.attachments.filter(a => a.id !== attachmentId);
+          }
+        });
+      }
+    );
   }
-  ngOnDestroy(): void { this.subs.unsubscribe(); }
 
   private loadMessages() {
-    this.http.get<ChatMessage[]>(`${this.API}/pchats/${this.projectId}`)
+    this.chatSvc.list(this.projectId)
       .subscribe(msgs => {
-        this.decorateUrls(msgs);
-        this.publicMessages = msgs;
-        setTimeout(() => this.scrollToBottom(), 0);
+        this.messages = msgs;
+        setTimeout(() => this.scrollToBottom(), 50);
       });
   }
 
-  /** Ajoute `url` à chaque attachment */
-  private decorateUrls(msgs: ChatMessage[]) {
-    msgs.forEach(m => {
-      m.attachments?.forEach(att => {
-        att.url = `${this.API}/pchats/messages/${m.id}/attachments/${att.id}`;
-      });
-    });
+  onFileSelected(evt: Event) {
+    const files = (evt.target as HTMLInputElement).files;
+    if (!files) return;
+    Array.from(files).forEach(f => this.attachments.push(f));
   }
 
-  onFilesSelected(evt: Event) {
-    const inp = evt.target as HTMLInputElement;
-    if (!inp.files) return;
-    this.selectedFiles = Array.from(inp.files);
+  removeAttachment(i: number) {
+    this.attachments.splice(i, 1);
   }
 
   sendMessage() {
-    const txt = this.newMessage.trim();
-    if (!txt && !this.selectedFiles.length) return;
+    if (!this.messageText.trim() && !this.attachments.length) return;
 
-    this.http.post<ChatMessage>(
-      `${this.API}/pchats/${this.projectId}/messages`,
-      null,
-      { params: new HttpParams()
-            .set('senderId', this.userId.toString())
-            .set('message', txt) }
-    ).subscribe(created => {
-      if (this.selectedFiles.length) {
-        const uploads = this.selectedFiles.map(f => {
-          const fd = new FormData();
-          fd.append('file', f, f.name);
-          return this.http.post<ProjectChatAttachment>(
-            `${this.API}/pchats/messages/${created.id}/attachments`,
-            fd
-          );
-        });
-        forkJoin(uploads).subscribe(() => this.loadMessages());
-      } else {
-        this.decorateUrls([created]);
-        this.publicMessages.push(created);
-      }
-      this.newMessage = '';
-      this.selectedFiles = [];
-      this.scrollToBottom();
-    });
+    // Prépare le FormData
+    const form = new FormData();
+    form.append('projectId', String(this.projectId));
+    form.append('senderId', String(this.currentUserId));
+    form.append('message', this.messageText);
+    this.attachments.forEach(f => form.append('files', f));
+
+    // 1) POST via REST
+    this.chatSvc.postMessage(this.projectId, form)
+      .subscribe((dto: ChatMessageDTO) => {
+        // 2) notifie tous via STOMP
+        this.chatSvc.publish('/app/chat.send', dto);
+
+        // reset UI
+        this.messageText = '';
+        this.attachments = [];
+        this.fileInput.nativeElement.value = '';
+      });
   }
 
-  close() { this.dialogRef.close(); }
+  onDeleteMessage(msg: ChatMessageDTO) {
+    if (!confirm('Supprimer ce message ?')) return;
+    this.chatSvc.deleteMessage(this.projectId, msg.id)
+      .subscribe(() => {
+        // local ou stomp 
+        this.messages = this.messages.filter(m => m.id !== msg.id);
+      });
+  }
+
+  onDeleteAttachment(msg: ChatMessageDTO, att: any) {
+    if (!confirm(`Supprimer la pièce jointe « ${att.fileName} » ?`)) return;
+    this.chatSvc.deleteAttachment(this.projectId, att.id)
+      .subscribe(() => {
+        msg.attachments = msg.attachments?.filter(a => a.id !== att.id) || [];
+      });
+  }
+
+  sanitizeUrl(url: string) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
 
   private scrollToBottom() {
-    try {
-      const el = this.scrollContainer.nativeElement;
-      el.scrollTop = el.scrollHeight;
-    } catch {}
+    const c = document.querySelector('.messages');
+    if (c) c.scrollTop = c.scrollHeight;
+  }
+
+  getFileIcon(mime: string) {
+    if (mime.startsWith('image/')) return '🖼️';
+    if (mime.startsWith('video/')) return '🎬';
+    if (mime === 'application/pdf') return '📄';
+    return '📎';
   }
 }
