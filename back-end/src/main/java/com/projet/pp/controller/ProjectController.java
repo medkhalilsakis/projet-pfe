@@ -8,6 +8,8 @@ import com.projet.pp.model.ProjectFile;
 import com.projet.pp.model.ProjectInvitedUser;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -275,4 +277,30 @@ public class ProjectController {
         return ResponseEntity.ok().build();
     }
 
+
+    @GetMapping("/{projectId}/pause")
+    public ResponseEntity<Map<String,String>> getLastPause(@PathVariable Long projectId) {
+        return projectService.findLastPause(projectId)
+                .map(pause -> ResponseEntity.ok(Map.of("reason", pause.getReason())))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{projectId}/closure")
+    public ResponseEntity<Map<String,String>> getLastClosure(@PathVariable Long projectId) {
+        return projectService.findLastClosure(projectId)
+                .map(clo -> ResponseEntity.ok(Map.of("reason", clo.getReason())))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping("/{projectId}/files/export")
+    public ResponseEntity<Resource> exportProject(@PathVariable Long projectId) throws IOException {
+        Resource zip = projectService.downloadProjectContent(projectId);
+        String filename = "project-" + projectId + ".zip";
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .body(zip);
+    }
 }

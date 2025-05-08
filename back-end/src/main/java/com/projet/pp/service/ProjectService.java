@@ -8,6 +8,8 @@ import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class ProjectService {
@@ -49,6 +52,9 @@ public class ProjectService {
 
     @Autowired
     private ProjectTesterAssignmentRepository assignmentRepo;
+
+    @Autowired
+    private TacheRepository tacheRepository;
 
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
 
@@ -105,6 +111,7 @@ public class ProjectService {
             }
 
         }
+
 
         return project.getId();
     }
@@ -256,6 +263,8 @@ public class ProjectService {
         project.setUpdatedAt(LocalDateTime.now());
         project.setStatus(Integer.valueOf(status));
         projectRepository.save(project);
+
+        syncTaskStatus(project);
     }
 
     public List<Project> getProjectsByUserId(Long userId) {
@@ -467,6 +476,8 @@ public class ProjectService {
         project.setUpdatedAt(LocalDateTime.now());
 
         projectRepository.save(project);
+
+        syncTaskStatus(project);
     }
 
 
@@ -532,6 +543,7 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
         project.setStatus(-1);
         projectRepository.save(project);
+        syncTaskStatus(project);
     }
 
     public List<FinishedProjectDTO> getFinishedDetails() {
@@ -588,5 +600,85 @@ public class ProjectService {
         // Réinitialiser le statut à 2 (en test)
         projet.setStatus(2);
         projectRepository.save(projet);
+
+        syncTaskStatus(projet);
     }
+
+
+    private Tache.Status mapProjectStatusToTaskStatus(Integer projectStatus) {
+        if (projectStatus == null) {
+            return Tache.Status.a_developper;
+        }
+        return switch (projectStatus) {
+            case 2, 3  -> Tache.Status.en_cours;
+            case 4     -> Tache.Status.terminé;
+            case 55    -> Tache.Status.suspendu;
+            case 99    -> Tache.Status.cloturé;
+            default    -> Tache.Status.a_developper;
+        };
+    }
+
+
+    @Transactional
+    protected void syncTaskStatus(Project project) {
+        // Récupère la tâche (OneToOne) liée au projet
+        Optional<Tache> opt = tacheRepository.findByProject_Id(project.getId());
+        if (opt.isPresent()) {
+            Tache t = opt.get();
+            Tache.Status newStatus = mapProjectStatusToTaskStatus(project.getStatus());
+            if (t.getStatus() != newStatus) {
+                t.setStatus(newStatus);
+                tacheRepository.save(t);
+            }
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    public Optional<ProjectPause> findLastPause(Long projectId) {
+        return pauseRepo.findFirstByProjectIdOrderByPausedAtDesc(projectId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ProjectClosure> findLastClosure(Long projectId) {
+        return closeRepo.findFirstByProjectIdOrderByClosureAtDesc(projectId);
+    }
+
+    @Transactional(readOnly = true)
+    public Resource downloadProjectContent(Long projectId) throws IOException {
+        // 1) Récupère tous les ProjectFile du projet (fichiers et dossiers)
+        List<ProjectFile> allEntries = projectFileRepository.findByProjectId(projectId);
+
+        // 2) Prépare le ZIP en mémoire
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            Path projectRoot = baseStorage.resolve(projectId.toString());
+
+            for (ProjectFile pf : allEntries) {
+                // On ne considère que les fichiers
+                if (pf.getType() != ItemType.FILE) {
+                    continue;
+                }
+
+                Path filePath = Paths.get(pf.getFilePath());
+                if (!Files.isRegularFile(filePath)) {
+                    // en bonus on vérifie que c'est bien un fichier
+                    continue;
+                }
+
+                // Calcul du chemin relatif pour l'entrée ZIP
+                Path relative = projectRoot.relativize(filePath);
+                String zipEntryName = relative.toString().replace("\\", "/");
+
+                zos.putNextEntry(new ZipEntry(zipEntryName));
+                Files.copy(filePath, zos);
+                zos.closeEntry();
+            }
+        }
+
+        // 3) On renvoie le ZIP sous forme de Resource
+        return new ByteArrayResource(baos.toByteArray());
+    }
+
+
 }

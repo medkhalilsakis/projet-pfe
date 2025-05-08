@@ -42,11 +42,11 @@
   }
   
   /* Boutons de création/upload */
-  .sidenav-header button.mat-icon-button {
+  .sidenav-header .mat-icon-button {
     color: rgba(255, 255, 255, 0.85);
     transition: color .2s;
   }
-  .sidenav-header button.mat-icon-button:hover {
+  .sidenav-header .mat-icon-button:hover {
     color: #fff;
   }
   

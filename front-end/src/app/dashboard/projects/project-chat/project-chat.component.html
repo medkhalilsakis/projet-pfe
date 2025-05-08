@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>Chat du projet</h2>
+<mat-dialog-content class="chat-content" #scrollMe>
+  <div *ngFor="let msg of publicMessages"
+       class="bubble"
+       [class.mine]="msg.sender.id===userId"
+       [class.theirs]="msg.sender.id!==userId">
+
+    <div class="message-header">
+      <span class="sender">{{msg.sender.prenom}} {{msg.sender.nom}}</span>
+      <span class="timestamp">{{msg.createdAt | date:'shortTime'}}</span>
+    </div>
+
+    <div class="message-body">{{msg.message}}</div>
+
+    <div *ngIf="msg.attachments?.length" class="attachments">
+      <ng-container *ngFor="let att of msg.attachments">
+        <img *ngIf="att.mimeType.startsWith('image/')"
+             class="attachment-img"
+             [src]="att.url"
+             [alt]="att.fileName" />
+        <video *ngIf="att.mimeType.startsWith('video/')"
+               class="attachment-video"
+               controls
+               [src]="att.url">
+        </video>
+        <a *ngIf="!att.mimeType.startsWith('image/') &&
+                  !att.mimeType.startsWith('video/')"
+           class="attachment-link"
+           [href]="att.url"
+           download>
+          <mat-icon>attach_file</mat-icon>
+          {{att.fileName}}
+        </a>
+      </ng-container>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="chat-actions">
+  <textarea matInput
+            placeholder="Votre message…"
+            [(ngModel)]="newMessage"
+            (keyup.enter)="sendMessage()">
+  </textarea>
+  <input type="file" multiple (change)="onFilesSelected($event)" />
+  <button mat-icon-button color="primary" (click)="sendMessage()">
+    <mat-icon>send</mat-icon>
+  </button>
+  <button mat-button (click)="close()">Fermer</button>
+</mat-dialog-actions>

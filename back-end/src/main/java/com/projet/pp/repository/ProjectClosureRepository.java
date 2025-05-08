@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface ProjectClosureRepository extends JpaRepository<ProjectClosure, Long> {
     Optional<ProjectClosure> findFirstByProjectIdOrderByClosureAtDesc(Long projectId);
+
 }
 

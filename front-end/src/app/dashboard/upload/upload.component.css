@@ -1,143 +1,125 @@
-/* upload.component.css */
-
-/* Conteneur global : occupe toute la zone et centre verticalement/horizontalement */
+/* Conteneur principal */
 .upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
   padding: 24px;
-  box-sizing: border-box;
-  background: #f5f6fa;
-  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-/* On applique l’ombre et le max-width directement au container */
-.upload-container {
-  max-width: 800px;
-  margin: auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.upload-container:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-/* Titre */
-.upload-container h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+/* Section commune */
+.upload-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
   margin-bottom: 16px;
-  font-family: 'Bebas Neue', cursive;
-  color: #3f51b5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre légère */
 }
 
 /* Zone de dépôt */
 .drop-zone {
-  border: 2px dashed #c5cae9;
-  border-radius: 12px;
-  padding: 80px;
+  background-color: #e3f2fd; /* Fond bleu clair pour la zone de dépôt */
+  border: 2px dashed #2196f3;
+  border-radius: 8px;
+  padding: 24px;
   text-align: center;
-  color: #5c6bc0;
-  transition: background 0.3s ease, border-color 0.3s ease;
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 180px;
 }
 
-.drop-zone:hover {
-  background: rgba(63, 81, 181, 0.05);
-  border-color: #3f51b5;
+.drop-zone mat-icon {
+  color: #2196f3;
 }
 
-.drop-zone .hint {
-  font-size: 0.85rem;
-  color: #9e9e9e;
+.drop-zone p {
+  font-size: 16px;
+  color: #333;
 }
 
-/* Liste des fichiers */
+.drop-zone button {
+  margin-top: 10px;
+  background-color: #2196f3;
+  color: white;
+  border-radius: 4px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.drop-zone button:hover {
+  background-color: #1976d2;
+}
+
+.hint {
+  font-size: 14px;
+  color: #777;
+}
+
+/* Liste des fichiers sélectionnés */
 .file-list {
-  width: 100%;
-  margin-bottom: 24px;
+  background-color: #f7f7f7; /* Fond clair */
+  border-radius: 8px;
+  padding: 16px;
 }
-.file-list h3 {
-  font-size: 1.1rem;
-  margin-bottom: 12px;
-  color: #3f51b5;
-}
-.file-list .file-item {
+
+.file-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.file-list .file-size {
-  margin-left: auto;
-  font-size: 0.85rem;
-  color: #757575;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-/* Section de progression */
+.file-size {
+  font-size: 12px;
+  color: #777;
+}
+
+/* Progression de l'upload */
 .progress-section {
-  width: 100%;
-  margin-bottom: 24px;
+  background-color: #f7f7f7; /* Fond clair */
+  border-radius: 8px;
+  padding: 16px;
 }
-.queue-item {
-  width: 100%;
-  margin-bottom: 12px;
+
+.progress-item {
+  margin-bottom: 16px;
 }
+
 .file-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.file-name {
-  flex: 1;
-}
-.progress-details {
-  display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: #616161;
+  margin-bottom: 8px;
 }
 
-/* Boutons d’action */
+.progress-details {
+  font-size: 12px;
+  color: #777;
+}
+
+mat-progress-bar {
+  margin-top: 8px;
+}
+
+/* Bouton d'action */
 .action-buttons {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
+  margin-top: 24px;
+  text-align: center;
 }
-.action-buttons button {
+
+button[mat-raised-button] {
+  background-color: #007bff;
+  color: white;
   padding: 12px 24px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(63,81,181,0.2);
-  transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+  border-radius: 4px;
 }
-.action-buttons button:disabled {
-  background: #e0e0e0 !important;
-  color: #9e9e9e !important;
-  box-shadow: none;
+
+button[mat-raised-button]:disabled {
+  background-color: #ccc;
   cursor: not-allowed;
 }
-.action-buttons button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(63,81,181,0.3);
-}
 
-/* Responsive */
-@media (max-width: 600px) {
-  .upload-container {
-    padding: 12px;
-  }
-  .drop-zone {
-    padding: 24px;
-  }
-  .action-buttons {
-    justify-content: center;
-  }
+button[mat-raised-button]:not(:disabled):hover {
+  background-color: #0056b3;
 }

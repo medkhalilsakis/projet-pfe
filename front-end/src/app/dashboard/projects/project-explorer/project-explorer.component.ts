@@ -220,4 +220,26 @@ export class ProjectExplorerComponent implements OnInit {
       node.name
     );
   }
+
+
+  downloadProjectZip(): void {
+    this.projectService.downloadProjectContent(this.projectId)
+      .subscribe({
+        next: (blob: Blob) => {
+          // Avec file-saver (si installé) :
+          // saveAs(blob, `projet-${this.projectId}.zip`);
+
+          // Sans dépendance, on crée un lien temporaire :
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `projet-${this.projectId}.zip`;
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        error: err => {
+          console.error('Erreur téléchargement ZIP', err);
+        }
+      });
+  }
 }

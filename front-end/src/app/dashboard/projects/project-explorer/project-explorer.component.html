@@ -11,13 +11,17 @@
         <span class="sidenav-title">Explorateur</span>
         <span class="spacer"></span>
   
+        <button mat-icon-button class="mat-icon-button" matTooltip="Télécharger le projet (ZIP)"
+          (click)="downloadProjectZip()">
+          <mat-icon>archive</mat-icon>
+        </button>
         <!-- créer dossier à la racine -->
-        <button mat-icon-button matTooltip="Créer dossier à la racine"
+        <button mat-icon-button class="mat-icon-button" matTooltip="Créer dossier à la racine"
                 (click)="setTargetNode(null)">
           <mat-icon>create_new_folder</mat-icon>
         </button>
         <!-- upload à la racine -->
-        <button mat-icon-button matTooltip="Uploader à la racine"
+        <button mat-icon-button class="mat-icon-button" matTooltip="Uploader à la racine"
                 (click)="openUploadDialog(null)">
           <mat-icon>upload_file</mat-icon>
         </button>

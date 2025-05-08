@@ -29,6 +29,7 @@
     "@types/stompjs": "^2.3.9",
     "codemirror": "^5.65.19",
     "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "jsencrypt": "^3.3.2",
     "monaco-editor": "^0.52.2",

@@ -1,0 +1,41 @@
+/* Style pour le conteneur du média */
+.media-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90vw;   /* Limite la taille du modal à 90% de la largeur de l'écran */
+  max-height: 90vh;  /* Limite la taille du modal à 90% de la hauteur de l'écran */
+  overflow: hidden;  /* Empêche le débordement du contenu */
+  position: relative;
+}
+
+/* Icône de fermeture sans fond et couleur rouge */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: red;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 24px;
+}
+
+/* Style de l'image dans le viewer */
+.viewer-image {
+  max-width: 100%;  /* L'image peut occuper jusqu'à 100% de la largeur du modal */
+  max-height: 100%; /* L'image peut occuper jusqu'à 100% de la hauteur du modal */
+  object-fit: contain;  /* Conserve les proportions de l'image, sans la couper */
+  display: block;
+  margin: 0 auto;  /* Centre l'image horizontalement dans le modal */
+}
+
+/* Style de la vidéo dans le viewer */
+.viewer-video {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto;
+}

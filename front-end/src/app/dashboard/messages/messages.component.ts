@@ -21,10 +21,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { PresenceService, PresenceUpdate } from '../../services/presence.service';
+import { PresenceService } from '../../services/presence.service';
 import { CallSignal, WebRtcService } from '../../services/webrtc.service';
-import { IncomingCallDialogComponent } from './incoming-call-dialog/incoming-call-dialog.component';
-import { OutgoingCallDialogComponent } from './outgoing-call-dialog/outgoing-call-dialog.component';
+import { MediaViewerComponent } from './media-viewer/media-viewer.component';
 
 const API = 'http://localhost:8080/api';
 
@@ -62,10 +61,17 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('scrollContainer', { static: true }) scrollContainer!: ElementRef;
 
   users: any[] = [];
+  sortedUsers: any[] = [];
+
+  mediaViewerOpen = false;
+  mediaUrl: string = '';
+  mediaType: string = '';
+
   selectedUser: any = null;
+  selectedFiles: File[] = [];
+
   messages: any[] = [];
   newMessage = '';
-  selectedFiles: File[] = [];
   searchQuery = '';
 
   currentUserId!: number;
@@ -74,7 +80,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private stompClient!: Client;
   private msgSub?: any;
-  private callSub?: Subscription;
   private subscription?: StompSubscription;
 
   constructor(
@@ -94,17 +99,12 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   ngOnInit() {
     this.connectWebSocket();
     this.presenceService.updatePresence(this.currentUserId, true);
-
-    // Signaling pour WebRTC
-    this.webRtc.connectSignaling(this.currentUserId);
-    this.callSub = this.webRtc.incomingCallSignal$.subscribe(signal => this.promptIncomingCall(signal));
   }
   
 
   ngOnDestroy() {
     this.stompClient?.deactivate();
     this.msgSub?.unsubscribe();
-    this.callSub?.unsubscribe();
     this.presenceService.updatePresence(this.currentUserId, false, new Date().toISOString());
   }
 
@@ -113,64 +113,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.isMobile = (e.target as Window).innerWidth < 768;
   }
 
+  
 
-  async startAudioCall() {
-    const data: OutgoingCallDialogData = {
-      isVideo: false,
-      calleeName: `${this.selectedUser.prenom} ${this.selectedUser.nom}`,
-      calleeAvatar: this.selectedUser.avatarUrl,
-      timeoutMs: 20000
-    };
-  
-    const dialogRef = this.dialog.open(OutgoingCallDialogComponent, { data, panelClass: 'call-dialog', disableClose: true });
-  
-    // Dès que l’utilisateur visualise le dialog, récupère le flux local
-    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    // Inonde le service
-    this.webRtc.localStream$.next(local);
-  
-    // Lance l’offre
-    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
-  
-    // Quand le dialog se ferme, termine l’appel
-    dialogRef.afterClosed().subscribe(status => {
-      this.webRtc.endCall(this.selectedUser.id, this.currentUserId, status === 'answered' ? 'hangup' : 'missed');
-    });
-  }
-  
-  async startVideoCall() {
-    const data: OutgoingCallDialogData = {
-      isVideo: true,
-      calleeName: `${this.selectedUser.prenom} ${this.selectedUser.nom}`,
-      calleeAvatar: this.selectedUser.avatarUrl,
-      timeoutMs: 20000
-    };
-  
-    const dialogRef = this.dialog.open(OutgoingCallDialogComponent, { data, panelClass: 'call-dialog', disableClose: true });
-  
-    const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    this.webRtc.localStream$.next(local);
-    this.webRtc.initCall(local, this.selectedUser.id, this.currentUserId);
-  
-    dialogRef.afterClosed().subscribe(status => {
-      this.webRtc.endCall(this.selectedUser.id, this.currentUserId, status === 'answered' ? 'hangup' : 'missed');
-    });
-  }
-  
-  private connectWebSocket() {
-  const socket = new SockJS(`${API.replace('/api','')}/ws`);
-  this.stompClient = new Client({
-    webSocketFactory: () => socket,
-    reconnectDelay: 5000,
-    connectHeaders: { 'X-User-Id': `${this.currentUserId}` }
-  });
-  this.stompClient.onConnect = () => {
-    console.log("connecté");
-    // *** uniquement messages ici ***
-    //this.subscribeToMessages();
-  };
-  this.stompClient.activate();
-}
 
 
   getStatus(u: { online: boolean; lastSeen?: Date }): string {
@@ -202,6 +146,48 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
   
 
+  private connectWebSocket() {
+    const socket = new SockJS(`${API.replace('/api','')}/ws`);
+    this.stompClient = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+      connectHeaders: { 'X-User-Id': `${this.currentUserId}` }
+    });
+    
+    this.stompClient.onConnect = () => {
+      console.log("connecté");
+      // Connexion établie, aucun message n'est encore reçu.
+    };
+    
+    this.stompClient.activate();
+  }
+  
+  selectUser(u: any) {
+    this.selectedUser = u;
+    if (this.isMobile) window.scrollTo(0, 0);
+    this.loadMessages(u.id);
+    
+    // Se (re)abonner au topic de l'utilisateur sélectionné
+    this.subscribeToMessages(u.id);
+  }
+  
+  private subscribeToMessages(receiverId: number) {
+    const topic = `/topic/messages/${this.currentUserId}/${receiverId}`;
+    this.subscription = this.stompClient.subscribe(topic, (msg: IMessage) => {
+      const body: any = JSON.parse(msg.body);
+      const sentBy: SentBy = body.sender.id === this.currentUserId ? 'me' : 'other';
+      this.appendMessage({
+        text: body.message,
+        sentBy,
+        date: new Date(body.createdAt),
+        avatarUrl: sentBy === 'me'
+          ? this.currentUserAvatarUrl
+          : this.selectedUser.avatarUrl,
+        attachments: body.attachments
+      });
+    });
+  }
+  
   private loadUsers() {
     this.http.get<any[]>(`${API}/users`)
       .pipe(catchError(() => {
@@ -209,27 +195,55 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
         return of([]);
       }))
       .subscribe(users => {
-        // 1) Charger les users depuis l'API
+        // Charger les utilisateurs depuis l'API
         this.users = users
           .filter(u => u.id !== this.currentUserId)
           .map(u => ({
             ...u,
             avatarUrl: `${API}/users/${u.id}/profile-image/raw`,
-            // on utilise d’abord les valeurs par défaut de l'API
             online:    u.online,
             lastSeen:  u.lastSeen
           }));
   
-        // 2) Récupérer les dernières mises à jour live
-        this.presenceService.presenceHistory.forEach((upd) => {
-          const user = this.users.find(x => x.id === upd.userId);
-          if (user) {
-            user.online   = upd.online;
-            user.lastSeen = upd.lastSeen ? new Date(upd.lastSeen) : undefined;
-          }
+        // Récupérer les dernières conversations
+        this.loadMessagesForAllUsers().then(() => {
+          // Trier les utilisateurs selon la date du dernier message échangé
+          this.sortedUsers = this.users.sort((a, b) => {
+            const lastMessageA = a.lastMessageDate ? new Date(a.lastMessageDate).getTime() : 0;
+            const lastMessageB = b.lastMessageDate ? new Date(b.lastMessageDate).getTime() : 0;
+            return lastMessageB - lastMessageA;
+          });
         });
       });
   }
+
+  private loadMessagesForAllUsers() {
+    const me = this.currentUserId;
+    // Créer un tableau de promises pour récupérer les derniers messages
+    const messagePromises = this.users.map(user => {
+      return this.loadLastMessageForUser(me, user.id);
+    });
+  
+    // Attendre que toutes les promesses se terminent
+    return Promise.all(messagePromises);
+  }
+  
+  private loadLastMessageForUser(senderId: number, receiverId: number) {
+    return this.http.get<ChatMessage[]>(`${API}/chat/history/${senderId}/${receiverId}`)
+      .pipe(catchError(() => of([])))  // Si une erreur survient, on retourne un tableau vide.
+      .toPromise()
+      .then(messages => {
+        // Vérifie que "messages" n'est ni "undefined" ni vide
+        if (messages && messages.length > 0) {
+          const lastMessage = messages[messages.length - 1];
+          const user = this.users.find(u => u.id === receiverId);
+          if (user) {
+            user.lastMessageDate = lastMessage.createdAt;  // Stocker la date du dernier message
+          }
+        }
+      });
+  }
+  
   
 
   filteredUsers() {
@@ -240,58 +254,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     );
   }
 
-  selectUser(u: any) {
-    this.selectedUser = u;
-    if (this.isMobile) window.scrollTo(0, 0);
-    this.loadMessages(u.id);
-
-    // se (re)subscribe au topic
-    this.subscription?.unsubscribe();
-    const topic = `/topic/messages/${this.currentUserId}/${u.id}`;
-    this.subscription = this.stompClient.subscribe(topic, (msg: IMessage) => {
-      const body: any = JSON.parse(msg.body);
-      const sentBy: SentBy =
-        body.sender.id === this.currentUserId ? 'me' : 'other';
-      this.appendMessage({
-        text:       body.message,
-        sentBy,
-        date:       new Date(body.createdAt),
-        avatarUrl:  sentBy === 'me'
-                     ? this.currentUserAvatarUrl
-                     : this.selectedUser.avatarUrl,
-        attachments: body.attachments
-      });
-    });
-  }
 
 
-
-  private promptIncomingCall(signal: CallSignal) {
-    const data: IncomingCallDialogData = {
-      ...signal,
-      callerName:   this.selectedUser.prenom + ' ' + this.selectedUser.nom,
-      callerAvatar: this.selectedUser.avatarUrl,
-      calleeAvatar: this.currentUserAvatarUrl
-    };
-
-    const dialogRef = this.dialog.open(
-      IncomingCallDialogComponent,
-      { data, panelClass: 'call-dialog' }
-    );
-
-    dialogRef.afterClosed().subscribe(async accepted => {
-      if (!accepted) {
-        this.webRtc.endCall(signal.fromUserId, this.currentUserId, 'missed');
-        return;
-      }
-      const constraints = {
-        audio: true,
-        video: !!signal.sdp?.includes('m=video')
-      };
-      const local = await navigator.mediaDevices.getUserMedia(constraints);
-      this.webRtc.answerCall(local, signal, this.currentUserId);
-    });
-  }
 
   private loadMessages(receiverId: number) {
     const me = this.currentUserId;
@@ -328,12 +292,22 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   onAttachmentChange(evt: Event) {
-    const inp = evt.target as HTMLInputElement;
-    this.selectedFiles = inp.files ? Array.from(inp.files) : [];
+    const input = evt.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedFiles = Array.from(input.files);
+    }
+  }
+
+  removeAttachment(file: File) {
+    const index = this.selectedFiles.indexOf(file);
+    if (index > -1) {
+      this.selectedFiles.splice(index, 1);
+    }
   }
 
   sendMessage() {
-    if (!this.newMessage.trim() && this.selectedFiles.length===0) return;
+    if (!this.newMessage.trim() && this.selectedFiles.length === 0) return;
+    
     const me = this.currentUserId, to = this.selectedUser.id;
     const payload = {
       sender: { id: me },
@@ -341,18 +315,22 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
       message: this.newMessage,
       createdAt: new Date().toISOString()
     };
+
     const fd = new FormData();
     fd.append('data', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     this.selectedFiles.forEach(f => fd.append('attachments', f, f.name));
+
     this.http.post<ChatMessage>(`${API}/chat/send`, fd).subscribe({
-      next: m => {
+      next: (m) => {
         this.appendMessage(this.toDisplay(m, 'me'));
         this.newMessage = '';
         this.selectedFiles = [];
       },
-      error: () => this.snackBar.open('Erreur envoi','Fermer',{duration:2000})
+      error: () => this.snackBar.open('Erreur envoi', 'Fermer', { duration: 2000 })
     });
   }
+
+
 
   deselectUser() { this.selectedUser = null; }
 
@@ -373,22 +351,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
       data: this.selectedUser
     });
   }
+
+
+  openMediaViewer(filePath: string, mimeType: string): void {
+    this.dialog.open(MediaViewerComponent, {
+      data: { filePath, mimeType },
+      width: '80vw',
+      height: '80vh',
+      panelClass: 'media-dialog'
+    });
+  }
   
 }
 
-export interface IncomingCallDialogData extends CallSignal {
-  callerName:   string;
-  callerAvatar: string;
-  calleeAvatar: string;
-}
-
-export interface OutgoingCallDialogData {
-  /** true pour appel vidéo, false pour appel audio */
-  isVideo: boolean;
-  /** Nom complet de la personne appelée */
-  calleeName: string;
-  /** URL de l’avatar de la personne appelée */
-  calleeAvatar: string;
-  /** Durée max avant timeout (en ms) ; par défaut 30000 si non fourni */
-  timeoutMs?: number;
-}

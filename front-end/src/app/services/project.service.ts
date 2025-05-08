@@ -70,11 +70,6 @@ export class ProjectService {
     return this.http.get<any>(`${this.baseUrl}/${projectId}`);
   }
 
-  /**
-   * Liste fichiers/dossiers d’un projet.
-   * @param projectId  ID du projet
-   * @param parentId   ID du dossier parent (facultatif)
-   */
   listFiles(
     projectId: number,
     parentId?: number
@@ -222,12 +217,17 @@ export class ProjectService {
   getInvitedUsers(projectId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/${projectId}/invite`);
   }
+
+  getLastPause(projectId: number): Observable<{reason: string}> {
+    return this.http.get<{reason:string}>(`${this.baseUrl}/${projectId}/pause`);
+  }
+
+  getLastClosure(projectId: number): Observable<{reason: string}> {
+    return this.http.get<{reason:string}>(`${this.baseUrl}/${projectId}/closure`);
+  }
 }
 
 
-
-
-// src/app/models/file-node.ts
 export type ItemType = 'FILE' | 'FOLDER';
 
 export interface FileNode {

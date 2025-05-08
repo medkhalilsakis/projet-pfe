@@ -9,7 +9,7 @@ export interface ChatMessage {
   receiver: { id: number; name: string };
   message: string;
   createdAt: string;
-  sentBy: 'me' | 'other';  // Indiquer si c'est l'utilisateur actuel ou un autre utilisateur
+  sentBy: 'me' | 'other';
 }
 
 @Injectable({

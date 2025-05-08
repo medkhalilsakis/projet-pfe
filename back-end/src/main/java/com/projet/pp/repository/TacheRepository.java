@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TacheRepository extends JpaRepository<Tache, Long> {
     List<Tache> findByNameContainingIgnoreCase(String q);
@@ -17,7 +18,7 @@ public interface TacheRepository extends JpaRepository<Tache, Long> {
     List<Tache> findByAssignedToId(Long userId);
     List<Tache> findByNameContainingIgnoreCaseAndStatusAndAssignedToId(String q, Tache.Status status, Long userId);
     List<Tache> findByProjectIsNull();
-
+    Optional<Tache> findByProject_Id(Long projectId);
 
     @Modifying
     @Transactional

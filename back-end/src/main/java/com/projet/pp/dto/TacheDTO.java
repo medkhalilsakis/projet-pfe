@@ -35,6 +35,8 @@ public class TacheDTO {
     /** Présent uniquement en détail */
     private List<AttachmentDTO> attachments;
 
+    private Long projectId;
+
     @Getter @Setter
     @NoArgsConstructor @AllArgsConstructor @Builder
     public static class AttachmentDTO {

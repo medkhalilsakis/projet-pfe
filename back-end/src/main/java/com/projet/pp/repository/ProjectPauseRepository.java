@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface ProjectPauseRepository extends JpaRepository<ProjectPause, Long> {
     Optional<ProjectPause> findFirstByProjectIdOrderByPausedAtDesc(Long projectId);
+
 }

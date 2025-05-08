@@ -1,0 +1,135 @@
+/* project-description-dialog.component.scss */
+
+:host {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #00796b;
+  margin-bottom: 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+mat-form-field {
+  width: 100%;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+mat-form-field.mat-focused {
+  box-shadow: none;
+}
+
+mat-select,
+mat-input {
+  border-radius: 8px;
+}
+
+mat-form-field.mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 8px;
+}
+
+mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+button {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  outline: none;
+}
+
+button[type='button'] {
+  background-color: #e0e0e0;
+  color: #212121;
+}
+
+button[type='submit'] {
+  background-color: #00796b;
+  color: #fff;
+  &:disabled {
+    background-color: #bdbdbd;
+  }
+}
+
+mat-error {
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+mat-select {
+  background-color: #fafafa;
+}
+
+mat-select.mat-select {
+  border-radius: 8px;
+}
+
+mat-select .mat-select-arrow {
+  color: #00796b;
+}
+
+mat-select .mat-option {
+  border-radius: 8px;
+}
+
+mat-select .mat-option:hover {
+  background-color: #00796b;
+  color: #fff;
+}
+
+mat-select .mat-option.mat-selected {
+  background-color: #004d40;
+  color: #fff;
+}
+
+input[matInput] {
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+textarea[matInput] {
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+button {
+  margin: 10px;
+}
+
+div[fxLayout="column"] {
+  gap: 3px;
+}
+
+@media (max-width: 600px) {
+  :host {
+    padding: 16px;
+  }
+
+  mat-form-field,
+  mat-select,
+  mat-input {
+    width: 100%;
+  }
+}

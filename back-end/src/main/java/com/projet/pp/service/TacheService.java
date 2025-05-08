@@ -340,4 +340,39 @@ public class TacheService {
     }
 
 
+    @Transactional
+    public void syncStatus(Long tacheId) {
+        Tache t = tacheRepository.findById(tacheId)
+                .orElseThrow(() -> new RuntimeException("Tâche introuvable : " + tacheId));
+
+        Project p = t.getProject();
+        Tache.Status newStatus;
+        if (p == null) {
+            // pas de projet lié → niveau développement
+            newStatus = Tache.Status.a_developper;
+        } else {
+            Integer projSt = p.getStatus();
+            // votre mapping projet→tâche
+            if (projSt == null) {
+                newStatus = Tache.Status.a_developper;
+            } else if (projSt == 2 || projSt == 3) {
+                newStatus = Tache.Status.en_cours;
+            } else if (projSt == 4) {
+                newStatus = Tache.Status.terminé;
+            } else if (projSt == 55) {
+                newStatus = Tache.Status.suspendu;
+            } else if (projSt == 99) {
+                newStatus = Tache.Status.cloturé;
+            } else {
+                newStatus = Tache.Status.a_developper;
+            }
+        }
+
+        if (t.getStatus() != newStatus) {
+            t.setStatus(newStatus);
+            tacheRepository.save(t);
+        }
+    }
+
+
 }

@@ -54,9 +54,9 @@ public class Tache {
 
     public enum Status {
         a_developper,
-        en_test,
+        en_cours,
         suspendu,
-        clôturé,
+        cloturé,
         terminé
     }
 }

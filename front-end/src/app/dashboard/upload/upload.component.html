@@ -1,84 +1,47 @@
-<!-- src/app/upload/upload.component.html -->
 <div class="upload-container" fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="24px" fxFlexFill>
 
   <!-- Titre -->
-  <h2 fxFlex="none">Upload de Projet</h2>
+  <h2 fxFlex="none">Importation du projet</h2>
 
-  <!-- Zone de drop & sélection -->
-  <div
-    class="drop-zone"
-    fxLayout="column"
-    fxLayoutAlign="center center"
-    fxLayoutGap="8px"
-    (drop)="onDrop($event)"
-    (dragover)="$event.preventDefault()"
-    (dragleave)="$event.preventDefault()"
-    fxFlex="none"
-  >
-    <mat-icon>cloud_upload</mat-icon>
-    <p>Glissez vos fichiers ici ou</p>
-    <input
-      type="file"
-      #fileInput
-      hidden
-      (change)="onFileSelected($event)"
-      multiple
-      webkitdirectory
-    >
-    <button mat-raised-button color="primary" (click)="fileInput.click()">
-      Sélectionner des fichiers / dossiers
-    </button>
-    <p class="hint">Formats supportés : dossiers ou archives (.zip, .rar)</p>
-  </div>
-
-  <!-- Liste des fichiers sélectionnés -->
-  <div *ngIf="files.length" fxFlex="none" fxLayout="column" fxLayoutGap="8px" class="file-list">
-    <h3>Fichiers sélectionnés :</h3>
-    <div fxLayout="column" fxLayoutGap="4px">
-      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px" *ngFor="let file of files">
+  <!-- Zone de dépôt et liste des fichiers -->
+  <div *ngIf="!isUploadStarted" class="upload-section" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="16px" fxFlex="none">
+    <div class="drop-zone" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="8px" (drop)="onDrop($event)" (dragover)="$event.preventDefault()" (dragleave)="$event.preventDefault()" fxFlex="50%">
+      <mat-icon>cloud_upload</mat-icon>
+      <p>Glissez vos fichiers ici ou</p>
+      <input type="file" #fileInput hidden (change)="onFileSelected($event)" multiple webkitdirectory>
+      <button mat-raised-button color="primary" (click)="fileInput.click()">Sélectionner des fichiers / dossiers</button>
+      <p class="hint">Formats supportés : dossiers ou archives (.zip, .rar)</p>
+    </div>
+    <div *ngIf="files.length" class="file-list" fxFlex="50%">
+      <h3>Fichiers sélectionnés :</h3>
+      <div *ngFor="let file of files" class="file-item">
         <mat-icon>{{ file.type.includes('directory') ? 'folder' : 'insert_drive_file' }}</mat-icon>
-        <span fxFlex>{{ file.name }}</span>
+        <span>{{ file.name }}</span>
         <span class="file-size">{{ file.size | fileSize }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Progression -->
-  <div *ngIf="isUploading" fxFlex="none" fxLayout="column" fxLayoutGap="12px" class="progress-section">
+  <!-- Progression de l'upload -->
+  <div *ngIf="isUploadStarted && isUploading" class="progress-section" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="16px" fxFlex="none">
     <h3>File d’upload :</h3>
-    <div fxLayout="column" fxLayoutGap="12px">
-      <div
-        fxLayout="column"
-        fxLayoutGap="6px"
-        *ngFor="let progress of uploadProgress; let i = index"
-        class="queue-item"
-      >
-        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px" class="file-info">
-          <mat-icon>{{ getFileIcon(files[i].name) }}</mat-icon>
-          <span fxFlex>{{ progress.name }}</span>
-        </div>
-        <mat-progress-bar
-          mode="determinate"
-          [value]="progress.progress"
-          [color]="progress.progress === 100 ? 'primary' : 'accent'"
-        ></mat-progress-bar>
-        <div fxLayout="row" fxLayoutAlign="space-between center" class="progress-details">
-          <span>{{ progress.speed | number:'1.1-1' }} KB/s</span>
-          <span>{{ progress.progress }} %</span>
-          <span>{{ progress.uploaded | fileSize }} / {{ progress.size | fileSize }}</span>
-        </div>
+    <div *ngFor="let progress of uploadProgress; let i = index" class="progress-item">
+      <div class="file-info">
+        <mat-icon>{{ getFileIcon(files[i].name) }}</mat-icon>
+        <span>{{ progress.name }}</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="progress.progress" [color]="progress.progress === 100 ? 'primary' : 'accent'"></mat-progress-bar>
+      <div class="progress-details">
+        <span>{{ progress.speed | number:'1.1-1' }} KB/s</span>
+        <span>{{ progress.progress }} %</span>
+        <span>{{ progress.uploaded | fileSize }} / {{ progress.size | fileSize }}</span>
       </div>
     </div>
   </div>
 
   <!-- Bouton de lancement -->
-  <div fxFlex="none" fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="startUpload()"
-      [disabled]="files.length === 0 || isUploading"
-    >
+  <div class="action-buttons" fxLayout="row" fxLayoutAlign="center center" fxFlex="none">
+    <button mat-raised-button color="primary" (click)="startUpload()" [disabled]="files.length === 0 || isUploading">
       Démarrer l’Upload
     </button>
   </div>

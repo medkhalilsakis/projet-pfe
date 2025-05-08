@@ -8,7 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface ChatAttachmentRepository extends JpaRepository<ChatAttachment, Long> {
+
+    List<ChatAttachment> findByChatMessageId(Long messageId);
+
+
     @Modifying
     @Transactional
     @Query("DELETE FROM ChatAttachment a WHERE a.chatMessage.sender.id = :userId OR a.chatMessage.receiver.id = :userId")

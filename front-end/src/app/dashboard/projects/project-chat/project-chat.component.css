@@ -1,21 +1,70 @@
 .chat-content {
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  
-  .messages-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .message-item {
-    background: #f1f1f1;
-    padding: 8px;
-    border-radius: 4px;
-  }
-  
-  .message-input {
-    width: 70%;
-  }
-  
+  max-height: 400px;
+  overflow-y: auto;
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bubble {
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  max-width: 75%;
+  word-break: break-word;
+}
+.mine   { background: #dcf8c6; align-self: flex-end; }
+.theirs { background: #ffffff; align-self: flex-start; }
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.attachment-img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.attachment-video {
+  max-width: 200px;
+  max-height: 150px;
+  margin-top: 8px;
+}
+
+.attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  padding: 4px 8px;
+  background: #e8eaf6;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+textarea[matInput] {
+  flex: 1;
+  resize: none;
+  padding: 8px;
+}
+.file-input {
+  display: inline-block;
+}

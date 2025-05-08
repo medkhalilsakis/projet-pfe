@@ -41,6 +41,8 @@ export class UploadComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
   private startTime!: number;
 
+  isUploadStarted = false;
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -71,31 +73,75 @@ export class UploadComponent implements OnDestroy {
     this.files = [...this.files, ...newFiles];
   }
 
-startUpload() {
+  startUpload() {
+    if (this.files.length === 0) return;
   
-  if (this.files.length === 0) return;
-  this.isUploading = true;
-  this.startTime = Date.now();
-
-  const user = this.sessionStorage.getUser();
-  if (!user?.id) {
-    this.snackBar.open('Utilisateur non identifié, veuillez vous reconnecter.', 'Fermer', { duration: 5000 });
+    this.isUploading = true;
+    this.startTime = Date.now();
+    this.isUploadStarted = true;
+  
+    // Récupérer l'ID de l'utilisateur à partir du sessionStorage
+    const user = this.sessionStorage.getUser();
+    const userId = user?.id;
+    
+    if (!userId) {
+      this.snackBar.open('Utilisateur non identifié, veuillez vous reconnecter.', 'Fermer', { duration: 5000 });
       this.isUploading = false;
       return;
+    }
+  
+    // Initialiser la progression pour chaque fichier
+    this.uploadProgress = this.files.map(file => ({
+      name: file.name,
+      progress: 0,
+      speed: 0,
+      size: file.size,
+      uploaded: 0
+    }));
+  
+    // Appel à la méthode d'upload avec l'ID de l'utilisateur
+    this.uploadFilesSequentially(userId);
   }
   
-
-  // Initialiser la progression pour chaque fichier
-  this.uploadProgress = this.files.map(file => ({
-    name: file.name,
-    progress: 0,
-    speed: 0,
-    size: file.size,
-    uploaded: 0
-  }));
-
-  this.uploadFilesSequentially(user.id);
-}
+  private uploadFilesSequentially(userId: string) {
+    const formData = new FormData();
+    this.files.forEach(file => formData.append('files', file));
+  
+    const isArchive = this.files.some(file => 
+      file.name.toLowerCase().endsWith('.zip') || 
+      file.name.toLowerCase().endsWith('.rar')
+    );
+  
+    // Préparer les paramètres HTTP
+    const params = new HttpParams()
+      .set('decompress', isArchive.toString())
+      .set('userId', userId);  // Inclure l'ID de l'utilisateur dans les paramètres
+  
+    this.http.post<{ projectId: number }>('http://localhost:8080/api/projects/upload', formData, {
+      reportProgress: true,
+      observe: 'events',
+      params
+    }).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (event: any) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            this.updateIndividualProgress(event);
+          } else if (event instanceof HttpResponse) {
+            this.isUploading = false;
+            const projectId = event.body.projectId;
+            this.sessionStorage.saveCurrentProject(projectId);
+            this.snackBar.open('Upload terminé!', 'Fermer', { duration: 3000 });
+            this.openProjectDescriptionDialog(projectId);
+          }
+        },
+        error: (error) => {
+          console.log(error);
+          this.snackBar.open('Erreur lors de l\'upload', 'Fermer', { duration: 5000 });
+          this.resetState();
+        }
+      });
+  }
+  
 public getFileIcon(fileName: string): string {
   if (fileName.toLowerCase().endsWith('.zip') || fileName.toLowerCase().endsWith('.rar')) {
     return 'archive';
@@ -103,91 +149,60 @@ public getFileIcon(fileName: string): string {
   return fileName.includes('.') ? 'insert_drive_file' : 'folder';
 }
 
-private uploadFilesSequentially(userId: number) {
-  const user = this.sessionStorage.getUser();
-  const formData = new FormData();
-  this.files.forEach(file => formData.append('files', file));
-
-  const isArchive = this.files.some(file => 
-    file.name.toLowerCase().endsWith('.zip') || 
-    file.name.toLowerCase().endsWith('.rar')
-  );
-
-  const params = new HttpParams()
-    .set('decompress', isArchive.toString())
-    .set('userId', userId);
-
-  this.http.post<{ projectId: number }>('http://localhost:8080/api/projects/upload', formData, {
-    reportProgress: true,
-    observe: 'events',
-    params
-  }).pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (event: any) => {
-        if (event.type === HttpEventType.UploadProgress) {
-          this.updateIndividualProgress(event);
-        } else if (event instanceof HttpResponse) {
-            this.isUploading = false;
-            const projectId = event.body.projectId;
-            this.sessionStorage.setUser({ ...user, currentProjectId: projectId });
-            this.snackBar.open('Upload terminé!', 'Fermer', { duration: 3000 });
-            // Ouvrir la popup pour saisir la description du projet
-            this.openProjectDescriptionDialog(projectId);
-        }
-      },
-      error: (error) => {
-        console.log(error);
-        this.snackBar.open('Erreur lors de l\'upload', 'Fermer', { duration: 5000 });
-        this.resetState();
-      }
-    });
-}
 
 private updateIndividualProgress(event: any) {
-  const elapsedTime = (Date.now() - this.startTime) / 1000;
-  const totalLoaded = event.loaded;
-  const totalSize = event.total;
-  
-  this.uploadProgress = this.uploadProgress.map((progress, index) => {
-    const fileRatio = this.files[index].size / totalSize;
-    const uploaded = totalLoaded * fileRatio;
-    
-    return {
-      ...progress,
-      progress: Math.round((uploaded / progress.size) * 100),
-      speed: (uploaded / elapsedTime) / 1024,
-      uploaded: uploaded
-    };
-  });
+  if (event.type === HttpEventType.UploadProgress) {
+    const totalLoaded = event.loaded;
+    const totalSize = event.total;
+
+    this.uploadProgress = this.uploadProgress.map((progress, index) => {
+      const file = this.files[index];
+      const fileRatio = file.size / totalSize;
+      const uploaded = totalLoaded * fileRatio;
+
+      return {
+        ...progress,
+        progress: Math.round((uploaded / progress.size) * 100),
+        speed: (uploaded / (Date.now() - this.startTime)) / 1024,
+        uploaded: uploaded
+      };
+    });
+  }
 }
 
 
-// … dans UploadComponent …
 
 private openProjectDescriptionDialog(projectId: number): void {
-  const dialogRef = this.dialog.open< ProjectDescriptionDialogComponent, {projectId:number}, ProjectFormData >(
-    ProjectDescriptionDialogComponent,
-    { width: '500px', data: { projectId } }
-  );
+  const dialogRef = this.dialog.open< 
+      ProjectDescriptionDialogComponent,
+      { projectId: number },
+      ProjectFormData 
+    >(ProjectDescriptionDialogComponent, {
+      width: '700px',
+      height: '90vh',
+      data: { projectId }
+    });
 
   dialogRef.afterClosed().subscribe(formData => {
     if (!formData) {
-      // ** Annulation : on supprime le draft côté serveur **
+      // Annulation : suppression du draft puis reset + redirection
       this.http.delete(`http://localhost:8080/api/projects/${projectId}`)
         .subscribe({
           next: () => {
             this.snackBar.open('Upload annulé, projet supprimé.', 'Fermer', { duration: 3000 });
             this.resetState();
+            // ** on redirige vers la liste des projets **
+            this.router.navigate(['/dashboard/upload']);
           },
           error: () => {
             this.snackBar.open('Erreur suppression projet annulé.', 'Fermer', { duration: 3000 });
             this.resetState();
+            this.router.navigate(['/dashboard/upload']);
           }
         });
       return;
     }
-
-    // 1) Commit du projet
+    // --- sinon on commit le projet ---
     const status = formData.visibilite === 'public' ? 1 : 0;
     const commitPayload = {
       name:        formData.name,
@@ -198,28 +213,31 @@ private openProjectDescriptionDialog(projectId: number): void {
     };
     const params = new HttpParams().set('projectId', projectId.toString());
 
-    this.http.post('http://localhost:8080/api/projects/commit', commitPayload, { params, responseType: 'text' })
+    this.http.post(
+        'http://localhost:8080/api/projects/commit',
+        commitPayload,
+        { params, responseType: 'text' }
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Projet finalisé.', 'Fermer',{duration:2000});
+          this.snackBar.open('Projet finalisé.', 'Fermer', { duration: 2000 });
+          const operations = [];
 
-          // 2) Si l’utilisateur a sélectionné une tâche, on l’associe
-          const assignSteps$ = [];
           if (formData.taskId) {
-            assignSteps$.push(
+            operations.push(
               this.http.put(
                 `http://localhost:8080/api/taches/${formData.taskId}/assignProject`,
                 null,
-                { params: new HttpParams().set('projectId', projectId.toString()), responseType: 'text' }
+                {
+                  params: new HttpParams().set('projectId', projectId.toString()),
+                  responseType: 'text'
+                }
               )
             );
           }
-
-          // 3) Invitations d’utilisateurs
-          const toInvite: number[] = formData.users || [];
-          toInvite.forEach(uid => {
-            assignSteps$.push(
+          (formData.users||[]).forEach(uid => {
+            operations.push(
               this.http.post(
                 `http://localhost:8080/api/projects/${projectId}/invite`,
                 { userId: uid, status: 'pending' },
@@ -228,30 +246,33 @@ private openProjectDescriptionDialog(projectId: number): void {
             );
           });
 
-          // Exécution parallèle de toutes les opérations post-commit
-          if (assignSteps$.length) {
-            forkJoin(assignSteps$).subscribe({
+          if (operations.length) {
+            forkJoin(operations).subscribe({
               next: () => {
-                this.snackBar.open('Tâche associée & invitations envoyées.', 'Fermer',{duration:2000});
-                this.uploadCompleted.emit();
+                this.snackBar.open('Tâche & invitations enregistrées.', 'Fermer', { duration: 2000 });
                 this.resetState();
+                this.router.navigate(['/dashboard/projects']);
+                this.uploadCompleted.emit();
               },
               error: () => {
-                this.snackBar.open('Problème lors de l’association/invitations', 'Fermer',{duration:2000});
-                this.uploadCompleted.emit();
+                this.snackBar.open('Erreur post-commit.', 'Fermer', { duration: 2000 });
                 this.resetState();
+                this.router.navigate(['/dashboard/upload']);
+                this.uploadCompleted.emit();
               }
             });
           } else {
-            // Ni tâche ni invitation
-            this.uploadCompleted.emit();
+            // pas d’opérations post-commit
             this.resetState();
+            this.router.navigate(['/dashboard/upload']);
+            this.uploadCompleted.emit();
           }
         },
         error: () => {
-          this.snackBar.open('Erreur finalisation projet', 'Fermer',{duration:2000});
-          this.uploadCompleted.emit();
+          this.snackBar.open('Erreur finalisation projet', 'Fermer', { duration: 2000 });
           this.resetState();
+          this.router.navigate(['/dashboard/upload']);
+          this.uploadCompleted.emit();
         }
       });
   });
@@ -259,13 +280,13 @@ private openProjectDescriptionDialog(projectId: number): void {
 
 
 
+private resetState() {
+  this.files = [];
+  this.uploadProgress = [];
+  this.isUploading = false;
+  this.isUploadStarted = false;  
+}
 
-
-  private resetState() {
-    this.files = [];
-    this.uploadProgress = [];
-    this.isUploading = false;
-  }
 
   ngOnDestroy() {
     this.destroy$.next();
@@ -286,6 +307,6 @@ interface ProjectFormData {
   description?: string;
   visibilite: 'public'|'prive';
   users?: number[];
-  taskId?: number;          // ← nouveau
+  taskId?: number;         
 }
 

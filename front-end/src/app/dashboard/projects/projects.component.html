@@ -1,14 +1,45 @@
 <div class="projects-container">
-  <!-- Barre de recherche -->
-  <div class="search-bar-container">
+  
+  <div class="toolbar" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+    <!-- Recherche -->
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Rechercher un projet</mat-label>
-      <input matInput placeholder="Nom du projet" [(ngModel)]="searchQuery" (keyup)="filterProjects()">
-      <button mat-icon-button matSuffix (click)="filterProjects()">
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFiltersAndSorting()">
+      <button mat-icon-button matSuffix (click)="applyFiltersAndSorting()">
         <mat-icon>search</mat-icon>
       </button>
     </mat-form-field>
+  
+    <!-- Filtre Statut (nouveau) -->
+    <mat-form-field appearance="outline" class="sort-field">
+      <mat-label>Filtrer par statut</mat-label>
+      <mat-select [(value)]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)">
+        <mat-option [value]="''">Tous</mat-option>
+        <mat-option *ngFor="let s of STATUS_OPTIONS" [value]="s.value">
+          {{ s.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  
+    <!-- Tri par champ -->
+    <mat-form-field appearance="outline" class="sort-field">
+      <mat-label>Tri par</mat-label>
+      <mat-select [(value)]="sortField" (selectionChange)="onSortFieldChange($event.value)">
+        <mat-option value="name">Nom (A → Z)</mat-option>
+        <mat-option value="createdAt">Date</mat-option>
+      </mat-select>
+    </mat-form-field>
+  
+    <!-- Ordre du tri -->
+    <mat-form-field appearance="outline" class="sort-direction">
+      <mat-label>Ordre</mat-label>
+      <mat-select [(value)]="sortDirection" (selectionChange)="onSortDirectionChange($event.value)">
+        <mat-option value="asc">Ascendant</mat-option>
+        <mat-option value="desc">Descendant</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
+  
 
   <!-- Liste des projets -->
   <div class="project-list" *ngIf="!loading">
@@ -34,6 +65,14 @@
           <span class="status-label">{{ getStatusLabel(project.status) }}</span>
         </div>
       </mat-card-content>
+      <div *ngIf="project.status===55 && pauseReasons[project.id]" class="warning-banner pause">
+        <mat-icon>pause_circle</mat-icon>
+        Raison : {{ pauseReasons[project.id] }}
+      </div>
+      <div *ngIf="project.status===99 && closureReasons[project.id]" class="warning-banner closure">
+        <mat-icon>lock_clock</mat-icon>
+        Raison : {{ closureReasons[project.id] }}
+      </div>  
       <mat-card-actions>
         <button mat-icon-button color="primary" (click)="viewDetails(project)">
           <mat-icon>code</mat-icon>

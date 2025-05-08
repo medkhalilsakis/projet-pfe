@@ -35,10 +35,6 @@ public class ProjectChatMessage {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    // Type de message : PUBLIC ou PRIVATE
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false)
-    private MessageType messageType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

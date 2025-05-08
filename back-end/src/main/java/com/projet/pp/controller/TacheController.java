@@ -32,64 +32,79 @@ public class TacheController {
             @RequestParam(required = false) Long assignedTo
     ) {
         return tacheService.search(q, status, assignedTo).stream()
-                .map(t -> TacheDTO.builder()
-                        .id(t.getId())
-                        .name(t.getName())
-                        .outils(t.getOutils())
-                        .status(t.getStatus().name())
-                        .deadline(t.getDeadline())
-                        .creationDate(t.getCreationDate())
-                        .assignedTo(t.getAssignedTo().stream()
-                                .map(u -> TacheDTO.SimpleUser.builder()
-                                        .id(u.getId())
-                                        .prenom(u.getPrenom())
-                                        .nom(u.getNom())
-                                        .build())
-                                .toList())
-                        .assignedBy(TacheDTO.SimpleUser.builder()
-                                .id(t.getAssignedBy().getId())
-                                .prenom(t.getAssignedBy().getPrenom())
-                                .nom(t.getAssignedBy().getNom())
-                                .build())
-                        .build())
+                .map(t -> {
+                    var b = TacheDTO.builder()
+                            .id(t.getId())
+                            .name(t.getName())
+                            .outils(t.getOutils())
+                            .status(t.getStatus().name())
+                            .deadline(t.getDeadline())
+                            .creationDate(t.getCreationDate())
+                            .assignedTo(t.getAssignedTo().stream()
+                                    .map(u -> TacheDTO.SimpleUser.builder()
+                                            .id(u.getId())
+                                            .prenom(u.getPrenom())
+                                            .nom(u.getNom())
+                                            .build())
+                                    .toList())
+                            .assignedBy(TacheDTO.SimpleUser.builder()
+                                    .id(t.getAssignedBy().getId())
+                                    .prenom(t.getAssignedBy().getPrenom())
+                                    .nom(t.getAssignedBy().getNom())
+                                    .build());
+
+                    // si un projet est lié, on expose son ID
+                    if (t.getProject() != null) {
+                        b.projectId(t.getProject().getId());
+                    }
+                    return b.build();
+                })
                 .toList();
     }
+
 
     /** Détail complet */
     @GetMapping("/{id}")
     public ResponseEntity<TacheDTO> detail(@PathVariable Long id) {
         return tacheService.getTacheById(id)
-                .map(t -> TacheDTO.builder()
-                        .id(t.getId())
-                        .name(t.getName())
-                        .description(t.getDescription())
-                        .outils(t.getOutils())
-                        .status(t.getStatus().name())
-                        .deadline(t.getDeadline())
-                        .creationDate(t.getCreationDate())
-                        .assignedTo(t.getAssignedTo().stream()
-                                .map(u -> TacheDTO.SimpleUser.builder()
-                                        .id(u.getId())
-                                        .prenom(u.getPrenom())
-                                        .nom(u.getNom())
-                                        .build())
-                                .toList())
-                        .assignedBy(TacheDTO.SimpleUser.builder()
-                                .id(t.getAssignedBy().getId())
-                                .prenom(t.getAssignedBy().getPrenom())
-                                .nom(t.getAssignedBy().getNom())
-                                .build())
-                        .attachments(t.getAttachments().stream()
-                                .map(a -> TacheDTO.AttachmentDTO.builder()
-                                        .id(a.getId())
-                                        .fileName(a.getFileName())
-                                        .fileType(a.getFileType())
-                                        .build())
-                                .toList())
-                        .build())
-                .map(ResponseEntity::ok)
+                .map(t -> {
+                    var b = TacheDTO.builder()
+                            .id(t.getId())
+                            .name(t.getName())
+                            .description(t.getDescription())
+                            .outils(t.getOutils())
+                            .status(t.getStatus().name())
+                            .deadline(t.getDeadline())
+                            .creationDate(t.getCreationDate())
+                            .assignedTo(t.getAssignedTo().stream()
+                                    .map(u -> TacheDTO.SimpleUser.builder()
+                                            .id(u.getId())
+                                            .prenom(u.getPrenom())
+                                            .nom(u.getNom())
+                                            .build())
+                                    .toList())
+                            .assignedBy(TacheDTO.SimpleUser.builder()
+                                    .id(t.getAssignedBy().getId())
+                                    .prenom(t.getAssignedBy().getPrenom())
+                                    .nom(t.getAssignedBy().getNom())
+                                    .build())
+                            .attachments(t.getAttachments().stream()
+                                    .map(a -> TacheDTO.AttachmentDTO.builder()
+                                            .id(a.getId())
+                                            .fileName(a.getFileName())
+                                            .fileType(a.getFileType())
+                                            .build())
+                                    .toList());
+
+                    // exposer projectId s’il est non-null
+                    if (t.getProject() != null) {
+                        b.projectId(t.getProject().getId());
+                    }
+                    return ResponseEntity.ok(b.build());
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     /** Création (retourne un résumé) */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -215,5 +230,39 @@ public class TacheController {
                 .body(zip);
     }
 
+
+
+    @GetMapping("/free")
+    public List<TacheDTO> listFree() {
+        return tacheService.getUnassignedTasks().stream()
+                .map(t -> TacheDTO.builder()
+                        .id(t.getId())
+                        .name(t.getName())
+                        .outils(t.getOutils())
+                        .status(t.getStatus().name())
+                        .deadline(t.getDeadline())
+                        .creationDate(t.getCreationDate())
+                        .assignedTo(t.getAssignedTo().stream()
+                                .map(u -> TacheDTO.SimpleUser.builder()
+                                        .id(u.getId())
+                                        .prenom(u.getPrenom())
+                                        .nom(u.getNom())
+                                        .build())
+                                .toList())
+                        .assignedBy(TacheDTO.SimpleUser.builder()
+                                .id(t.getAssignedBy().getId())
+                                .prenom(t.getAssignedBy().getPrenom())
+                                .nom(t.getAssignedBy().getNom())
+                                .build())
+                        .build())
+                .toList();
+    }
+
+
+    @PutMapping("/{id}/syncStatus")
+    public ResponseEntity<Void> syncStatus(@PathVariable Long id) {
+        tacheService.syncStatus(id);
+        return ResponseEntity.ok().build();
+    }
 
 }

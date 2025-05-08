@@ -3,29 +3,17 @@ import { SessionStorageService } from '../services/session-storage.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
-import { MatDrawerContainer, MatSidenavModule } from '@angular/material/sidenav';
+import { CommonModule } from '@angular/common';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
-
 import { ProfileImageService } from '../services/profile-image.service';
 import { PresenceService, PresenceUpdate } from '../services/presence.service';
-
-import { OverviewComponent } from './overview/overview.component';
-import { ProjectsComponent } from './projects/projects.component';
-import { MessagesComponent } from './messages/messages.component';
-import { UploadComponent } from './upload/upload.component';
-import { AddUserComponent } from './add-user/add-user.component';
-import { DesignationTesteurComponent } from './projects/designation-testeur/designation-testeur.component';
-import { SettingsComponent } from './settings/settings.component';
-import { TaskAssignmentComponent } from './task-assignment/task-assignment.component';
-
 import { Subscription } from 'rxjs';
-import { UserManagementComponent } from "./user-management/user-management.component";
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
@@ -34,7 +22,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
   imports: [
     CommonModule,
     RouterModule,
-    FlexLayoutModule,      // pour fxLayout / fxFlex
+    FlexLayoutModule,   
     MatSidenavModule,
     MatMenuModule,
     MatBadgeModule,
@@ -146,8 +134,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   //  history.replaceState(null, '', '/dashboard');
   //}
 
-  navigateTo(view: string): void {
-    this.router.navigate([view], { relativeTo: this.route });
+  navigateTo(view: string, queryParams: Record<string, any> = {}) {
+    this.router.navigate(
+      [view],
+      { relativeTo: this.route, queryParams }
+    );
   }
 
   private loadNotifications(): void {
@@ -167,17 +158,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (role === 3) {
       this.menuItems = [
         ...baseMenu,
-        { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
+        { label: 'Tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
         {
           label: 'Projets', icon: 'list_alt',
           subMenu: [
             { label: 'Vue d\'ensemble',      action: () => this.navigateTo('projects') },
-            { label: 'Mes Projets', action: () => this.navigateTo('my-projects') },
-            { label: 'Désignation testeurs', action: () => this.navigateTo('designation') },
-            { label: 'Projets en révision',  action: () => this.navigateTo('projects/revision') },
-            { label: 'Réclamations',         action: () => this.navigateTo('projects/complaints') },
-            { label: 'Projets archivés',     action: () => this.navigateTo('projects/archived') },
-            { label: 'Projets terminés',     action: () => this.navigateTo('projects/completed') }
+            { label: 'Mes Projets',           action: () => this.navigateTo('my-projects') },
+            { label: 'Désignation testeurs',  action: () => this.navigateTo('designation') },
+            { label: 'Projets en révision',   action: () => this.navigateTo('projects', { status: 'accept' }) },
+            { label: 'Réclamations',          action: () => this.navigateTo('complaints') },
+            { label: 'Projets archivés',      action: () => this.navigateTo('projects', { status: 'archived' }) },
+            { label: 'Projets terminés',      action: () => this.navigateTo('projects', { status: 'done' }) },
           ]
         },
         { label: 'Gestion Utilisateurs',  icon: 'people', action: () => this.navigateTo('users') }
@@ -194,7 +185,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     else {
       this.menuItems = [
         ...baseMenu,
-        { label: 'tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
+        { label: 'Tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
         { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('my-projects') }
       ];
     }

@@ -45,6 +45,7 @@
 mat-list-item {
   border-radius: 8px;
   transition: background 0.2s;
+  margin-bottom: 5px;
 }
 mat-list-item:hover {
   background: #e8eaf6;
@@ -118,41 +119,101 @@ mat-list-item.selected {
 }
 
 /* Style des bulles */
+/* Style des bulles de message */
+/* Style des bulles de message */
 .msg-row {
   display: flex;
   align-items: flex-end;
-}
-.msg-row.received .bubble {
-  background: #e8eaf6;
-  border-radius: 12px 12px 12px 0;
-}
-.msg-row.sent .bubble {
-  background: #c5cae9;
-  border-radius: 12px 12px 0 12px;
-}
-.bubble {
-  padding: 12px 16px;
-  max-width: 60%;
-  position: relative;
+  margin-bottom: 12px; /* Un peu d'espace entre chaque message */
 }
 
+.msg-row.sent {
+  justify-content: flex-end;
+}
+
+.msg-row.received {
+  justify-content: flex-start;
+}
+
+/* Bulles des messages envoyés */
+.msg-row.sent .bubble {
+  background-color: #3f51b5; /* Couleur bleue pour les messages envoyés */
+  color: #fff;
+  border-radius: 12px 12px 0 12px;
+  max-width: 70%; /* Ajuster la largeur de la bulle */
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Ombre légère pour donner du relief */
+}
+
+/* Bulles des messages reçus */
+.msg-row.received .bubble {
+  background-color: #7cffcb; /* Couleur plus claire pour les messages reçus */
+  color: #333;
+  border-radius: 12px 12px 12px 0;
+  max-width: 70%; /* Ajuster la largeur de la bulle */
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Ombre légère pour donner du relief */
+}
+
+/* Bulle de message avec contenu */
+.bubble p {
+  margin: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+
+
 /* Joints */
-.att-img, .att-video {
-  max-width: 100px;
-  max-height: 80px;
+/* Joints - Images envoyées */
+/* Joints - Images envoyées */
+.att-img {
+  max-width: 200px;
+  max-height: 200px;
   border-radius: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère autour des images */
 }
+
+/* Joints - Vidéos envoyées */
+.att-video {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Joints - Fichiers envoyés (pour tout type de fichier) */
 .att-file {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   text-decoration: none;
-  color: #3f51b5;
-  border: 1px solid #c5cae9;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  color: #fff;
+  background-color: #3f51b5; /* Couleur d'arrière-plan bleue */
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: auto;
+  margin-top: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère autour des fichiers */
+  transition: background-color 0.3s;
 }
+
+/* Effet de survol pour les fichiers */
+.att-file:hover {
+  background-color: #2c387e; /* Couleur plus foncée au survol */
+}
+
+/* Icône pour les fichiers */
+.att-file mat-icon {
+  color: #fff;
+}
+
 
 /* Pied de saisie fixe */
 .chat-input {
@@ -164,3 +225,36 @@ mat-list-item.selected {
   align-items: center;
   gap: 8px;
 }
+
+
+/* Aperçu des fichiers joints avant l'envoi */
+.attachment-preview {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f4f7fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.attachment-item span {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.attachment-item button {
+  background: transparent;
+  border: none;
+  color: #f44336;  /* Couleur rouge pour l'icône de suppression */
+  cursor: pointer;
+}
+
+
+

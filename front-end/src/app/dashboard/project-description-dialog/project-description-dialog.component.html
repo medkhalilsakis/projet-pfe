@@ -1,1 +1,76 @@
-<p>project-description-dialog works!</p>
+<h1 mat-dialog-title>Finalisez votre projet</h1>
+<div mat-dialog-content fxLayout="column" fxLayoutGap="24px" fxFlexFill>
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" fxLayout="column" fxLayoutGap="24px" fxFlexFill>
+    <!-- Nom du projet -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nom du projet</mat-label>
+      <input matInput formControlName="name">
+      <mat-error *ngIf="projectForm.get('name')?.hasError('required')">
+        Le nom est obligatoire
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Type de projet et Visibilité sur la même ligne -->
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Type de projet</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="WEB">Application Web</mat-option>
+          <mat-option value="MOBILE">Application Mobile</mat-option>
+          <mat-option value="IA">Intelligence Artificielle</mat-option>
+          <mat-option value="DATA">Science des Données</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Visibilité</mat-label>
+        <mat-select formControlName="visibilite">
+          <mat-option value="public">Public</mat-option>
+          <mat-option value="prive">Privé</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+    </mat-form-field>
+
+    <!-- Tâche à associer et Inviter des utilisateurs sur la même ligne -->
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Tâche à associer (facultatif)</mat-label>
+        <mat-select formControlName="taskId">
+          <mat-option [value]="null">— Aucune —</mat-option>
+          <mat-option *ngFor="let t of tasks" [value]="t.id">
+            {{ t.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Barre de recherche et sélection des utilisateurs -->
+      <div fxLayout="column" fxLayoutGap="8px">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Inviter des utilisateurs (optionnel)</mat-label>
+          <input matInput placeholder="Rechercher" [(ngModel)]="userFilter" [ngModelOptions]="{ standalone: true }">
+        </mat-form-field>
+
+        <mat-select formControlName="users" placeholder="Sélectionner des utilisateurs" multiple>
+          <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
+            {{ u.prenom }} {{ u.nom }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end center">
+      <button mat-button type="button" (click)="onCancel()">Annuler</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="projectForm.invalid">
+        Finaliser
+      </button>
+    </div>
+  </form>
+</div>

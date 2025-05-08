@@ -1,4 +1,5 @@
 <!-- src/app/task-detail/task-detail.component.html -->
+
 <main fxLayout="column" fxLayoutGap="24px" fxFill class="detail-page">
 
   <!-- Spinner -->
@@ -6,15 +7,32 @@
     <span class="loading-text">Chargement…</span>
   </div>
 
-  <!-- Contenu de la tâche -->
+  <!-- Contenu -->
   <div *ngIf="task" fxLayout="column" fxLayoutGap="24px">
 
-    <!-- Titre et actions -->
+    <!-- Bouton ZIP & Actions -->
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      <h1 class="task-title">{{ task.name }}</h1>
-      <button mat-icon-button (click)="editTask()">
+      
+      <!-- Tout télécharger -->
+      <button mat-raised-button class="mat-stroked-button" color="accent" (click)="downloadAll()">
+        <mat-icon>archive</mat-icon>
+        Exporter tous les détails de la tâche (ZIP)
+      </button>
+
+      <!-- Éditer la tâche -->
+      <button mat-icon-button class="mat-stroked-button" (click)="editTask()">
         <mat-icon>edit</mat-icon>
       </button>
+    </div>
+
+    <!-- Titre + Projet lié -->
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+      <h1 class="task-title">{{ task.name }}</h1>
+      <ng-container *ngIf="projectName">
+        <button mat-stroked-button class="mat-stroked-button" (click)="goToProject()">
+          Voir le projet : {{ projectName }}
+        </button>
+      </ng-container>
     </div>
 
     <!-- Métadonnées -->
@@ -36,16 +54,18 @@
         <h2>Description</h2>
         <p>{{ task.description }}</p>
       </div>
-      <div *ngIf="task.outils" class="tools-section" fxFlex>
-        <h2>Outils &amp; Technologies</h2>
+
+      <!-- n’affiche que s’il y a des outils -->
+      <div *ngIf="getOutilsList().length" class="tools-section" fxFlex>
+        <h2>Outils & Technologies</h2>
         <div fxLayout="row wrap" fxLayoutGap="8px" class="badges">
           <span class="badge" *ngFor="let o of getOutilsList()">{{ o }}</span>
         </div>
       </div>
     </section>
 
-    <!-- Assigné à -->
-    <section>
+    <!-- Assigné à (si non vide) -->
+    <section *ngIf="task.assignedTo?.length">
       <h2>Assigné à</h2>
       <div fxLayout="row wrap" fxLayoutGap="12px" class="assignees">
         <div *ngFor="let u of task.assignedTo" class="custom-chip">
@@ -54,9 +74,9 @@
       </div>
     </section>
 
-    <!-- Cahier des charges (PDF principal) -->
+    <!-- Cahier des charges (PDF) -->
     <section *ngIf="pdfAttachments.length" fxLayout="column" fxLayoutGap="16px">
-      <h2>Cahier des Charges (PDF)</h2>
+      <h2>Cahier des charges (PDF)</h2>
       <div *ngFor="let pdf of pdfAttachments" class="pdf-section">
         <ngx-extended-pdf-viewer
           [src]="API + '/taches/attachments/' + pdf.id"
@@ -69,49 +89,44 @@
       </div>
     </section>
 
+  
     <!-- Images -->
-    <section *ngIf="imageAttachments.length">
-      <h2>Images</h2>
-      <div fxLayout="row wrap" fxLayoutGap="16px">
-        <img *ngFor="let img of imageAttachments"
-             [src]="API + '/taches/attachments/' + img.id"
-             [alt]="img.fileName"
-             class="preview-image">
-      </div>
-    </section>
+<section *ngIf="imageAttachments.length">
+  <h2>Images</h2>
+  <div class="image-grid">
+    <img *ngFor="let img of imageAttachments"
+         [src]="API + '/taches/attachments/' + img.id"
+         [alt]="img.fileName"
+         class="preview-image">
+  </div>
+</section>
 
-    <!-- Vidéos -->
-    <section *ngIf="videoAttachments.length">
-      <h2>Vidéos</h2>
-      <div fxLayout="column" fxLayoutGap="16px">
-        <video *ngFor="let vid of videoAttachments"
-               controls
-               [src]="API + '/taches/attachments/' + vid.id"
-               class="video-player">
-        </video>
-      </div>
-    </section>
+<!-- Vidéos -->
+<section *ngIf="videoAttachments.length">
+  <h2>Vidéos</h2>
+  <div class="video-grid">
+    <video *ngFor="let vid of videoAttachments"
+           controls
+           [src]="API + '/taches/attachments/' + vid.id"
+           class="video-player">
+    </video>
+  </div>
+</section>
 
-    <!-- Autres fichiers -->
-    <section *ngIf="otherAttachments.length">
-      <h2>Autres fichiers</h2>
-      <mat-list>
-        <mat-list-item *ngFor="let a of otherAttachments">
-          <mat-icon matListIcon>insert_drive_file</mat-icon>
-          <a [href]="API + '/taches/attachments/' + a.id" download>
-            {{ a.fileName }}
-          </a>
-        </mat-list-item>
-      </mat-list>
-    </section>
+<!-- Autres fichiers -->
+<section *ngIf="otherAttachments.length">
+  <h2>Autres fichiers</h2>
+  <div class="other-grid">
+    <a *ngFor="let a of otherAttachments"
+       [href]="API + '/taches/attachments/' + a.id"
+       download
+       class="other-file-card">
+      <mat-icon>insert_drive_file</mat-icon>
+      <span>{{ a.fileName }}</span>
+    </a>
+  </div>
+</section>
 
-    <!-- Téléchargement ZIP -->
-    <section fxLayout="row" fxLayoutAlign="end center">
-      <button mat-raised-button color="accent" (click)="downloadAll()">
-        <mat-icon>archive</mat-icon>
-        Tout télécharger (ZIP)
-      </button>
-    </section>
 
   </div>
 </main>

@@ -1,0 +1,13 @@
+<div class="media-container">
+  <!-- Icône de fermeture -->
+  <button mat-icon-button class="close-button" (click)="closeViewer()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <!-- Affichage de l'image ou de la vidéo -->
+  <img *ngIf="data.mimeType.startsWith('image')" [src]="data.filePath" alt="Image" />
+  <video *ngIf="data.mimeType.startsWith('video')" controls>
+    <source [src]="data.filePath" />
+    Votre navigateur ne prend pas en charge la balise vidéo.
+  </video>
+</div>
