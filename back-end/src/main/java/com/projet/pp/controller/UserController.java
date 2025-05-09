@@ -247,4 +247,33 @@ public class UserController {
         List<User> list = userService.getUsersByRoleId(roleId);
         return ResponseEntity.ok(list);
     }
+    @GetMapping("/devstats")
+    public ResponseEntity<?> getDevStats() {
+        List<?> devstats= userService.getAllDeveloperStats();
+        System.out.println(devstats);
+        return ResponseEntity.ok(devstats);
+    }
+    @GetMapping("/devstats/{id}")
+    public ResponseEntity<?> getDevStatsByID(@PathVariable Long id) {
+        Map<String, Object> devstats= userService.getDeveloperStatsById(id);
+        System.out.println(devstats);
+        return ResponseEntity.ok(devstats);
+    }@GetMapping("/devstats/test/{id}")
+    public ResponseEntity<?> getDevTestingStatsByID(@PathVariable Long id) {
+        Map<String, Object> devstats= userService.getDevTestingStatsByID(id);
+        System.out.println(devstats);
+        return ResponseEntity.ok(devstats);
+    }
+    @GetMapping("/testerstats/{id}")
+    public ResponseEntity<?> getTesterStats(@PathVariable Long id) {
+        Map<String, Object> testerStats= userService.getTesterStats(id);
+        System.out.println(testerStats);
+        return ResponseEntity.ok(testerStats);
+    }
+    @GetMapping("/testerstats")
+    public ResponseEntity<?> getTesterStats() {
+        List<?> testersStats= userService.getAllTesterStats();
+        System.out.println(testersStats);
+        return ResponseEntity.ok(testersStats);
+    }
 }

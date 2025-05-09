@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -303,4 +304,55 @@ public class ProjectController {
                         "attachment; filename=\"" + filename + "\"")
                 .body(zip);
     }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String,Object>> getProjectStats() {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeek(),
+                "month", projectService.getToTestingMonth(),
+                "year",  projectService.getToTestingYear()
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeek());
+        root.put("month",           projectService.getMonth());
+        root.put("year",            projectService.getYear());
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<Map<String,Object>> getProjectStats(@PathVariable Long id) {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeekAndUserId(id),
+                "month", projectService.getToTestingMonthAndUserId(id),
+                "year",  projectService.getToTestingYearAndUserId(id)
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeekAndUserId( id));
+        root.put("month",           projectService.getMonthAndUserId(id));
+        root.put("year",            projectService.getYearAndUserId(id));
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+    @GetMapping("/stats/tester/{id}")
+    public ResponseEntity<Map<String,Object>> getProjectTesterStats(@PathVariable Long id) {
+        Map<String, Long> toTesting = Map.of(
+                "week",  projectService.getToTestingWeekAndTesteurId(id),
+                "month", projectService.getToTestingMonthAndTesteurId(id),
+                "year",  projectService.getToTestingYearAndTesteurId(id)
+        );
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("week",            projectService.getWeekAndTesteurId( id));
+        root.put("month",           projectService.getMonthAndTesteurId(id));
+        root.put("year",            projectService.getYearAndTesteurId(id));
+        root.put("toTesting",       toTesting);
+        System.out.println(root);
+        return ResponseEntity.ok(root);
+    }
+
 }

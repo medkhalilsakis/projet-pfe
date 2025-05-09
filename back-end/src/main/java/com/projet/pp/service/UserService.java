@@ -1,6 +1,7 @@
 package com.projet.pp.service;
-
+import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.projet.pp.model.User;
@@ -12,9 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -29,6 +33,8 @@ public class UserService {
     @Autowired private projectInvitedUserRepository      invitedRepo;
     @Autowired private ProjectTesterAssignmentRepository assignRepo;
     @Autowired private TacheRepository                   tacheRepo;
+
+    LocalDateTime now = LocalDateTime.now();  // No additional imports needed
 
     private final Path uploadsRoot = Paths.get("uploads").toAbsolutePath().normalize();
 
@@ -160,6 +166,169 @@ public class UserService {
 
     public List<User> getUsersByIds(List<Long> ids) {
         return userRepository.findAllById(ids);  // Récupère les utilisateurs par leurs IDs
+    }
+
+
+    public List<?> getAllDeveloperStats() {
+
+        List<User> devs = userRepository.findByRoleId(1L);
+
+        // 2) build DTO per dev
+        return devs.stream().map(dev -> {
+            Long  id    = dev.getId();
+            long  dp    = projectRepo.countByUser_Id(id);
+            long  done  = projectRepo.countByUser_IdAndStatus(id, 5 );
+            long  test  = projectRepo.countByUser_IdAndStatus(id, 2);
+            long projectsLastMonth= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5, now.minusMonths(1),now);
+
+
+            long projectsLastYear= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5,now.minusYears(1),now);
+            long activeTasks       = tacheRepo.countActiveTasks(id);
+            long activeProjects    = tacheRepo.countActiveProjects(id);
+
+            Map<String, Object> stats = new LinkedHashMap<>();
+            stats.put("name",              dev.getNom() + " " + dev.getPrenom());
+            stats.put("devProjects",       dp);
+            stats.put("completed",         done);
+            stats.put("inTesting",         test);
+            stats.put("salary",            dev.getSalaire());
+            stats.put("activeTasks",       activeTasks);
+            stats.put("activeProjects",   activeProjects);
+            stats.put("projectsLastMonth",   projectsLastMonth);
+            stats.put("projectsLastYear",   projectsLastYear);
+
+
+            return stats;
+        }).collect(Collectors.toList());
+    }
+    public Map<String, Object> getDeveloperStatsById(Long id) {
+
+        // 1) Find the developer
+        User dev = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Developer not found with id: " + id));
+        // 2) build DTO per dev
+        long  dp    = projectRepo.countByUser_Id(id);
+        long  done  = projectRepo.countByUser_IdAndStatus(id, 5 );
+        long  test  = projectRepo.countByUser_IdAndStatus(id, 2);
+        long projectsLastMonth= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5, now.minusMonths(1),now);
+
+
+        long projectsLastYear= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5,now.minusYears(1),now);
+        long activeTasks       = tacheRepo.countActiveTasks(id);
+        long activeProjects    = tacheRepo.countActiveProjects(id);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("name",              dev.getNom() + " " + dev.getPrenom());
+        stats.put("devProjects",       dp);
+        stats.put("completed",         done);
+        stats.put("inTesting",         test);
+        stats.put("salary",            dev.getSalaire());
+        stats.put("activeTasks",       activeTasks);
+        stats.put("activeProjects",   activeProjects);
+        stats.put("projectsLastMonth",   projectsLastMonth);
+        stats.put("projectsLastYear",   projectsLastYear);
+
+
+        return stats;
+    }
+
+
+    public  Map<String, Object> getDevTestingStatsByID(Long id) {
+
+        User dev = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Developer not found with id: " + id));
+
+
+        long total   = assignRepo.countByProject_User_Id(id);
+        long APPROVED = assignRepo
+                .countByProject_User_IdAndDecision(id, TestApproval.APPROVED);
+        long failed  = assignRepo
+                .countByProject_User_IdAndDecision(id, TestApproval.REJECTED);
+
+        return Map.of(
+                "total",   total,
+                "success", APPROVED,
+                "failed",  failed
+        );
+    }
+
+
+    public List<?> getAllTesterStats() {
+
+        List<User> testers = userRepository.findByRoleId(2L);
+
+        // 2) build DTO per dev
+        return testers.stream().map(tester -> {
+            Long  id    = tester.getId();
+            long testedProjects = assignRepo.countByTesteur_Id(id);
+            long totalTests     = assignRepo.countByTesteur_Id(id);
+            long acceptedTests    = assignRepo.countByTesteur_IdAndDecision(id,TestApproval.APPROVED);
+
+            long failedTests    = assignRepo.countByTesteur_IdAndDecision(id,TestApproval.REJECTED);
+
+            long activeTasks       = assignRepo.countActiveTasks(id);
+            long activeProjects    = assignRepo.countActiveProjects(id);
+
+            Map<String, Object> stats = new LinkedHashMap<>();
+            stats.put("name",              tester.getNom() + " " + tester.getPrenom());
+            stats.put("testedProjects",       testedProjects);
+            stats.put("failedTests",         failedTests);
+            stats.put("successTests",         acceptedTests);
+
+            stats.put("totalTests",         totalTests);
+            stats.put("salary",            tester.getSalaire());
+            stats.put("activeTasks",       activeTasks);
+            stats.put("activeProjects",   activeProjects);
+
+            return stats;
+        }).collect(Collectors.toList());
+    }
+
+    public  Map<String, Object>  getTesterStats(long id) {
+
+        User tester = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Developer not found with id: " + id));
+        // 2) build DTO per dev
+        long testedProjects = assignRepo.countByTesteur_Id(id);
+        long totalTests     = assignRepo.countByTesteur_Id(id);
+        long acceptedTests    = assignRepo.countByTesteur_IdAndDecision(id,TestApproval.APPROVED);
+
+        long failedTests    = assignRepo.countByTesteur_IdAndDecision(id,TestApproval.REJECTED);
+
+        long activeTasks       = assignRepo.countActiveTasks(id);
+        long activeProjects    = assignRepo.countActiveProjects(id);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("name",              tester.getNom() + " " + tester.getPrenom());
+        stats.put("testedProjects",       testedProjects);
+        stats.put("failedTests",         failedTests);
+        stats.put("successTests",         acceptedTests);
+
+        stats.put("totalTests",         totalTests);
+        stats.put("salary",            tester.getSalaire());
+        stats.put("activeTasks",       activeTasks);
+        stats.put("activeProjects",   activeProjects);
+
+        return stats;
+
+    }
+    public  Map<String, Object> getTestingStatsByID(Long id) {
+
+        User dev = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Developer not found with id: " + id));
+
+
+        long total   = assignRepo.countByProject_User_Id(id);
+        long approved = assignRepo
+                .countByTesteur_IdAndDecision(id, TestApproval.APPROVED);
+        long failed  = assignRepo
+                .countByTesteur_IdAndDecision(id, TestApproval.REJECTED);
+
+        return Map.of(
+                "total",   total,
+                "success", approved,
+                "failed",  failed
+        );
     }
 
 }

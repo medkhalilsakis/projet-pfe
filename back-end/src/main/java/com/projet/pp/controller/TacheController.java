@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -263,6 +264,36 @@ public class TacheController {
     public ResponseEntity<Void> syncStatus(@PathVariable Long id) {
         tacheService.syncStatus(id);
         return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String,Object>> getTacheStats() {
+
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("completed",            tacheService.getByStatus(Tache.Status.terminé));
+        root.put("inDev",           tacheService.getByStatus(Tache.Status.a_developper));
+        root.put("inTest",            tacheService.getByStatus(Tache.Status.en_cours));
+        root.put("closed",       tacheService.getByStatus(Tache.Status.cloturé));
+        root.put("blocked",       tacheService.getByStatus(Tache.Status.suspendu));
+
+
+        return ResponseEntity.ok(root);
+    }
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<Map<String,Object>> getTacheStats(@PathVariable Long id) {
+
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("completed",            tacheService.getByStatusAndAssignedTo(id,Tache.Status.terminé));
+        root.put("inDev",           tacheService.getByStatusAndAssignedTo(id,Tache.Status.a_developper));
+        root.put("inTest",            tacheService.getByStatusAndAssignedTo(id,Tache.Status.en_cours));
+        root.put("closed",       tacheService.getByStatusAndAssignedTo(id,Tache.Status.cloturé));
+        root.put("blocked",       tacheService.getByStatusAndAssignedTo(id,Tache.Status.suspendu));
+
+
+        return ResponseEntity.ok(root);
     }
 
 }

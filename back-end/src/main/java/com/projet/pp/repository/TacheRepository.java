@@ -34,4 +34,30 @@ public interface TacheRepository extends JpaRepository<Tache, Long> {
     @Query(nativeQuery = true,
             value = "DELETE FROM tache_assigne ta WHERE ta.user_id = :userId")
     void deleteUserFromAssignedTo(@Param("userId") Long userId);
+
+    long countByStatus(Tache.Status statut);
+    long countByStatusAndAssignedTo(Tache.Status statut, User user);
+
+
+    @Query("""
+      SELECT COUNT(t)
+      FROM Tache t 
+     JOIN t.assignedTo u 
+      WHERE u.id = :devId
+        AND t.status NOT IN (com.projet.pp.model.Tache.Status.suspendu, com.projet.pp.model.Tache.Status.cloturé)
+    """)
+    long countActiveTasks(@Param("devId") Long devId);
+
+    /**
+     * Count distinct projects where that dev has tasks
+     * whose status is NOT 'suspendu' or 'cloturé'.
+     */
+    @Query("""
+      SELECT COUNT(DISTINCT t.project.id)
+      FROM Tache t
+      JOIN t.assignedTo u 
+      WHERE u.id = :devId
+        AND t.status NOT IN (com.projet.pp.model.Tache.Status.suspendu, com.projet.pp.model.Tache.Status.cloturé)
+    """)
+    long countActiveProjects(@Param("devId") Long devId);
 }

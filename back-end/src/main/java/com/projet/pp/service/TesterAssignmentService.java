@@ -15,7 +15,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class TesterAssignmentService {
 
     @Autowired
     private ProjectTesterAssignmentRepository assignmentRepo;
+
 
     private final Path baseStorage = Paths.get("uploads/test-report").toAbsolutePath().normalize();
 
@@ -239,6 +242,29 @@ public class TesterAssignmentService {
 
         // Récupérer les détails des testeurs à partir de leurs IDs
         return userRepo.findAllById(testerIds);  // Rechercher tous les testeurs par leurs IDs
+    }
+
+    public Map<String, Object> getTestStats() {
+        long total   = assignmentRepo.count();
+        long success = assignmentRepo.countByDecision(TestApproval.APPROVED);
+        long failed  = assignmentRepo.countByDecision(TestApproval.REJECTED);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("total",   total);
+        stats.put("success", success);
+        stats.put("failed",  failed);
+        return stats;
+    }
+    public Map<String, Object> getTesterStats(long id) {
+        long total   = assignmentRepo.countByTesteur_Id(id);
+        long success = assignmentRepo.countByTesteur_IdAndDecision(id,TestApproval.APPROVED);
+        long failed  = assignmentRepo.countByTesteur_IdAndDecision(id,TestApproval.REJECTED);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("total",   total);
+        stats.put("success", success);
+        stats.put("failed",  failed);
+        return stats;
     }
 
 

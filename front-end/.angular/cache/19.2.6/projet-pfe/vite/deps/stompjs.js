@@ -1,6 +1,6 @@
 import {
   __commonJS
-} from "./chunk-EIB7IA3J.js";
+} from "./chunk-KBUIKKCC.js";
 
 // node_modules/stompjs/lib/stomp.js
 var require_stomp = __commonJS({

@@ -8,6 +8,7 @@ import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.TacheAttachmentRepository;
 import com.projet.pp.repository.TacheRepository;
 import com.projet.pp.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -372,6 +373,15 @@ public class TacheService {
             t.setStatus(newStatus);
             tacheRepository.save(t);
         }
+    }
+
+    public long getByStatus(Tache.Status status) {
+        return tacheRepository.countByStatus(status);
+    }public long getByStatusAndAssignedTo(Long id, Tache.Status status) {
+        User assignedTo=userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Developer not found with id: " + id));
+
+        return tacheRepository.countByStatusAndAssignedTo(status,assignedTo);
     }
 
 

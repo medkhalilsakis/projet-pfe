@@ -18,7 +18,7 @@ import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
 import { TestProjetDetailComponent } from './dashboard/projects/project-test/test-projet-detail/test-projet-detail.component';
-
+import {AnalyticsComponent} from './dashboard/analytics/analytics.component'
 export const routes: Routes = [
   { 
     path: 'dashboard',
@@ -28,6 +28,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       { path: 'overview', component: OverviewComponent },
       { path: 'notifications', component: NotificationsComponent },
+      { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
       { path: 'settings', component: SettingsComponent },
