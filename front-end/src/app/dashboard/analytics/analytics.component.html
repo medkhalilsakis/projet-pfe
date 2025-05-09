@@ -1,0 +1,515 @@
+<div *ngIf="isAdmin() && projectStats" class="dashboard" id=dashboardContent>
+    <div class="print-only" style="display: none;">
+        <h1>Supervisor Analytics Dashboard</h1>
+        <p>Generated on {{ currentDate | date:'medium' }}</p>
+      </div>
+      
+  <div class="dashboard-header">
+    <h2>📊 Supervisor Analytics Dashboard</h2>
+    <button (click)="exportToPDF()" class="export-btn">
+      Export to PDF
+    </button>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Summary Cards -->
+    <div class="summary-card">
+      <h3>📅 Projects Overview</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ projectStats?.week }}</span>
+          <span class="metric-label">This Week</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ projectStats?.month }}</span>
+          <span class="metric-label">This Month</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ projectStats?.year }}</span>
+          <span class="metric-label">This Year</span>
+        </div>
+      </div>
+      <div class="sub-metrics">
+        <h4>✅ Passed to Testing</h4>
+        <div class="metric-group">
+          <div class="metric">
+            <span class="metric-value">{{ projectStats.toTesting?.week }}</span>
+            <span class="metric-label">Week</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">{{ projectStats.toTesting?.month }}</span>
+            <span class="metric-label">Month</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">{{ projectStats.toTesting?.year }}</span>
+            <span class="metric-label">Year</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h3>📂 Task Status</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ taskStats.completed }}</span>
+          <span class="metric-label">Completed</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ taskStats.inDev }}</span>
+          <span class="metric-label">In Dev</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ taskStats.inTest }}</span>
+          <span class="metric-label">In Test</span>
+        </div>
+      </div>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ taskStats.closed }}</span>
+          <span class="metric-label">Closed</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ taskStats.blocked }}</span>
+          <span class="metric-label">Blocked</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h3>🧪 Test Results</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ testStats.total }}</span>
+          <span class="metric-label">Total Tests</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ testStats.success }}</span>
+          <span class="metric-label">Success</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ testStats.failed }}</span>
+          <span class="metric-label">Failed</span>
+        </div>
+      </div>
+      <div class="metric">
+        <span class="metric-value">{{ (testStats.success / testStats.total * 100).toFixed(2) }}%</span>
+        <span class="metric-label">Success Rate</span>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="chart-card ">
+      <h3>📊 Task Distribution</h3>
+      <ngx-charts-advanced-pie-chart
+        [results]="projectCompletionChart"
+        [scheme]="colorScheme"
+        [gradient]="true"
+        [animations]="true">
+      </ngx-charts-advanced-pie-chart>
+    </div>
+
+    <div class="chart-card">
+      <h3>🧪 Test Results</h3>
+      <ngx-charts-pie-chart
+        [results]="testingSuccessChart"
+        [scheme]="colorScheme"
+        [legend]="true"
+        [labels]="true"
+        [doughnut]="true"
+        [animations]="true">
+      </ngx-charts-pie-chart>
+    </div>
+
+    <div class="chart-card">
+      <h3>🚀 Developer Productivity (Completed Projects / Salary)</h3>
+      <ngx-charts-bar-vertical
+  [results]="devProductivityChart"
+  [xAxis]="true"
+  [yAxis]="true"
+  [yAxisTicks]="yAxisTicks"             
+  [showXAxisLabel]="true"
+  [showYAxisLabel]="true"
+  xAxisLabel="Developer"
+  yAxisLabel="Productivity Score"
+  [animations]="true">
+</ngx-charts-bar-vertical>
+    </div>
+   <div class="chart-card  ">
+  <h3>🚀 testers Productivity</h3>
+  <ngx-charts-bar-vertical
+    [results]="testProductivityChart"
+    [xAxis]="true"
+    [yAxis]="true"
+    [yAxisTicks]="yAxisTicks"             
+    [showXAxisLabel]="true"
+    [showYAxisLabel]="true"
+    [xAxisLabel]="'Developer'"
+    [yAxisLabel]="'Productivity Score'"
+    [animations]="true"
+    >
+  </ngx-charts-bar-vertical>
+</div>
+<div class="chart-card ">
+    <h3>📅 Workload Distribution</h3>
+    <ngx-charts-line-chart
+      [results]="workloadDistributionChart"
+      [scheme]="colorScheme"
+      [xAxis]="true"
+    [yAxis]="true"
+      [legend]="true"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      xAxisLabel="Team Member"
+      yAxisLabel="Active Tasks"
+      [animations]="true">
+    </ngx-charts-line-chart>
+  </div>
+
+    <!-- Team Performance Sections -->
+    <div class="performance-section">
+      <h3>🏆 Top Performers</h3>
+      <div class="tabs">
+        <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+        <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+      </div>
+      
+      <div class="performance-grid">
+        <div *ngFor="let dev of (showAllDevs ? devStats : topDevs)" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.completed }}</span>
+              <span class="metric-label">Completed</span>
+            </div>
+            
+            <div class="performance-metric">
+              <span class="metric-value">{{ calculateProductivity(dev) }}</span>
+              <span class="metric-label">Prod. Score</span>
+            </div>
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.activeTasks }}/{{ dev.activeProjects }}</span>
+              <span class="metric-label">Tasks/Projects</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="performance-section">
+      <h3>🧪 Testers Efficiency</h3>
+      <div class="tabs">
+        <button [class.active]="!showAllTesters" (click)="showAllTesters = false">Top 5</button>
+        <button [class.active]="showAllTesters" (click)="showAllTesters = true">All Testers</button>
+      </div>
+      
+      <div class="performance-grid">
+        
+        <div *ngFor="let tester of (showAllTesters ? testerStats : topTesters)" class="performance-card">
+          <h4>{{ tester.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ tester.testedProjects }}</span>
+              <span class="metric-label">Projects</span>
+            </div>
+            <div class="performance-metric">
+              <span class="metric-value">{{ calculateFailureRate(tester) }}</span>
+              <span class="metric-label">Failure Rate</span>
+            </div>
+            <div class="performance-metric">
+              <span class="metric-value">{{ (tester.testedProjects / tester.salary).toFixed(2) }}</span>
+              <span class="metric-label">€/Project</span>
+            </div>
+            <div class="performance-metric">
+              <span class="metric-value">{{ tester.activeTasks }}/{{ tester.activeProjects }}</span>
+              <span class="metric-label">Tasks/Projects</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="performance-section">
+        <h3>📅 Top performers last month</h3>
+
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+          </div>
+    <div class="performance-grid">
+        <div *ngFor="let dev of devStatsSortedByLastMonth" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.projectsLastMonth }}</span>
+              <span class="metric-label">projects</span>
+            </div>
+        </div>
+    </div>
+            <div *ngIf="devStatsSortedByLastMonth.length === 0" class="no-data">
+               <h2> No projects completed last year </h2>
+              </div>
+              <div class="performance-section">
+                <h3>📅 Developer Performance last year</h3>
+
+                <div class="tabs">
+                    <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+                    <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+                  </div>
+            <div class="performance-grid">
+              <div *ngFor="let dev of devStatsSortedByLastYear"  class="performance-card">
+                <h4>{{ dev.name }}</h4>
+                <div class="performance-metrics">
+                  <div class="performance-metric">
+                    <span class="metric-value">{{ dev.projectsLastYear }}</span>
+                    <span class="metric-label">projects </span>
+                  </div>
+              </div>
+          </div>
+                  <div *ngIf="devStatsSortedByLastMonth.length === 0" class="no-data">
+                      No projects completed last month
+                    </div>
+      
+         
+        </div>
+      </div>
+    
+  </div>
+  </div>
+  </div>
+  </div>
+  <div *ngIf="isDeveloper() && projectStats" class="dashboard" id=dashboardDeveloperContent>
+    <div class="dashboard-header">
+        <h2>📊 Supervisor Analytics Dashboard</h2>
+        <button (click)="exportToPDF()" class="export-btn">
+          Export to PDF
+        </button>
+      </div>
+    
+      <div class="dashboard-grid">
+        <!-- Summary Cards -->
+        <div class="summary-card">
+          <h3>📅 Projects Overview</h3>
+          <div class="metric-group">
+            <div class="metric">
+              <span class="metric-value">{{ projectStats?.week }}</span>
+              <span class="metric-label">This Week</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ projectStats?.month }}</span>
+              <span class="metric-label">This Month</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ projectStats?.year }}</span>
+              <span class="metric-label">This Year</span>
+            </div>
+          </div>
+          <div class="sub-metrics">
+            <h4>✅ Passed to Testing</h4>
+            <div class="metric-group">
+              <div class="metric">
+                <span class="metric-value">{{ projectStats.toTesting?.week }}</span>
+                <span class="metric-label">Week</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">{{ projectStats.toTesting?.month }}</span>
+                <span class="metric-label">Month</span>
+              </div>
+              <div class="metric">
+                <span class="metric-value">{{ projectStats.toTesting?.year }}</span>
+                <span class="metric-label">Year</span>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div class="summary-card">
+          <h3>📂 Task Status</h3>
+          <div class="metric-group">
+            <div class="metric">
+              <span class="metric-value">{{taskStats.completed }}</span>
+              <span class="metric-label">Completed</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ taskStats.inDev }}</span>
+              <span class="metric-label">In Dev</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ taskStats.inTest }}</span>
+              <span class="metric-label">In Test</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="metric">
+              <span class="metric-value">{{ taskStats.closed }}</span>
+              <span class="metric-label">Closed</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ taskStats.blocked }}</span>
+              <span class="metric-label">Blocked</span>
+            </div>
+          </div>
+        </div>
+    
+        <div class="summary-card">
+          <h3>🧪 Test Results</h3>
+          <div class="metric-group">
+            <div class="metric">
+              <span class="metric-value">{{ total }}</span>
+              <span class="metric-label">Total Tests</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ success }}</span>
+              <span class="metric-label">Success</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ failed }}</span>
+              <span class="metric-label">Failed</span>
+            </div>
+          </div>
+          <div class="metric">
+            <span class="metric-value">{{ (testStats.success / testStats.total * 100).toFixed(2) }}%</span>
+            <span class="metric-label">Success Rate</span>
+          </div>
+          </div>
+              <!-- Charts Section -->
+    <div class="chart-card ">
+        <h3>📊 Task Distribution</h3>
+        <ngx-charts-advanced-pie-chart 
+          [results]="projectCompletionChart"
+          [scheme]="colorScheme"
+          [gradient]="true"
+          [animations]="true">
+        </ngx-charts-advanced-pie-chart>
+      </div>
+  
+      <div class="chart-card">
+        <h3>🧪 Test Results</h3>
+        <ngx-charts-pie-chart
+          [results]="testingSuccessChart"
+          [scheme]="colorScheme"
+          [legend]="true"
+          [labels]="true"
+          [doughnut]="true"
+          [animations]="true">
+        </ngx-charts-pie-chart>
+      </div>
+      <div class="chart-card ">
+        <h3>📅 Workload Distribution</h3>
+        <ngx-charts-bar-vertical
+              [results]="workloadDevDistributionChart"
+              [scheme]="colorScheme"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="true"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Activity Type"
+              yAxisLabel="Count"
+              [animations]="true">
+            </ngx-charts-bar-vertical>
+      </div>
+        </div>
+    </div><div *ngIf="isTester() && projectStats" class="dashboard" id=dashboardTesterContent>
+        <div class="dashboard-header">
+            <h2>📊 Supervisor Analytics Dashboard</h2>
+            <button (click)="exportToPDF()" class="export-btn">
+              Export to PDF
+            </button>
+          </div>
+        
+          <div class="dashboard-grid">
+            <!-- Summary Cards -->
+            <div class="summary-card">
+              <h3>📅 Projects Overview</h3>
+              <div class="metric-group">
+                <div class="metric">
+                  <span class="metric-value">{{ projectStats?.week }}</span>
+                  <span class="metric-label">This Week</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">{{ projectStats?.month }}</span>
+                  <span class="metric-label">This Month</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">{{ projectStats?.year }}</span>
+                  <span class="metric-label">This Year</span>
+                </div>
+              </div>
+              <div class="sub-metrics">
+                <h4>✅ Passed to Testing</h4>
+                <div class="metric-group">
+                  <div class="metric">
+                    <span class="metric-value">{{ projectStats.toTesting?.week }}</span>
+                    <span class="metric-label">Week</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-value">{{ projectStats.toTesting?.month }}</span>
+                    <span class="metric-label">Month</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-value">{{ projectStats.toTesting?.year }}</span>
+                    <span class="metric-label">Year</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+        
+            
+        
+            <div class="summary-card">
+              <h3>🧪 Test Results</h3>
+              <div class="metric-group">
+                <div class="metric">
+                  <span class="metric-value">{{ total }}</span>
+                  <span class="metric-label">Total Tests</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">{{ success }}</span>
+                  <span class="metric-label">Success</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">{{ failed }}</span>
+                  <span class="metric-label">Failed</span>
+                </div>
+              </div>
+              <div class="metric">
+                <span class="metric-value">{{ (testStats.success / testStats.total * 100).toFixed(2) }}%</span>
+                <span class="metric-label">Success Rate</span>
+              </div>
+              </div>
+                  <!-- Charts Section -->
+         
+      
+          <div class="chart-card">
+            <h3>🧪 Test Results</h3>
+            <ngx-charts-pie-chart
+              [results]="testingSuccessChart"
+              [scheme]="colorScheme"
+              [legend]="true"
+              [labels]="true"
+              [doughnut]="true"
+              [animations]="true">
+            </ngx-charts-pie-chart>
+          </div>
+          <div class="chart-card ">
+            <h3>📅 Workload Distribution</h3>
+            <ngx-charts-bar-vertical
+              [results]="workloadTestDistributionChart"
+              [scheme]="colorScheme"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="true"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Activity Type"
+              yAxisLabel="Count"
+              [animations]="true">
+            </ngx-charts-bar-vertical>
+          </div>
+            </div>
+        </div>
+<div *ngIf="isGeneratingPDF" class="pdf-loading-overlay">
+    <div class="spinner"></div>
+    <p>Generating PDF report...</p>
+  </div>
+  
