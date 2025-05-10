@@ -86,27 +86,31 @@ export class ProjectChatComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.messageText.trim() && !this.attachments.length) return;
+  if (!this.messageText.trim() && !this.attachments.length) return;
 
-    // Prépare le FormData
-    const form = new FormData();
-    form.append('projectId', String(this.projectId));
-    form.append('senderId', String(this.currentUserId));
-    form.append('message', this.messageText);
-    this.attachments.forEach(f => form.append('files', f));
+  const form = new FormData();
+  form.append('senderId', String(this.currentUserId));
+  form.append('message', this.messageText);
+  this.attachments.forEach(f => form.append('files', f));
 
-    // 1) POST via REST
-    this.chatSvc.postMessage(this.projectId, form)
-      .subscribe((dto: ChatMessageDTO) => {
-        // 2) notifie tous via STOMP
-        this.chatSvc.publish('/app/chat.send', dto);
-
-        // reset UI
-        this.messageText = '';
-        this.attachments = [];
-        this.fileInput.nativeElement.value = '';
+  // 1) Envoi HTTP
+  this.chatSvc.postMessage(this.projectId, form)
+    .subscribe((dto: ChatMessageDTO) => {
+      // 2) Publication STOMP
+      this.chatSvc.publish('/app/chat.send', {
+        projectId: this.projectId,
+        senderId: this.currentUserId,
+        message: this.messageText,
+        id: dto.id  // selon ce que vous attendez en payload
       });
-  }
+
+      // reset UI
+      this.messageText = '';
+      this.attachments = [];
+      this.fileInput.nativeElement.value = '';
+    });
+}
+
 
   onDeleteMessage(msg: ChatMessageDTO) {
     if (!confirm('Supprimer ce message ?')) return;
@@ -114,14 +118,6 @@ export class ProjectChatComponent implements OnInit {
       .subscribe(() => {
         // local ou stomp 
         this.messages = this.messages.filter(m => m.id !== msg.id);
-      });
-  }
-
-  onDeleteAttachment(msg: ChatMessageDTO, att: any) {
-    if (!confirm(`Supprimer la pièce jointe « ${att.fileName} » ?`)) return;
-    this.chatSvc.deleteAttachment(this.projectId, att.id)
-      .subscribe(() => {
-        msg.attachments = msg.attachments?.filter(a => a.id !== att.id) || [];
       });
   }
 

@@ -1,11 +1,18 @@
 <h2 mat-dialog-title>Statut du projet</h2>
 
 <mat-dialog-content>
-  <!-- Barre de progression avec étapes -->
-  <div class="stepper-container">
+  <div class="stepper-container"
+       [ngClass]="{
+         'paused': isPaused,
+         'closed': isClosed
+       }">
     <div class="stepper">
       <ng-container *ngFor="let s of stages; let i = index">
-        <div class="step" [ngClass]="{'completed': i < current, 'active': i === current}">
+        <div class="step"
+             [ngClass]="{
+               'completed': !isFrozen && i < current,
+               'active':    !isFrozen && i === current
+             }">
           <div class="circle">
             <mat-icon>{{ iconName(i) }}</mat-icon>
           </div>
@@ -13,26 +20,15 @@
         </div>
       </ng-container>
     </div>
-    <mat-progress-bar mode="determinate" [value]="(current / (stages.length - 1)) * 100"></mat-progress-bar>
-  </div>
 
-  <!-- Raison de mise en pause -->
-  <div *ngIf="showPauseReason" class="reason-block pause">
-    <h3>Projet mis en pause</h3>
-    <p class="reason-text">{{ data.project.pauseReason }}</p>
-    <div *ngIf="data.project.attachments?.length" class="attachments">
-      <h4>Pièces jointes</h4>
-      <div class="att-list">
-        <a *ngFor="let att of data.project.attachments"
-           [href]="att.url" target="_blank">{{ att.fileName }}</a>
-      </div>
+    <mat-progress-bar
+      mode="determinate"
+      [value]="isFrozen ? 0 : (current / (stages.length - 1)) * 100">
+    </mat-progress-bar>
+
+    <div *ngIf="isFrozen" class="freeze-warning">
+      {{ freezeMessage }}
     </div>
-  </div>
-
-  <!-- Raison de clôture -->
-  <div *ngIf="showClosureReason" class="reason-block closure">
-    <h3>Projet clôturé</h3>
-    <p class="reason-text">{{ data.project.closureReason }}</p>
   </div>
 </mat-dialog-content>
 

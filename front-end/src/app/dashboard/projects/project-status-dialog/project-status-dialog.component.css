@@ -1,82 +1,99 @@
+:host {
+  --warning-color: #fbbf24;
+  --stop-color:    #e53935;
+  --done-color:    #4caf50;
+  --active-color:  #ff9800;
+  --future-bg:     #e0e0e0;
+}
+
 .stepper-container {
-  width: 100%;
   padding: 20px;
 }
 
 .stepper {
   display: flex;
   justify-content: space-between;
-  position: relative;
+  margin-bottom: 16px;
 }
 
 .step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
   width: 20%;
 }
 
-.step .circle {
+.circle {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  background-color: var(--future-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  margin-bottom: 8px;
   transition: background-color 0.3s ease;
 }
 
-.step .label {
+.label {
   font-size: 12px;
   text-align: center;
+  margin-top: 4px;
 }
 
-.step.active .circle {
-  background-color: #ff9800;
-  color: #fff;
-}
-
+/* Normal : passé = vert, actif = orange */
 .step.completed .circle {
-  background-color: #4caf50;
+  background-color: var(--done-color);
+}
+.step.active .circle {
+  background-color: var(--active-color);
+}
+
+/* Pause : tous en warning */
+.stepper-container.paused .circle {
+  background-color: var(--warning-color);
+}
+.stepper-container.paused .circle mat-icon {
   color: #fff;
 }
 
+/* Clôture : tous en rouge */
+.stepper-container.closed .circle {
+  background-color: var(--stop-color);
+}
+.stepper-container.closed .circle mat-icon {
+  color: #fff;
+}
+
+/* Par défaut, icône grise sur futur */
+.circle mat-icon {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Barre de progression */
 mat-progress-bar {
   width: 100%;
-  margin-top: 20px;
   height: 8px;
   border-radius: 4px;
+  margin-bottom: 12px;
 }
 
-.reason-block {
-  margin-top: 20px;
+/* Warning message */
+.freeze-warning {
+  padding: 12px;
+  border-radius: 4px;
+  background-color: #fff4e5;
+  color: #a66300;
+  font-weight: 500;
 }
 
-.reason-block h3 {
-  font-size: 16px;
-  font-weight: bold;
+:host ::ng-deep mat-dialog-content {
+  max-width: 600px;     /* ne dépassera jamais 600px */
+  width: 100%;          /* s’étend à 100% de ce max-width */
+  margin: 0 auto;       /* centré horizontalement */
+  box-sizing: border-box; /* padding inclus dans la largeur totale */
 }
 
-.reason-block p {
-  font-size: 14px;
-  color: #757575;
-}
-
-.attachments {
-  margin-top: 10px;
-}
-
-.att-list a {
-  display: block;
-  font-size: 14px;
-  color: #1976d2;
-  text-decoration: none;
-  margin-bottom: 5px;
-}
-
-.att-list a:hover {
-  text-decoration: underline;
+/* Facultatif : ajuster le padding interne si trop large */
+:host ::ng-deep mat-dialog-content {
+  padding: 16px 24px;
 }

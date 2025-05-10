@@ -14,7 +14,6 @@ export interface Project {
   id: number;
   name: string;
   status: number;
-  // Nouveaux champs :
   pauseReason?: string;
   closureReason?: string;
   attachments?: { url: string; fileName: string }[];
@@ -35,7 +34,6 @@ export interface Project {
   styleUrls: ['./project-status-dialog.component.css']
 })
 export class ProjectStatusDialogComponent {
-  // Codes de statuts pour plus de lisibilité
   readonly PAUSED = 55;
   readonly CLOSED = 99;
 
@@ -56,22 +54,38 @@ export class ProjectStatusDialogComponent {
     this.current = data.project.status;
   }
 
+  /** Choix de l’icône à afficher */
   iconName(idx: number): string {
+    if (this.isPaused) {
+      return 'pause_circle';
+    }
+    if (this.isClosed) {
+      return 'cancel';
+    }
     if (idx < this.current)   return 'done';
     if (idx === this.current) return 'autorenew';
     return 'radio_button_unchecked';
   }
-  iconColor(idx: number): 'primary'|'warn'|undefined {
-    if (idx < this.current)   return 'primary';  // déjà passé
-    if (idx === this.current) return 'warn';     // en cours
-    return undefined;                             // à venir
+
+  /** Détermine si pause / clôture */
+  get isPaused(): boolean {
+    return this.current === this.PAUSED;
+  }
+  get isClosed(): boolean {
+    return this.current === this.CLOSED;
+  }
+  get isFrozen(): boolean {
+    return this.isPaused || this.isClosed;
   }
 
-  // Détermine si on doit afficher le bloc de raison
-  get showPauseReason(): boolean {
-    return this.data.project.status === this.PAUSED;
-  }
-  get showClosureReason(): boolean {
-    return this.data.project.status === this.CLOSED;
+  /** Texte du warning à afficher */
+  get freezeMessage(): string {
+    if (this.isPaused) {
+      return `⚠️ Projet mis en pause : ${this.data.project.pauseReason}`;
+    }
+    if (this.isClosed) {
+      return `⚠️ Projet clôturé : ${this.data.project.closureReason}`;
+    }
+    return '';
   }
 }
