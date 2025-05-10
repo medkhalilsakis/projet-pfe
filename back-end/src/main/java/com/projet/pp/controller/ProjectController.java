@@ -5,6 +5,13 @@ import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.ProjectFile;
+import com.projet.pp.model.User;
+import com.projet.pp.model.Tache;
+import com.projet.pp.model.Notification;
+import com.projet.pp.service.UserService;
+import com.projet.pp.service.TacheService;
+import com.projet.pp.service.NotificationService;
+
 import com.projet.pp.model.ProjectInvitedUser;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +37,12 @@ public class ProjectController {
 
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private TacheService tacheService;
+    @Autowired
+    private UserService userService;
+    @Autowired NotificationService notificationService;
+
 
     @GetMapping
     public ResponseEntity<List<Project>> getAllProjects() {
@@ -66,6 +80,28 @@ public class ProjectController {
             String status = commitData.get("status");
 
             projectService.commitProject(projectId, name, type, description, visibilite, status);
+            Project project = projectService.getProjectById(projectId);
+            User dev = project.getUser();
+            Tache tache = tacheService.getTacheByProjectId(projectId).orElse(null);
+
+            if (tache != null) {
+                User admin = tache.getAssignedBy();
+
+
+                Notification noti = new Notification(null,
+                        admin,
+                        Notification.RoleType.admin,
+                        "Projet développé",
+                        "la développeur" + dev.getNom() + "a terminé la tache que vous lui a assigné" + project.getName(),
+                        false,
+                        LocalDateTime.now(),
+                        project,
+                        tache,
+                        null,
+                        null
+                );
+                notificationService.createNoti(noti);
+            }
             return ResponseEntity.ok("Projet finalisé avec succès");
         } catch (Exception e) {
             e.printStackTrace();

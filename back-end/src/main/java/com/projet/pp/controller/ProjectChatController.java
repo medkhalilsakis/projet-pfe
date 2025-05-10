@@ -1,8 +1,15 @@
 // src/main/java/com/projet/pp/controller/ProjectChatController.java
 package com.projet.pp.controller;
 
+import com.projet.pp.model.*;
 import com.projet.pp.dto.ProjectChatMessageDTO;
 import com.projet.pp.service.ProjectChatService;
+import com.projet.pp.service.NotificationService;
+import com.projet.pp.service.ProjectService;
+import com.projet.pp.service.TacheService;
+
+import com.projet.pp.service.UserService;
+import com.projet.pp.service.TesterAssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -12,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +27,11 @@ import java.util.Map;
 @RequestMapping("/api/projects/{projectId}/chat")
 public class ProjectChatController {
     @Autowired private ProjectChatService svc;
-
+    @Autowired private NotificationService notificationService;
+    @Autowired private ProjectService projectService;
+    @Autowired private UserService userService;
+    @Autowired private TesterAssignmentService testerAssignmentService;
+    @Autowired private TacheService tacheService;
     @Autowired private SimpMessagingTemplate broker;
 
     /** Historique */
@@ -36,7 +48,117 @@ public class ProjectChatController {
             @RequestPart("message") String message,
             @RequestPart(name="files", required=false) MultipartFile[] files
     ) throws Exception {
-        return svc.postMessage(projectId, senderId, message, files);
+        ProjectChatMessageDTO pcdto= svc.postMessage(projectId, senderId, message, files);
+        Project p =projectService.getProjectById(projectId);
+        User sender = userService.getUserById(senderId);
+        if (sender.getRole().getLibelle().equals("developpeur")){
+
+            Notification noti1 = new Notification(
+                    null,
+                    testerAssignmentService.getAssignmentByProjectId(projectId).getTesteur(),
+                    Notification.RoleType.tester,
+                    "Nouveau message du proejt ",
+                    sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    null,
+                    null,
+                    null
+            );
+            notificationService.createNoti(noti1);
+            Tache tache = tacheService.getTacheById(projectId).orElse(null);
+
+            if (tache != null) {
+                Notification noti2 = new Notification(
+                        null,
+                        tache.getAssignedBy(),
+                        Notification.RoleType.admin,
+                        "Nouveau message du proejt ",
+                        sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
+                        false,
+                        LocalDateTime.now(),
+                        p,
+                        null,
+                        null,
+                        null
+                );
+                notificationService.createNoti(noti2);
+            }
+
+        }
+        if (sender.getRole().getLibelle().equals("testeur")) {
+
+            Notification noti = new Notification(
+                    null,
+                    projectService.getProjectById(projectId).getUser(),
+                    Notification.RoleType.dev,
+                    "Nouveau message du proejt ",
+                    sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    null,
+                    null,null
+
+            );
+
+            notificationService.createNoti(noti);
+
+
+            Tache tache = tacheService.getTacheById(projectId).orElse(null);
+
+            if (tache != null) {
+                Notification noti2 = new Notification(
+                        null,
+                        tache.getAssignedBy(),
+                        Notification.RoleType.admin,
+                        "Nouveau message du proejt ",
+                        sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
+                        false,
+                        LocalDateTime.now(),
+                        p,
+                        null,
+                        null,
+                        null
+                );
+                notificationService.createNoti(noti2);
+            }
+        }
+        if (sender.getRole().getLibelle().equals("superviseur")){
+
+            Notification noti1 = new Notification(
+                    null,
+                    projectService.getProjectById(projectId).getUser(),
+                    Notification.RoleType.dev,
+                    "Nouveau message du proejt ",
+                    sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    null
+                    ,null,
+                    null
+            );
+            notificationService.createNoti(noti1);
+
+            Notification noti2 = new Notification(
+                    null,
+                    testerAssignmentService.getAssignmentByProjectId(projectId).getTesteur(),
+                    Notification.RoleType.tester,
+                    "Nouveau message du proejt ",
+                    sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    null
+                    ,null,null
+            );
+            notificationService.createNoti(noti2);
+
+        }
+
+        return pcdto;
     }
 
     /** Télécharger une pièce jointe */

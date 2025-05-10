@@ -1,0 +1,30 @@
+<div class="notifications-container">
+    <ng-container *ngFor="let notif of notifications; let last = last">
+      <div class="notification-card" 
+      [class.unread-notification]="!notif.isRead" 
+      (click)="viewNotificationDetails(notif)">   
+           <p class="notif-message">{{ notif.title }}</p>
+        <p class="notif-message">{{ notif.createdAt }}</p>
+  
+        <ng-container *ngIf="notif.relatedTask">
+          <p class="notif-message">By: {{ notif.relatedTask.assignedBy.nom }} {{ notif.relatedTask.assignedBy.prenom }}</p>
+          <p class="notif-message">Task: {{ notif.relatedTask.name }}</p>
+          <p class="notif-message">{{ notif.relatedTask.description }}</p>
+        </ng-container>
+        <ng-container *ngIf="notif.relatedProject">
+          <p class="notif-message">By: {{ notif.relatedProject.name }} </p>
+          <p class="notif-message">Task: {{ notif.relatedProject.typr }}</p>
+          <p class="notif-message">{{ notif.relatedProject.status }}</p>
+        </ng-container>
+        <ng-container *ngIf="notif.chatMessage">
+          <p class="notif-message">By: {{ notif.chatMessage.sender.nom }} {{ notif.chatMessage.sender.prenom }} </p>
+          <p class="notif-message">Task: {{ notif.chatMessage.message }}</p>
+        
+          </ng-container>
+      </div>
+  
+      <!-- divider under every card except the last -->
+      <hr *ngIf="!last" class="notif-divider"/>
+    </ng-container>
+  </div>
+  <!--[class.unread-notification]="!notif.isRead" -->

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ElementRef, ViewChild, computed } from '@angular/core';
 import { SessionStorageService } from '../services/session-storage.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -13,8 +13,10 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ProfileImageService } from '../services/profile-image.service';
 import { PresenceService, PresenceUpdate } from '../services/presence.service';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { NotificationService } from '../services/notification.service';
+import { NotificationPopupComponent } from './notification-popup/notification-popup.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +32,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatToolbarModule,
     MatListModule,
     MatIconModule,
+    NotificationPopupComponent,
     MatExpansionModule
   ],
   templateUrl: './dashboard.component.html',
@@ -39,16 +42,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('profileFileInput', { read: ElementRef }) 
   profileFileInput!: ElementRef<HTMLInputElement>;
 
+  @ViewChild(NotificationPopupComponent)
+  popupComponent!: NotificationPopupComponent;
+    
+
   presenceMap = new Map<number, PresenceUpdate>();
 
   currentView = signal<string>('overview');
   sideNavOpen = signal(true);
   notifications = signal<any[]>([]);
-  profileImageUrl: string|null = null;
+  unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);  profileImageUrl: string|null = null;
   currentUser: any;
   menuItems: any[] = [];
 
   private session = inject(SessionStorageService);
+  private notifService = inject(NotificationService);
+
   private http = inject(HttpClient);
   private snack = inject(MatSnackBar);
   private router = inject(Router);
@@ -142,8 +151,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadNotifications(): void {
-    // … votre logique de notifications …
-  }
+const UserId = this.currentUser.id;
+      this.notifService.refreshUserUnreadNotifications(UserId);
+      console.log(this.notifications())
+      this.notifService.unreadnotifications$.subscribe(data => {
+        this.notifications.set(data);
+        console.log(this.notifications())
+
+      });
+      this.notifService.connect(UserId);
+    
+      this.notifService.notifications$.subscribe(data => {
+        const updatedNotifications = [...this.notifications(), ...data];
+        this.notifications.set(updatedNotifications);
+              if (data.length > 0) {
+          this.popupComponent.showNotification(data[0]);
+        }
+      });
+    }  
 
   private buildMenu(): void {
     const role = this.currentUser.role.id;
@@ -189,6 +214,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
         { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('my-projects') }
       ];
     }
+  }
+
+  
+  selectedNoti = signal<any>(null);
+
+  viewNotiDetails(notification: any) {
+    this.navigateTo('/notification',notification.id)
+  }
+
+   viewNotificationDetails(notification: any) {
+  const currentUserId = this.currentUser  .id;
+
+       this.markAsRead(notification.id).subscribe({
+         next: () => {
+           this.notifService.refreshUserUnreadNotifications(currentUserId);
+      this.router.navigate(['notification', notification.id], { relativeTo: this.route });
+         }
+     });
+    
+   }
+  
+  markAsRead(id: number): Observable<any> {
+    return this.notifService.markAsRead(this.currentUser.id,id);
+
   }
 
   logout(): void {

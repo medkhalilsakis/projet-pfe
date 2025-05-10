@@ -24,7 +24,7 @@
       <!-- Notifications -->
       <span
         class="action-icon"
-        matBadge="{{ notifications().length }}"
+        [matBadge]="unreadCount()"
         matBadgeColor="warn"
         matBadgeOverlap="false"
         [matMenuTriggerFor]="notificationsMenu"
@@ -57,6 +57,7 @@
 
   <!-- Contenu principal : menu + zone routée -->
   <div class="main-content" fxLayout="row" fxFlex>
+  <app-notification-popup (notiSelected)="viewNotiDetails($event)"></app-notification-popup>
 
     <!-- Sidebar pliante -->
     <div
@@ -123,11 +124,12 @@
   <!-- Menu Notifications -->
   <mat-menu #notificationsMenu="matMenu">
     <ng-container *ngIf="notifications().length; else noNotes">
-      <button mat-menu-item *ngFor="let n of notifications()">
+    <h3 class="notification-header">Notifications ({{unreadCount()}})</h3>
+      <button mat-menu-item *ngFor="let n of notifications()" (click)="viewNotificationDetails(n)">
         <mat-icon>{{ n.icon }}</mat-icon>
         <div fxLayout="column">
-          <span>{{ n.text }}</span>
-          <small>{{ n.date | date:'short' }}</small>
+          <span>{{ n.title }}</span>
+          <small>{{ n.createdAt | date:'short' }}</small>
         </div>
       </button>
       <mat-divider></mat-divider>

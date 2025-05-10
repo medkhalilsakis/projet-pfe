@@ -1,10 +1,11 @@
 // src/app/services/notification.service.ts
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { BehaviorSubject, tap } from "rxjs";
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
-import { SessionStorageService } from "./session-storage.service";
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Client, Message, StompSubscription } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export interface NotificationDTO {
   id: number;
@@ -13,55 +14,105 @@ export interface NotificationDTO {
   read: boolean;
   createdAt: string;
 }
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class NotificationService {
   private stompClient!: Client;
-  private notif$ = new BehaviorSubject<NotificationDTO[]>([]);
-  public notifications$ = this.notif$.asObservable();
+  private notificationsSubject = new BehaviorSubject<any[]>([]);
+  private unreadnotificationsSubject = new BehaviorSubject<any[]>([]);
 
-  constructor(
-    private http: HttpClient,
-    private session: SessionStorageService
-  ) {
-    const user = this.session.getUser();
-    if (!user?.id) return;
+  notifications$ = this.notificationsSubject.asObservable();
+  unreadnotifications$ = this.unreadnotificationsSubject.asObservable();
 
-    this.loadInitial(user.id);
-    this.connect(user.id);
-  }
+  private subscription?: StompSubscription;
+  private reloadTrigger = new Subject<void>();
 
-  private loadInitial(userId: number) {
-    this.http
-      .get<NotificationDTO[]>(`http://localhost:8080/api/notifications/${userId}`)
-      .subscribe(list => this.notif$.next(list));
-  }
+  reloadNeeded$ = this.reloadTrigger.asObservable();
 
-  private connect(userId: number) {
-    const socket = new SockJS("http://localhost:8080/ws");
+  constructor(private http: HttpClient) {}
+
+  connect(userId: number) {
     this.stompClient = new Client({
-      webSocketFactory: () => socket
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      reconnectDelay: 5000
     });
+
     this.stompClient.onConnect = () => {
-      this.stompClient.subscribe(`/topic/notifications/${userId}`, msg => {
-        const n: NotificationDTO = JSON.parse(msg.body);
-        this.notif$.next([n, ...this.notif$.value]);
-      });
+      console.log('Connected to WebSocket');
+      this.subscription = this.stompClient.subscribe(
+        `/topic/notifications/${userId}`,
+        (message: Message) => {
+          console.log('[STOMP raw message]', message);
+          this.handleIncomingPush(message)
+          let notification;
+          try {
+            notification = JSON.parse(message.body);
+          } catch (e) {
+            console.error('JSON parse error', e, message.body);
+            return;
+          }
+          console.log('[Parsed notification]', notification);
+          // now push or show it
+          const current = this.notificationsSubject.value;
+          this.notificationsSubject.next([notification, ...current]);
+        }
+      );
     };
-    this.stompClient.activate();
+    this.stompClient.onWebSocketError = (err) => console.error('WebSocket error', err);
+
+    this.stompClient.onStompError = (frame) => {
+      console.error('Broker error: ', frame.headers['message']);
+      console.error('Details: ', frame.body);
+    };
+
+    this.stompClient.activate(); // Start the connection
   }
 
-  markRead(id: number) {
-    const userId = this.session.getUser()!.id;
+  disconnect() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    if (this.stompClient && this.stompClient.active) {
+      this.stompClient.deactivate();
+      console.log('Disconnected from WebSocket');
+    }
+  }
+  
+  markAsRead(userId: number, notificationId: number) {
     return this.http
-      .post(`http://localhost:8080/api/notifications/${userId}/${id}/read`, {})
+      .post(`http://localhost:8080/api/notifications/user/${userId}/${notificationId}/mark-read`, {})
+      
       .pipe(
         tap(() => {
-          const updated = this.notif$.value.map(n =>
-            n.id === id ? { ...n, read: true } : n
-          );
-          this.notif$.next(updated);
+          console.log(this.unreadnotifications$)
+          // tell anyone listening that they should reload
+          this.reloadTrigger.next();
         })
       );
   }
+  private handleIncomingPush(raw: Message) {
+    const notif = JSON.parse(raw.body);
+    // … your existing logic to prepend into subjects …
+    this.reloadTrigger.next();
+  }
+
+
+refreshUserNotifications(userId: number) {
+  console.log("trfghkjljytdgfghhj")
+  this.http.get<any[]>(`http://localhost:8080/api/notifications/user/${userId}`).subscribe((data) => {
+    this.notificationsSubject.next(data);
+  });
 }
+refreshUserUnreadNotifications(userId: number) {
+  console.log("unreaaaad")
+  this.http.get<any[]>(`http://localhost:8080/api/notifications/user/${userId}/unread`).subscribe((data) => {
+    this.unreadnotificationsSubject.next(data);
+  });
+}
+getNotificationById(id: number): Observable<any> {
+  return this.http.get<any>(`http://localhost:8080/api/notifications/${id}`);
+}
+
+}
+

@@ -3,7 +3,9 @@ package com.projet.pp.controller;
 
 import com.projet.pp.dto.ChatMessageDTO;
 import com.projet.pp.model.ChatMessage;
+import com.projet.pp.model.Notification;
 import com.projet.pp.service.ChatMessageService;
+import com.projet.pp.service.NotificationService;
 import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,8 @@ public class ChatMessageController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * Envoi d'un message (avec pièces jointes éventuelles).
@@ -39,7 +44,18 @@ public class ChatMessageController {
         try {
             var sender   = userService.getUserById(data.getSender().getId());
             var receiver = userService.getUserById(data.getReceiver().getId());
+            String roleLibelle = receiver.getRole().getLibelle().toLowerCase().trim();
+            Notification.RoleType recipientRole;
 
+            if (roleLibelle.equals("developpeur")) {
+                recipientRole = Notification.RoleType.dev;
+            } else if (roleLibelle.equals("testeur")) {
+                recipientRole = Notification.RoleType.tester;
+            } else if (roleLibelle.equals("superviseur")) {
+                recipientRole = Notification.RoleType.admin;
+            } else {
+                recipientRole = Notification.RoleType.admin; // Default fallback
+            }
             ChatMessage saved = chatMessageService.sendMessage(
                     sender,
                     receiver,
@@ -47,7 +63,21 @@ public class ChatMessageController {
                     data.getCreatedAt(),
                     files
             );
+            Notification noti = new Notification(
+                    null,
+                    receiver,
+                    recipientRole,
+                    "Nouveau message ",
+                    sender.getNom() + " vous a envooyé un nouveau message : " +saved.getMessage(),
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    null,
+                    saved
+                    ,null
+            );
 
+            notificationService.createNoti(noti);
             return ResponseEntity.ok(ChatMessageDTO.fromEntity(saved));
 
         } catch (IOException e) {

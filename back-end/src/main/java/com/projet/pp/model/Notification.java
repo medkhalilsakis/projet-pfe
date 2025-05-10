@@ -1,33 +1,62 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "notifications")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "notifications")
+@ToString
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class Notification {
-    @Id @GeneratedValue
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne @JoinColumn(name="user_id", nullable=false)
-    private User recipient;
+    // The recipient of the notification (admin, dev, or tester)
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private String type;      // "TASK_ASSIGNED", "PROJECT_LINKED", "NEW_MESSAGE", …
-    private String payload;   // JSON ou texte libre à afficher
-    private boolean read = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recipient_role", nullable = false)
+    private RoleType recipientRole;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
 
-    // getters/setters, constructeur…
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String message;
+
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead = false;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "related_project_id")
+    private Project relatedProject;
+
+    @ManyToOne
+    @JoinColumn(name = "related_task_id")
+    private Tache relatedTask;
+
+    @ManyToOne
+    @JoinColumn(name = "chat_message_id")
+    private ChatMessage chatMessage;
+    @ManyToOne
+    @JoinColumn(name = "meeting_id")
+    private Meeting meeting;
+
+    public enum RoleType {
+        admin, dev, tester
+    }
 }

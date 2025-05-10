@@ -5,7 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projet.pp.dto.TacheDTO;
 import com.projet.pp.model.Tache;
+import com.projet.pp.model.Notification;
 import com.projet.pp.service.TacheService;
+import com.projet.pp.service.UserService;
+
+import com.projet.pp.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -15,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +29,8 @@ import java.util.Map;
 public class TacheController {
 
     @Autowired private TacheService tacheService;
-
+    @Autowired  private NotificationService notificationService;
+    @Autowired private  UserService userService;
     /** Liste (summary) */
     @GetMapping
     public List<TacheDTO> list(
@@ -141,6 +147,23 @@ public class TacheController {
                         .nom(t.getAssignedBy().getNom())
                         .build())
                 .build();
+        for (var user : t.getAssignedTo()) {
+            Notification noti = new Notification(
+                    null,
+                    user,
+                    Notification.RoleType.dev,
+                    "nouvelle tache",
+                    t.getAssignedBy().getNom() + " " + t.getAssignedBy().getPrenom() +
+                            " vous a assigné une nouvelle tâche nommée " + t.getName(),
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    t,
+                    null,
+                    null
+            );
+            notificationService.createNoti(noti);
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -217,6 +240,21 @@ public class TacheController {
                                 .build())
                         .toList())
                 .build();
+
+        Notification noti1 = new Notification(
+                null,
+                t.getAssignedBy(),
+                Notification.RoleType.admin,
+                "Modification d'une tâche ",
+                "la tache que vous avez assigné a été modifié ",
+                false,
+                LocalDateTime.now(),
+                null,
+                t
+                ,null
+                ,null
+        );
+        notificationService.createNoti(noti1);
         return ResponseEntity.ok(dto);
     }
 

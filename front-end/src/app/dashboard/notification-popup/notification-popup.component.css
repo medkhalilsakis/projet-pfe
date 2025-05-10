@@ -1,0 +1,20 @@
+.notification-popup {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    background: #323232;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    animation: fade-in-out 20s ease-in-out;
+  }
+  
+  @keyframes fade-in-out {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  

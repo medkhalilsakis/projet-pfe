@@ -3,14 +3,22 @@ package com.projet.pp.controller;
 
 import com.projet.pp.dto.MeetingRequest;
 import com.projet.pp.model.Meeting;
+import com.projet.pp.model.Tache;
+
 import com.projet.pp.service.MeetingService;
+import com.projet.pp.service.TesterAssignmentService;
+import com.projet.pp.model.Notification;
+import com.projet.pp.service.NotificationService;
+import com.projet.pp.service.TacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -18,6 +26,9 @@ import java.util.List;
 public class MeetingController {
 
     @Autowired private MeetingService svc;
+    @Autowired private NotificationService notificationService;
+    @Autowired private TesterAssignmentService testerAssignementService;
+    @Autowired private TacheService tacheService;
 
     /** Planifier une réunion avec pièces‑jointes */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -29,8 +40,61 @@ public class MeetingController {
     ) {
         try {
             Meeting saved = svc.schedule(projectId, data, files);
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            LocalDateTime date = saved.getDate();
+            String strDate = formatter.format(date);
+            Notification noti = new Notification(
+                    null,
+                    saved.getProject().getUser(),
+                    Notification.RoleType.dev,
+                    "Une Nouvelle reunion " ,
+                    "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() +" en " +strDate,
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    null,
+                    null,
+                    saved
+            );
+
+            notificationService.createNoti(noti);
+
+            Notification noti1 = new Notification(
+                    null,
+                    testerAssignementService.getAssignmentByProjectId(saved.getProject().getId()).getTesteur(),
+                    Notification.RoleType.tester,
+                    "Une Nouvelle reunion " ,
+                    "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() +" en " +strDate,
+                    false,
+                    LocalDateTime.now(),
+                    null,
+                    null,
+                    null,
+                    saved
+            );
+
+            notificationService.createNoti(noti1);
+            Tache tache = tacheService.getTacheByProjectId(projectId).orElse(null);
+
+            if (tache != null) {
+                Notification noti2 = new Notification(
+                        null,
+                        tache.getAssignedBy(),
+                        Notification.RoleType.admin,
+                        "Une Nouvelle reunion ",
+                        "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() + " en " + strDate,
+                        false,
+                        LocalDateTime.now(),
+                        null,
+                        null,
+                        null,
+                        saved
+                );
+
+                notificationService.createNoti(noti2);
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IOException e) {
+        }catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(null);
         }

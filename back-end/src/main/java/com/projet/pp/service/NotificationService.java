@@ -1,55 +1,72 @@
 package com.projet.pp.service;
 
-import com.projet.pp.dto.NotificationDTO;
 import com.projet.pp.model.Notification;
 import com.projet.pp.model.User;
 import com.projet.pp.repository.NotificationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.http.ResponseEntity; // For ResponseEntity
+import org.springframework.messaging.simp.SimpMessagingTemplate; // For WebSocket messaging
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
+
     @Autowired
-    NotificationRepository repo;
+    private NotificationRepository notificationRepository;
+
+
     @Autowired
-    SimpMessagingTemplate ws;
-
-    @Autowired private UserService userService;
-
-    public NotificationDTO notifyUser(Long userId, String type, String payload) {
-
-        User recipient = userService.getUserById(userId);
-
-        Notification n = new Notification();
-        n.setRecipient(recipient);
-        n.setType(type);
-        n.setPayload(payload);
-        repo.save(n);
-
-        // 3) Construire le DTO et diffuser
-        NotificationDTO dto = NotificationDTO.fromEntity(n);
-        ws.convertAndSend("/topic/notifications/" + userId, dto);
-        return dto;
+    private SimpMessagingTemplate simpMessagingTemplate;
+    // Create a new notification
+    public Notification createNoti(Notification notification) {
+        Notification saved = notificationRepository.save(notification);
+        // Send via WebSocket
+        simpMessagingTemplate.convertAndSend("/topic/notifications/" + saved.getUser().getId(), saved);
+        return saved;
+    }
+    public Notification getNotificationsById(Long id) {
+        return notificationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
     }
 
-    public List<NotificationDTO> listFor(Long userId) {
-        return repo.findByRecipientIdOrderByCreatedAtDesc(userId)
-                .stream().map(NotificationDTO::fromEntity)
-                .collect(Collectors.toList());
+
+    // Get all notifications for a specific user
+    public List<Notification> getNotificationsByUser(User user) {
+        return notificationRepository.findByUser(user);
     }
 
-    @Transactional
-    public void markAsRead(Long notificationId) {
-        Notification n = repo.findById(notificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification non trouvée"));
-        n.setRead(true);
-        repo.save(n);
-        // (optionnel) renvoyer un event WebSocket pour mise à jour live
+    // Get unread notifications
+    public List<Notification> getUnreadNotifications(User user) {
+        return notificationRepository.findUnreadByUser(user);
     }
+
+    // Mark all notifications as read
+    public void markAllAsRead(User user) {
+        List<Notification> notifications = getUnreadNotifications(user);
+        for (Notification n : notifications) {
+            n.setIsRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+    }
+
+    // Delete notification by ID
+    public void deleteNotification(Long id) {
+        notificationRepository.deleteById(id);
+    }
+
+    // Get all notifications
+    public List<Notification> getAll() {
+        return notificationRepository.findAll();
+    }
+    public void markNotificationAsRead(Notification notification, User user) {
+        // Ensure the notification belongs to the user (optional but safer)
+        if (!notification.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Notification does not belong to this user");
+        }
+
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
+    }
+
 }

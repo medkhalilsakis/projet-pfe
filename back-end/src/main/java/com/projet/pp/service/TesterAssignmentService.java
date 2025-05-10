@@ -58,6 +58,10 @@ public class TesterAssignmentService {
     public List<ProjectTesterAssignment> getAssignments(Long projectId) {
         return assignmentRepo.findByProjectId(projectId);
     }
+    public ProjectTesterAssignment getAssignmentByProjectId(Long ProjectId){
+        return assignmentRepo.findOneByProjectId(ProjectId);
+
+    }
 
     /**
      * Désigne un ou plusieurs testeurs sur un projet.

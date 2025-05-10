@@ -60,6 +60,9 @@ public class TacheService {
     public Optional<Tache> getTacheById(Long id) {
         return tacheRepository.findById(id);
     }
+    public Optional<Tache> getTacheByProjectId(Long id) {
+        return tacheRepository.findByProject_Id(id);
+    }
 
     // src/main/java/com/projet/pp/service/TacheService.java
     @Transactional

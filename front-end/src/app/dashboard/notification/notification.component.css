@@ -1,0 +1,63 @@
+/* Container: lays out cards in a row, wraps on small screens */
+.notifications-container {
+    display: flex;
+    padding: 0.5rem;
+    overflow-x: auto;        /* allow horizontal scroll if too many */
+    flex-direction: column;  /* stack cards vertically for the divider example */
+    gap: 0;      
+  }
+  
+  /* Individual card */
+  .notification-card {
+    flex: 0 0 200px;         /* fixed width, won’t shrink */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+
+
+  }
+  .notif-divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 0.5rem 0;
+  }
+  
+  /* Optional styling for title/message */
+  .notif-title {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+  }
+  
+  .notif-message {
+    font-size: 0.9rem;
+    margin: 0;
+  }
+/* Bold style for unread notifications */
+.unread-notification {
+  font-weight: bold;
+  /* Optional: Add other visual cues */
+  background-color: #f8f9fa;
+  border-left: 3px solid #007bff;
+}
+
+/* Hover effect for better interaction */
+.notification-card:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+/* Bold titles only for unread */
+.unread-notification .notif-title {
+  font-weight: 800;
+  color: #333;
+}
+
+/* Normal weight for read notifications */
+.notification-card:not(.unread-notification) {
+  font-weight: normal;
+  opacity: 0.8;
+}

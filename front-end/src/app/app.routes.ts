@@ -13,7 +13,9 @@ import { TaskAssignmentComponent } from './dashboard/task-assignment/task-assign
 import { UploadComponent } from './dashboard/upload/upload.component';
 import { UserManagementComponent } from './dashboard/user-management/user-management.component';
 import { TaskDetailComponent } from './dashboard/task-assignment/task-detail/task-detail.component';
-import { NotificationsComponent } from './dashboard/notifications/notifications.component';
+import { NotificationComponent } from './dashboard/notification/notification.component';
+import { NotifcationDetailComponent } from './dashboard/notification/notifcation-detail/notifcation-detail.component';
+
 import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/project-explorer.component';
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
@@ -27,7 +29,9 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       { path: 'overview', component: OverviewComponent },
-      { path: 'notifications', component: NotificationsComponent },
+      { path: 'notifications', component: NotificationComponent },
+      { path: 'notification/:id', component: NotifcationDetailComponent },
+
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
