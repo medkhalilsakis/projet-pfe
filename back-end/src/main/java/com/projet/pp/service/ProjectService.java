@@ -440,8 +440,18 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public void removeInvitedUser(Long projectId, Long userId) {
+        ProjectInvitedUser invitedUser = projectInvitedUserRepository
+                .findByProjectIdAndUserId(projectId, userId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                String.format("Invitation non trouvée pour projectId=%d et userId=%d", projectId, userId)
+                        )
+                );
+        projectInvitedUserRepository.delete(invitedUser);
     }
+
 
     public Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)

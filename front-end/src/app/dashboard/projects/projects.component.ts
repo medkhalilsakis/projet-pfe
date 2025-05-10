@@ -268,7 +268,7 @@ export class ProjectsComponent implements OnInit {
 
   openSettings(project: Project): void{
     this.dialog.open(ParametresProjetComponent, {
-      width: '600px',
+      width: '700px',
       data: { projectId: project.id }
     });
   }

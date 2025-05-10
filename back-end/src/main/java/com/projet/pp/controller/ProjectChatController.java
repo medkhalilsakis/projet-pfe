@@ -33,11 +33,12 @@ public class ProjectChatController {
     public ProjectChatMessageDTO send(
             @PathVariable Long projectId,
             @RequestParam Long senderId,
-            @RequestPart("message") String message,
-            @RequestPart(name="files", required=false) MultipartFile[] files
+            @RequestParam String message,
+            @RequestParam(name="files", required=false) MultipartFile[] files
     ) throws Exception {
         return svc.postMessage(projectId, senderId, message, files);
     }
+
 
     /** Télécharger une pièce jointe */
     @GetMapping("/attachments/{attId}")

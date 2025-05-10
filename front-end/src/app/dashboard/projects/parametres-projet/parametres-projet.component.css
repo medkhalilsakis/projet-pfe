@@ -1,212 +1,183 @@
-/* Carte globale sans margin */
-.param-card {
-  max-width: 600px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  background: #fff;
+:host {
+  --primary-color: #4f46e5;
+  --secondary-color: #e0e7ff;
+  --accent-color: #fbbf24;
+  --error-color: #ef4444;
+  --text-color: #1f2937;
+  --background-color: #ffffff;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+  display: block;
 }
 
-/* Header coloré */
-.header {
-  background: #1976d2;
-  color: #fff;
-  padding: 0;
-}
-.header .mat-card-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-
-/* Contenu scrollable si trop long */
-.content {
-  padding: 16px;
-  max-height: 75vh;
-  overflow-y: auto;
+:host .dialog-content {
+  background: var(--background-color);
+  padding: 32px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 24px;
 }
 
-/* Formulaire */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+:host .dialog-title {
+  grid-column: 1 / -1;
+  font-size: 28px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-weight: 700;
+  text-align: center;
 }
-.row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.field {
-  flex: 1;
-}
-.small {
-  flex: 0 0 180px;
-}
-.full-width {
+
+:host .form-field {
   width: 100%;
+  background: var(--secondary-color);
+  border-radius: calc(var(--border-radius) / 2);
+  transition: background var(--transition-speed) ease;
 }
 
-/* Style des boutons */
-.btn-save {
-  background: #388e3c;
-  color: #fff;
-  padding: 8px 16px;
-  font-weight: 500;
-  transition: background 0.2s, transform 0.1s;
+:host .form-field:hover .mat-form-field-flex {
+  background: rgba(224, 231, 255, 0.8);
 }
-.btn-save:hover {
-  background: #2e7d32;
+
+:host .description-field textarea {
+  height: 120px;
+}
+
+:host .visibility-field {
+  grid-column: 1 / -1;
+}
+
+/* Boutons Enregistrer/Annuler */
+:host .actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+:host .actions button {
+  min-width: 100px;
+  font-weight: 600;
+  border-radius: calc(var(--border-radius) / 2);
+  transition: background var(--transition-speed) ease,
+              transform var(--transition-speed) ease;
+}
+
+:host .actions button:hover {
   transform: translateY(-2px);
 }
 
-/* Sections */
-h3 {
-  margin: 24px 0 12px;
-  font-size: 1.1rem;
-  color: #333;
-  border-left: 4px solid #1976d2;
-  padding-left: 8px;
+:host .save-btn {
+  background: var(--primary-color);
+  color: #fff;
 }
 
-/* Listes d’invités */
-.invite-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.invite-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid #e0e0e0;
-  gap: 12px;
-}
-.invite-item:last-child {
-  border-bottom: none;
-}
-.col {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.status.pending {
-  color: #f57c00;
-  font-style: italic;
-}
-.status.accepted {
-  color: #388e3c;
-  font-weight: 600;
+:host .save-btn:hover {
+  background: #4338ca; /* primary darkened */
 }
 
-/* Boutons de suppression/invitation */
-.invite-item button {
-  transition: background 0.2s, transform 0.1s;
-}
-.invite-item button:hover {
-  background: rgba(0,0,0,0.05);
-  transform: translateY(-1px);
+:host .cancel-btn {
+  background: transparent;
+  color: var(--text-color);
 }
 
-/* Ajout invité suggestions */
-.add-invite .invite-list .invite-item {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-.add-invite .invite-list .invite-item:hover {
-  background: #f9f9f9;
+:host .cancel-btn:hover {
+  background: rgba(31, 41, 55, 0.1);
 }
 
-/* Champ recherche */
-.add-invite .mat-form-field {
+/* Section Invitations */
+:host .invitations {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px dashed rgba(31, 41, 55, 0.3);
+}
+
+:host .invitations-title {
+  font-size: 22px;
+  color: var(--text-color);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+:host .invitations-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: var(--accent-color);
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  border-radius: 2px;
+}
+
+/* Liste des invitations */
+:host .invited-list {
+  max-height: 200px;
+  overflow-y: auto;
   margin-bottom: 16px;
 }
 
-/* Vide */
-.empty {
-  text-align: center;
-  color: #777;
-  font-style: italic;
-  margin: 16px 0;
-}
-
-/* Footer */
-mat-card-actions {
+:host .invited-item {
+  background: #f9fafb;
+  border-radius: calc(var(--border-radius) / 2);
+  margin-bottom: 8px;
   padding: 8px 16px;
-  background: #fafafa;
-}
-.btn-close {
-  color: #1976d2;
-  transition: background 0.2s;
-}
-.btn-close:hover {
-  background: rgba(25, 118, 210, 0.1);
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .row { flex-direction: column; }
-  .small { flex: 1; }
-}
-
-
-
-/* Conteneur flex dans l'en-tête */
-.header-content {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  padding: 16px;
+  transition: background var(--transition-speed) ease;
 }
 
-/* Espaceur pour pousser le bouton à droite */
-.spacer {
-  flex: 1;
+:host .invited-item:hover {
+  background: #fbfcfd;
 }
 
-/* Bouton "close" plus discret, rond et lumineux au survol */
-.close-btn {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: transparent;
-  transition: background 0.2s ease, transform 0.2s ease;
-  overflow: hidden;
+:host .invited-item .status {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(31, 41, 55, 0.6);
+  text-transform: capitalize;
 }
 
-/* Icône centrée */
-.close-btn mat-icon {
-  font-size: 20px;
-  color: rgba(255,255,255,0.8);
-  transition: color 0.2s ease;
-}
-
-/* Halo animé au survol */
-.close-btn::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+:host .invited-item button.cancel-invite-btn {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-speed) ease;
 }
 
-.close-btn:hover::before {
+:host .invited-item:hover button.cancel-invite-btn {
   opacity: 1;
 }
 
-.close-btn:hover {
-  background: rgba(255,255,255,0.1);
-  transform: scale(1.1);
+/* Formulaire d’invitation */
+:host .invite-form {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  grid-gap: 12px;
+  align-items: end;
 }
 
-.close-btn:hover mat-icon {
-  color: #ffffff;
+:host .invite-select {
+  margin-bottom: 0;
+}
+
+:host .invite-btn {
+  height: 36px;
+  align-self: stretch;
+  background: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  border-radius: calc(var(--border-radius) / 2);
+  transition: background var(--transition-speed) ease,
+              transform var(--transition-speed) ease;
+}
+
+:host .invite-btn:hover {
+  background: #f59e0b; /* accent darkened */
+  transform: translateY(-1px);
 }
