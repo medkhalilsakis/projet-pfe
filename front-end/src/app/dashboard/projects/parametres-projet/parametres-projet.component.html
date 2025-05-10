@@ -1,108 +1,107 @@
-<mat-card class="param-card">
-  <!-- HEADER -->
-  <mat-card-header class="header">
-    <div class="header-content">
-      <mat-card-title>Paramètres du projet</mat-card-title>
-      <div class="spacer"></div>
-      <button mat-icon-button class="close-btn" (click)="close()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  </mat-card-header>
+<mat-dialog-content *ngIf="project" [formGroup]="form" class="dialog-content" fxLayout="column" fxLayoutGap="24px">
 
-  <!-- CONTENT -->
-  <mat-card-content class="content">
-    <!-- FORM -->
-    <form *ngIf="projectForm"
-          [formGroup]="projectForm"
-          (ngSubmit)="onSubmit()"
-          class="form">
+  <!-- TITRE -->
+  <h2 class="dialog-title">Paramètres du projet</h2>
 
-      <div class="row">
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>Nom du projet</mat-label>
-          <input matInput formControlName="name" />
-        </mat-form-field>
+  <!-- NOM + TYPE sur une même ligne -->
+  <div fxLayout="row" fxLayoutGap="16px">
+    <mat-form-field
+      appearance="fill"
+      class="form-field"
+      fxFlex="1 1 calc(50% - 8px)"
+    >
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>Type</mat-label>
-          <input matInput formControlName="type" />
-        </mat-form-field>
-      </div>
+    <mat-form-field
+      appearance="fill"
+      class="form-field"
+      fxFlex="1 1 calc(50% - 8px)"
+    >
+      <mat-label>Type</mat-label>
+      <input matInput formControlName="type" />
+    </mat-form-field>
+  </div>
 
-      <mat-form-field appearance="outline" class="field full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="3"></textarea>
-      </mat-form-field>
+  <!-- DESCRIPTION, full width -->
+  <div fxLayout="row">
+    <mat-form-field appearance="fill" class="form-field description-field" fxFlex>
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+  </div>
 
-      <mat-form-field appearance="outline" class="field small">
-        <mat-label>Visibilité</mat-label>
-        <mat-select formControlName="visibilite">
-          <mat-option value="privée">Privé</mat-option>
-          <mat-option value="public">Public</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- VISIBILITÉ, full width, affichée seulement si status 0 ou 1 ET propriétaire -->
+  <div fxLayout="row" *ngIf="isOwner() && (project.status === 0 || project.status === 1)">
+    <mat-form-field appearance="fill" class="form-field visibility-field" fxFlex>
+      <mat-label>Visibilité</mat-label>
+      <mat-select formControlName="visibilite" (selectionChange)="updateVisibilite()">
+        <mat-option value="public">Public</mat-option>
+        <mat-option value="privée">Privée</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-      <div class="actions">
-        <button mat-flat-button color="accent" class="btn-save" type="submit" [disabled]="projectForm.invalid">
-          <mat-icon>save</mat-icon>
-          Enregistrer
-        </button>
-      </div>
-    </form>
+  <!-- BOUTONS, alignés à droite -->
+  <div fxLayout="row" fxLayoutAlign="end center" class="actions">
+    <button mat-raised-button
+            color="primary"
+            class="save-btn"
+            (click)="save()"
+            [disabled]="form.invalid">
+      Enregistrer
+    </button>
+    <button mat-button
+            class="cancel-btn"
+            (click)="close()">
+      Annuler
+    </button>
+  </div>
 
-    <mat-divider></mat-divider>
+  <!-- SECTION INVITATIONS -->
+  <div class="invitations" *ngIf="isOwner()" fxLayout="column" fxLayoutGap="16px">
+    <h3 class="invitations-title">Invitations</h3>
 
-    <!-- INVITÉS -->
-    <section class="invites">
-      <h3>Utilisateurs invités</h3>
-      <div *ngIf="invitedUsers.length; else noInvites">
-        <ul class="invite-list">
-          <li *ngFor="let u of invitedUsers" class="invite-item">
-            <span class="col name">{{ u.prenom }} {{ u.nom }}</span>
-            <span class="col email">{{ u.email }}</span>
-            <span class="col status" [ngClass]="{'pending': u.status==='pending', 'accepted': u.status==='accepted'}">
-              {{ u.status==='pending' ? 'En attente' : 'Accepté' }}
-            </span>
-            <button mat-icon-button color="warn" (click)="removeInvitedUser(u)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </li>
-        </ul>
-      </div>
-      <ng-template #noInvites>
-        <p class="empty">Aucun invité</p>
-      </ng-template>
-    </section>
-
-    <mat-divider></mat-divider>
-
-    <!-- AJOUT D'INVITÉ -->
-    <section class="add-invite">
-      <h3>Ajouter un invité</h3>
-      <mat-form-field appearance="outline" class="field full-width">
-        <mat-label>Rechercher utilisateur</mat-label>
-        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Nom ou email" />
-        <button mat-icon-button matSuffix>
-          <mat-icon>search</mat-icon>
-        </button>
-      </mat-form-field>
-
-      <ul class="invite-list" *ngIf="availableUsers.length">
-        <li *ngFor="let u of availableUsers" class="invite-item">
-          <span class="col name">{{ u.prenom }} {{ u.nom }}</span>
-          <span class="col email">{{ u.email }}</span>
-          <button mat-icon-button color="primary" (click)="inviteUser(u)">
-            <mat-icon>person_add</mat-icon>
+    <mat-list class="invited-list">
+      <mat-list-item *ngFor="let inv of invitedUsers" class="invited-item">
+        <div fxLayout="row" fxLayoutAlign="space-between center" fxFlex>
+          <span class="invited-info">{{ inv.name }}</span>
+          <span class="status">{{ inv.status }}</span>
+          <button mat-icon-button
+                  *ngIf="inv.status === 'pending'"
+                  class="cancel-invite-btn"
+                  (click)="cancelInvite(inv.inviteId)">
+            <mat-icon>cancel</mat-icon>
           </button>
-        </li>
-      </ul>
-      <p *ngIf="!availableUsers.length && searchQuery" class="empty">Aucun résultat</p>
-    </section>
-  </mat-card-content>
+        </div>
+      </mat-list-item>
+    </mat-list>
 
-  <!-- FOOTER -->
-  <mat-card-actions align="end">
-    <button mat-stroked-button class="btn-close" (click)="close()">Fermer</button>
-  </mat-card-actions>
-</mat-card>
+    <div class="invite-form" fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start center">
+  <!-- 70% pour le select -->
+  <mat-form-field
+    appearance="fill"
+    class="form-field invite-select"
+    fxFlex="0 0 60%">
+    <mat-label>Inviter un utilisateur</mat-label>
+    <mat-select [(value)]="selectedUserId">
+      <mat-option *ngFor="let u of availableUsers" [value]="u.id">
+        {{ u.nom }} {{ u.prenom }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- 30% pour le bouton -->
+  <button
+    mat-raised-button
+    class="invite-btn"
+    fxFlex="0 0 30%"
+    (click)="invite()">
+    Inviter
+  </button>
+</div>
+
+  </div>
+
+</mat-dialog-content>

@@ -1,164 +1,145 @@
-import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-  FormsModule
-} from '@angular/forms';
+/* src/app/components/parametres-projet/parametres-projet.component.ts */
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { ProjectService } from '../../../services/project.service';
+import { SessionStorageService } from '../../../services/session-storage.service';
+import { UserService } from '../../../services/users.service';
+import { User } from '../../../models/user.model';
+import { Project } from '../../../models/project.model';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-  MatDialogModule
-} from '@angular/material/dialog';
-import { Subscription, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
-// Angular Material Modules
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
-export interface User {
-  id: number;
-  prenom: string;
-  nom: string;
-  email: string;
-  status: 'pending' | 'accepted';
-}
 
 @Component({
   selector: 'app-parametres-projet',
-  standalone: true,
-  imports: [
+  templateUrl: './parametres-projet.component.html',
+  styleUrls: ['./parametres-projet.component.css'],
+  imports:[
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatCardModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
+    MatListModule,
+    MatOptionModule,
     MatSelectModule,
-    MatDividerModule,
-    MatListModule
-  ],
-  templateUrl: './parametres-projet.component.html',
-  styleUrls: ['./parametres-projet.component.css']
+    MatIconModule,
+    MatDialogModule,
+    MatInputModule,
+    FlexLayoutModule
+  ]
 })
-export class ParametresProjetComponent implements OnInit, OnDestroy {
-  projectForm!: FormGroup;
-  invitedUsers: User[] = [];
-  availableUsers: User[] = [];
-  searchQuery = '';
+export class ParametresProjetComponent implements OnInit {
   projectId!: number;
+  project!: Project;
+  currentUserId!: number;
+  form!: FormGroup;
 
-  private searchSubject = new Subject<string>();
-  private searchSubscription!: Subscription;
+  invitedUsers: { id: number; name: string; status: string; inviteId: number }[] = [];
+  availableUsers: User[] = [];
+  selectedUserId!: number;
 
   constructor(
+    private dialogRef: MatDialogRef<ParametresProjetComponent>,
+    @Inject(MAT_DIALOG_DATA) data: { projectId: number },
     private fb: FormBuilder,
-    private http: HttpClient,
-    private snackBar: MatSnackBar,
-    public dialogRef: MatDialogRef<ParametresProjetComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { projectId: number }
-  ) {}
+    private projectService: ProjectService,
+    private sessionStorageService: SessionStorageService,
+    private userService: UserService
+  ) {
+    this.projectId = data.projectId;
+  }
 
   ngOnInit(): void {
-    this.projectId = this.data.projectId;
-    this.loadProjectDetails();
+    const currentUser = this.sessionStorageService.getUser();
+    this.currentUserId = currentUser?.id ?? null;
+    this.initForm();
 
-    this.searchSubscription = this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(query => this.searchUsers(query));
-  }
-
-  ngOnDestroy(): void {
-    this.searchSubscription.unsubscribe();
-  }
-
-  private loadProjectDetails(): void {
-    this.http
-      .get<any>(`http://localhost:8080/api/projects/${this.projectId}`)
-      .subscribe(data => {
-        this.projectForm = this.fb.group({
-          name: [data.name, Validators.required],
-          type: [data.type, Validators.required],
-          description: [data.description],
-          visibilite: [data.visibilite, Validators.required]
-        });
-        this.invitedUsers = data.invitedUsers || [];
+    // Charger projet puis invitations puis utilisateurs disponibles
+    this.projectService.getProjectById(this.projectId).subscribe(proj => {
+      this.project = proj;
+      this.form.patchValue({
+        name: proj.name,
+        type: proj.type,
+        description: proj.description,
+        visibilite: proj.visibilite
       });
+      this.loadInvites();
+    });
   }
 
-  onSubmit(): void {
-    if (this.projectForm.invalid) return;
-    this.http
-      .post(
-        `http://localhost:8080/api/projects/commit?projectId=${this.projectId}`,
-        this.projectForm.value,
-        { responseType: 'text' }
-      )
-      .subscribe(() => {
-        this.snackBar.open('Modifications enregistrées', 'Fermer', { duration: 3000 });
-        this.loadProjectDetails();
-      });
+  private initForm(): void {
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      type: [''],
+      description: [''],
+      visibilite: ['', Validators.required]
+    });
   }
 
-  onSearchChange(query: string): void {
-    this.searchSubject.next(query);
+  private loadInvites(): void {
+    this.projectService.getInvitedUsers(this.projectId).subscribe(list => {
+      this.invitedUsers = list.map((u: any) => ({
+        id: u.userId,
+        name: `${u.prenom} ${u.nom}`,
+        status: u.status,
+        inviteId: u.id
+      }));
+      this.loadAvailableUsers();
+    });
   }
 
-  private searchUsers(query: string): void {
-    if (!query.trim()) {
-      this.availableUsers = [];
-      return;
+  private loadAvailableUsers(): void {
+    this.userService.getAllUsers().subscribe(users => {
+      this.availableUsers = users
+        .filter(u => u.id !== this.project.user.id)
+        .filter(u => !this.invitedUsers.some(i => i.id === u.id));
+    });
+  }
+
+  save(): void {
+    if (this.form.invalid) { return; }
+    const payload = {
+      name: this.form.value.name,
+      type: this.form.value.type,
+      description: this.form.value.description,
+      visibilite: this.form.value.visibilite,
+      status: this.project.status?.toString() || '0'
+    };
+    this.projectService.commitProject(this.projectId, payload).subscribe(() => this.dialogRef.close(true));
+  }
+
+  updateVisibilite(): void {
+    const status = this.project.status ?? 0;
+    if (![0, 1].includes(status)) { return; }
+    const vis = this.form.value.visibilite;
+    this.projectService.updateVisibility(this.projectId, this.currentUserId, vis, status)
+      .subscribe(() => { this.project.visibilite = vis; });
+  }
+
+  invite(): void {
+    if (!this.selectedUserId) { return; }
+    this.projectService.inviteUser(this.projectId, this.selectedUserId)
+      .subscribe(() => this.loadInvites());
+  }
+
+  cancelInvite(inviteId: number): void {
+    this.projectService.cancelInvite(this.projectId, inviteId)
+      .subscribe(() => this.loadInvites());
+  }
+
+  isOwner(): boolean {
+    if (!this.project || !this.project.user) {
+      return false;
     }
-    this.http
-      .get<User[]>(`http://localhost:8080/api/users/search?query=${query}`)
-      .subscribe(users => {
-        this.availableUsers = users.filter(
-          u => !this.invitedUsers.some(inv => inv.id === u.id)
-        );
-      });
-  }
-
-  inviteUser(user: User): void {
-    this.http
-      .post(
-        `http://localhost:8080/api/projects/${this.projectId}/invite`,
-        { userId: user.id.toString(), status: 'pending' },
-        { responseType: 'text' }
-      )
-      .subscribe(() => {
-        this.snackBar.open(`${user.prenom} ${user.nom} invité`, 'Fermer', { duration: 3000 });
-        this.loadProjectDetails();
-        this.searchQuery = '';
-        this.availableUsers = [];
-      });
-  }
-
-  removeInvitedUser(user: User): void {
-    this.http
-      .delete(
-        `http://localhost:8080/api/projects/${this.projectId}/invite/${user.id}`,
-        { responseType: 'text' }
-      )
-      .subscribe(() => {
-        this.snackBar.open(`${user.prenom} ${user.nom} retiré`, 'Fermer', { duration: 3000 });
-        this.loadProjectDetails();
-      });
+    return this.currentUserId === this.project.user.id;
   }
 
   close(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 }

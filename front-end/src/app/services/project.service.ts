@@ -31,8 +31,6 @@ export class ProjectService {
 
   /**
    * Commit final du projet.
-   * @param projectId ID du projet
-   * @param payload   Métadonnées de commit
    */
   commitProject(
     projectId: number,
@@ -44,24 +42,16 @@ export class ProjectService {
       status: string;
     }
   ): Observable<any> {
-    // Note : l'endpoint attend projectId en query param
     return this.http.post(
       `${this.baseUrl}/commit?projectId=${projectId}`,
       payload
     );
   }
 
-  /**
-   * Récupère la liste de tous les projets.
-   */
   getAllProjects(): Observable<any[]> {
     return this.http.get<any[]>(this.baseUrl);
   }
 
-  /**
-   * Récupère la liste des projets d'un utilisateur.
-   * @param userId ID de l'utilisateur
-   */
   getProjectsByUser(userId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/user/${userId}`);
   }
@@ -84,21 +74,12 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Récupère l’arbre complet des fichiers.
-   * @param projectId ID du projet
-   */
   getFilesTree(projectId: number): Observable<FileNode[]> {
     return this.http.get<FileNode[]>(
       `${this.baseUrl}/${projectId}/files/tree`
     );
   }
 
-  /**
-   * Lit le contenu d’un fichier texte.
-   * @param projectId ID du projet
-   * @param fileId    ID du fichier
-   */
   readFile(
     projectId: number,
     fileId: number
@@ -109,12 +90,6 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Met à jour le contenu d’un fichier texte.
-   * @param projectId ID du projet
-   * @param fileId    ID du fichier
-   * @param content   Nouveau contenu
-   */
   saveFile(
     projectId: number,
     fileId: number,
@@ -130,12 +105,6 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Crée un nouveau dossier dans un projet.
-   * @param projectId ID du projet
-   * @param name      Nom du dossier
-   * @param parentId  ID du dossier parent (facultatif)
-   */
   createFolder(
     projectId: number,
     name: string,
@@ -151,12 +120,6 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Upload de fichiers dans un dossier existant.
-   * @param projectId ID du projet
-   * @param files     Fichiers à uploader
-   * @param parentId  ID du dossier parent (facultatif)
-   */
   uploadFiles(
     projectId: number,
     files: File[],
@@ -174,26 +137,19 @@ export class ProjectService {
     );
   }
 
-  /**
-   * Supprime un fichier du projet.
-   * @param projectId ID du projet
-   * @param fileId    ID du fichier
-   */
   deleteFile(
     projectId: number,
     fileId: number
   ): Observable<any> {
     return this.http.delete(
       `${this.baseUrl}/${projectId}/files/${fileId}`,
-      { responseType: 'text' }
+      { responseType: 'text' as 'json' }
     );
   }
-
 
   deleteProject(projectId: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/${projectId}`);
   }
-  
 
   updateVisibility(
     projectId: number,
@@ -208,25 +164,55 @@ export class ProjectService {
     );
   }
 
-
   downloadProjectContent(projectId: number): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/${projectId}/files/export`, { responseType: 'blob' });
+    return this.http.get(
+      `${this.baseUrl}/${projectId}/files/export`,
+      { responseType: 'blob' }
+    );
   }
 
-    
+  /**
+   * Invitations utilisateurs
+   */
   getInvitedUsers(projectId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/${projectId}/invite`);
+    return this.http.get<any[]>(
+      `${this.baseUrl}/${projectId}/invite`
+    );
   }
 
-  getLastPause(projectId: number): Observable<{reason: string}> {
-    return this.http.get<{reason:string}>(`${this.baseUrl}/${projectId}/pause`);
+  inviteUser(
+    projectId: number,
+    userId: number,
+    status: string = 'pending'
+  ): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/${projectId}/invite`,
+      { userId: userId.toString(), status }
+    );
   }
 
-  getLastClosure(projectId: number): Observable<{reason: string}> {
-    return this.http.get<{reason:string}>(`${this.baseUrl}/${projectId}/closure`);
+  cancelInvite(
+    projectId: number,
+    userId: number
+  ): Observable<any> {
+    return this.http.delete(
+      `${this.baseUrl}/${projectId}/invite/${userId}`,
+      { responseType: 'text' as 'json' }
+    );
+  }
+
+  getLastPause(projectId: number): Observable<{ reason: string }> {
+    return this.http.get<{ reason: string }>(
+      `${this.baseUrl}/${projectId}/pause`
+    );
+  }
+
+  getLastClosure(projectId: number): Observable<{ reason: string }> {
+    return this.http.get<{ reason: string }>(
+      `${this.baseUrl}/${projectId}/closure`
+    );
   }
 }
-
 
 export type ItemType = 'FILE' | 'FOLDER';
 
