@@ -1,160 +1,157 @@
-// src/app/dashboard/project-details/project-details.component.ts
-import { Component, OnInit, Inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { MatDialog, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Project } from '../../../models/project.model';
+import { ProjectInvitedUser } from '../../../models/invited-user.model';
+import { ProjectTesterAssignment } from '../../../models/assignment.model';
+import { PauseRequest } from '../../../services/pause-request.service';
+import { ProjectService } from '../../../services/project.service';
+import { PauseRequestService } from '../../../services/pause-request.service';
+import { SessionStorageService } from '../../../services/session-storage.service';
+import { AssignmentService } from '../../../services/assignment.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { MatTreeModule } from '@angular/material/tree';
-import { FlatTreeControl } from '@angular/cdk/tree';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
-import { forkJoin } from 'rxjs';
-import { MatChipsModule } from '@angular/material/chips';
-
-interface Project {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  visibilite: string;
-  status: number;
-  createdAt: string;
-  user: { prenom: string; nom: string; };
-}
-
-interface InvitedUser {
-  id: number;
-  prenom: string;
-  nom: string;
-  status: string;
-}
-
-interface ProjectFileNode {
-  id: number;
-  name: string;
-  type: 'FILE' | 'FOLDER';
-  children?: ProjectFileNode[];
-}
-
-interface ProjectStatsDTO {
-  total: number;
-  counts: { [ext: string]: number };
-}
+import { ProjectChatComponent } from '../project-chat/project-chat.component';
 
 @Component({
-  selector: 'app-project-details',
-  standalone: true,
-  imports: [
+  selector: 'app-project-detail',
+  templateUrl: './project-details.component.html',
+  styleUrls: ['./project-details.component.css'],
+  imports:[
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
-    MatButtonModule,
     MatIconModule,
     MatListModule,
-    MatTreeModule,
-    MatChipsModule
-  ],
-  templateUrl: './project-details.component.html',
-  styleUrls: ['./project-details.component.css']
+    ProjectChatComponent
+  ]
 })
 export class ProjectDetailsComponent implements OnInit {
-  private api = 'http://localhost:8080/api/projects';
   project!: Project;
-  invitedUsers: InvitedUser[] = [];
-  stats!: ProjectStatsDTO;
+  projectId!: number;
 
-  // --- Pour la tree-view ---
-  private transformer = (node: ProjectFileNode, level: number) => ({
-    expandable: !!node.children && node.children.length > 0,
-    name: node.name,
-    level
-  });
+  // Bloc invitations
+  invitedUsers: ProjectInvitedUser[] = [];
 
-  treeControl = new FlatTreeControl<{ expandable: boolean; name: string; level: number }>(
-    node => node.level,
-    node => node.expandable
-  );
+  // Bloc testeurs
+  testers: ProjectTesterAssignment[] = [];
+  isSupervisor = false;
 
-  treeFlattener = new MatTreeFlattener<ProjectFileNode,
-                                       { expandable: boolean; name: string; level: number }>(
-    this.transformer,
-    node => node.level,
-    node => node.expandable,
-    node => node.children
-  );
+  // Bloc pauses
+  pauseRequests: PauseRequest[] = [];
 
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
-
-  hasChild = (_: number, node: { expandable: boolean }) => node.expandable;
+  expanded = false;
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient,
-    private dialog: MatDialog
+    private router: Router,
+    private projectService: ProjectService,
+    private assignmentService: AssignmentService,
+    private pauseRequestService: PauseRequestService,
+    private session: SessionStorageService
   ) {}
 
-  ngOnInit() {
-    const id = Number(this.route.snapshot.params['id']);
-    forkJoin({
-      proj: this.http.get<Project>(`${this.api}/${id}`),
-      invs: this.http.get<InvitedUser[]>(`${this.api}/${id}/invite`),
-      tree: this.http.get<ProjectFileNode[]>(`${this.api}/${id}/files/tree`),
-      stats: this.http.get<ProjectStatsDTO>(`${this.api}/${id}/stats`)
-    }).subscribe(({ proj, invs, tree, stats }) => {
-      this.project = proj;
-      this.invitedUsers = invs;
-      this.dataSource.data = tree;
-      this.stats = stats;
-    });
-  }
-  isRed(status: number): boolean {
-  return status >= 0 && status <= 1;
-}
+  ngOnInit(): void {
+    // 1) Récupérer l'ID depuis la route
+    this.projectId = Number(this.route.snapshot.paramMap.get('id'));
 
-isYellow(status: number): boolean {
-  return status >= 2 && status <= 3;
-}
+    // 2) Charger le projet
+    this.projectService.getProjectById(this.projectId)
+      .subscribe(p => {
+        this.project = p;
+        // une fois le projet chargé, on peut charger les dépendances
+        this.loadInvitedUsers();
+      });
 
-isGreen(status: number): boolean {
-  return status > 3;
-}
+    // 3) Invitations (sera rechargé après projet)
+    // this.loadInvitedUsers();
 
+    // 4) Testeurs (uniquement si superviseur)
+    const user = this.session.getUser();
+    this.isSupervisor = user?.role?.id === 3;
+    if (this.isSupervisor) {
+      this.loadTesters();
+    }
 
-  openDescription() {
-    this.dialog.open(DescriptionDialog, {
-      data: this.project.description,
-      width: '400px'
-    });
+    // 5) Demandes de pause
+    this.loadPauseRequests();
   }
 
-  /** Pour formater le statut */
-  getStatusLabel(status: number): string {
-    switch (status) {
-      case 0: return 'Brouillon';
-      case 1: return 'En attente';
-      case 2: return 'En test';
-      case 3: return 'Acceptation';
-      case 4: return 'En ligne';
+  /* Bloc invitations */
+  private loadInvitedUsers(): void {
+    this.projectService.getInvitedUsers(this.projectId)
+      .subscribe(list => this.invitedUsers = list);
+  }
+  removeInvite(inviteId: number): void {
+    this.projectService.cancelInvite(this.projectId, inviteId)
+      .subscribe(() => this.loadInvitedUsers());
+  }
+  openInviteDialog(): void {
+    // à implémenter
+  }
+
+  /* Bloc testeurs */
+  private loadTesters(): void {
+    this.assignmentService.getAssignments(this.projectId)
+      .subscribe(list => this.testers = list);
+  }
+  goToDesignation(): void {
+    this.router.navigate(
+      ['/dashboard/projects', this.projectId, 'designation-testeurs']
+    );
+  }
+
+  /* Bloc pauses */
+  private loadPauseRequests(): void {
+    this.pauseRequestService.list(this.projectId)
+      .subscribe(requests => this.pauseRequests = requests);
+  }
+
+  /* Bloc explorer */
+  goToExplorer(): void {
+    this.router.navigate(
+      ['/dashboard/projects', this.projectId, 'explorer']
+    );
+  }
+
+  /* Bloc chat */
+  // projectId est déjà en champ, passé au component <app-project-chat>
+
+  /* Bloc overview */
+  get statusLabel(): string {
+    switch (this.project.status) {
+      case -1: return 'Projet archivé';
+      case  0: return 'Brouillon : projet non publié';
+      case  1: return 'En attente de désignation du testeur';
+      case  2: return 'En phase de test';
+      case  3: return 'En phase d\'acceptation';
+      case  4: return 'Projet approuvé et mis en ligne';
+      case 55: return 'Projet mis en pause';
+      case 99: return 'Projet clôturé';
       default: return 'Inconnu';
     }
   }
+
+  get shortDesc(): string {
+    if (!this.project.description) return '';
+    const words = this.project.description.split(/\s+/);
+    return words.length <= 100
+      ? this.project.description
+      : words.slice(0, 100).join(' ');
+  }
+
+  toggleExpanded(): void {
+    this.expanded = !this.expanded;
+  }
+
+  /** Renvoie true si la description dépasse 100 mots */
+get hasLongDesc(): boolean {
+  const desc = this.project?.description;
+  if (!desc) return false;
+  return desc.split(/\s+/).length > 100;
 }
 
-/** Dialog pour la description complète */
-@Component({
-  selector: 'dialog-description',
-  standalone: true,
-  imports: [CommonModule, MatButtonModule, MatDialogModule],
-  template: `
-    <h2 mat-dialog-title>Description complète</h2>
-    <mat-dialog-content>{{ data }}</mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Fermer</button>
-    </mat-dialog-actions>
-  `
-})
-export class DescriptionDialog {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: string) {}
 }

@@ -2,11 +2,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { FileNode } from '../models/file-node.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
+  getStats(id: number) {
+    throw new Error('Method not implemented.');
+  }
+  getPauseRequests(id: number) {
+    throw new Error('Method not implemented.');
+  }
+  getTesters(id: number) {
+    throw new Error('Method not implemented.');
+  }
   private baseUrl = 'http://localhost:8080/api/projects';
 
   constructor(private http: HttpClient) {}
@@ -212,14 +222,4 @@ export class ProjectService {
       `${this.baseUrl}/${projectId}/closure`
     );
   }
-}
-
-export type ItemType = 'FILE' | 'FOLDER';
-
-export interface FileNode {
-  id: number;
-  name: string;
-  type: ItemType;
-  filePath: string;
-  children?: FileNode[];
 }

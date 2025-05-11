@@ -2,16 +2,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Meeting } from '../models/meeting.model';
 
-export interface Meeting {
-createdAt: string|number|Date;
-  id?: number;
-  subject: string;
-  date: string;
-  participants: string[] | null;
-  description?: string;
-  attachments?: File[] | FileList | null;  // accepte FileList aussi
-}
+
 
 @Injectable({ providedIn: 'root' })
 export class MeetingService {

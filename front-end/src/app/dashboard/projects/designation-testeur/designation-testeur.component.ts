@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AssignmentService, FinishedProjectDetail, ProjectTesterAssignment } from '../../../services/assignment.service';
+import { AssignmentService, FinishedProjectDetail } from '../../../services/assignment.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import { UserService } from '../../../services/users.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { User } from '../../../models/user.model';
+import { ProjectTesterAssignment } from '../../../models/assignment.model';
 
 interface Project {
   id: number;
@@ -109,11 +110,7 @@ export class DesignationTesteurComponent implements OnInit {
       .map(a => a.testeur.id)
       .filter(id => id !== testeurId);
   
-    this.svc.assignTesters(projectId, newIds, this.superviseurId)
-      .subscribe(() => {
-        this.snack.open('Testeur retiré', 'OK', { duration: 2000 });
-        this.refreshAll();
-      });
+   
   }
   
   
@@ -127,12 +124,7 @@ export class DesignationTesteurComponent implements OnInit {
     const existants = (this.assignmentsMap[projectId] || []).map(a => a.testeur.id);
     const merged = Array.from(new Set([...existants, ...toAdd]));
   
-    this.svc.assignTesters(projectId, merged, this.superviseurId)
-      .subscribe(() => {
-        this.snack.open('Testeurs ajoutés', 'OK', { duration: 2000 });
-        this.newTesteursMap[projectId] = [];
-        this.refreshAll();
-      });
+  
   }
   
   

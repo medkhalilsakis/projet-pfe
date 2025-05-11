@@ -1,18 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { PauseRequest } from '../models/pause-request.model';
 
-export interface PauseRequest {
-  id?: number;
-  projectId: number;
-  requesterId: number;
-  reason: string;
-  status?: string;
-  requestedAt?: string;
-  supervisorId?: number;
-  handledAt?: string;
-  requesterName?: string;
-}
+
 
 @Injectable({ providedIn: 'root' })
 export class PauseRequestService {

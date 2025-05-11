@@ -1,5 +1,5 @@
 // src/app/.../project-chat.component.ts
-import { Component, Inject, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ChatStompService, ChatMessageDTO } from '../../../services/chat-stomp.service';
@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-project-chat',
@@ -21,6 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./project-chat.component.css']
 })
 export class ProjectChatComponent implements OnInit {
+  @Input() projectId2!: number;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   projectId: number;

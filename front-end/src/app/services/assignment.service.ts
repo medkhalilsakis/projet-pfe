@@ -4,32 +4,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Project } from '../models/project.model';
 import { User } from '../models/user.model';
+import { ProjectTesterAssignment } from '../models/assignment.model';
+import { FinishedProjectDetail } from '../models/finished-project-detail.model';
 
-
-/**
- * Interface pour un enregistrement d’assignation (ProjectTesterAssignment).
- */
-export interface ProjectTesterAssignment {
-  id: number;
-  project: Project;
-  testeur: { id: number; nom: string; prenom: string };
-  superviseur: { id: number; nom: string; prenom: string };
-  dateDesignation: string;    // ex: "2025-05-04"
-  numeroTesteur: number;
-  casTestPath?: string;
-  statutTest: string;         // ex: "non_commence", "en_cours", etc.
-}
-
-// src/app/models/finished-detail.ts
-export interface FinishedProjectDetail {
-  projectId: number;
-  name: string;
-  status: number;               // 55 = pause, 99 = clôture
-  pausedAt: string;           // ISO string
-  closureAt: string;           // ISO string
-  supervisorName: string;
-  testerNames: string[];
-}
 
 
 @Injectable({

@@ -4,14 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import SockJS from 'sockjs-client';
 import { Client, over, Message } from 'stompjs';
 import { Observable } from 'rxjs';
+import { ChatMessageDTO } from '../models/chat-message.model';
 
-export interface ChatMessageDTO {
-  id: number;
-  message: string;
-  createdAt: string;
-  sender: { id: number; prenom: string; nom: string; };
-  attachments?: { id: number; fileName: string; mimeType: string; }[];
-}
+
 
 @Injectable({
   providedIn: 'root'

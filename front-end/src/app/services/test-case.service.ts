@@ -2,24 +2,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { TestCase } from '../models/test-case.model';
 
-export interface TestCase {
-  id?: number;
-  caseNumber: string;
-  title: string;
-  subsystem?: string;
-  description?: string;
-  executionDate: string;
-  preconditions?: string;
-  postconditions?: string;
-  steps: {
-    stepDesc: string;
-    action: string;
-    expected: string;
-    success: boolean;
-    comment?: string;
-  }[];
-}
 
 @Injectable({ providedIn: 'root' })
 export class TestCaseService {

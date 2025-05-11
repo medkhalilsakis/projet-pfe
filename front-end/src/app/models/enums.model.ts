@@ -11,10 +11,23 @@ export enum TestStatus {
   termine = 'termine'
 }
 
+export enum TacheStatus {
+  A_DEVELOPPER = 'a_developper',
+  EN_COURS     = 'en_cours',
+  SUSPENDU     = 'suspendu',
+  CLOTURE      = 'cloturé',
+  TERMINE      = 'terminé'
+}
 /**
  * Tester decision values
  */
 export enum TestApproval {
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
+}
+
+export enum PauseStatus {
+  PENDING  = 'PENDING',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED'
 }

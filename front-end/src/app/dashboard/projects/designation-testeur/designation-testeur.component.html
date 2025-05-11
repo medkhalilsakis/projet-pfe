@@ -42,10 +42,7 @@
               <h4>Testeurs assignés :</h4>
               <div *ngFor="let a of assignmentsMap[proj.id]" fxLayout="row" fxLayoutAlign="space-between center">
                 <span>{{ a.testeur.prenom }} {{ a.testeur.nom }}</span>
-                <button mat-icon-button color="warn"
-                        (click)="removeTesteur(proj.id, a.testeur.id)">
-                  <mat-icon>delete</mat-icon>
-                </button>
+  
               </div>
             </div>
   

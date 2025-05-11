@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AssignmentService, ProjectTesterAssignment } from '../../../services/assignment.service';
+import { AssignmentService } from '../../../services/assignment.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ProjectTesterAssignment } from '../../../models/assignment.model';
 
 @Component({
   selector: 'app-project-test',

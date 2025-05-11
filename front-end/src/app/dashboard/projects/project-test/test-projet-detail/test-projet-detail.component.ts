@@ -27,9 +27,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { BugDetailDialogComponent } from './bug-detail-dialog/bug-detail-dialog.component';
 import { PauseRequestDialogComponent } from './pause-request-dialog/pause-request-dialog.component';
-import { AssignmentService, ProjectTesterAssignment } from '../../../../services/assignment.service';
+import { AssignmentService } from '../../../../services/assignment.service';
 import { ProjectService } from '../../../../services/project.service';
 import { User } from '../../../../models/user.model';
+import { ProjectTesterAssignment } from '../../../../models/assignment.model';
 
 
 @Component({
@@ -132,7 +133,7 @@ export class TestProjetDetailComponent implements OnInit {
     // Mettre à jour le statut du test à "en_cours"
     this.assignmentService.changePhase(this.projectId, 'en_cours').subscribe({
       next: () => {
-        this.projectTesterAssignment.statutTest = 'en_cours';
+        //this.projectTesterAssignment.statutTest = 'en_cours';
         this.canLaunchTest = false;  // Désactiver le bouton après lancement
         this.snack.open('Le test a été lancé avec succès', 'OK', { duration: 2000 });
       },

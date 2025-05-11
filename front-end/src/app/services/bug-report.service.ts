@@ -2,16 +2,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { BugReport } from '../models/bug-report.model';
 
-export interface BugReport {
-  id?: number;
-  level: 'critical' | 'major' | 'minor';
-  description: string;
-  suggestions?: string;
-  attachments?: string[];    // ← URLs/noms renvoyés par le serveur
-  createdAt: string;         // ISO string
-  projectId: number;         // ajout pour reconstruire les URLs de téléchargement
-}
 
 
 @Injectable({ providedIn: 'root' })

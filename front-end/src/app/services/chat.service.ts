@@ -1,16 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ChatMessage } from '../models/chat-message.model';
 
-export interface ChatMessage {
-  id: number;
-  project: any;
-  sender: { id: number; name: string };
-  receiver: { id: number; name: string };
-  message: string;
-  createdAt: string;
-  sentBy: 'me' | 'other';
-}
+
 
 @Injectable({
   providedIn: 'root'
