@@ -4,7 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule, MatOptionModule } from '@angular/material/core';
-import { Meeting } from '../../../../../services/meeting.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { UserService } from '../../../../../services/users.service';
 import { SessionStorageService } from '../../../../../services/session-storage.service';
 import { User } from '../../../../../models/user.model';
+import { Meeting } from '../../../../../models/meeting.model';
 
 @Component({
   selector: 'app-meeting-dialog',

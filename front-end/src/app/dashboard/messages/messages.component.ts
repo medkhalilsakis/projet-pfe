@@ -22,7 +22,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { PresenceService } from '../../services/presence.service';
-import { CallSignal, WebRtcService } from '../../services/webrtc.service';
 import { MediaViewerComponent } from './media-viewer/media-viewer.component';
 
 const API = 'http://localhost:8080/api';
@@ -88,7 +87,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     private session: SessionStorageService,
     private presenceService: PresenceService,
     private dialog: MatDialog,
-    private webRtc: WebRtcService
   ) {
     const u = this.session.getUser();
     this.currentUserId = u.id;

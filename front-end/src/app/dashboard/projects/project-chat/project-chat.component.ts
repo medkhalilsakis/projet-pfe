@@ -2,13 +2,14 @@
 import { Component, Inject, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ChatStompService, ChatMessageDTO } from '../../../services/chat-stomp.service';
+import { ChatStompService } from '../../../services/chat-stomp.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
+import { ChatMessageDTO } from '../../../models/chat-message.model';
 
 @Component({
   selector: 'app-project-chat',

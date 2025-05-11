@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Project } from '../../../models/project.model';
 import { ProjectInvitedUser } from '../../../models/invited-user.model';
 import { ProjectTesterAssignment } from '../../../models/assignment.model';
-import { PauseRequest } from '../../../services/pause-request.service';
 import { ProjectService } from '../../../services/project.service';
 import { PauseRequestService } from '../../../services/pause-request.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
@@ -14,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { ProjectChatComponent } from '../project-chat/project-chat.component';
+import { PauseRequest } from '../../../models/pause-request.model';
 
 @Component({
   selector: 'app-project-detail',

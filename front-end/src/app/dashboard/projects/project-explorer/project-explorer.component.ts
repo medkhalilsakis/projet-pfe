@@ -7,7 +7,7 @@ import {
 } from '@angular/material/tree';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { FileNode, ProjectService } from '../../../services/project.service';
+import { ProjectService } from '../../../services/project.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +21,7 @@ import {
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
+import { FileNode } from '../../../models/file-node.model';
 
 interface FlatNode {
   id: number;

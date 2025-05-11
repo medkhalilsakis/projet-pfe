@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
-import { BugReport } from '../../../../../services/bug-report.service';
+import { BugReport } from '../../../../../models/bug-report.model';
 
 @Component({
   selector: 'app-bug-detail-dialog',

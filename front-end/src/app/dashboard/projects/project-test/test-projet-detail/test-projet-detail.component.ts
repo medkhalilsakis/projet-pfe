@@ -1,11 +1,11 @@
 // src/app/testing/components/test-projet-detail.component.ts
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { BugReport, BugReportService } from '../../../../services/bug-report.service';
-import { Meeting, MeetingService } from '../../../../services/meeting.service';
+import { BugReportService } from '../../../../services/bug-report.service';
+import { MeetingService } from '../../../../services/meeting.service';
 import { SessionStorageService } from '../../../../services/session-storage.service';
 import { UploadedTestCase, TestCaseUploadService } from '../../../../services/test-case-upload.service';
-import { TestCase, TestCaseService } from '../../../../services/test-case.service';
+import { TestCaseService } from '../../../../services/test-case.service';
 import { BugReportDialogComponent } from './bug-report-dialog/bug-report-dialog.component';
 import { MeetingDialogComponent } from './meeting-dialog/meeting-dialog.component';
 import { TestCaseDialogComponent } from './test-case-dialog/test-case-dialog.component';
@@ -18,9 +18,9 @@ import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { saveAs } from 'file-saver';
 import { UserService } from '../../../../services/users.service';
 import { TestProgressService } from '../../../../services/test-progress.service';
-import { PauseRequest, PauseRequestService } from '../../../../services/pause-request.service';
+import { PauseRequestService } from '../../../../services/pause-request.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatCardMdImage, MatCardModule } from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTreeModule } from '@angular/material/tree';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -31,6 +31,10 @@ import { AssignmentService } from '../../../../services/assignment.service';
 import { ProjectService } from '../../../../services/project.service';
 import { User } from '../../../../models/user.model';
 import { ProjectTesterAssignment } from '../../../../models/assignment.model';
+import { TestCase } from '../../../../models/test-case.model';
+import { BugReport } from '../../../../models/bug-report.model';
+import { Meeting } from '../../../../models/meeting.model';
+import { PauseRequest } from '../../../../models/pause-request.model';
 
 
 @Component({

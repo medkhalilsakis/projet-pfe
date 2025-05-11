@@ -19,7 +19,7 @@ public class TestCaseStep {
     // dans TestCaseStep.java
     @ManyToOne
     @JoinColumn(name="test_case_id")
-    @JsonIgnore  // on n’a pas besoin de sérialiser le testCase ici
+    @JsonIgnore
     private TestCase testCase;
 
 }

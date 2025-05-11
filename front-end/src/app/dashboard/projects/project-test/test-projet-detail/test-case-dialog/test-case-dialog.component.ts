@@ -8,7 +8,7 @@ import {
   MAT_DIALOG_DATA, MatDialogModule, MatDialogRef
 } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
-import { TestCase, TestCaseService } from '../../../../../services/test-case.service';
+import { TestCaseService } from '../../../../../services/test-case.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,6 +22,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TestCase } from '../../../../../models/test-case.model';
 
 @Component({
   selector: 'app-test-case-dialog',

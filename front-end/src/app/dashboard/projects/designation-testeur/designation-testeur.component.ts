@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AssignmentService, FinishedProjectDetail } from '../../../services/assignment.service';
+import { AssignmentService } from '../../../services/assignment.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { User } from '../../../models/user.model';
 import { ProjectTesterAssignment } from '../../../models/assignment.model';
+import { FinishedProjectDetail } from '../../../models/finished-project-detail.model';
 
 interface Project {
   id: number;
