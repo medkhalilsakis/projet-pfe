@@ -1,32 +1,31 @@
-// src/app/.../project-chat.component.ts
-import { Component, Inject, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ChatStompService } from '../../../services/chat-stomp.service';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { ChatMessageDTO } from '../../../models/chat-message.model';
 
 @Component({
   selector: 'app-project-chat',
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    MatInputModule, MatIconModule,
-    MatDialogModule
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    MatIconModule
   ],
   templateUrl: './project-chat.component.html',
   styleUrls: ['./project-chat.component.css']
 })
 export class ProjectChatComponent implements OnInit {
-  @Input() projectId2!: number;
+  /** Si on est en inline, on passe le projectId en input. */
+  @Input() projectId!: number;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-  projectId: number;
   messages: ChatMessageDTO[] = [];
   messageText = '';
   attachments: File[] = [];
@@ -37,19 +36,37 @@ export class ProjectChatComponent implements OnInit {
     private chatSvc: ChatStompService,
     private session: SessionStorageService,
     private sanitizer: DomSanitizer,
-    private dialogRef: MatDialogRef<ProjectChatComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { projectId: number}
-  ) {
-    this.projectId = data.projectId;
-  }
+    private route: ActivatedRoute   // <- pour le mode “page”
+  ) {}
 
   ngOnInit(): void {
+    // Si on n'a pas reçu de `projectId` en @Input, on le récupère dans le param de route
+    if (!this.projectId) {
+      const pid = this.route.snapshot.paramMap.get('id') 
+               || this.route.snapshot.paramMap.get('projectId');
+      this.projectId = pid ? +pid : NaN;
+    }
+    if (isNaN(this.projectId)) {
+      throw new Error('ProjectChatComponent : projectId introuvable !');
+    }
+
+    // on peut maintenant charger
     const u = this.session.getUser();
-    this.currentUserId = u?.id;
+    this.currentUserId = u?.id!;
 
     this.loadMessages();
 
-    // STOMP events pour suppression
+    // abonnement STOMP pour nouveaux msgs
+    this.chatSvc.subscribe(
+      `/topic/chat.${this.projectId}`,
+      frame => {
+        const newMsg: ChatMessageDTO = JSON.parse(frame.body);
+        this.messages.push(newMsg);
+        setTimeout(() => this.scrollToBottom(), 50);
+      }
+    );
+
+    // abonnement suppr messages
     this.chatSvc.subscribe(
       `/topic/chat.${this.projectId}.delete`,
       frame => {
@@ -57,20 +74,21 @@ export class ProjectChatComponent implements OnInit {
         this.messages = this.messages.filter(m => m.id !== messageId);
       }
     );
+
+    // abonnement suppr pièces jointes
     this.chatSvc.subscribe(
       `/topic/chat.${this.projectId}.deleteAtt`,
       frame => {
         const { attachmentId } = JSON.parse(frame.body);
         this.messages.forEach(m => {
-          if (m.attachments) {
-            m.attachments = m.attachments.filter(a => a.id !== attachmentId);
-          }
+          m.attachments = m.attachments
+                         ?.filter(a => a.id !== attachmentId);
         });
       }
     );
   }
 
-  private loadMessages() {
+  private loadMessages(): void {
     this.chatSvc.list(this.projectId)
       .subscribe(msgs => {
         this.messages = msgs;
@@ -81,7 +99,7 @@ export class ProjectChatComponent implements OnInit {
   onFileSelected(evt: Event) {
     const files = (evt.target as HTMLInputElement).files;
     if (!files) return;
-    Array.from(files).forEach(f => this.attachments.push(f));
+    this.attachments.push(...Array.from(files));
   }
 
   removeAttachment(i: number) {
@@ -89,47 +107,48 @@ export class ProjectChatComponent implements OnInit {
   }
 
   sendMessage() {
-  if (!this.messageText.trim() && !this.attachments.length) return;
+    if (!this.messageText.trim() && !this.attachments.length) return;
 
-  const form = new FormData();
-  form.append('senderId', String(this.currentUserId));
-  form.append('message', this.messageText);
-  this.attachments.forEach(f => form.append('files', f));
+    const form = new FormData();
+    form.append('senderId', `${this.currentUserId}`);
+    form.append('message', this.messageText);
+    this.attachments.forEach(f => form.append('files', f));
 
-  // 1) Envoi HTTP
-  this.chatSvc.postMessage(this.projectId, form)
-    .subscribe((dto: ChatMessageDTO) => {
-      // 2) Publication STOMP
-      this.chatSvc.publish('/app/chat.send', {
-        projectId: this.projectId,
-        senderId: this.currentUserId,
-        message: this.messageText,
-        id: dto.id  // selon ce que vous attendez en payload
+    this.chatSvc.postMessage(this.projectId, form)
+      .subscribe(dto => {
+        this.chatSvc.publish('/app/chat.send', {
+          projectId: this.projectId,
+          senderId: this.currentUserId,
+          message: this.messageText,
+          id: dto.id
+        });
+        // reset
+        this.messageText = '';
+        this.attachments = [];
+        this.fileInput.nativeElement.value = '';
       });
-
-      // reset UI
-      this.messageText = '';
-      this.attachments = [];
-      this.fileInput.nativeElement.value = '';
-    });
-}
-
+  }
 
   onDeleteMessage(msg: ChatMessageDTO) {
     if (!confirm('Supprimer ce message ?')) return;
     this.chatSvc.deleteMessage(this.projectId, msg.id)
       .subscribe(() => {
-        // local ou stomp 
         this.messages = this.messages.filter(m => m.id !== msg.id);
+      });
+  }
+
+  /** Supprime une pièce jointe côté serveur + notifie STOMP */
+  onDeleteAttachment(attId: number) {
+    this.chatSvc.deleteAttachment(this.projectId, attId)
+      .subscribe(() => {
+        this.messages.forEach(m => {
+          m.attachments = m.attachments?.filter(a => a.id !== attId);
+        });
       });
   }
 
   sanitizeUrl(url: string) {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-  }
-
-  close() {
-    this.dialogRef.close();
   }
 
   private scrollToBottom() {

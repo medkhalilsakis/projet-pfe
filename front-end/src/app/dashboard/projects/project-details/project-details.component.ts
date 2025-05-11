@@ -14,6 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { ProjectChatComponent } from '../project-chat/project-chat.component';
 import { PauseRequest } from '../../../models/pause-request.model';
+import { map } from 'rxjs/operators';
+import { User } from '../../../models/user.model';
+import { MatDialogModule } from '@angular/material/dialog';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-project-detail',
@@ -26,10 +30,69 @@ import { PauseRequest } from '../../../models/pause-request.model';
     MatCardModule,
     MatIconModule,
     MatListModule,
-    ProjectChatComponent
+    MatDialogModule,
+    ProjectChatComponent,
+    FlexLayoutModule
   ]
 })
 export class ProjectDetailsComponent implements OnInit {
+  actionsList = [
+  {
+    icon: 'file_download',
+    label: 'Télécharger',
+    handler: () => this.downloadContent(),
+    colorClass: 'file_download'    // ← ici
+  },
+  {
+    icon: 'settings',
+    label: 'Modifier',
+    handler: () => this.openSettings(),
+    colorClass: 'settings'         // ← et là
+  },
+  {
+    icon: 'delete',
+    label: 'Supprimer',
+    handler: () => this.deleteProject(),
+    colorClass: 'delete'
+  },
+  {
+    icon: 'archive',
+    label: 'Archiver',
+    handler: () => this.archiveProject(),
+    colorClass: 'archive'
+  },
+  {
+    icon: 'pause_circle',
+    label: 'Mettre en pause',
+    handler: () => this.pauseProject(),
+    colorClass: 'pause_circle'
+  },
+  {
+    icon: 'stop_circle',
+    label: 'Clôturer',
+    handler: () => this.closeProject(),
+    colorClass: 'stop_circle'
+  }
+];
+
+closeProject() {
+throw new Error('Method not implemented.');
+}
+pauseProject() {
+throw new Error('Method not implemented.');
+}
+archiveProject() {
+throw new Error('Method not implemented.');
+}
+deleteProject() {
+throw new Error('Method not implemented.');
+}
+openSettings() {
+throw new Error('Method not implemented.');
+}
+downloadContent() {
+throw new Error('Method not implemented.');
+}
   project!: Project;
   projectId!: number;
 
@@ -66,9 +129,6 @@ export class ProjectDetailsComponent implements OnInit {
         this.loadInvitedUsers();
       });
 
-    // 3) Invitations (sera rechargé après projet)
-    // this.loadInvitedUsers();
-
     // 4) Testeurs (uniquement si superviseur)
     const user = this.session.getUser();
     this.isSupervisor = user?.role?.id === 3;
@@ -83,12 +143,43 @@ export class ProjectDetailsComponent implements OnInit {
   /* Bloc invitations */
   private loadInvitedUsers(): void {
     this.projectService.getInvitedUsers(this.projectId)
-      .subscribe(list => this.invitedUsers = list);
+      .pipe(
+        map(rawList =>
+          rawList.map(raw => {
+            const u: User = {
+              id: raw.userId,
+              prenom: raw.prenom,
+              nom: raw.nom,
+              username: '',      // champs obligatoires du modèle, laissez vide si non dispo
+              email: '',
+              dateEmbauche: '',
+              salaire: 0,
+              ncin: '',
+              genre: '',
+            };
+            const invite: ProjectInvitedUser = {
+              id: raw.id,
+              project: this.project!,   // on ré-utilise le projet chargé en amont
+              user: u,
+              status: raw.status,
+              invitedAt: raw.invitedAt
+            };
+            return invite;
+          })
+        )
+      )
+      .subscribe(invites => {
+        this.invitedUsers = invites;
+      });
   }
-  removeInvite(inviteId: number): void {
-    this.projectService.cancelInvite(this.projectId, inviteId)
-      .subscribe(() => this.loadInvitedUsers());
-  }
+  
+removeInvite(userId: number): void {
+  this.projectService.cancelInvite(this.projectId, userId)
+    .subscribe({
+      next: () => this.loadInvitedUsers(),
+      error: err => console.error('Erreur lors de la suppression', err)
+    });
+}
   openInviteDialog(): void {
     // à implémenter
   }
@@ -121,7 +212,7 @@ export class ProjectDetailsComponent implements OnInit {
   // projectId est déjà en champ, passé au component <app-project-chat>
 
   /* Bloc overview */
-  get statusLabel(): string {
+  statusLabel(): string {
     switch (this.project.status) {
       case -1: return 'Projet archivé';
       case  0: return 'Brouillon : projet non publié';
@@ -153,5 +244,26 @@ get hasLongDesc(): boolean {
   if (!desc) return false;
   return desc.split(/\s+/).length > 100;
 }
+
+// project-details.component.ts
+
+/** Retourne true si le status est Brouillon ou En attente */
+isRed(): boolean {
+  if (this.project.status == null) return false;
+  return this.project.status == -1 || this.project.status == 0 || this.project.status == 1 || this.project.status == 55 || this.project.status == 99;
+}
+
+/** Retourne true si le status est En test ou Acceptation */
+isYellow(): boolean {
+  if (this.project.status == null) return false;
+  return this.project.status == 2 || this.project.status == 3;
+}
+
+/** Retourne true si le status est En ligne (4+) */
+isGreen(): boolean {
+  if (this.project.status == null) return false;
+  return this.project.status == 4;
+}
+
 
 }

@@ -13,7 +13,7 @@ export interface Project {
   committed: boolean;                // commit final effectué ?
   createdAt: string;                 // ISO datetime (CreationTimestamp)
   updatedAt: string;                 // ISO datetime (UpdateTimestamp)
-  status?: number;                   // statut numérique (nullable)
+  status: number;                   // statut numérique (nullable)
   assignments?: ProjectTesterAssignment[]; // 1-n assignations testeurs
   files?: ProjectFile[];             // 1-n fichiers du projet
   invitedUsers?: User[];             // liste des users invités

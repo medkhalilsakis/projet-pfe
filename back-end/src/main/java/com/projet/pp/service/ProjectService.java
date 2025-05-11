@@ -6,6 +6,7 @@ import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
 import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -440,8 +441,22 @@ public class ProjectService {
     }
 
 
+    @Transactional
     public void removeInvitedUser(Long projectId, Long userId) {
+        // 1) Vérifier que le projet existe
+        projectRepository.findById(projectId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Projet introuvable pour id : " + projectId));
+
+        // 2) Supprimer l’invitation
+        int deleted = projectInvitedUserRepository.deleteByProjectIdAndUserId(projectId, userId);
+        if (deleted == 0) {
+            throw new EntityNotFoundException(
+                    "Aucune invitation trouvée pour userId=" + userId +
+                            " sur projectId=" + projectId);
+        }
     }
+
 
     public Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)

@@ -21,6 +21,7 @@ import { MyProjectsComponent } from './dashboard/projects/my-projects/my-project
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
 import { TestProjetDetailComponent } from './dashboard/projects/project-test/test-projet-detail/test-projet-detail.component';
 import {AnalyticsComponent} from './dashboard/analytics/analytics.component'
+import { ProjectChatComponent } from './dashboard/projects/project-chat/project-chat.component';
 export const routes: Routes = [
   { 
     path: 'dashboard',
@@ -46,6 +47,7 @@ export const routes: Routes = [
       { path: 'projects-test/:id',       component: TestProjetDetailComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
+      { path: 'projects/:id/chat', component: ProjectChatComponent },
     ]
   },
   {

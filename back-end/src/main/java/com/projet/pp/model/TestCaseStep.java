@@ -16,7 +16,6 @@ public class TestCaseStep {
     @Column(columnDefinition="TEXT") private String stepDesc, action, expected, comment;
     private boolean success;
 
-    // dans TestCaseStep.java
     @ManyToOne
     @JoinColumn(name="test_case_id")
     @JsonIgnore

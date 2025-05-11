@@ -260,11 +260,9 @@ export class ProjectsComponent implements OnInit {
   }
 
   chatDetails(project: Project): void {
-    this.dialog.open(ProjectChatComponent, {
-      width: '600px',
-      data: { projectId: project.id }
-    });
+    this.router.navigate(['/dashboard/projects', project.id, 'chat']);
   }
+
 
   openSettings(project: Project): void{
     this.dialog.open(ParametresProjetComponent, {

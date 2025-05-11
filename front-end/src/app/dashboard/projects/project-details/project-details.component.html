@@ -1,119 +1,170 @@
-<div class="project-detail" fxLayout="column" fxLayoutGap="24px">
+<!-- project-details-layout.component.html -->
+<div class="project-detail-container" fxLayout="row" fxLayoutGap="24px" fxLayout.xs="column">
 
-  <!-- 1. Overview -->
-  <mat-card *ngIf="project" class="card-overview">
-    <mat-card-header>
-      <mat-card-title>{{ project.name }}</mat-card-title>
-      <mat-card-subtitle>
-        Par {{ project.user.prenom }} {{ project.user.nom }}
-        <span *ngIf="project.type">• {{ project.type }}</span>
-      </mat-card-subtitle>
-    </mat-card-header>
+  <!-- COLUMN LEFT -->
+  <section class="project-detail-left" fxFlex.gt-sm="60" fxFlex="100" fxLayout="column" fxLayoutGap="24px">
 
-    <mat-card-content>
-      <p class="description">
-        {{ expanded ? project.description : shortDesc }}
-        <ng-container *ngIf="hasLongDesc">
-          <a class="toggle-desc" (click)="toggleExpanded()">
-            {{ expanded ? 'Voir moins' : '… Lire la suite' }}
-          </a>
-        </ng-container>
-      </p>
+    <!-- Overview Card -->
+    <mat-card *ngIf="project" class="overview-card">
+  <mat-card-header class="overview-header">
+    <mat-card-title class="overview-title">
+      <mat-icon class="overview-icon">folder</mat-icon>
+      {{ project.name }}
+    </mat-card-title>
+    <mat-card-subtitle class="overview-subtitle">
+      <mat-icon class="overview-icon-small">person</mat-icon>
+      Par {{ project.user.prenom }} {{ project.user.nom }}
+      <ng-container *ngIf="project.type">
+        <mat-icon class="overview-icon-small">label</mat-icon>
+        <span class="overview-type">{{ project.type }}</span>
+      </ng-container>
+    </mat-card-subtitle>
+  </mat-card-header>
 
-      <p class="meta">
-        <strong>Visibilité :</strong> {{ project.visibilite }}<br>
-        <strong>Créé le :</strong>
-        {{ project.createdAt | date:'longDate' }}<br>
-        <strong>Statut :</strong> {{ statusLabel }}
-      </p>
-    </mat-card-content>
-  </mat-card>
+  <mat-card-content class="overview-content">
+    <p class="overview-description">
+      {{ expanded ? project.description : shortDesc }}
+      <ng-container *ngIf="hasLongDesc">
+        <a class="description-toggle" (click)="toggleExpanded()">
+          <mat-icon class="toggle-icon">expand_more</mat-icon>
+          {{ expanded ? 'Voir moins' : '… Lire la suite' }}
+        </a>
+      </ng-container>
+    </p>
 
-
-  <!-- 2. Invitations -->
-  <!-- Bloc Invitations -->
-  <mat-card *ngIf="invitedUsers.length" class="card-invitations">
-    <mat-card-title>Invitations</mat-card-title>
-    <mat-list>
-      <mat-list-item *ngFor="let inv of invitedUsers">
-        <div class="inv-item" fxLayout="row" fxLayoutAlign="space-between center">
-          <!--<span class="inv-name">{{ inv.prenom }} {{ inv.nom }}</span>-->
-          <span class="inv-status">{{ inv.status }}</span>
-          <button mat-icon-button color="warn"
-                  (click)="removeInvite(inv.id)">
-            <mat-icon>cancel</mat-icon>
-          </button>
+    <div class="overview-meta-grid">
+      <div class="meta-item">
+        <mat-icon>visibility</mat-icon>
+        <div>
+          <div class="meta-label">Visibilité</div>
+          <div class="meta-value">{{ project.visibilite }}</div>
         </div>
-      </mat-list-item>
-    </mat-list>
-    <button mat-mini-fab color="primary"
-            class="invite-btn"
-            (click)="openInviteDialog()">
-      <mat-icon>person_add</mat-icon>
-    </button>
-  </mat-card>
-
-
-  <!-- 3. Explorer -->
-  <!-- Bloc Explorateur de projet -->
-<mat-card class="card-explorer">
-  <mat-card-title>Explorateur de projet</mat-card-title>
-  <mat-card-content>
-    <p>Parcourez l’arborescence des fichiers de votre projet.</p>
-    <button mat-stroked-button color="primary" (click)="goToExplorer()">
-      <mat-icon>folder_open</mat-icon>
-      Ouvrir l’explorateur
-    </button>
-  </mat-card-content>
-</mat-card>
-
-
-  <!-- 4. Chat -->
-<mat-card class="card-chat">
-  <mat-card-title>Chat du projet</mat-card-title>
-  <mat-card-content>
-    <app-project-chat [projectId2]="projectId"></app-project-chat>
-  </mat-card-content>
-</mat-card>
-
-
-  <!-- 5. Testers -->
-  <!-- Bloc Testeurs assignés (visible pour superviseur seulement) -->
-<mat-card *ngIf="isSupervisor && testers.length" class="card-testers">
-  <mat-card-title>Testeurs assignés</mat-card-title>
-  <mat-card-content>
-    <mat-list>
-      <mat-list-item *ngFor="let t of testers">
-        {{ t.testeur.prenom }} {{ t.testeur.nom }}
-        <span class="badge">#{{ t.numeroTesteur }}</span>
-      </mat-list-item>
-    </mat-list>
-    <button mat-stroked-button color="primary" (click)="goToDesignation()">
-      <mat-icon>group_add</mat-icon>
-      Gérer les testeurs
-    </button>
-  </mat-card-content>
-</mat-card>
-
-
-  <!-- 6. Pause requests -->
-<mat-card *ngIf="pauseRequests.length" class="card-pauses">
-  <mat-card-title>Demandes de suspension</mat-card-title>
-  <mat-card-content>
-    <div class="pause-list">
-      <details *ngFor="let p of pauseRequests" class="pause-item">
-        <summary class="pause-summary">
-          {{ p.requesterName || p.requesterId }} — {{ p.status }}
-        </summary>
-        <div class="pause-details">
-          <p><strong>Raison :</strong> {{ p.reason }}</p>
-          <p class="pause-date">
-            <em>Demandé le {{ p.requestedAt | date:'short' }}</em>
-          </p>
+      </div>
+      <div class="meta-item">
+        <mat-icon>event</mat-icon>
+        <div>
+          <div class="meta-label">Créé le</div>
+          <div class="meta-value">{{ project.createdAt | date:'longDate' }}</div>
         </div>
-      </details>
+      </div>
+      <div class="meta-item status-item">
+  <mat-icon class="status-flag">flag</mat-icon>
+  <div class="status-block">
+    <div class="status-label">Statut</div>
+    <div class="status-wrapper">
+      <div class="traffic-light">
+        <div class="light red"    [class.active]="isRed()"></div>
+        <div class="light yellow" [class.active]="isYellow()"></div>
+        <div class="light green"  [class.active]="isGreen()"></div>
+      </div>
+      <div class="status-text">{{ statusLabel() }}</div>
+    </div>
+  </div>
+</div>
+
+
     </div>
   </mat-card-content>
 </mat-card>
+
+
+    <!-- Testers Card -->
+    <mat-card *ngIf="isSupervisor && testers.length" class="testers-card">
+      <mat-card-title class="testers-title">Testeurs assignés</mat-card-title>
+      <mat-card-content class="testers-content">
+        <mat-list class="testers-list">
+          <mat-list-item *ngFor="let t of testers" class="tester-item">
+            <span class="tester-name">{{ t.testeur.prenom }} {{ t.testeur.nom }}</span>
+            <span class="tester-badge">#{{ t.numeroTesteur }}</span>
+          </mat-list-item>
+        </mat-list>
+        <button mat-stroked-button color="primary" class="testers-button" (click)="goToDesignation()">
+          <mat-icon class="testers-icon">group_add</mat-icon>
+          Gérer les testeurs
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pause Requests Card -->
+    <mat-card *ngIf="pauseRequests.length" class="pauses-card">
+      <mat-card-title class="pauses-title">Demandes de suspension</mat-card-title>
+      <mat-card-content class="pauses-content">
+        <div class="pauses-list">
+          <details *ngFor="let p of pauseRequests" class="pause-item">
+            <summary class="pause-summary">
+              {{ p.requesterName || p.requesterId }} — {{ p.status }}
+            </summary>
+            <div class="pause-details">
+              <p class="pause-reason"><strong>Raison :</strong> {{ p.reason }}</p>
+              <p class="pause-date"><em>Demandé le {{ p.requestedAt | date:'short' }}</em></p>
+            </div>
+          </details>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions Card -->
+    <mat-card class="actions-card">
+      <mat-card-title class="actions-title">Actions</mat-card-title>
+      <mat-card-content class="actions-content" fxLayout="column" fxLayoutGap="16px">
+        <div class="action-item" *ngFor="let act of actionsList">
+          <button mat-icon-button
+                  class="action-btn"
+                  [ngClass]="act.colorClass"
+                  (click)="act.handler()">
+            <mat-icon>{{ act.icon }}</mat-icon>
+          </button>
+          <span class="action-label">{{ act.label }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+
+  </section>
+
+  <!-- COLUMN RIGHT -->
+  <aside class="project-detail-right" fxFlex.gt-sm="40" fxFlex="100" fxLayout="column" fxLayoutGap="24px">
+
+    <!-- Invitations Card -->
+    <mat-card *ngIf="invitedUsers.length" class="invitations-card">
+      <mat-card-title class="invitations-title">Invitations</mat-card-title>
+      <mat-card-content class="invitations-content">
+        <mat-list class="invitations-list">
+          <mat-list-item *ngFor="let inv of invitedUsers" class="invitation-item">
+            <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
+              <span class="invitation-name">{{ inv.user.prenom }} {{ inv.user.nom }}</span>
+              <span class="invitation-status">{{ inv.status }}</span>
+              <button mat-icon-button class="invitation-remove" color="warn" (click)="removeInvite(inv.user.id!)">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+        <button mat-mini-fab color="primary" class="invitations-add" (click)="openInviteDialog()">
+          <mat-icon>person_add</mat-icon>
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Explorer Card -->
+    <mat-card class="explorer-card">
+      <mat-card-title class="explorer-title">Explorateur de projet</mat-card-title>
+      <mat-card-content class="explorer-content">
+        <p class="explorer-text">Parcourez l’arborescence des fichiers de votre projet.</p>
+        <button mat-stroked-button color="primary" class="explorer-button" (click)="goToExplorer()">
+          <mat-icon class="explorer-icon">folder_open</mat-icon> Ouvrir l’explorateur
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Chat Card -->
+    <mat-card class="chat-card">
+      <mat-card-title class="chat-title">Chat du projet</mat-card-title>
+      <mat-card-content class="chat-content">
+        <app-project-chat [projectId]="projectId"></app-project-chat>
+      </mat-card-content>
+    </mat-card>
+
+  </aside>
 
 </div>
