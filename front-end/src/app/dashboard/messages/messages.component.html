@@ -29,7 +29,7 @@
              alt="{{u.prenom}}"
              class="avatar-sm">
         <div class="user-details" fxFlex>
-          <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+          <div class="user-name">{{ u.nom }} {{ u.prenom }}</div>
           <div class="user-status">
             <span [class.online]="u.online" [class.offline]="!u.online"></span>
             {{ getStatus(u) }}
@@ -56,7 +56,7 @@
       <div class="chat-recipient" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
         <img class="avatar-sm" [src]="selectedUser.avatarUrl" alt="{{selectedUser.nom}}">
         <div>
-          <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
+          <h2>{{ selectedUser.nom }} {{ selectedUser.prenom }}</h2>
         </div>
       </div>
       <div class="header-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
@@ -72,6 +72,17 @@
   <ng-container *ngFor="let m of messages">
     <div class="msg-row" [ngClass]="{ 'sent': m.sentBy === 'me', 'received': m.sentBy !== 'me' }" fxLayout="row" fxLayoutAlign="{{ m.sentBy === 'me' ? 'end center' : 'start center' }}">
       <ng-container *ngIf="m.sentBy === 'me'">
+
+        <button
+        *ngIf="m.sentBy === 'me'"
+        mat-icon-button
+        class="delete-btn"
+        (click)="onDeleteMessage(m)"
+        matTooltip="Supprimer le message"
+        aria-label="Supprimer message"
+      >
+        <mat-icon>clear</mat-icon>
+      </button>
         <div class="bubble">
           <p>{{ m.text }}</p>
           <ng-container *ngIf="m.attachments?.length">

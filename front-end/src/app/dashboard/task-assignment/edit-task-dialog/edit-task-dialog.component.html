@@ -1,28 +1,27 @@
-<!-- src/app/task-assignment/edit-task-dialog/edit-task-dialog.component.html -->
-<h2 mat-dialog-title>Modifier la tâche</h2>
+<h2 mat-dialog-title class="dialog-title">Modifier la tâche</h2>
 
 <mat-dialog-content [formGroup]="form" class="dialog-content">
 
-  <!-- Nom -->
-  <mat-form-field appearance="outline" class="full">
+  <!-- Task Name Field -->
+  <mat-form-field appearance="outline" class="form-field full-width">
     <mat-label>Nom</mat-label>
     <input matInput formControlName="name">
   </mat-form-field>
 
-  <!-- Description -->
-  <mat-form-field appearance="outline" class="full">
+  <!-- Description Field -->
+  <mat-form-field appearance="outline" class="form-field full-width">
     <mat-label>Description</mat-label>
     <textarea matInput formControlName="description" rows="3"></textarea>
   </mat-form-field>
 
-  <!-- Deadline -->
-  <mat-form-field appearance="outline">
+  <!-- Deadline Field -->
+  <mat-form-field appearance="outline" class="form-field medium-width">
     <mat-label>Deadline</mat-label>
     <input matInput type="date" formControlName="deadline">
   </mat-form-field>
 
-  <!-- Assignés -->
-  <mat-form-field appearance="outline" class="full">
+  <!-- Assigned Users Field -->
+  <mat-form-field appearance="outline" class="form-field full-width">
     <mat-label>Assigné à</mat-label>
     <mat-select formControlName="assignedTo" multiple>
       <mat-option *ngFor="let u of users" [value]="u.id">
@@ -31,54 +30,61 @@
     </mat-select>
   </mat-form-field>
 
-  <!-- Outils -->
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>Outils &amp; Technologies</mat-label>
-    <mat-chip-grid #chipGrid>
-        <mat-chip-row *ngFor="let outil of outilsList" (removed)="removeOutil(outil)" removable>
-          {{ outil }}
-          <button matChipRemove><mat-icon>cancel</mat-icon></button>
-        </mat-chip-row>
-      
-        <!-- Ici le binding correct -->
-        <input
-          [matChipInputFor]="chipGrid"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          placeholder="Ajouter un outil…"
-          (matChipInputTokenEnd)="addOutil($event)">
-      </mat-chip-grid>
+  <!-- Tools & Technologies Chips -->
+  <mat-form-field appearance="outline" class="form-field full-width">
+    <mat-label>Outils & Technologies</mat-label>
+    <mat-chip-grid #chipGrid class="tool-chip-grid">
+      <mat-chip-row *ngFor="let outil of outilsList" (removed)="removeOutil(outil)" removable>
+        {{ outil }}
+        <button matChipRemove><mat-icon>cancel</mat-icon></button>
+      </mat-chip-row>
+      <input
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        placeholder="Ajouter un outil…"
+        (matChipInputTokenEnd)="addOutil($event)"
+      >
+    </mat-chip-grid>
   </mat-form-field>
 
-  <!-- Cahier de charges (PDF) -- facultatif -->
-  <div class="file-input full">
-    <label>Cahier de charges (PDF)</label><br>
+  <!-- PDF Input -->
+  <div class="file-input full-width">
+  <label class="file-label">Cahier de charges (PDF)</label>
+  <label class="custom-file-btn">
+    <mat-icon>picture_as_pdf</mat-icon>
+    Choisir un PDF
     <input type="file" accept=".pdf" (change)="onProjectPdfChange($event)">
-  </div>
+  </label>
+</div>
 
-  <!-- Pièces existantes -->
-  <div *ngIf="existingAttachments.length" class="existing-atts full">
-    <label>Pièces jointes existantes</label>
-    <ul>
-      <li *ngFor="let a of existingAttachments">
+  <!-- Existing Attachments -->
+  <div *ngIf="existingAttachments.length" class="existing-atts full-width">
+    <label class="file-label">Pièces jointes existantes</label>
+    <ul class="atts-list">
+      <li *ngFor="let a of existingAttachments" class="atts-item">
         {{ a.fileName }}
-        <button mat-icon-button color="warn" (click)="removeExisting(a)">
+        <button mat-icon-button color="warn" class="delete-att-btn" (click)="removeExisting(a)">
           <mat-icon>delete</mat-icon>
         </button>
       </li>
     </ul>
   </div>
 
-  <!-- Nouvelles pièces -->
-  <div class="file-input full">
-    <label>Ajouter d’autres pièces</label><br>
+  <!-- New Attachments -->
+  <div class="file-input full-width">
+  <label class="file-label">Ajouter d’autres pièces</label>
+  <label class="custom-file-btn">
+    <mat-icon>attach_file</mat-icon>
+    Sélectionner des fichiers
     <input type="file" multiple (change)="onAttachmentsChange($event)">
-  </div>
+  </label>
+</div>
 
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Annuler</button>
-  <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="submit()">
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button class="cancel-btn" (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" class="save-btn" [disabled]="form.invalid" (click)="submit()">
     <mat-icon>save</mat-icon> Enregistrer
   </button>
 </mat-dialog-actions>

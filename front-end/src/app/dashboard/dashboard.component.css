@@ -216,7 +216,7 @@ html, body {
   color: #ecf0f1;
   box-shadow: 2px 0 12px rgba(0,0,0,0.3);
   transition: width 0.3s ease;
-  border: 3px solid rgb(255, 213, 0);
+  border: 3px dashed rgb(255, 213, 0);
 }
 
 .side-nav mat-icon{
@@ -238,7 +238,7 @@ html, body {
   padding-top: 16px;
 }
 .menu-divider {
-  margin: 18px 0;
+  margin: 20px 0;
   border-color: rgba(236,240,241,0.2);
 }
 

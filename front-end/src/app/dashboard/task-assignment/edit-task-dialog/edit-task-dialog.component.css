@@ -1,23 +1,193 @@
-/* src/app/task-assignment/edit-task-dialog/edit-task-dialog.component.css */
+/* ─────────────────────────────────────────────
+   Dialog Title
+───────────────────────────────────────────── */
+.dialog-title {
+  margin: 0;
+  padding: 16px 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #ff6f61, #de4313);
+  position: relative;
+  overflow: hidden;
+}
+.dialog-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 0; height: 4px;
+  background: #ffd54f;
+  transition: width 0.4s ease, left 0.4s ease;
+}
+.dialog-title:hover::after {
+  width: 60%;
+  left: 20%;
+}
+
+/* ─────────────────────────────────────────────
+   Dialog Content Layout
+───────────────────────────────────────────── */
 .dialog-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .full {
-    width: 100%;
-  }
-  .file-input {
-    margin-top: 8px;
-  }
-  .existing-atts ul {
-    list-style: none;
-    padding: 0;
-  }
-  .existing-atts li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 0;
-  }
-  
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 16px;
+  padding: 24px;
+  background: #fafafa;
+}
+
+/* Full-width and medium fields */
+.full-width   { grid-column: 1 / -1; }
+.medium-width { grid-column: span 1; }
+
+/* ─────────────────────────────────────────────
+   Form Fields
+───────────────────────────────────────────── */
+.form-field {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.form-field:hover .mat-form-field-outline {
+  box-shadow: 0 4px 12px rgba(255,111,97,0.3);
+}
+
+/* Outline focus accent */
+.mat-form-field.mat-focused .mat-form-field-outline {
+  border-color: #ff6f61;
+}
+
+/* ─────────────────────────────────────────────
+   Tools Chips Grid
+───────────────────────────────────────────── */
+.tool-chip-grid {
+  padding: 8px;
+  background: #fff3e0;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+.tool-chip-grid:hover {
+  background: #ffe0b2;
+}
+mat-chip-row {
+  background: #ffccbc;
+  margin: 4px;
+  transition: background 0.2s ease;
+}
+mat-chip-row:hover {
+  background: #ffab91;
+}
+
+/* ─────────────────────────────────────────────
+   File Inputs & Attachments
+───────────────────────────────────────────── */
+/* Conteneur global des champs fichier */
+.file-input {
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label stylé */
+.file-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* Masquer réellement l’input natif */
+.file-input input[type="file"] {
+  display: none;
+}
+
+/* Bouton stylé qui remplace l’input */
+.file-input .custom-file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ff6b6b, #f06595);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Icone interne */
+.file-input .custom-file-btn mat-icon {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+/* Hover / focus */
+.file-input .custom-file-btn:hover,
+.file-input .custom-file-btn:focus {
+  background: linear-gradient(135deg, #f06595, #ff6b6b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+.file-input .custom-file-btn:hover mat-icon {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+/* Exemple d’utilisation : */
+
+.file-label {
+  font-weight: 500;
+  color: #6e6e6e;
+  margin-bottom: 4px;
+  display: block;
+}
+.existing-atts .atts-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+.atts-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff8e1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: background 0.3s ease;
+}
+.atts-item:hover {
+  background: #ffecb3;
+}
+.delete-att-btn mat-icon {
+  color: #e53935;
+  transition: transform 0.2s ease;
+}
+.delete-att-btn:hover mat-icon {
+  transform: scale(1.2);
+}
+
+/* ─────────────────────────────────────────────
+   Dialog Actions
+───────────────────────────────────────────── */
+.dialog-actions {
+  padding: 16px 24px;
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+.cancel-btn {
+  color: #757575;
+  margin-right: 12px;
+  transition: color 0.2s ease;
+}
+.cancel-btn:hover {
+  color: #424242;
+}
+.save-btn {
+  background: linear-gradient(45deg, #00c853, #b2ff59);
+  color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,200,83,0.4);
+}

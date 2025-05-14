@@ -57,6 +57,9 @@ interface DisplayMessage {
   styleUrls: ['./messages.component.css'],
 })
 export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
+onDeleteMessage(_t68: any) {
+throw new Error('Method not implemented.');
+}
   @ViewChild('scrollContainer', { static: true }) scrollContainer!: ElementRef;
 
   users: any[] = [];
