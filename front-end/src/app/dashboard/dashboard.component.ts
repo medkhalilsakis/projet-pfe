@@ -17,6 +17,7 @@ import { Observable, Subscription } from 'rxjs';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { NotificationService } from '../services/notification.service';
 import { NotificationPopupComponent } from './notification-popup/notification-popup.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,7 +34,8 @@ import { NotificationPopupComponent } from './notification-popup/notification-po
     MatListModule,
     MatIconModule,
     NotificationPopupComponent,
-    MatExpansionModule
+    MatExpansionModule,
+    MatFormFieldModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']

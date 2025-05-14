@@ -34,40 +34,97 @@ html, body {
    Barre supérieure
 ───────────────────────────────────────────── */
 .top-toolbar {
-  flex: 0 0 64px;
   display: flex;
   align-items: center;
   padding: 0 24px;
   background: #3f51b5;
   color: #fff;
-  z-index: 10;
+  height: 64px;
+  gap: 16px;                /* espacement minimal entre sections */
 }
-.top-toolbar .app-name {
-  font-family: 'Bebas Neue', cursive;
+.app-name {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
   font-size: 1.8rem;
-  cursor: default;
-  transition: color .3s, transform .3s;
+  color: #ffffff;
+  position: relative;
+  transition: color 0.2s ease, transform 0.2s ease;
+  margin-left: 8px;
+
+  flex: 0 0 auto;
 }
-.top-toolbar .app-name:hover {
-  color: #e91e63;
-  transform: scale(1.05);
+
+/* Petit effet de soulignement progressif */
+.app-name::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -4px;
+  width: 100%; height: 2px;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
-.top-toolbar .toolbar-search {
-  flex: 1;
+
+/* Au survol, texte et soulignement s’animent */
+.app-name:hover {
+  color: #f0f0f0;
+  transform: translateY(-2px);
+}
+.app-name:hover::after {
+  transform: scaleX(1);
+}
+
+.toolbar-search {
+  flex: 1 1 0;          /* prend tout l'espace restant */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* on fixe une largeur max et un margin auto pour vraiment centrer */
   max-width: 400px;
-  margin: 0 24px;
+  margin-left: auto;    /* pousse à droite du toggle/titre */
+  margin-right: auto;   /* pousse à gauche de la zone actions */
 }
-.top-toolbar .toolbar-search input {
+.toolbar-search input {
   width: 100%;
-  padding: 8px 16px;
+  max-width: 400px;
+  padding: 6px 14px;
   border: none;
-  border-radius: 24px;
-  font-size: .95rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 0.95rem;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
-.top-toolbar .toolbar-actions {
+.top-toolbar .toolbar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* blanc semi-transparent */
+  opacity: 1;                      /* Safari */
+}
+.toolbar-search input:focus {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.02);
+  outline: none;
+}
+.toolbar-actions {
+  flex: 0 0 auto;           /* taille auto */
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  margin-left: auto;        /* pousse à l'extrémité droite */
+}
+
+.toolbar-actions .action-icon,
+.toolbar-actions .profile-img-small,
+.toolbar-actions .profile-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.toolbar-actions .action-icon:hover,
+.toolbar-actions .profile-img-small:hover,
+.toolbar-actions .profile-circle:hover {
+  transform: scale(1.1);
 }
 .top-toolbar .action-icon {
   position: relative;
@@ -81,6 +138,62 @@ html, body {
 .top-toolbar .mat-badge-content {
   background: #ff5252 !important;
   color: #fff !important;
+}
+.toggle-btn {
+  /* Taille et centrage */
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto; 
+
+  /* Fond en dégradé */
+  background: linear-gradient(135deg, #5c6bc0, #3949ab);
+  border-radius: 50%;
+  border: none;
+  
+  /* Ombres pour l’effet « flottant » */
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+  
+  /* Transition douce */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.3s ease;
+}
+
+/* Icône blanche et légèrement agrandie */
+.toggle-btn mat-icon {
+  color: #fff;
+  font-size: 24px;
+  transition: transform 0.2s ease;
+}
+
+/* Hover : bouton qui « s’élève » et passe en dégradé léger */
+.toggle-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(135deg, #7986cb, #5c6bc0);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Active (au clic) : enfoncé avec effet d’inset plus prononcé */
+.toggle-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus accessible */
+.toggle-btn:focus {
+  outline: 2px solid #ffca28;
+  outline-offset: 2px;
 }
 
 /* ─────────────────────────────────────────────
@@ -210,3 +323,5 @@ mat-menu button.mat-menu-item {
 .side-nav.closed .bottom-menu {
   display: none;
 }
+
+

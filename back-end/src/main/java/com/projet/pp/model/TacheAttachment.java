@@ -1,6 +1,7 @@
 // src/main/java/com/projet/pp/model/TacheAttachment.java
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,5 +29,6 @@ public class TacheAttachment {
     // Relation Many-to-One vers Tache
     @ManyToOne
     @JoinColumn(name = "tache_id", nullable = false)
+    @JsonBackReference
     private Tache tache;
 }
