@@ -61,6 +61,12 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 
+.task-card .card-content {
+  flex: 1 1 auto;            /* prend tout l’espace restant */
+  padding-bottom: 16px;      /* un peu d’air avant la zone d’actions */
+}
+
+
 /* Card Header */
 .card-header {
   background: #f7fafc;
@@ -126,15 +132,19 @@
 }
 
 /* Card Actions */
-.card-actions {
+.task-card .card-actions {
+  flex: 0 0 auto;            /* bloc non extensible */
   padding: 8px 16px;
   background: #f7fafc;
+  border-top: 1px solid #e2e8f0;
 }
-.card-actions button {
+
+/* Boutons d’action */
+.task-card .card-actions button {
   transition: color 0.2s, transform 0.2s;
   color: #64748b;
 }
-.card-actions button:hover {
+.task-card .card-actions button:hover {
   color: #2d3748;
   transform: scale(1.1);
 }
