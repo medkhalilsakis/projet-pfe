@@ -61,59 +61,72 @@
 
     <!-- Sidebar pliante -->
     <div
-      class="side-nav"
-      [class.closed]="!sideNavOpen()"
-      fxFlex="{{ sideNavOpen() ? '20%' : '0px' }}"
-    >
-      <mat-nav-list class="main-menu">
-        <ng-container *ngFor="let item of menuItems">
-          <ng-container *ngIf="item.subMenu; else singleItem">
-            <mat-expansion-panel class="menu-panel" hideToggle>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon>{{ item.icon }}</mat-icon>
-                  {{ item.label }}
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <mat-nav-list>
-                <a
-                  mat-list-item
-                  *ngFor="let sub of item.subMenu"
-                  (click)="sub.action()"
-                  [class.active]="currentView() === sub.label"
-                >
-                  <mat-icon matListItemIcon>chevron_right</mat-icon>
-                  <span>{{ sub.label }}</span>
-                </a>
-              </mat-nav-list>
-            </mat-expansion-panel>
-          </ng-container>
-          <ng-template #singleItem>
+  class="side-nav"
+  [class.closed]="!sideNavOpen()"
+  fxFlex="{{ sideNavOpen() ? '20%' : '0px' }}"
+>
+
+  <!-- ===== MENU PRINCIPAL ===== -->
+  <mat-nav-list class="main-menu">
+
+    <!-- Itération des items de menu -->
+    <ng-container *ngFor="let item of menuItems">
+
+      <!-- ===== ITEM AVEC SOUS-MENU ===== -->
+      <ng-container *ngIf="item.subMenu; else singleItem">
+        <mat-expansion-panel class="menu-panel" hideToggle>
+          <mat-expansion-panel-header class="menu-panel-header">
+            <mat-panel-title class="menu-panel-title">
+              <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+              <span class="menu-label">{{ item.label }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-nav-list class="submenu-list">
             <a
               mat-list-item
-              (click)="item.action()"
-              [class.active]="currentView() === item.label"
+              *ngFor="let sub of item.subMenu"
+              (click)="sub.action()"
+              [class.active]="currentView() === sub.label"
+              class="submenu-item"
             >
-              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-              <span>{{ item.label }}</span>
+              <mat-icon class="submenu-icon" matListItemIcon>chevron_right</mat-icon>
+              <span class="submenu-label">{{ sub.label }}</span>
             </a>
-          </ng-template>
-        </ng-container>
+          </mat-nav-list>
+        </mat-expansion-panel>
+      </ng-container>
 
-        <mat-divider></mat-divider>
+      <!-- ===== ITEM SIMPLE ===== -->
+      <ng-template #singleItem>
+        <a
+          mat-list-item
+          (click)="item.action()"
+          [class.active]="currentView() === item.label"
+          class="menu-item"
+        >
+          <mat-icon class="menu-icon" matListItemIcon>{{ item.icon }}</mat-icon>
+          <span class="menu-label">{{ item.label }}</span>
+        </a>
+      </ng-template>
+    </ng-container>
 
-        <mat-nav-list class="bottom-menu">
-          <a mat-list-item (click)="navigateTo('settings')">
-            <mat-icon matListItemIcon>settings</mat-icon>
-            <span>Paramètres</span>
-          </a>
-          <a mat-list-item (click)="logout()">
-            <mat-icon matListItemIcon>exit_to_app</mat-icon>
-            <span>Se déconnecter</span>
-          </a>
-        </mat-nav-list>
-      </mat-nav-list>
-    </div>
+    <mat-divider class="menu-divider"></mat-divider>
+
+    <!-- ===== MENU BAS ===== -->
+    <mat-nav-list class="bottom-menu">
+      <a mat-list-item (click)="navigateTo('settings')" class="bottom-item">
+        <mat-icon class="bottom-icon" matListItemIcon>settings</mat-icon>
+        <span class="bottom-label">Paramètres</span>
+      </a>
+      <a mat-list-item (click)="logout()" class="bottom-item">
+        <mat-icon class="bottom-icon" matListItemIcon>exit_to_app</mat-icon>
+        <span class="bottom-label">Se déconnecter</span>
+      </a>
+    </mat-nav-list>
+
+  </mat-nav-list>
+</div>
+
 
     <!-- Zone de contenu routé -->
     <div fxFlex class="content-area">
