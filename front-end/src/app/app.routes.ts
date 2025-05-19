@@ -19,12 +19,12 @@ import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
 import { TestProjetDetailComponent } from './dashboard/projects/project-test/test-projet-detail/test-projet-detail.component';
-import {AnalyticsComponent} from './dashboard/analytics/analytics.component';
+import { AnalyticsComponent } from './dashboard/analytics/analytics.component';
 import { ComplaintsComponent } from './dashboard/complaints/complaints.component';
 import { ProjectChatComponent } from './dashboard/projects/project-chat/project-chat.component';
-import { EspaceAdminstrativeComponent} from './dashboard/espace-adminstrative/espace-adminstrative.component';
-import{ProjectInProgressComponent} from './dashboard/projects/project-in-progress/project-in-progress.component'
-import{ProjectTermineComponent} from './dashboard/projects/project-termine/project-termine.component'
+import { EspaceAdminstrativeComponent } from './dashboard/espace-adminstrative/espace-adminstrative/espace-adminstrative.component';
+import { ProjectInProgressComponent } from './dashboard/projects/project-in-progress/project-in-progress/project-in-progress.component';
+import { ProjectTermineComponent } from './dashboard/projects/project-termine/project-termine/project-termine.component';
 
 export const routes: Routes = [
   { 
@@ -36,7 +36,7 @@ export const routes: Routes = [
       { path: 'overview', component: OverviewComponent },
       { path: 'notifications', component: NotificationComponent },
       { path: 'notification/:id', component: NotifcationDetailComponent },
-      {path:'espace-adminstrative', component:EspaceAdminstrativeComponent},
+      {path:'espace-adminstrative', component: EspaceAdminstrativeComponent},
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
