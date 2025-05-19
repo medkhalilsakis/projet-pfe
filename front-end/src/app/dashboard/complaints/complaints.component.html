@@ -1,0 +1,42 @@
+<mat-card *ngIf="!isSupervisor">
+  <h2>Nouvelle Réclamation</h2>
+  <form [formGroup]="complaintForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Projet</mat-label>
+      <mat-select formControlName="pausedProjectId" required>
+        <mat-option *ngFor="let pausedProject of pausedProjects" [value]="pausedProject?.id">
+          {{ pausedProject.project?.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Raison</mat-label>
+      <input matInput formControlName="reason" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Détails supplémentaires</mat-label>
+      <textarea matInput formControlName="details" rows="4" required></textarea>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="complaintForm.invalid">
+      Envoyer
+    </button>
+  </form>
+</mat-card>
+
+<mat-card class="mt-4">
+  <h2 *ngIf="isSupervisor">Toutes les réclamations</h2>
+  <h2 *ngIf="!isSupervisor">Mes réclamations</h2>
+  <mat-list>
+    <mat-list-item *ngFor="let c of complaints">
+      <div fxLayout="column" fxLayoutGap="4px">
+        <div><strong>Projet ID:</strong> {{ c.projectId }}</div>
+        <div><strong>Raison:</strong> {{ c.reason }}</div>
+        <div><strong>Détails:</strong> {{ c.details }}</div>
+        <div><em>{{ c.date | date:'short' }}</em></div>
+      </div>
+    </mat-list-item>
+  </mat-list>
+</mat-card>

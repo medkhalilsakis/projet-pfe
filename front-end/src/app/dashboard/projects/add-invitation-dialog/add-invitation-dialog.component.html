@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>ajouter une invitation</h2>
+<mat-dialog-content [formGroup]="form">
+  <div fxLayout="column" fxLayoutGap="8px">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Inviter des utilisateurs (optionnel)</mat-label>
+          <input matInput placeholder="Rechercher" [(ngModel)]="userFilter" [ngModelOptions]="{ standalone: true }">
+        </mat-form-field>
+
+        <mat-select formControlName="users" placeholder="Sélectionner des utilisateurs" multiple>
+          <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
+            {{ u.prenom }} {{ u.nom }}
+          </mat-option>
+        </mat-select>
+      </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Envoyer</button>
+</mat-dialog-actions>
