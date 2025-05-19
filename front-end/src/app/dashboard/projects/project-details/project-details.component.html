@@ -108,14 +108,53 @@
       <mat-card-title class="actions-title">Actions</mat-card-title>
       <mat-card-content class="actions-content" fxLayout="column" fxLayoutGap="16px">
         <div class="action-item" *ngFor="let act of actionsList">
-          <button mat-icon-button
-                  class="action-btn"
-                  [ngClass]="act.colorClass"
-                  (click)="act.handler()">
-            <mat-icon>{{ act.icon }}</mat-icon>
-          </button>
-          <span class="action-label">{{ act.label }}</span>
-        </div>
+      <button mat-icon-button
+              class="action-btn"
+              [ngClass]="act.colorClass"
+              (click)="act.handler()">
+        <mat-icon>{{ act.icon }}</mat-icon>
+      </button>
+      <span class="action-label">{{ act.label }}</span>
+    </div>
+
+
+ <!-- pause only if permitted -->
+    <div class="action-item" *ngIf="isSupervisor">
+      <button mat-icon-button
+              class="action-btn pause_circle"
+              (click)="pauseProject()">
+        <mat-icon>pause_circle</mat-icon>
+      </button>
+      <span class="action-label">Mettre en pause</span>
+    </div>
+    
+    <!-- close only if permitted -->
+    <div class="action-item" *ngIf="isSupervisor">
+      <button mat-icon-button
+              class="action-btn stop_circle"
+              (click)="closeProject()">
+        <mat-icon>stop_circle</mat-icon>
+      </button>
+      <span class="action-label">Clôturer</span>
+    </div>
+    
+    <!-- delete only if permitted -->
+    <div class="action-item" *ngIf="canDelete">
+      <button mat-icon-button
+              class="action-btn delete"
+              (click)="deleteProject()">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <span class="action-label">Supprimer</span>
+    </div>
+     <div class="action-item" *ngIf="canArchive">
+      <button mat-icon-button
+              class="action-btn archive "
+              (click)="archiveProject()">
+        <mat-icon>archive</mat-icon>
+      </button>
+      <span class="action-label">archive</span>
+    </div>
       </mat-card-content>
     </mat-card>
 
@@ -126,10 +165,17 @@
   <aside class="project-detail-right" fxFlex.gt-sm="40" fxFlex="100" fxLayout="column" fxLayoutGap="24px">
 
     <!-- Invitations Card -->
-    <mat-card *ngIf="invitedUsers.length" class="invitations-card">
-      <mat-card-title class="invitations-title">Invitations</mat-card-title>
-      <mat-card-content class="invitations-content">
-        <mat-list class="invitations-list">
+    <mat-card  class="invitations-card">
+      
+      <mat-card-title class="invitations-title">
+  <span>Invitations</span>
+          <button mat-mini-fab color="primary" class="invitations-add" (click)="openInviteDialog()">
+            <mat-icon>person_add</mat-icon>
+          </button>
+      </mat-card-title>
+      
+      <mat-card-content *ngIf="canSeeInvitedList()" class="invitations-content">
+        <mat-list *ngIf="invitedUsers.length" class="invitations-list">
           <mat-list-item *ngFor="let inv of invitedUsers" class="invitation-item">
             <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
               <span class="invitation-name">{{ inv.user.prenom }} {{ inv.user.nom }}</span>
@@ -140,11 +186,28 @@
             </div>
           </mat-list-item>
         </mat-list>
-        <button mat-mini-fab color="primary" class="invitations-add" (click)="openInviteDialog()">
-          <mat-icon>person_add</mat-icon>
-        </button>
+     
+      </mat-card-content>
+      <mat-card-content *ngIf="isInvitationPending()" class="invitations-content">
+        <mat-list  class="invitations-list">
+          <mat-list-item  class="invitation-item">
+            <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
+              <span class="invitation-name">{{ currentUser.prenom }} {{ currentUser.nom }}</span>
+              <span class="invitation-status">pending</span>
+               <button mat-icon-button class="pauseRequests-accept" color="warn" (click)="acceptInviteRequest()">
+                <mat-icon>check</mat-icon>
+              </button>
+               <button mat-icon-button class="pauseRequests-deny" color="warn" (click)="denyInviteRequest()">
+            <mat-icon>highlight_off</mat-icon>              </button>
+              
+            </div>
+          </mat-list-item>
+        </mat-list>
+        
       </mat-card-content>
     </mat-card>
+
+
 
     <!-- Explorer Card -->
     <mat-card class="explorer-card">
@@ -154,6 +217,51 @@
         <button mat-stroked-button color="primary" class="explorer-button" (click)="goToExplorer()">
           <mat-icon class="explorer-icon">folder_open</mat-icon> Ouvrir l’explorateur
         </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- pauseRequests Card -->
+    <mat-card *ngIf="pendingPauseRequests.length && isSupervisor" class="pauseRequests-card">
+      <mat-card-title class="pauseRequests-title">demande de suspensions</mat-card-title>
+      <mat-card-content class="pauseRequests-content">
+        <mat-list class="pauseRequests-list">
+<mat-list-item *ngFor="let req of pendingPauseRequests; let i = index" class="invitation-item">
+            <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
+            <span class="pauseRequests-number">{{i}} </span>
+
+              <span class="pauseRequests-name">{{ req.requester.prenom }} {{ req.requester.nom }}</span>
+              <span class="pauseRequests-status">{{ req.reason }}</span>
+              <button mat-icon-button class="pauseRequests-accept" color="warn" (click)="acceptPauseRequest(req.id)">
+                <mat-icon>pause</mat-icon>
+              </button>
+               <button mat-icon-button class="pauseRequests-deny" color="warn" (click)="denyPauseRequest(req.id)">
+            <mat-icon>highlight_off</mat-icon>              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+        </mat-card-content>
+    </mat-card>
+    
+        <button mat-mini-fab color="primary" class="pauseRequests-add" (click)="openInviteDialog()">
+        <mat-icon>pause_circle</mat-icon>
+        </button>
+    
+    <!-- reclamations Card -->
+    <mat-card *ngIf="reclamationList.length && isSupervisor" class="reclamations-card">
+      <mat-card-title class="reclamations-title">les reclamations</mat-card-title>
+      <mat-card-content class="reclamations-content">
+        <mat-list class="reclamations-list">
+<mat-list-item *ngFor="let reclamation of reclamationList; let i = index" class="invitation-item">
+            <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
+            <span class="reclamations-number">{{i}} </span>
+
+              <span class="reclamations-name">  {{ reclamation.complainter.prenom }} {{ reclamation.complainter.nom }} </span>
+              <span class="reclamations-status">{{ reclamation.reason }}</span>
+              
+            </div>
+          </mat-list-item>
+        </mat-list>
+        
       </mat-card-content>
     </mat-card>
 

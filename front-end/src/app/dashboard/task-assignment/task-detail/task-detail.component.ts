@@ -12,6 +12,11 @@ import { ProjectService } from '../../../services/project.service';
 import { EditTaskDialogComponent } from '../edit-task-dialog/edit-task-dialog.component';
 import { Project } from '../../../models/project.model';
 
+import { SessionStorageService } from '../../../services/session-storage.service';
+import { UserService } from '../../../services/users.service';
+
+
+
 interface TacheDetailDTO {
   id: number;
   name: string;
@@ -50,6 +55,8 @@ export class TaskDetailComponent implements OnInit {
 
   project?: Project;
   projectName?: string;
+  currentUser :any
+  role:any
   readonly API = 'http://localhost:8080/api';
 
   constructor(
@@ -57,10 +64,25 @@ export class TaskDetailComponent implements OnInit {
     private http: HttpClient,
     private projectSvc: ProjectService,
     private router: Router,
-    private dialog: MatDialog
-  ) {}
+    private dialog: MatDialog,
+    private sessionStorage:SessionStorageService,
 
+  ) {}
+isSupervisor(){
+    if (this.role===3){
+      return true
+    }
+    return false
+  }
+   isDev(){
+    if (this.role===1){
+      return true
+    }
+    return false
+  }
   ngOnInit() {
+    this.currentUser=this.sessionStorage.getUser()
+    this.role=this.currentUser.role;
     this.loadTask();
   }
 

@@ -114,10 +114,8 @@ export class ProjectsComponent implements OnInit {
       this.snackBar.open('Utilisateur non identifié', 'Fermer', { duration: 5000 });
       this.router.navigate(['/login']);
     }
-  }
-  
-
-  loadProjects(): void {
+  }  
+    loadProjects(): void {
     this.loading = true;
     let endpoint = '';
     const user = this.sessionStorage.getUser();
@@ -170,7 +168,9 @@ export class ProjectsComponent implements OnInit {
         this.loading = false;
       }
     });
+    
   }
+
   applyFiltersAndSorting(): void {
     const q = this.searchQuery.trim().toLowerCase();
   

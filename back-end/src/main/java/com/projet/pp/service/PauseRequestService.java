@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PauseRequestService {
@@ -21,6 +22,7 @@ public class PauseRequestService {
         Project project = projectService.getProjectById(projectId);
         PauseRequest pr = new PauseRequest();
         pr.setProject(project);
+        pr.setStatus(PauseStatus.PENDING);
         pr.setRequesterId(userId);
         pr.setReason(reason);
         // pr.setStatus(PauseStatus.PENDING) déjà en défaut
@@ -40,10 +42,11 @@ public class PauseRequestService {
         pr.setStatus(newStatus);
         pr.setSupervisorId(supervisorId);
         pr.setHandledAt(LocalDateTime.now());
+        PauseRequest pauseRequest=pauseRequestRepo.save(pr);
 
         // Si APPROVED, on bascule aussi le projet en statut \"en pause\" (ex : 55)
         if (newStatus == PauseStatus.APPROVED) {
-            Project proj = pr.getProject();
+            Project proj = projectService.getProjectById(projectId);
             proj.setStatus(55);
             projectService.commitProject(
                     proj.getId(),
@@ -54,8 +57,10 @@ public class PauseRequestService {
                     String.valueOf(proj.getStatus())
             );
         }
-
-        return pauseRequestRepo.save(pr);
+return pauseRequest;
+    }
+    public Optional<PauseRequest> getById(Long pauseRequestId) {
+        return pauseRequestRepo.findById(pauseRequestId);
     }
 
     @Transactional(readOnly = true)

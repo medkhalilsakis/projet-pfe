@@ -45,28 +45,18 @@ public class ChatMessageController {
             var sender   = userService.getUserById(data.getSender().getId());
             var receiver = userService.getUserById(data.getReceiver().getId());
             String roleLibelle = receiver.getRole().getLibelle().toLowerCase().trim();
-            Notification.RoleType recipientRole;
 
-            if (roleLibelle.equals("developpeur")) {
-                recipientRole = Notification.RoleType.dev;
-            } else if (roleLibelle.equals("testeur")) {
-                recipientRole = Notification.RoleType.tester;
-            } else if (roleLibelle.equals("superviseur")) {
-                recipientRole = Notification.RoleType.admin;
-            } else {
-                recipientRole = Notification.RoleType.admin; // Default fallback
-            }
             ChatMessage saved = chatMessageService.sendMessage(
                     sender,
                     receiver,
                     data.getMessage(),
+                    false,
                     data.getCreatedAt(),
                     files
             );
             Notification noti = new Notification(
                     null,
                     receiver,
-                    recipientRole,
                     "Nouveau message ",
                     sender.getNom() + " vous a envooyé un nouveau message : " +saved.getMessage(),
                     false,
@@ -87,6 +77,12 @@ public class ChatMessageController {
                     .body(null);
         }
     }
+    @GetMapping("/unread/{receiverId}/{senderId}")
+    public ResponseEntity<Integer> getCountUnreadMessages(@PathVariable Long receiverId, @PathVariable Long senderId) {
+        int count = chatMessageService.countUnreadMessagesBetweenUsers(receiverId, senderId);
+        return ResponseEntity.ok(count);
+    }
+
 
     /**
      * Récupère l'historique complet entre deux utilisateurs.
@@ -102,4 +98,11 @@ public class ChatMessageController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+        @PutMapping("/{receiverId}/{senderId}/makeAllRead")
+    public ResponseEntity<List<ChatMessage>> markMessagesAsRead(@PathVariable Long receiverId, @PathVariable Long senderId) {
+        System.out.println("marking all messages as read");
+        List<ChatMessage>a =chatMessageService.markAllMessagesAsRead(receiverId, senderId);
+        return ResponseEntity.ok(a);
+    }
+
 }

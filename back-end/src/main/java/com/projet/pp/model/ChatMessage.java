@@ -37,6 +37,10 @@ public class ChatMessage {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead = false;
+
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -47,9 +51,10 @@ public class ChatMessage {
 
 
     // Constructeur minimal
-    public ChatMessage(User sender, User receiver, String message, LocalDateTime createdAt) {
+    public ChatMessage(User sender, User receiver, String message,boolean isRead, LocalDateTime createdAt) {
         this.sender = sender;
         this.receiver = receiver;
+        this.isRead = isRead;
         this.message = message;
         this.createdAt = createdAt;
     }

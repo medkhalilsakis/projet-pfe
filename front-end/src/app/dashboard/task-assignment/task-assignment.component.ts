@@ -20,6 +20,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SessionStorageService } from '../../services/session-storage.service';
+import { UserService } from '../../services/users.service';
 
 interface Tache {
   id: number;
@@ -56,7 +58,8 @@ export class TaskAssignmentComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 9;
   pageIndex = 0;
-
+  currentUser :any
+  role:any
   statuses = [
     { value: '',             label: 'Tous' },
     { value: 'a_developper', label: 'À développer' },
@@ -71,12 +74,55 @@ export class TaskAssignmentComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private sessionStorage:SessionStorageService,
+    private userService: UserService
   ) {}
-
+  
   ngOnInit() {
-    this.loadAndSync();
+    this.currentUser=this.sessionStorage.getUser()
+    this.role=this.currentUser.role;
+    if (this.role.id===3){
+      this.loadAndSync();
+    }
+    if (this.role.id===1){
+      this.loadUserTasksAndSync();
+    }
+
+
   }
+  isSupervisor(){
+    console.log(this.role)
+    return (this.role===3)
+    
+  }
+   isDev(){
+    if (this.role===1){
+      return true
+    }
+    return false
+  }
+   private loadUserTasksAndSync() {
+    let params = new HttpParams();
+    params = params.set('assignedTo', this.currentUser.id);
+    if (this.statusFilter) params = params.set('status', this.statusFilter);
+
+    this.http.get<Tache[]>(`${this.API}/taches`, { params })
+      .subscribe(list => {
+        this.tâches = list;
+        this.syncAllStatuses()
+          .subscribe({
+            next: () => {
+              this.applyFilters();
+            },
+            error: err => {
+              console.error('Erreur de sync des statuts', err);
+              this.applyFilters();
+            }
+          });
+      });
+  }
+
 
   /** 1) Charge la liste, 2) synchronise statuts, 3) applique filtres */
   private loadAndSync() {

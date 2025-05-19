@@ -113,6 +113,10 @@ public class TacheController {
     }
 
 
+
+
+
+
     /** Création (retourne un résumé) */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TacheDTO> create(
@@ -151,7 +155,6 @@ public class TacheController {
             Notification noti = new Notification(
                     null,
                     user,
-                    Notification.RoleType.dev,
                     "nouvelle tache",
                     t.getAssignedBy().getNom() + " " + t.getAssignedBy().getPrenom() +
                             " vous a assigné une nouvelle tâche nommée " + t.getName(),
@@ -244,7 +247,6 @@ public class TacheController {
         Notification noti1 = new Notification(
                 null,
                 t.getAssignedBy(),
-                Notification.RoleType.admin,
                 "Modification d'une tâche ",
                 "la tache que vous avez assigné a été modifié ",
                 false,

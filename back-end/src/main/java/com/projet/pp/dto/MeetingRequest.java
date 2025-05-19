@@ -8,6 +8,6 @@ import java.util.List;
 public class MeetingRequest {
     private String subject;
     private LocalDateTime date;
-    private List<String> participants;
+    private List<Long> participantsIds;
     private String description;
 }

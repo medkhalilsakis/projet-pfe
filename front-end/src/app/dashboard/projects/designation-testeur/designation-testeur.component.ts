@@ -79,12 +79,12 @@ export class DesignationTesteurComponent implements OnInit {
   }
 
   loadAll() {
-    //this.svc.getPending().subscribe(p => this.pending = p);
-    //this.svc.getInTest().subscribe(p => {
-    //  this.inTest = p;
+    this.svc.getPending().subscribe(p => this.pending = p);
+    this.svc.getInTest().subscribe(p => {
+    this.inTest = p;
       // pour chaque projet, charger ses assignations
     //  p.forEach(proj => this.loadAssignments(proj.id));
-    //});
+    });
     //this.svc.getFinished().subscribe(p => this.finished = p);
   }
 

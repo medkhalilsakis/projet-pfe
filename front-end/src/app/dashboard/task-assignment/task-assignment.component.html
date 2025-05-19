@@ -1,4 +1,5 @@
 <!-- src/app/task-assignment/task-assignment.component.html -->
+ <div  *ngIf="  isSupervisor()">
 <mat-toolbar color="primary" class="top-bar" fxLayout="row" fxLayoutAlign="start center">
   <span class="title">Gérer les tâches</span>
   <span fxFlex></span>
@@ -7,9 +8,10 @@
     <span class="btn-text">Nouvelle tâche</span>
   </button>
 </mat-toolbar>
-
+</div>
 <div class="controls" fxLayout="row wrap" fxLayoutGap="16px">
-  <mat-form-field appearance="outline" class="ctrl" fxFlex.gt-sm="30%" fxFlex.xs="100%">
+  <div *ngIf="isSupervisor()">
+  <mat-form-field  appearance="outline" class="ctrl" fxFlex.gt-sm="30%" fxFlex.xs="100%">
     <mat-label>Recherche</mat-label>
     <input matInput
            [(ngModel)]="search"
@@ -21,7 +23,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-
+</div>
   <mat-form-field appearance="outline" class="ctrl status" fxFlex.gt-sm="20%" fxFlex.xs="100%">
     <mat-label>Statut</mat-label>
     <mat-select

@@ -15,7 +15,6 @@ public class ProjectInvitedUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -24,7 +23,7 @@ public class ProjectInvitedUser {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "status")  // Match your DB column
     private String status; // "pending", "accepted", "rejected"
 
     @Column(name = "invited_at")

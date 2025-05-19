@@ -163,7 +163,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   selectUser(u: any) {
     this.selectedUser = u;
     if (this.isMobile) window.scrollTo(0, 0);
+      this.http.put<ChatMessage>(`${API}/chat/${u.id}/${this.currentUserId}/makeAllRead`,{}).subscribe({
+      next: () => {
+        this.loadUsers()
+       console.log('marking unraed')
+            },
+      error: (e) => console.error(e)
+    });
+
     this.loadMessages(u.id);
+
     
     // Se (re)abonner au topic de l'utilisateur sélectionné
     this.subscribeToMessages(u.id);
@@ -187,21 +196,43 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
   
   private loadUsers() {
-    this.http.get<any[]>(`${API}/users`)
-      .pipe(catchError(() => {
-        this.snackBar.open('Erreur chargement users', 'Fermer', { duration: 3000 });
-        return of([]);
-      }))
-      .subscribe(users => {
-        // Charger les utilisateurs depuis l'API
-        this.users = users
-          .filter(u => u.id !== this.currentUserId)
-          .map(u => ({
-            ...u,
-            avatarUrl: `${API}/users/${u.id}/profile-image/raw`,
-            online:    u.online,
-            lastSeen:  u.lastSeen
-          }));
+  this.http.get<any[]>(`${API}/users`)
+    .pipe(catchError(() => {
+      this.snackBar.open('Erreur chargement users', 'Fermer', { duration: 3000 });
+      return of([]);
+    }))
+    .subscribe(users => {
+      // Filter out current user
+      const filtered = users.filter(u => u.id !== this.currentUserId);
+
+      // Prepare all unread requests
+      const unreadRequests = filtered.map(u =>
+        this.http.get<number>(`${API}/chat/unread/${this.currentUserId}/${u.id}`).pipe(
+          catchError(() => of(0)) // if unread count fails, set to 0
+        )
+      );
+
+      // Execute all requests in parallel
+      forkJoin(unreadRequests).subscribe(unreadCounts => {
+        // Merge unread counts with user data
+        this.users = filtered.map((u, idx) => ({
+          ...u,
+          avatarUrl: `${API}/users/${u.id}/profile-image/raw`,
+          unread: unreadCounts[idx]
+        }));
+
+        // Then fetch last messages
+        this.loadMessagesForAllUsers().then(() => {
+          this.sortedUsers = this.users.sort((a, b) => {
+            const lastA = a.lastMessageDate ? new Date(a.lastMessageDate).getTime() : 0;
+            const lastB = b.lastMessageDate ? new Date(b.lastMessageDate).getTime() : 0;
+            return lastB - lastA;
+          });
+        });
+      });
+    });
+
+
   
         // Récupérer les dernières conversations
         this.loadMessagesForAllUsers().then(() => {
@@ -212,8 +243,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
             return lastMessageB - lastMessageA;
           });
         });
-      });
-  }
+      };
+   
 
   private loadMessagesForAllUsers() {
     const me = this.currentUserId;
@@ -256,23 +287,28 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
 
   private loadMessages(receiverId: number) {
-    const me = this.currentUserId;
+        const me = this.currentUserId;
+    console.log("ijpp")
     forkJoin([
       this.http.get<ChatMessage[]>(`${API}/chat/history/${me}/${receiverId}`),
-      this.http.get<ChatMessage[]>(`${API}/chat/history/${receiverId}/${me}`)
+      this.http.get<ChatMessage[]>(`${API}/chat/history/${receiverId}/${me}`),
     ]).subscribe({
+      
       next: ([out, inc]) => {
+        console.log()
         const mapped = [
           ...out.map(m => this.toDisplay(m, 'me')),
           ...inc.map(m => this.toDisplay(m, 'other'))
         ].sort((a,b) => a.date.getTime() - b.date.getTime());
         this.messages = mapped;
+        console.log(this.messages)
       },
       error: () => this.snackBar.open('Erreur chargement messages','Fermer',{duration:3000})
     });
   }
 
   private toDisplay(m: ChatMessage, who: SentBy): DisplayMessage {
+    console.log(m)
     return {
       text: m.message,
       sentBy: who,

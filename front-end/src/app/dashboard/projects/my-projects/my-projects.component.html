@@ -1,69 +1,114 @@
-<div class="my-projects-container">
-    <h2 class="title">Mes Projets</h2>
+<div class="projects-container">
   
-    <!-- État de chargement -->
-    <div *ngIf="loading" class="loading">
-      <mat-spinner></mat-spinner>
-      <p>Chargement en cours…</p>
-    </div>
+  <div class="toolbar" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
+    
+    <!-- Search bar -->
+    <mat-form-field appearance="outline" class="search-field" fxFlex="0 0 40%">
+      <mat-label class="search-label">Rechercher un projet</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFiltersAndSorting()" class="search-input">
+      <button mat-icon-button matSuffix (click)="applyFiltersAndSorting()" class="search-button">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
   
-    <!-- Erreur -->
-    <div *ngIf="!loading && errorMessage" class="error">
-      {{ errorMessage }}
-    </div>
+    <!-- Filter by Status -->
+    <mat-form-field appearance="outline" class="filter-status" fxFlex="0 0 20%">
+      <mat-label class="filter-label">Filtrer par statut</mat-label>
+      <mat-select [(value)]="statusFilter" (selectionChange)="onStatusFilterChange($event.value)" class="filter-select">
+        <mat-option [value]="''">Tous</mat-option>
+        <mat-option *ngFor="let s of STATUS_OPTIONS" [value]="s.value">
+          {{ s.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   
-    <!-- Liste vide -->
-    <div *ngIf="!loading && !errorMessage && projects.length === 0" class="empty">
-      Vous n'avez encore aucun projet.
-    </div>
+    <!-- Sort by Field -->
+    <mat-form-field appearance="outline" class="sort-field" fxFlex="0 0 20%">
+      <mat-label class="sort-label">Tri par</mat-label>
+      <mat-select [(value)]="sortField" (selectionChange)="onSortFieldChange($event.value)" class="sort-select">
+        <mat-option value="name">Nom (A → Z)</mat-option>
+        <mat-option value="createdAt">Date</mat-option>
+      </mat-select>
+    </mat-form-field>
   
-    <!-- Liste des projets sous forme de grille -->
-    <div *ngIf="!loading && !errorMessage && projects.length > 0" class="project-grid">
-      <mat-card *ngFor="let project of projects" class="project-card">
-        <!-- Icône de visibilité -->
-        <mat-icon class="visibility-icon" [ngClass]="{'public': project.visibilite === 'public', 'private': project.visibilite === 'privée'}">
-          {{ project.visibilite === 'public' ? 'public' : 'lock' }}
-        </mat-icon>
-  
-        <!-- Statut du projet -->
-        <div class="status-indicator" [ngStyle]="{'background-color': getStatusColor(project.status ?? 0)}">
-          <span class="status-text">{{ getStatusLabel(project.status ?? 0) }}</span>
-        </div>
-  
-        <mat-card-header>
-          <mat-card-title>{{ project.name }}</mat-card-title>
-          <mat-card-subtitle>{{ project.type || 'Non spécifié' }}</mat-card-subtitle>
-        </mat-card-header>
-  
-        <mat-card-content>
-          <p><strong>Description :</strong> {{ project.description | slice:0:100 }}...</p>
-          <p><strong>Créé le :</strong> {{ project.createdAt | date:'short' }}</p>
-        </mat-card-content>
-  
-        <mat-card-actions>
-            <button mat-icon-button (click)="viewDetails(project)">
-            <mat-icon>code</mat-icon>
-          </button>
-          <button mat-icon-button (click)="openSettings(project)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button (click)="chatDetails(project)">
-            <mat-icon>chat</mat-icon>
-          </button>
-          <button mat-icon-button (click)="viewStatus(project)">
-            <mat-icon>info</mat-icon>
-          </button>
-          <button *ngIf="project.status === 0 || project.status === 1" mat-icon-button (click)="deleteProject(project)">
-            <mat-icon>delete</mat-icon>
-          </button>
-          <button mat-icon-button (click)="viewProject(project)">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <button *ngIf="project.status === 0 || project.status === 1" mat-icon-button (click)="toggleVisibility(project)">
-            <mat-icon>{{ project.visibilite === 'privée' ? 'public' : 'lock' }}</mat-icon>
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
+    <!-- Sort Direction -->
+    <mat-form-field appearance="outline" class="sort-direction" fxFlex="0 0 20%">
+      <mat-label class="direction-label">Ordre</mat-label>
+      <mat-select [(value)]="sortDirection" (selectionChange)="onSortDirectionChange($event.value)" class="direction-select">
+        <mat-option value="asc">Ascendant</mat-option>
+        <mat-option value="desc">Descendant</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
+
   
+
+  <!-- Liste des projets -->
+  <div class="project-list" *ngIf="!loading">
+  <mat-card *ngFor="let project of filteredProjects" class="project-card">
+    
+    <!-- En-tête de la carte avec avatar décoratif -->
+    <mat-card-header class="card-header">
+      <div mat-card-avatar class="card-avatar">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <mat-card-title class="card-title">{{ project.name }}</mat-card-title>
+      <mat-card-subtitle class="card-subtitle">
+        <span class="subtitle-date">Créé le {{ project.createdAt | date:'medium' }}</span>
+        <span class="subtitle-date">Mis à jour le {{ project.updatedAt | date:'medium' }}</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <!-- Contenu principal avec ombre interne et découpe -->
+    <mat-card-content class="card-content">
+      <p class="card-description">
+        {{ project.description | slice:0:100 }}          {{ project.description && project.description.length > 100 ? '...' : '' }}
+
+      </p>
+      <div class="status-item">
+        <div class="traffic-light horizontal">
+          <div class="light red"    [class.active]="isRed(project.status!)"></div>
+          <div class="light yellow" [class.active]="isYellow(project.status!)"></div>
+          <div class="light green"  [class.active]="isGreen(project.status!)"></div>
+        </div>
+        <span class="status-label">{{ getStatusLabel(project.status!) }}</span>
+      </div>
+    </mat-card-content>
+
+    <!-- Bannières d’alerte stylisées -->
+    <div *ngIf="project.status===55 && pauseReasons[project.id]" class="warning-banner pause">
+      <mat-icon>pause_circle</mat-icon>
+      <span class="warning-text">Raison : {{ pauseReasons[project.id] }}</span>
+    </div>
+    <div *ngIf="project.status===99 && closureReasons[project.id]" class="warning-banner closure">
+      <mat-icon>lock_clock</mat-icon>
+      <span class="warning-text">Raison : {{ closureReasons[project.id] }}</span>
+    </div>
+
+    <!-- Actions avec effet 3D et hover -->
+    <mat-card-actions class="card-actions">
+      <button mat-icon-button class="action-btn code-btn" (click)="viewDetails(project)">
+        <mat-icon>code</mat-icon>
+      </button>
+      <button mat-icon-button class="action-btn chat-btn" (click)="chatDetails(project)">
+        <mat-icon>message</mat-icon>
+      </button>
+      <button mat-icon-button class="action-btn settings-btn" (click)="openSettings(project)">
+        <mat-icon>settings</mat-icon>
+      </button>
+      <button mat-icon-button class="action-btn info-btn" (click)="viewStatus(project)" matTooltip="Voir le statut">
+        <mat-icon>info</mat-icon>
+      </button>
+      <button mat-icon-button class="action-btn more-btn" (click)="viewProject(project)" matTooltip="Voir les détails">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-card-actions>
+
+  </mat-card>
+</div>
+
+
+  <div *ngIf="loading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+</div>

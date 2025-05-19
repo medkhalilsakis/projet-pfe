@@ -393,6 +393,15 @@ mat-card-title, .overview-title {
 .invitations-card .mat-card-title,
 .invitations-title {
   color: var(--color-secondary);
+   display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+.invitations-add {
+  /* cancel the old absolute positioning */
+  position: static !important;
+  margin: 0;             /* reset any bottom/right margins */
 }
 .invitations-list {
   margin: 0;

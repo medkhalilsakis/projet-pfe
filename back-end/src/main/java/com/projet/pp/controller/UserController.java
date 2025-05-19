@@ -49,7 +49,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(userService.getAllActiveUsers());
     }
 
     @GetMapping("/search")
@@ -75,7 +75,9 @@ public class UserController {
         String hashedPassword = passwordEncoder.encode(rawPassword);
         LocalDate dateEmbauche = LocalDate.parse(signupData.get("dateEmbauche"));
         double salaire = Double.parseDouble(signupData.get("salaire"));
-        Long roleId = Long.parseLong(signupData.get("role_id"));
+        String roleIdStr= signupData.get("role");
+        System.out.println("role"+roleIdStr);
+        Long roleId = Long.parseLong(signupData.get("role"));
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
 
@@ -238,6 +240,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", ex.getMessage()));
         }
+    }
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
 

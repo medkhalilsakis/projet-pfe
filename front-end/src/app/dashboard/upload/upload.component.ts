@@ -236,15 +236,15 @@ private openProjectDescriptionDialog(projectId: number): void {
               )
             );
           }
-          (formData.users||[]).forEach(uid => {
-            operations.push(
-              this.http.post(
-                `http://localhost:8080/api/projects/${projectId}/invite`,
-                { userId: uid, status: 'pending' },
-                { responseType: 'text' }
-              )
-            );
-          });
+            (formData.users||[]).forEach(uid => {
+              operations.push(
+                this.http.post(
+                  `http://localhost:8080/api/projects/${projectId}/invite`,
+                  { userId: uid, status: 'pending' },
+                  { responseType: 'text' }
+                )
+              );
+            });
 
           if (operations.length) {
             forkJoin(operations).subscribe({

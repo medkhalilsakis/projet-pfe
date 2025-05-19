@@ -12,7 +12,7 @@ export class MeetingService {
 
   constructor(private http: HttpClient) {}
 
-  schedule(projectId: number, m: Meeting): Observable<Meeting> {
+  schedule(projectId: number, m: any, userId: number): Observable<Meeting> {
     const url = `${this.base}/${projectId}/meetings`;
     const form = new FormData();
 
@@ -20,7 +20,7 @@ export class MeetingService {
     const blob = new Blob([ JSON.stringify({
       subject:      m.subject,
       date:         m.date,
-      participants: m.participants,
+      participantsIds: [...m.participantsIds, userId],
       description:  m.description
     })], { type: 'application/json' });
     form.append('data', blob);
@@ -47,5 +47,8 @@ export class MeetingService {
 
   list(projectId: number): Observable<Meeting[]> {
     return this.http.get<Meeting[]>(`${this.base}/${projectId}/meetings`);
+  }
+    getUserMeetings(userId: number): Observable<any[]> {
+    return this.http.get<Meeting[]>(`http://localhost:8080/api/users/${userId}/meetings`);
   }
 }

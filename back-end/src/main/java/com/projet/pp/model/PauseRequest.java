@@ -28,7 +28,7 @@ public class PauseRequest {
     private String reason;
 
     @Enumerated(EnumType.STRING)
-    private PauseStatus status = PauseStatus.PENDING; // PENDING, APPROVED, REJECTED
+    private PauseStatus status ; // PENDING, APPROVED, REJECTED
 
     @Column(updatable = false)
     private LocalDateTime requestedAt = LocalDateTime.now();

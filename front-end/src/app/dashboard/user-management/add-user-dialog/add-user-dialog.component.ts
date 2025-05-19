@@ -62,10 +62,16 @@ export class AddUserDialogComponent implements OnInit {
 
   ngOnInit(): void {
     // Charger les rôles pour le select
-    this.roleSvc.getRoles().subscribe(
-      roles => this.roles = roles,
-      _err  => { /* gérer l’erreur si besoin */ }
-    );
+   this.roleSvc.getRoles().subscribe(
+    (roles: Role[]) => {
+      this.roles = roles;
+      console.log(roles);
+    },
+    err => {
+      console.error('Erreur en chargeant les rôles', err);
+    }
+  );
+
   }
 
   /** Async-Validator pour vérifier l’unicité du username */
@@ -81,9 +87,9 @@ export class AddUserDialogComponent implements OnInit {
   /** Soumission du formulaire */
   submit(): void {
     if (this.form.invalid) return;
-
     // Extraction sécurisée des valeurs
     const fv = this.form.value;
+    console.log(fv.role_id)
     const rawDate = fv.dateEmbauche;
     let dateString: string;
     if (rawDate instanceof Date) {
@@ -108,6 +114,7 @@ export class AddUserDialogComponent implements OnInit {
       ncin:         fv.ncin!,
       genre:        fv.genre!
     };
+    console.log(payload);
 
     // Appel API
     this.userSvc.createUser(payload).subscribe({

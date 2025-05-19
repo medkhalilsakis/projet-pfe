@@ -35,6 +35,8 @@ import { TestCase } from '../../../../models/test-case.model';
 import { BugReport } from '../../../../models/bug-report.model';
 import { Meeting } from '../../../../models/meeting.model';
 import { PauseRequest } from '../../../../models/pause-request.model';
+  import { forkJoin, of } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 
 
 @Component({
@@ -75,7 +77,7 @@ export class TestProjetDetailComponent implements OnInit {
   projectTesterAssignment!: ProjectTesterAssignment;
   canLaunchTest: boolean = false;
   canSubmitDecision: boolean = false;
-
+  participants: string[] = []
 
   isPaused: boolean = false;
 
@@ -125,12 +127,44 @@ export class TestProjetDetailComponent implements OnInit {
     this.checkProjectPaused();
   }
 
-  private loadAll() {
-    this.tcService.list(this.projectId).subscribe(list => this.testCases = list);
-    this.uploadService.list(this.projectId).subscribe(list => this.uploads = list);
-    this.meetingService.list(this.projectId).subscribe(list => this.meetings = list);
-    this.bugService.list(this.projectId).subscribe(list => this.bugs = list);
-  }
+
+private loadAll() {
+  this.tcService.list(this.projectId).subscribe(list => this.testCases = list);
+  this.uploadService.list(this.projectId).subscribe(list => this.uploads = list);
+  this.bugService.list(this.projectId).subscribe(list => this.bugs = list);
+
+  this.meetingService.list(this.projectId).pipe(
+  switchMap((meetings) => {
+    const enrichedMeetings$ = meetings.map(meeting => {
+      if (!meeting.participantsIds || meeting.participantsIds.length === 0) {
+        return of({ ...meeting, participants: [], participantNames: [] });
+      }
+
+      // Create an observable that fetches all participant users for this meeting
+      const participantRequests = meeting.participantsIds.map(id =>
+        this.userService.getUserById(id)
+      );
+
+      return forkJoin(participantRequests).pipe(
+        map(users => {
+          const participantNames = users.map(user => `${user.nom} ${user.prenom}`);
+          return {
+        ...meeting,
+        participants: users,
+        participantNames // Store names directly on the meeting
+};
+        })
+      );
+    });
+
+    return forkJoin(enrichedMeetings$);
+  })
+).subscribe((enrichedMeetings: any[]) => {
+  this.meetings = enrichedMeetings;
+});
+
+}
+
 
 
   launchTest() {
@@ -257,7 +291,7 @@ openTestCaseDialog(tc?: TestCase) {
         dlg.afterClosed().subscribe((m: Meeting) => {
           if (m) {
             // 4) Envoyer au service et recharger
-            this.meetingService.schedule(this.projectId, m)
+            this.meetingService.schedule(this.projectId, m,this.currentUserId)
               .subscribe({
                 next: () => this.loadAll(),
                 error: err => console.error('Erreur scheduling meeting', err)

@@ -28,7 +28,7 @@ export class NotificationComponent implements OnInit {
     this.getNotifications();
     console.log(this.notifications)
     this.notifService.connect(currentUserId);
-    this.notifService.refreshUserNotifications(currentUserId); // <-- 🔹 Add this line here
+    //this.notifService.refreshUserNotifications(currentUserId); // <-- 🔹 Add this line here
 
     
         

@@ -41,7 +41,7 @@ public class MeetingService {
         Meeting m = new Meeting();
         m.setSubject(req.getSubject());
         m.setDate(req.getDate());
-        m.setParticipants(req.getParticipants());
+        m.setParticipantsIds(req.getParticipantsIds());
         m.setDescription(req.getDescription());
         m.setProject(project);
 
@@ -76,5 +76,8 @@ public class MeetingService {
         } catch (MalformedURLException e) {
             throw new RuntimeException("URL invalide: " + filename, e);
         }
+    }
+    public List<Meeting> findByUser(Long userId) {
+        return meetingRepo.findByParticipantId(userId);
     }
 }

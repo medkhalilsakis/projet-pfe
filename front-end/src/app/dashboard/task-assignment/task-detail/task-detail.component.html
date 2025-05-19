@@ -20,7 +20,7 @@
       </button>
 
       <!-- Éditer la tâche -->
-      <button mat-icon-button class="mat-stroked-button" (click)="editTask()">
+      <button *ngIf="isSupervisor()" mat-icon-button class="mat-stroked-button" (click)="editTask()">
         <mat-icon>edit</mat-icon>
       </button>
     </div>

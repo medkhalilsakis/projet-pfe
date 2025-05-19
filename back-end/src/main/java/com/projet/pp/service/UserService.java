@@ -3,6 +3,7 @@ import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.projet.pp.model.User;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder; // <-- ADD THIS LINE
 
 
     @Autowired private ChatAttachmentRepository attachmentRepo;
@@ -33,10 +36,12 @@ public class UserService {
     @Autowired private projectInvitedUserRepository      invitedRepo;
     @Autowired private ProjectTesterAssignmentRepository assignRepo;
     @Autowired private TacheRepository                   tacheRepo;
-
+@Autowired private NotificationService notificationService;
     LocalDateTime now = LocalDateTime.now();  // No additional imports needed
 
     private final Path uploadsRoot = Paths.get("uploads").toAbsolutePath().normalize();
+    @Autowired
+    private ChatMessageService chatMessageService;
 
 
     // Récupérer tous les utilisateurs
@@ -86,7 +91,18 @@ public class UserService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + id));
-        userRepository.delete(user);
+
+
+        chatMessageService.deleteChatMessagesbyUserId(user.getId());
+        notificationService.getNotificationsByUser(user);
+        // Other fields remain unchanged
+        user.setEmail("deleted_user_"+user.getId()+"@example.com");
+        user.setUsername("deleted_user_"+user.getId());
+        user.setSalaire(0);
+        user.setDateEmbauche(LocalDate.of(1900, 1, 1));
+        user.setNom("user");
+        user.setPrenom("deleted");
+        userRepository.save(user);
     }
 
 
@@ -160,7 +176,7 @@ public class UserService {
 
 
     public List<User> getUsersByRoleId(Long roleId) {
-        return userRepository.findByRoleId(roleId);
+        return userRepository.findAllActiveByRoleId(roleId);
     }
 
 
@@ -170,8 +186,8 @@ public class UserService {
 
 
     public List<?> getAllDeveloperStats() {
-
-        List<User> devs = userRepository.findByRoleId(1L);
+//Filter from the line before where the user.nom="user" user.prenom=deleted
+        List<User> devs = userRepository.findAllActiveByRoleId(1L);
 
         // 2) build DTO per dev
         return devs.stream().map(dev -> {
@@ -255,7 +271,7 @@ public class UserService {
 
     public List<?> getAllTesterStats() {
 
-        List<User> testers = userRepository.findByRoleId(2L);
+        List<User> testers = userRepository.findAllActiveByRoleId(2L);
 
         // 2) build DTO per dev
         return testers.stream().map(tester -> {
@@ -330,5 +346,11 @@ public class UserService {
                 "failed",  failed
         );
     }
+    public List<User> getAllActiveUsers() {
+        return userRepository.findAllActiveUsers();
+    }
+
+
+
 
 }

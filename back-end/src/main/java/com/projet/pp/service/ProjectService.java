@@ -32,7 +32,8 @@ import java.util.zip.ZipOutputStream;
 
 @Service
 public class ProjectService {
-
+@Autowired
+private UserService userService;
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -58,6 +59,8 @@ public class ProjectService {
     private TacheRepository tacheRepository;
 
     private final Path baseStorage = Paths.get("uploads/projets").toAbsolutePath().normalize();
+    @Autowired
+    private ProjectPauseService projectPauseService;
 
     public ProjectService() {
         try {
@@ -116,6 +119,18 @@ public class ProjectService {
 
         return project.getId();
     }
+    @Transactional
+    public Project updateProjectStatus(Long  ProjectId,int newStatus,Long supervisorId){
+        Project projet = projectRepository.findById(ProjectId)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable"));
+        projet.setStatus(newStatus);
+        User superviser = userService.getUserById(supervisorId);
+        if (newStatus == 55) projectPauseService.createPauseByproject(projet,superviser);
+        projet =projectRepository.save(projet);
+        return projet;
+
+        }
+
 
     @Transactional
     protected Long getOrCreateFolder(Project project, Path projectStorage, Long parentFolderId, String folderName) throws IOException {
@@ -151,6 +166,7 @@ public class ProjectService {
         String originalFilename = file.getOriginalFilename();
         return originalFilename != null && originalFilename.toLowerCase().endsWith(".zip");
     }
+
 
     private void decompressArchive(MultipartFile file, Path projectStorage, Project project) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
@@ -270,6 +286,11 @@ public class ProjectService {
 
     public List<Project> getProjectsByUserId(Long userId) {
         return projectRepository.findByUserId(userId);
+    }
+    public List<Project> getProjectsByInvitedUserId(Long userId) {
+        List<Long> ids = projectInvitedUserRepository.findProjectsIdByUserId(userId);
+        return projectRepository.findAllById(ids);
+
     }
 
     public List<ProjectFile> getFilesByProjectId(Long projectId) {
@@ -425,12 +446,18 @@ public class ProjectService {
 
 
     @Transactional
-    public void inviteUser(Long projectId, Long userId, String status) {
+    public ProjectInvitedUser inviteUser(Long projectId, Long userId, String status) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
+        // 3. Check for existing invitation
+        if (projectInvitedUserRepository.existsByProjectAndUser(project, user)) {
+            throw new IllegalStateException(
+                    "User " + userId + " is already invited to project " + projectId
+            );
+        }
         ProjectInvitedUser invitedUser = new ProjectInvitedUser();
         invitedUser.setProject(project);
         invitedUser.setUser(user);
@@ -438,6 +465,7 @@ public class ProjectService {
         invitedUser.setInvitedAt(LocalDateTime.now());
 
         projectInvitedUserRepository.save(invitedUser);
+        return invitedUser;
     }
 
 
@@ -523,7 +551,6 @@ public class ProjectService {
                         .build())
                 .collect(Collectors.toList());
     }
-
 
     @Transactional
     public void deleteProject(Long projectId) {
@@ -828,5 +855,51 @@ public class ProjectService {
         return assignmentRepo.countProjectsByTesteur_IdAndProject_StatusAndProject_UpdatedAtBetween(id ,projectStatus, from, now);
     }
 
+        @Transactional
+        public ProjectInvitedUser decideInvitation(
+                Long projectId,
+                Long userId,
+                String newStatus
+        ) {
+            // 1️⃣ load the invite row (or 404)
+            ProjectInvitedUser iu = projectInvitedUserRepository
+                    .findByProjectIdAndUserId(projectId, userId)
+                    .orElseThrow(() ->
+                            new EntityNotFoundException(
+                                    "Invitation not found for project " + projectId + " & user " + userId
+                            )
+                    );
 
-}
+            // 2️⃣ update
+            iu.setStatus(newStatus);
+            iu.setInvitedAt(LocalDateTime.now());  // optional: stamp the change time
+
+            // 3️⃣ persist
+            ProjectInvitedUser saved = projectInvitedUserRepository.save(iu);
+
+
+            return saved;
+        }
+    public List<Project> findInvitedProjects(Long userId) {
+        // 1. find all projectIds for that user
+        List<Long> projIds = projectInvitedUserRepository.findProjectsIdByUserId(userId);
+        if (projIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 2. load all matching Project entities in one go
+        return projectRepository.findAllById(projIds);
+    }
+    public List<Project> findAcceptedInvitedProjects(Long userId) {
+        // 1) only get IDs for invites with status='accepted'
+        List<Long> acceptedIds = projectInvitedUserRepository.findAcceptedProjectIdsByUserId(userId);
+        if (acceptedIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 2) fetch all matching Projects
+        return projectRepository.findAllById(acceptedIds);
+    }
+
+    }
+
+
+

@@ -9,6 +9,7 @@ import com.projet.pp.repository.ChatMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -39,10 +40,11 @@ public class ChatMessageService {
     public ChatMessage sendMessage(User sender,
                                    User receiver,
                                    String message,
+                                   boolean isRead,
                                    LocalDateTime createdAt,
                                    MultipartFile[] attachments) throws IOException {
         // (1) Créer et sauver le message
-        ChatMessage chat = new ChatMessage(sender, receiver, message, createdAt);
+        ChatMessage chat = new ChatMessage(sender, receiver, message,isRead, createdAt);
         chat = chatMessageRepository.save(chat);
 
         // (2) Créer dossier uploads/chat/{messageId}
@@ -90,9 +92,33 @@ public class ChatMessageService {
 
         return chat;
     }
+    public int countUnreadMessagesBetweenUsers(Long receiverId, @PathVariable Long senderId) {
+        return chatMessageRepository.countByReceiverIdAndSenderIdAndIsReadFalse(receiverId,senderId);
+    }
 
     /** Récupère l’historique entre deux utilisateurs */
     public List<ChatMessage> getChatHistory(Long senderId, Long receiverId) {
         return chatMessageRepository.findBySenderIdAndReceiverId(senderId, receiverId);
     }
+    public List<ChatMessage> markAllMessagesAsRead(Long senderId, Long receiverId) {
+        // Now senderId = selected user, receiverId = current user
+        System.out.println("marking all messages as read");
+        List<ChatMessage> unreadMessages = chatMessageRepository
+                .findBySenderIdAndReceiverId(senderId, receiverId);
+        System.out.println("unread messages: " + unreadMessages.size());
+
+        for (ChatMessage msg : unreadMessages) {
+            msg.setIsRead(true);
+            chatMessageRepository.save(msg);
+
+        }
+        return chatMessageRepository.findBySenderIdAndReceiverId(senderId, receiverId);
+    }
+    @Transactional
+    public void deleteChatMessagesbyUserId(Long userId) {
+        // This will delete all ChatMessage rows with sender_id = userId AND receiver_id = userId
+        chatMessageRepository.deleteBySenderId(userId);
+        chatMessageRepository.deleteByReceiverId(userId);
+    }
+
 }

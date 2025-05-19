@@ -1,5 +1,7 @@
 // src/app/models/meeting.model.ts
 
+import { User } from "./user.model";
+
 /**
  * Représente une réunion liée à un projet.
  */
@@ -14,7 +16,7 @@ export interface Meeting {
   date: string;
 
   /** Liste des participants (noms ou ID selon votre API) */
-  participants: string[] | null;
+  participantsIds: number[] | null;
 
   /** Description ou compte‑rendu de la réunion */
   description: string;
@@ -25,4 +27,7 @@ export interface Meeting {
   // project?: Project;
     createdAt: string|number|Date;
   attachments?: File[] | FileList | null;
+   // Add these new properties
+  participants?: User[];
+  participantNames?: string[];
 }

@@ -46,7 +46,7 @@ export class MeetingDialogComponent {
     this.form = this.fb.group({
       subject:       ['', Validators.required],
       date:          ['', Validators.required],
-      participants:  [<string[]>[], Validators.required],
+      participantsIds:  [<number[]>[], Validators.required],
       description:   [''],
       attachments:   [null]
     });
@@ -82,7 +82,7 @@ export class MeetingDialogComponent {
     }
     const raw = this.form.value as Meeting;
     // s'assurer d'avoir un tableau même vide
-    raw.participants = raw.participants || [];
+    raw.participantsIds = raw.participantsIds || [];
     this.dialogRef.close(raw);
   }
   

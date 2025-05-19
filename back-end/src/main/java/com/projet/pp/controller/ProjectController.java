@@ -3,16 +3,11 @@ package com.projet.pp.controller;
 import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
-import com.projet.pp.model.Project;
-import com.projet.pp.model.ProjectFile;
-import com.projet.pp.model.User;
-import com.projet.pp.model.Tache;
-import com.projet.pp.model.Notification;
+import com.projet.pp.model.*;
 import com.projet.pp.service.UserService;
 import com.projet.pp.service.TacheService;
 import com.projet.pp.service.NotificationService;
 
-import com.projet.pp.model.ProjectInvitedUser;
 import com.projet.pp.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -25,10 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -90,7 +82,6 @@ public class ProjectController {
 
                 Notification noti = new Notification(null,
                         admin,
-                        Notification.RoleType.admin,
                         "Projet développé",
                         "la développeur" + dev.getNom() + "a terminé la tache que vous lui a assigné" + project.getName(),
                         false,
@@ -109,6 +100,44 @@ public class ProjectController {
                     .body("Erreur lors du commit : " + e.getMessage());
         }
     }
+    @PostMapping("/modify/{userId}")
+    public ResponseEntity<?> updateProject(
+            @PathVariable Long userId,
+            @RequestParam("projectId") Long projectId,
+            @RequestBody Map<String, String> commitData) {
+        try {
+            String name = commitData.get("name");
+            String type = commitData.get("type");
+            String description = commitData.get("description"); // Optionnel
+            String visibilite = commitData.get("visibilite");
+            String status = commitData.get("status");
+
+            projectService.commitProject(projectId, name, type, description, visibilite, status);
+            Project project = projectService.getProjectById(projectId);
+            User dev = project.getUser();
+            User superviseur= userService.getUserById(userId);
+
+                Notification noti = new Notification(null,
+                        dev,
+                        "Projet modifié",
+                        "la superviseur" + superviseur.getNom() + "a modifié votre projet    " + project.getName(),
+                        false,
+                        LocalDateTime.now(),
+                        project,
+                        null,
+                        null,
+                        null
+                );
+                notificationService.createNoti(noti);
+
+            return ResponseEntity.ok("Projet finalisé avec succès");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors du commit : " + e.getMessage());
+        }
+    }
+
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getProjectsByUser(@PathVariable("userId") Long userId) {
@@ -208,7 +237,22 @@ public class ProjectController {
         try {
             Long userId = Long.valueOf(body.get("userId"));
             String status = body.get("status"); // Par exemple: "pending", "accepted", etc.
-            projectService.inviteUser(projectId, userId, status);
+            ProjectInvitedUser invitedUser =projectService.inviteUser(projectId, userId, status);
+            User user =invitedUser.getUser();
+            Project p=invitedUser.getProject();
+            Notification noti = new Notification(
+                    null,
+                    user,
+                    "invitation à rejoindre un projet",
+                            " vous avez été invité au projet " + p.getName(),
+                    false,
+                    LocalDateTime.now(),
+                    p,
+                    null,
+                    null,
+                    null
+            );
+            notificationService.createNoti(noti);
             return ResponseEntity.ok("Utilisateur invité avec succès");
         } catch (Exception e) {
             e.printStackTrace();
@@ -322,6 +366,14 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{projectId}/status")
+    public ResponseEntity<Project> updateStatus(@PathVariable Long projectId, @RequestBody Map<String,String> body) {
+        int newStatus = Integer.parseInt(body.get("status"));
+        Long userId = Long.parseLong(body.get("userId"));
+        Project p =projectService.updateProjectStatus(projectId,newStatus,userId);
+        return ResponseEntity.ok(p);
+
+    }
     @GetMapping("/{projectId}/closure")
     public ResponseEntity<Map<String,String>> getLastClosure(@PathVariable Long projectId) {
         return projectService.findLastClosure(projectId)
@@ -391,4 +443,65 @@ public class ProjectController {
         return ResponseEntity.ok(root);
     }
 
-}
+        /**
+         * Accept or reject an existing invitation.
+         */
+        @PutMapping("/{projectId}/invite/{userId}")
+        public ResponseEntity<InvitedUserDTO> decideInvitation(
+                @PathVariable Long projectId,
+                @PathVariable Long userId,
+                @RequestBody Map<String,String> body
+        ) {
+            String status = body.get("status");
+            ProjectInvitedUser updated = projectService.decideInvitation(projectId, userId, status);
+
+            // convert to DTO
+            InvitedUserDTO dto = new InvitedUserDTO();
+            dto.setId(updated.getId());
+            dto.setUserId(updated.getUser().getId());
+            dto.setPrenom(updated.getUser().getPrenom());
+            dto.setNom(updated.getUser().getNom());
+            dto.setStatus(updated.getStatus());
+            dto.setInvitedAt(updated.getInvitedAt());
+            Project project=projectService.getProjectById(projectId);
+            User dev =project.getUser();
+            String statusMsg ="refusé";
+
+            if (status=="accepted"){
+                statusMsg="accepté";
+            }
+
+
+            Notification noti = new Notification(null,
+                    dev,
+                    "invitation"+ statusMsg,
+                    "la développeur" +updated.getUser().getNom() + " " + updated.getUser().getPrenom() + "a "+statusMsg+" une invitation au projet" + project.getName(),
+                    false,
+                    LocalDateTime.now(),
+                    project,
+                    null,
+                    null,
+                    null
+            );
+            notificationService.createNoti(noti);
+            return ResponseEntity.ok(dto);
+        }
+    @GetMapping("/invited/user/{userId}")
+    public ResponseEntity<List<Project>> getInvitedProjects(@PathVariable Long userId) {
+        List<Project> invited = projectService.findInvitedProjects(userId);
+        return ResponseEntity.ok(invited);
+    }
+
+        @GetMapping("/invited/user/accepted/{userId}")
+        public ResponseEntity<List<Project>> getAcceptedInvitedProjects(@PathVariable Long userId) {
+            List<Project> list = projectService.findAcceptedInvitedProjects(userId);
+            return ResponseEntity.ok(list);
+        }
+    }
+
+
+
+
+
+
+

@@ -11,6 +11,16 @@ import { ParametresProjetComponent } from '../parametres-projet/parametres-proje
 import { ProjectChatComponent } from '../project-chat/project-chat.component';
 import { ProjectStatusDialogComponent } from '../project-status-dialog/project-status-dialog.component';
 
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+
 interface Project {
   id: number;
   name: string;
@@ -20,6 +30,7 @@ interface Project {
   createdAt: string;
   updatedAt: string;
   status?: number;
+
   // ajoutez d’autres champs si besoin
 }
 
@@ -32,12 +43,57 @@ interface Project {
     MatCardModule,
     MatIconModule,
   MatDialogModule,
-  RouterModule]
+  RouterModule,
+    FormsModule,
+    MatLabel,
+    MatCardModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatProgressBarModule,
+    MatSelectModule,
+    MatOptionModule]
 })
 export class MyProjectsComponent implements OnInit {
+readonly API = 'http://localhost:8080/api';
 
   projects: Project[] = [];
-  loading = true;
+  filteredProjects: Project[] = [];
+  loading = false;
+  userId!: number;
+  userRole!: number; // 1, 2 ou 3
+  searchQuery: string = '';
+
+  sortField: 'name' | 'createdAt' | 'status' = 'createdAt';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
+  statusFilter: number | '' = '';
+
+  pauseReasons: Record<number,string>   = {};
+  closureReasons: Record<number,string> = {};
+
+  readonly STATUS_OPTIONS: { value: number; label: string }[] = [
+    { value:  1, label: 'En attente' },
+    { value:  2, label: 'En test' },
+    { value:  3, label: 'En acceptation' },
+    { value:  4, label: 'En ligne' },
+    { value: 55, label: 'En pause' },
+    { value: 99, label: 'Clôturé' },
+  ];
+
+  
+  // Pour afficher les détails d'un projet
+  selectedProject: Project | null = null;
+
+  private STATUS_QUERY_MAP: Record<string, number> = {
+    draft:   0,
+    pending: 1,
+    test:    2,
+    accept:  3,
+    done:    4,
+    pause:   55,
+    archived:-1
+  };
   errorMessage: string | null = null;
 
   constructor(
@@ -50,34 +106,62 @@ export class MyProjectsComponent implements OnInit {
   ngOnInit(): void {
     const user = this.sessionStorage.getUser();
     if (!user) {
-      // pas connecté → renvoyer vers login
       this.router.navigate(['/login']);
       return;
     }
 
+    this.userId = user.id;                  // ← set it here
     const roleId = user.role.id;
-    // Si c'est un testeur (2), on bloque l'accès
     if (roleId === 2) {
       this.router.navigate(['/forbidden']);
       return;
     }
-
-    // Sinon, on charge ses projets
-    this.projectService.getProjectsByUser(user.id)
+    this.projectService.getProjectsByUser(this.userId)
       .subscribe({
         next: (projects: Project[]) => {
-          this.projects = projects;
-          this.loading = false;
+          // ① normalize so description & status are defined
+          this.projects = projects
+            .map(p => ({
+              ...p,
+              description: p.description ?? '',
+              status: p.status ?? 0
+            }))
+            .sort((a, b) =>
+              new Date(b.createdAt).getTime() -
+              new Date(a.createdAt).getTime()
+            );
+
+          // ② merge accepted invites
+          this.projectService.getAcceptedInvitedProjects(this.userId)
+            .subscribe({
+              next: invited => {
+                invited.forEach(p => {
+                  const normalized = {
+                    ...p,
+                    description: p.description ?? '',
+                    status: p.status ?? 0
+                  };
+                  if (!this.projects.some(x => x.id === normalized.id)) {
+                    this.projects.push(normalized);
+                  }
+                });
+                this.filteredProjects = [...this.projects];
+                this.loading = false;
+              },
+              error: err => {
+                console.error('Impossible de charger les projets invités', err);
+                this.filteredProjects = [...this.projects];
+                this.loading = false;
+              }
+            });
         },
         error: err => {
-          console.error(err);
+          console.error('Erreur lors du chargement des projets', err);
           this.errorMessage = 'Impossible de charger vos projets.';
           this.loading = false;
         }
       });
-  }
-
-  chatDetails(project: Project): void {
+  }  chatDetails(project: Project): void {
       this.dialog.open(ProjectChatComponent, {
         width: '600px',
         data: { projectId: project.id }
@@ -198,4 +282,75 @@ openSettings(project: Project): void{
       default: return 'gray';  // Gris pour les autres statuts
     }
   }
+  
+
+  isRed(status: number): boolean {
+    return [0, 1, 55, 99].includes(status);
+  }
+  isYellow(status: number): boolean {
+    return [2, 3].includes(status);
+  }
+  isGreen(status: number): boolean {
+    return status === 4;
+  }
+  applyFiltersAndSorting(): void {
+  const q = this.searchQuery.trim().toLowerCase();
+
+  // If no explicit filter, default to [1,2,3,55]
+  const DEFAULT_STATUSES = [1, 2, 3, 55];
+
+  this.filteredProjects = this.projects
+    .filter(p =>
+      // name search
+      (!q || p.name.toLowerCase().includes(q))
+      // status filter (use `!` to assert p.status is defined)
+      && (
+           this.statusFilter === ''
+             ? DEFAULT_STATUSES.includes(p.status!)
+             : p.status! === this.statusFilter
+         )
+    )
+    .sort((a, b) => {
+      let cmp = 0;
+      if (this.sortField === 'name') {
+        cmp = a.name.localeCompare(b.name);
+      } else if (this.sortField === 'createdAt') {
+        cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (this.sortField === 'status') {
+        // assert both statuses are defined
+        cmp = a.status! - b.status!;
+      }
+      return this.sortDirection === 'asc' ? cmp : -cmp;
+    });
+}
+
+  onSearchChange() {
+    this.applyFiltersAndSorting();
+  }
+
+  onStatusFilterChange(val: number | '') {
+    this.statusFilter = val;
+    this.applyFiltersAndSorting();
+  }
+
+  onSortFieldChange(field: 'name'|'createdAt'|'status') {
+    this.sortField = field;
+    this.applyFiltersAndSorting();
+  }
+
+  onSortDirectionChange(dir: 'asc'|'desc') {
+    this.sortDirection = dir;
+    this.applyFiltersAndSorting();
+  }
+
+  // Filtrer les projets localement par nom
+  filterProjects(): void {
+    if (!this.searchQuery.trim()) {
+      this.filteredProjects = this.projects;
+    } else {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredProjects = this.projects.filter(proj => proj.name.toLowerCase().includes(query));
+    }
+  }
+
 }

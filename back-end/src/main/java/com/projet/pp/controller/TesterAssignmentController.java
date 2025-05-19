@@ -61,7 +61,11 @@ public class TesterAssignmentController {
         service.assignTesters(projectId, testeurIds, superviseurId);
         return ResponseEntity.ok().build();
     }
-
+    @PutMapping("/{id}/syncStatus")
+    public ResponseEntity<Void> syncStatus(@PathVariable Long id) {
+        service.syncStatus(id);
+        return ResponseEntity.ok().build();
+    }
     /** Mettre en pause ou clore la phase de test */
     @PostMapping("/{projectId}/phase")
     public ResponseEntity<Void> changePhase(
@@ -118,6 +122,15 @@ public class TesterAssignmentController {
     public ResponseEntity<List<ProjectTesterAssignment>> getMyAssignments(
             @PathVariable Long testeurId) {
         List<ProjectTesterAssignment> assigns = service.getAssignmentsByTesteur(testeurId);
+        return ResponseEntity.ok(assigns);
+    }
+    @GetMapping("/my/{testeurId}/{status}")
+    public ResponseEntity<List<ProjectTesterAssignment>> getMyAssignments(
+            @PathVariable Long testeurId,
+            @PathVariable String status
+    ) {
+        TestStatus ts=TestStatus.valueOf(status);
+        List<ProjectTesterAssignment> assigns = service.getAssignmentsByTesteurAndStatus(testeurId,ts);
         return ResponseEntity.ok(assigns);
     }
 

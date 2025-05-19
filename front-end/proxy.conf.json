@@ -4,5 +4,13 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/external-api": {
+    "target": "https://api.11holidays.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
   }
 }

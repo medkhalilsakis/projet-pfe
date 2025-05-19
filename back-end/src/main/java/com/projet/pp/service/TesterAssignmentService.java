@@ -58,9 +58,8 @@ public class TesterAssignmentService {
     public List<ProjectTesterAssignment> getAssignments(Long projectId) {
         return assignmentRepo.findByProjectId(projectId);
     }
-    public ProjectTesterAssignment getAssignmentByProjectId(Long ProjectId){
-        return assignmentRepo.findOneByProjectId(ProjectId);
-
+    public List<ProjectTesterAssignment> getAssignmentsByProjectId(Long projectId) {
+        return assignmentRepo.findByProjectId(projectId);
     }
 
     /**
@@ -193,8 +192,38 @@ public class TesterAssignmentService {
     public List<ProjectTesterAssignment> getAssignmentsByTesteur(Long testeurId) {
         return assignmentRepo.findByTesteurId(testeurId);
     }
+    public List<ProjectTesterAssignment> getAssignmentsByTesteurAndStatus(Long testeurId ,TestStatus statusTest) {
+        return assignmentRepo.findByTesteur_IdAndStatutTest(testeurId,statusTest);
+    }
+
+    @Transactional
+    public void syncStatus(Long assignmentId) {
+        ProjectTesterAssignment pta = assignmentRepo.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Tâche introuvable : " + assignmentId));
+
+        Project p = pta.getProject();
+        TestStatus newStatus;
+
+            Integer projSt = p.getStatus();
+            // votre mapping projet→tâche
+            if (projSt == 2 || projSt == 3) {
+                newStatus = TestStatus.en_cours;
+            } else if (projSt == 4) {
+                newStatus = TestStatus.termine;
+            } else if (projSt == 55) {
+                newStatus = TestStatus.en_pause;
+            } else if (projSt == 99) {
+                newStatus = TestStatus.cloture;
+            } else {
+                newStatus = TestStatus.non_commence;
+            }
 
 
+        if (pta.getStatutTest() != newStatus) {
+            pta.setStatutTest(newStatus);
+            assignmentRepo.save(pta);
+        }
+    }
     @Transactional
     public void updateTesterDecision(Long assignmentId, TestApproval decision, String rapportTestPath) {
         ProjectTesterAssignment assignment = assignmentRepo.findById(assignmentId)

@@ -57,6 +57,22 @@ export class ProjectService {
       payload
     );
   }
+  ModifyProject(
+    userId:number,
+    projectId: number,
+    payload: {
+      name: string;
+      type: string;
+      description?: string;
+      visibilite: string;
+      status: string;
+    }
+  ): Observable<any> {
+    return this.http.post(
+      `${this.baseUrl}/modify/${userId}?projectId=${projectId}`,
+      payload
+    );
+  }
 
   getAllProjects(): Observable<any[]> {
     return this.http.get<any[]>(this.baseUrl);
@@ -201,6 +217,11 @@ export class ProjectService {
     );
   }
 
+  updateProjectStatus(projectId: number,status :number,userId : number):Observable<any>
+  {
+    return this.http.put(`${this.baseUrl}/${projectId}/status`,{status,userId })
+  }
+
   cancelInvite(
     projectId: number,
     userId: number
@@ -222,4 +243,24 @@ export class ProjectService {
       `${this.baseUrl}/${projectId}/closure`
     );
   }
+  decideInvitation(
+    userId: number,
+    status: 'accepted' | 'rejected',
+    projectId: number
+  ): Observable<any> {
+    return this.http.put(
+      `${this.baseUrl}/${projectId}/invite/${userId}`,
+      { status }
+    );
+  }
+  getInvitedProjects(userId: number): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.baseUrl}/invited/user/${userId}`
+  );
+}
+getAcceptedInvitedProjects(userId: number): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.baseUrl}/invited/user/accepted/${userId}`
+  );
+}
 }

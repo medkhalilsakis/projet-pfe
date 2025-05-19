@@ -17,6 +17,8 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

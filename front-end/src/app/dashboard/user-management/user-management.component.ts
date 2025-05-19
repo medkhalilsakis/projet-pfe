@@ -138,7 +138,7 @@ export class UserManagementComponent implements OnInit {
   
   onDelete(u: User)  {
     if(!confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) return;
-    this.http.delete(`http://localhost:8080/api/users/${u.id}`).subscribe(
+    this.http.put(`http://localhost:8080/api/users/delete/${u.id}`,{}).subscribe(
       () => { this.snack.open('Supprimé','Fermer',{duration:2000}); this.loadUsers(); },
       () => this.snack.open('Erreur suppression','Fermer',{duration:2000})
     );

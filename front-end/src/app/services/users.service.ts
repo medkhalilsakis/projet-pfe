@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { PresenceService, PresenceUpdate } from './presence.service';
 import { User } from '../models/user.model';
+import { PauseRequestService } from './pause-request.service';
 
 @Injectable({
   providedIn: 'root'
@@ -77,6 +78,7 @@ export class UserService {
       this.usersSubject.next(updatedUsers);
     }
   }
+  
 
   getUsersByRole(roleId: number): Observable<User[]> {
     return this.http.get<User[]>(`${this.base}/role/${roleId}`);

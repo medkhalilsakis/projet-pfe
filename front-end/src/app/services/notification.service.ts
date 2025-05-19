@@ -110,6 +110,10 @@ refreshUserUnreadNotifications(userId: number) {
     this.unreadnotificationsSubject.next(data);
   });
 }
+getUnreadUserNotifications(userId:number){
+  return   this.http.get<any[]>(`http://localhost:8080/api/notifications/user/${userId}/unread`);
+
+}
 getNotificationById(id: number): Observable<any> {
   return this.http.get<any>(`http://localhost:8080/api/notifications/${id}`);
 }

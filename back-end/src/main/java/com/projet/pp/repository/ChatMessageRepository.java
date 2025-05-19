@@ -15,9 +15,13 @@ import java.util.List;
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findBySenderIdAndReceiverId(Long senderId, Long receiverId);
+    int countByReceiverIdAndSenderIdAndIsReadFalse(Long receiverId, Long senderId);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM ChatMessage m WHERE m.sender.id = :userId OR m.receiver.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+    List<ChatMessage> findBySenderIdAndReceiverIdAndIsReadFalse(Long senderId, Long receiverId);
+    void deleteBySenderId(Long senderId);
+    void deleteByReceiverId(Long receiverId);
 }

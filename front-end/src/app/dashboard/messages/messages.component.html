@@ -29,7 +29,10 @@
              alt="{{u.prenom}}"
              class="avatar-sm">
         <div class="user-details" fxFlex>
-          <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+          <div class="user-name" *ngIf="u.unread > 9">{{ u.prenom }} {{ u.nom }} +9</div>
+          <div class="user-name" *ngIf="u.unread > 0 && u.unread <= 9">{{ u.prenom }} {{ u.nom }} {{u.unread}}</div>
+          <div class="user-name" *ngIf="u.unread === 0">{{ u.prenom }} {{ u.nom }}</div>
+
           <div class="user-status">
             <span [class.online]="u.online" [class.offline]="!u.online"></span>
             {{ getStatus(u) }}
@@ -56,7 +59,7 @@
       <div class="chat-recipient" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
         <img class="avatar-sm" [src]="selectedUser.avatarUrl" alt="{{selectedUser.nom}}">
         <div>
-          <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}</h2>
+          <h2>{{ selectedUser.prenom }} {{ selectedUser.nom }}  </h2>
         </div>
       </div>
       <div class="header-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">

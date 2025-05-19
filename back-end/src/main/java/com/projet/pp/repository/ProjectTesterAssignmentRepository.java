@@ -85,4 +85,7 @@ public interface ProjectTesterAssignmentRepository extends JpaRepository<Project
     long countProjectsByTesteur_IdAndProject_StatusAndProject_UpdatedAtBetween(Long testeurId, int projectStatus, LocalDateTime from, LocalDateTime to);
     long countByTesteur_Id(Long testeurId);
 
+
+    List<ProjectTesterAssignment> findByTesteur_IdAndStatutTest(Long testeurId, TestStatus statutTest);
+
 }

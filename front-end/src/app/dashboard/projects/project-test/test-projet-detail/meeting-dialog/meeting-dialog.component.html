@@ -27,8 +27,8 @@
   <!-- Sélection multiple -->
   <mat-form-field appearance="fill">
     <mat-label>Participants</mat-label>
-    <mat-select formControlName="participants" multiple>
-      <mat-option *ngFor="let u of filteredUsers" [value]="u.nom + ' ' + u.prenom">
+    <mat-select formControlName="participantsIds" multiple>
+      <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
         {{ u.nom }} {{ u.prenom }}
       </mat-option>
     </mat-select>

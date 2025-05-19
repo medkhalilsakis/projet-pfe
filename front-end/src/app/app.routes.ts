@@ -15,13 +15,17 @@ import { UserManagementComponent } from './dashboard/user-management/user-manage
 import { TaskDetailComponent } from './dashboard/task-assignment/task-detail/task-detail.component';
 import { NotificationComponent } from './dashboard/notification/notification.component';
 import { NotifcationDetailComponent } from './dashboard/notification/notifcation-detail/notifcation-detail.component';
-
 import { ProjectExplorerComponent } from './dashboard/projects/project-explorer/project-explorer.component';
 import { MyProjectsComponent } from './dashboard/projects/my-projects/my-projects.component';
 import { ProjectTestComponent } from './dashboard/projects/project-test/project-test.component';
 import { TestProjetDetailComponent } from './dashboard/projects/project-test/test-projet-detail/test-projet-detail.component';
-import {AnalyticsComponent} from './dashboard/analytics/analytics.component'
+import {AnalyticsComponent} from './dashboard/analytics/analytics.component';
+import { ComplaintsComponent } from './dashboard/complaints/complaints.component';
 import { ProjectChatComponent } from './dashboard/projects/project-chat/project-chat.component';
+import { EspaceAdminstrativeComponent} from './dashboard/espace-adminstrative/espace-adminstrative.component';
+import{ProjectInProgressComponent} from './dashboard/projects/project-in-progress/project-in-progress.component'
+import{ProjectTermineComponent} from './dashboard/projects/project-termine/project-termine.component'
+
 export const routes: Routes = [
   { 
     path: 'dashboard',
@@ -32,7 +36,7 @@ export const routes: Routes = [
       { path: 'overview', component: OverviewComponent },
       { path: 'notifications', component: NotificationComponent },
       { path: 'notification/:id', component: NotifcationDetailComponent },
-
+      {path:'espace-adminstrative', component:EspaceAdminstrativeComponent},
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
@@ -42,8 +46,13 @@ export const routes: Routes = [
       { path: 'tâches/:id',      component: TaskDetailComponent  },
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
+      { path: 'complaints',       component: ComplaintsComponent },
+
       { path: 'my-projects',       component: MyProjectsComponent },
       { path: 'projects-test',       component: ProjectTestComponent },
+      { path: 'projects-in-progress',       component: ProjectInProgressComponent },
+      { path: 'projects-termine',       component: ProjectTermineComponent },
+
       { path: 'projects-test/:id',       component: TestProjetDetailComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },

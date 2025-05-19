@@ -151,12 +151,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadNotifications(): void {
-const UserId = this.currentUser.id;
+      const UserId = this.currentUser.id;
       this.notifService.refreshUserUnreadNotifications(UserId);
       console.log(this.notifications())
       this.notifService.unreadnotifications$.subscribe(data => {
         this.notifications.set(data);
-        console.log(this.notifications())
+      console.log(this.notifications())
 
       });
       this.notifService.connect(UserId);
@@ -164,7 +164,14 @@ const UserId = this.currentUser.id;
       this.notifService.notifications$.subscribe(data => {
         const updatedNotifications = [...this.notifications(), ...data];
         this.notifications.set(updatedNotifications);
-              if (data.length > 0) {
+        const uniqueNotificationsMap = new Map();
+        updatedNotifications.forEach(notification => {
+        uniqueNotificationsMap.set(notification.id, notification);
+       });
+
+      const uniqueNotifications = Array.from(uniqueNotificationsMap.values());
+      this.notifications.set(uniqueNotifications);        console.log(this.notifications())
+        if (data.length > 0) {
           this.popupComponent.showNotification(data[0]);
         }
       });
@@ -178,6 +185,8 @@ const UserId = this.currentUser.id;
       { label: 'Messagerie',      icon: 'message',      action: () => this.navigateTo('messages') },
       { label: 'Notifications',   icon: 'notifications',action: () => this.navigateTo('notifications') },
       { label: 'Analytics',      icon: 'analytics',     action: () => this.navigateTo('analytics') },
+      { label: 'Espace Administratif',      icon: 'account_balance',     action: () => this.navigateTo('espace-adminstrative') },
+
     ];
 
     if (role === 3) {
@@ -204,14 +213,16 @@ const UserId = this.currentUser.id;
         ...baseMenu,
         { label: 'Projets à tester', icon: 'assignment',      action: () => this.navigateTo('projects-test') },
         { label: 'Projets en cours', icon: 'hourglass_empty', action: () => this.navigateTo('projects-in-progress') },
-        { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects?type=completed') }
+        { label: 'Projets terminés', icon: 'assignment_turned_in', action: () => this.navigateTo('projects-termine') }
       ];
     }
     else {
       this.menuItems = [
         ...baseMenu,
         { label: 'Tâches', icon: 'assignment_turned_in', action: () => this.navigateTo('tâches') },
-        { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('my-projects') }
+        { label: 'Mes Projets', icon: 'folder', action: () => this.navigateTo('my-projects') },
+        { label: 'Réclamations',  icon :'feedback', action: () => this.navigateTo('complaints') },
+
       ];
     }
   }

@@ -110,7 +110,7 @@ export class ParametresProjetComponent implements OnInit {
       visibilite: this.form.value.visibilite,
       status: this.project.status?.toString() || '0'
     };
-    this.projectService.commitProject(this.projectId, payload).subscribe(() => this.dialogRef.close(true));
+    this.projectService.ModifyProject(this.currentUserId,this.projectId, payload).subscribe(() => this.dialogRef.close(true));
   }
 
   updateVisibilite(): void {

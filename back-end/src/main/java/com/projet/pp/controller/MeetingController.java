@@ -4,7 +4,8 @@ package com.projet.pp.controller;
 import com.projet.pp.dto.MeetingRequest;
 import com.projet.pp.model.Meeting;
 import com.projet.pp.model.Tache;
-
+import com.projet.pp.model.User;
+import com.projet.pp.model.ProjectTesterAssignment;
 import com.projet.pp.service.MeetingService;
 import com.projet.pp.service.TesterAssignmentService;
 import com.projet.pp.model.Notification;
@@ -46,7 +47,6 @@ public class MeetingController {
             Notification noti = new Notification(
                     null,
                     saved.getProject().getUser(),
-                    Notification.RoleType.dev,
                     "Une Nouvelle reunion " ,
                     "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() +" en " +strDate,
                     false,
@@ -58,29 +58,32 @@ public class MeetingController {
             );
 
             notificationService.createNoti(noti);
+            List<ProjectTesterAssignment> assignments = testerAssignementService.getAssignmentsByProjectId(projectId);
+            assignments.forEach(assignment -> {
+                User tester = assignment.getTesteur();
 
-            Notification noti1 = new Notification(
-                    null,
-                    testerAssignementService.getAssignmentByProjectId(saved.getProject().getId()).getTesteur(),
-                    Notification.RoleType.tester,
-                    "Une Nouvelle reunion " ,
-                    "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() +" en " +strDate,
-                    false,
-                    LocalDateTime.now(),
-                    null,
-                    null,
-                    null,
-                    saved
-            );
+                Notification noti1 = new Notification(
+                        null,
+                        tester,
+                        "Une Nouvelle reunion ",
+                        "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() + " en " + strDate,
+                        false,
+                        LocalDateTime.now(),
+                        null,
+                        null,
+                        null,
+                        saved
+                );
+                notificationService.createNoti(noti1);
 
-            notificationService.createNoti(noti1);
+            });
+
             Tache tache = tacheService.getTacheByProjectId(projectId).orElse(null);
 
             if (tache != null) {
                 Notification noti2 = new Notification(
                         null,
                         tache.getAssignedBy(),
-                        Notification.RoleType.admin,
                         "Une Nouvelle reunion ",
                         "vous a envoyé une nouvelle reunion nommée" + saved.getSubject() + " en " + strDate,
                         false,
@@ -117,4 +120,6 @@ public class MeetingController {
                         "attachment; filename=\"" + filename + "\"")
                 .body(file);
     }
+
+
 }

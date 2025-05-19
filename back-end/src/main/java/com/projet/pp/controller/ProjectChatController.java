@@ -7,6 +7,7 @@ import com.projet.pp.service.ProjectChatService;
 import com.projet.pp.service.NotificationService;
 import com.projet.pp.service.ProjectService;
 import com.projet.pp.service.TacheService;
+import  com.projet.pp.model.ProjectTesterAssignment;
 
 import com.projet.pp.service.UserService;
 import com.projet.pp.service.TesterAssignmentService;
@@ -48,32 +49,41 @@ public class ProjectChatController {
             @RequestPart("message") String message,
             @RequestPart(name="files", required=false) MultipartFile[] files
     ) throws Exception {
-        ProjectChatMessageDTO pcdto= svc.postMessage(projectId, senderId, message, files);
-        Project p =projectService.getProjectById(projectId);
+        ProjectChatMessageDTO pcdto = svc.postMessage(projectId, senderId, message, files);
+        Project p = projectService.getProjectById(projectId);
         User sender = userService.getUserById(senderId);
-        if (sender.getRole().getLibelle().equals("developpeur")){
 
-            Notification noti1 = new Notification(
-                    null,
-                    testerAssignmentService.getAssignmentByProjectId(projectId).getTesteur(),
-                    Notification.RoleType.tester,
-                    "Nouveau message du proejt ",
-                    sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
-                    false,
-                    LocalDateTime.now(),
-                    p,
-                    null,
-                    null,
-                    null
-            );
-            notificationService.createNoti(noti1);
-            Tache tache = tacheService.getTacheById(projectId).orElse(null);
+        if (sender.getRole().getLibelle().equals("developpeur")) {
+// Check if assignment exists before getting tester
+            List<ProjectTesterAssignment> assignments = testerAssignmentService.getAssignmentsByProjectId(projectId);
+
+            // Notify all testers
+            assignments.forEach(assignment -> {
+                User tester = assignment.getTesteur();
+                if (tester!=null) {
+                    Notification noti2 = new Notification(
+                            null,
+                            tester,
+                            "Nouveau message du proejt ",
+                            sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
+                            false,
+                            LocalDateTime.now(),
+                            p,
+                            null,
+                            null,
+                            null
+                    );
+                    notificationService.createNoti(noti2);
+                }
+            });
+
+
+            Tache tache = tacheService.getTacheByProjectId(projectId).orElse(null);
 
             if (tache != null) {
                 Notification noti2 = new Notification(
                         null,
                         tache.getAssignedBy(),
-                        Notification.RoleType.admin,
                         "Nouveau message du proejt ",
                         sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
                         false,
@@ -85,14 +95,14 @@ public class ProjectChatController {
                 );
                 notificationService.createNoti(noti2);
             }
-
         }
+
+
         if (sender.getRole().getLibelle().equals("testeur")) {
 
             Notification noti = new Notification(
                     null,
                     projectService.getProjectById(projectId).getUser(),
-                    Notification.RoleType.dev,
                     "Nouveau message du proejt ",
                     sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
                     false,
@@ -106,13 +116,12 @@ public class ProjectChatController {
             notificationService.createNoti(noti);
 
 
-            Tache tache = tacheService.getTacheById(projectId).orElse(null);
+            Tache tache = tacheService.getTacheByProjectId(projectId).orElse(null);
 
             if (tache != null) {
                 Notification noti2 = new Notification(
                         null,
                         tache.getAssignedBy(),
-                        Notification.RoleType.admin,
                         "Nouveau message du proejt ",
                         sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
                         false,
@@ -130,7 +139,6 @@ public class ProjectChatController {
             Notification noti1 = new Notification(
                     null,
                     projectService.getProjectById(projectId).getUser(),
-                    Notification.RoleType.dev,
                     "Nouveau message du proejt ",
                     sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
                     false,
@@ -141,21 +149,27 @@ public class ProjectChatController {
                     null
             );
             notificationService.createNoti(noti1);
+            List<ProjectTesterAssignment> assignments = testerAssignmentService.getAssignmentsByProjectId(projectId);
 
-            Notification noti2 = new Notification(
-                    null,
-                    testerAssignmentService.getAssignmentByProjectId(projectId).getTesteur(),
-                    Notification.RoleType.tester,
-                    "Nouveau message du proejt ",
-                    sender.getNom() + " a envooyé un nouveau message en " + p.getName() ,
-                    false,
-                    LocalDateTime.now(),
-                    p,
-                    null
-                    ,null,null
-            );
-            notificationService.createNoti(noti2);
-
+            // Notify all testers
+            assignments.forEach(assignment -> {
+                User tester = assignment.getTesteur();
+                if (tester!=null) {
+                    Notification noti2 = new Notification(
+                            null,
+                            tester,
+                            "Nouveau message du proejt ",
+                            sender.getNom() + " a envooyé un nouveau message en " + p.getName(),
+                            false,
+                            LocalDateTime.now(),
+                            p,
+                            null,
+                            null,
+                            null
+                    );
+                    notificationService.createNoti(noti2);
+                }
+            });
         }
 
         return pcdto;

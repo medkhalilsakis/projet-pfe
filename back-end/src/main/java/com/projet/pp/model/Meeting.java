@@ -16,7 +16,7 @@ public class Meeting {
     @Id @GeneratedValue private Long id;
     private String subject;
     private LocalDateTime date;
-    @ElementCollection private List<String> participants;
+    @ElementCollection private List<Long> participantsIds;
     @ElementCollection private List<String> attachments;
     @Column(columnDefinition="TEXT") private String description;
     @ManyToOne @JoinColumn(name="project_id") private Project project;

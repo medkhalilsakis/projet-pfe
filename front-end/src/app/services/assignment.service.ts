@@ -33,6 +33,21 @@ export class AssignmentService {
     return this.http.get<Project[]>(`${this.baseUrl}/finished`);
   }
 
+  /** Récupère les projets en attente de désignation (status = 1) */
+  getTesterPending(testerId:number): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/pending/${testerId}`);
+  }
+
+  /** Récupère les projets en cours de test (status = 2) */
+  getTesterInTest(testerId:number): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/in-test/${testerId}`);
+  }
+
+  /** Récupère les projets mis en pause (55) ou clôturés (99) */
+  getTesterFinished(testerId:number): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.baseUrl}/finished/${testerId}`);
+  }
+
   /**
    * Récupère les assignations actuelles d’un projet
    * @param projectId ID du projet
@@ -114,11 +129,20 @@ getMyAssignments(testeurId: number): Observable<ProjectTesterAssignment[]> {
     `${this.baseUrl}/my/${testeurId}`
   );
 }
-
+getMyAssignmentsPerStatus(testeurId: number,status :string): Observable<ProjectTesterAssignment[]> {
+  
+  return this.http.get<ProjectTesterAssignment[]>(
+    `${this.baseUrl}/my/${testeurId}/${status}`
+  );
+}
 getTesteursExcept(projectId: number, excludeTesterId: number): Observable<User[]> {
   const params = new HttpParams().set('excludeTesterId', excludeTesterId.toString());
   return this.http.get<User[]>(`${this.baseUrl}/${projectId}/testeurs`, { params });
 }
 
+syncStatus(id:number){
+    return this.http.put<User[]>(`${this.baseUrl}/${id}/syncStatus`, null);
+
+}
 
 }

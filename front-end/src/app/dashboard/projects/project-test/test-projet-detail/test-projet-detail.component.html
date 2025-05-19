@@ -131,8 +131,8 @@
                 </mat-panel-description>
               </mat-expansion-panel-header>
               <p><strong>Créée le :</strong> {{ m.createdAt | date:'short' }}</p>
-              <p><strong>Participants :</strong> {{ m.participants?.join(', ') ?? 'Aucun' }}</p>
-              <p>{{ m.description }}</p>
+<p><strong>Participants :</strong> {{ (m.participantNames || []).join(', ') || 'Aucun' }}</p>
+               <p>{{ m.description }}</p>
               <div class="panel-actions">
                 <button mat-icon-button color="primary" (click)="editMeeting(m)">
                   <mat-icon>edit</mat-icon>
