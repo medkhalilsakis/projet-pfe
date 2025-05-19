@@ -4,28 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca5c6ffd-1d66-4ac5-a723-e7af2dc7570e" name="Changes" comment="normalent koll chay mrigel fel notifications  kounch el 7ajet li teb3a el testeur a5ta el testassignement rigeltou w fama 7ajet manajmtech ntestihom 5ater projet 3andi nakes emma normalment cv 7att mel messaget 3mtlou notification , el project discussion 3matlou notification 7awelt na3mel el 7ajet el mouema wellazma w li tfakrthom lkoll ken famma 7aja o5ra t7ebni ngeddha kolli">
+    <list default="true" id="ca5c6ffd-1d66-4ac5-a723-e7af2dc7570e" name="Changes" comment="k3ad ken lanalytics">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ChatMessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ChatMessageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/MeetingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/MeetingController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/NotificationWebSocketController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/NotificationWebSocketController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ProjectChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ProjectChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ProjectController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ProjectController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/TacheController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/TacheController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/dto/NotificationDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/model/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/model/Notification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/model/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/NotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/NotificationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/ProjectTesterAssignmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/ProjectTesterAssignmentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/TacheService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/TacheService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/TesterAssignmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/TesterAssignmentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notifications/notifications.component.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notifications/notifications.component.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notifications/notifications.component.spec.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notifications/notifications.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +16,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="v17" />
+        <entry key="$PROJECT_DIR$" value="v19" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -61,23 +42,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;v19&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/souil/OneDrive/Desktop/projet-pfe/back-end&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.4.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "v20",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/souil/OneDrive/Desktop/projet-pfe/back-end",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.4.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="projet-pfe" />
@@ -161,7 +142,17 @@
       <workItem from="1746785578924" duration="595000" />
       <workItem from="1746789252063" duration="854000" />
       <workItem from="1746825175360" duration="732000" />
+      <workItem from="1747653622834" duration="1780000" />
     </task>
+    <task id="LOCAL-00001" summary="k3ad ken lanalytics">
+      <option name="closed" value="true" />
+      <created>1747653715733</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747653715733</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -169,6 +160,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="normalent koll chay mrigel fel notifications  kounch el 7ajet li teb3a el testeur a5ta el testassignement rigeltou w fama 7ajet manajmtech ntestihom 5ater projet 3andi nakes emma normalment cv 7att mel messaget 3mtlou notification , el project discussion 3matlou notification 7awelt na3mel el 7ajet el mouema wellazma w li tfakrthom lkoll ken famma 7aja o5ra t7ebni ngeddha kolli" />
-    <option name="LAST_COMMIT_MESSAGE" value="normalent koll chay mrigel fel notifications  kounch el 7ajet li teb3a el testeur a5ta el testassignement rigeltou w fama 7ajet manajmtech ntestihom 5ater projet 3andi nakes emma normalment cv 7att mel messaget 3mtlou notification , el project discussion 3matlou notification 7awelt na3mel el 7ajet el mouema wellazma w li tfakrthom lkoll ken famma 7aja o5ra t7ebni ngeddha kolli" />
+    <MESSAGE value="k3ad ken lanalytics" />
+    <option name="LAST_COMMIT_MESSAGE" value="k3ad ken lanalytics" />
   </component>
 </project>
