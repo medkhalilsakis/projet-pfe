@@ -9,6 +9,9 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { firstValueFrom } from 'rxjs';
 import { forkJoin } from 'rxjs';
+import { PauseRequestService } from '../../services/pause-request.service';
+import { ComplaintService } from '../../services/complaint.service';
+import { BugReportService } from '../../services/bug-report.service';
 
 
 interface Developer {
@@ -79,13 +82,18 @@ export class AnalyticsComponent implements OnInit {
   statsVisible = false;
   currentDate: Date = new Date();
   view: [number, number] = [1600, 900]; // Larger dimensions for better PDF quality
-  
   // Main stats
   projectStats: any = {} ;
   taskStats: any = {} ;
 
   // Extended stats
   devStats: any[] = [];
+  devstatsSortedByDev :any[]=[]
+  devstatsSortedByDevLastMounth :any[]=[]
+  devstatsSortedByDevLastYear :any[]=[]
+devBugStatsSortedByDev :any[]=[]
+devBugStatsSortedByDevLastMounth :any[]=[]
+devBugStatsSortedByDevLastYear:any[]=[]
 
   testStats: any = { 
     
@@ -104,8 +112,18 @@ export class AnalyticsComponent implements OnInit {
   failed :number=0;
   success : number=0;
   total : number=0;
-
-  // Chart data
+  complaintCount:number=0
+BugStats: { bugs: number; bugsLastWeek: number; bugsLastMonth: number ; bugsLastYear: number } = {
+  bugs: 0,
+  bugsLastWeek: 0,
+  bugsLastMonth: 0,
+  bugsLastYear:0
+}; 
+pauseRequestStats: { total: number; success: number; failed: number } = {
+  total: 0,
+  success: 0,
+  failed: 0
+};  // Chart data
   projectCompletionChart: any[] = [];
   testingSuccessChart: any[] = [];
   devProductivityChart: any[] = [];
@@ -127,7 +145,14 @@ export class AnalyticsComponent implements OnInit {
   developerStats :any 
   // View dimensions for charts
 
-  constructor(private sessionStorage: SessionStorageService,private http: HttpClient,  private cdr: ChangeDetectorRef ,     private ngZone: NgZone  ) {}
+  constructor(private sessionStorage: SessionStorageService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef ,
+    private ngZone: NgZone ,
+    private pauseRequestService:PauseRequestService,
+    private complaintService:ComplaintService,
+    private bugReportService:BugReportService
+  ) {}
 
   ngOnInit(): void {
     const user = this.sessionStorage.getUser();
@@ -227,18 +252,19 @@ export class AnalyticsComponent implements OnInit {
       const user = this.sessionStorage.getUser();
 
       if(this.userRole === 3){
-        console.log(33333)
         try{
-        const [projectStats,taskStats,testStats,devStats,testerStats] = await firstValueFrom(
+        const [projectStats,taskStats,testStats,devStats,testerStats,pauseRequestsStats,complaintCount,BugStats] = await firstValueFrom(
         forkJoin([
           this.http.get<ProjectStats>(`http://localhost:8080/api/projects/stats`),
           this.http.get<TaskStats>(`http://localhost:8080/api/taches/stats`),
           this.http.get<TestStats>(`http://localhost:8080/api/tester-assignments/stats`),
           this.http.get<Developer[]>(`http://localhost:8080/api/users/devstats`),
-          this.http.get<Tester[]>(`http://localhost:8080/api/users/testerstats`)
+          this.http.get<Tester[]>(`http://localhost:8080/api/users/testerstats`),
+          this.pauseRequestService.listPauseRequestStats(),
+          this.complaintService.getComplaintCount(),
+          this.bugReportService.getStats()      
         ])
       );
-      console.log(5555)
     
       // now _all_ data is in
       this.projectStats = projectStats;
@@ -246,20 +272,36 @@ export class AnalyticsComponent implements OnInit {
       this.testStats    = testStats;      // ← was wrong before
       this.devStats     = devStats;
       this.testerStats  = testerStats;
-    
-      // for debugging, now _all_ five logs will appear:
-      console.log('projectStats', this.projectStats);
-      console.log('taskStats',    this.taskStats);
-      console.log('testStats',    this.testStats);
-      console.log('devStats',     this.devStats);
-      console.log('testerStats',  this.testerStats);
-    
-      // only now prepare your charts
+      this.BugStats=BugStats;
+      this.pauseRequestStats=pauseRequestsStats
+      this.complaintCount=complaintCount
+      console.log(this.pauseRequestStats)
+     
+
       this.devStats.sort((a, b) => (b.completed / b.salary) - (a.completed / a.salary));
+     this.devstatsSortedByDev=devStats;
+    this.devstatsSortedByDevLastMounth=devStats;
+     this.devstatsSortedByDevLastYear=devStats;
+     this.devstatsSortedByDev.sort((a,b)=>(b.devProjects)-(a.devProjects))
+     this.devstatsSortedByDevLastMounth.sort((a,b)=>(b.projectsLastMonth)-(a.projectsLastMonth))
+     this.devstatsSortedByDevLastYear.sort((a,b)=>(b.projectsLastYear)-(a.projectsLastYear))
+      this.devBugStatsSortedByDev=devStats;
+    this.devBugStatsSortedByDevLastMounth=devStats;
+     this.devBugStatsSortedByDevLastYear=devStats;
+     this.devBugStatsSortedByDev.sort((a,b)=>(b.devProjects)-(a.devProjects))
+     this.devBugStatsSortedByDevLastMounth.sort((a,b)=>(b.projectsLastMonth)-(a.projectsLastMonth))
+     this.devBugStatsSortedByDevLastYear.sort((a,b)=>(b.projectsLastYear)-(a.projectsLastYear))
+
       this.topDevs = this.devStats.slice(0, 5);
+      this.topDevs = this.devstatsSortedByDev.slice(0, 5);
+      this.topDevs = this.devstatsSortedByDevLastMounth.slice(0, 5);
+      this.topDevs = this.devStatsSortedByLastYear.slice(0,5)
       this.worstDevs = this.devStats.slice(-5).reverse();
 
       this.testerStats.sort((a, b) => (a.failedTests / a.totalTests) - (b.failedTests / b.totalTests));
+     
+     
+     
       this.topTesters = this.testerStats.slice(0, 5);
       this.worstTesters = this.testerStats.slice(-5).reverse();
 
@@ -271,12 +313,13 @@ export class AnalyticsComponent implements OnInit {
   }
     }else if(this.userRole === 1){
 
-      const [projectStats,taskStats,devStats,testStats] = await firstValueFrom(
+      const [projectStats,taskStats,devStats,testStats,bugStats] = await firstValueFrom(
             forkJoin([
               this.http.get<ProjectStats>(`http://localhost:8080/api/projects/stats/${user.id}`),
               this.http.get<TaskStats>(`http://localhost:8080/api/taches/stats/${user.id}`),
               this.http.get<Developer[]>(`http://localhost:8080/api/users/devstats/${user.id}`),
-              this.http.get<any[]>(`http://localhost:8080/api/users/devstats/test/${user.id}`)
+              this.http.get<any[]>(`http://localhost:8080/api/users/devstats/test/${user.id}`),
+              this.bugReportService.getDevStats(user.id)
             ])
           );
         
@@ -285,13 +328,7 @@ export class AnalyticsComponent implements OnInit {
           this.taskStats    = taskStats;
           this.testStats    = testStats;      // ← was wrong before
           this.devStats     = [devStats];
-        
-          // for debugging, now _all_ five logs will appear:
-          console.log('projectStats', this.projectStats);
-          console.log('taskStats',    this.taskStats);
-          console.log('testStats',    this.testStats);
-          console.log('devStats',     this.devStats);
-        
+          this.BugStats=bugStats;
       
       this.prepareDevChartData();
       this.cdr.detectChanges();
@@ -385,7 +422,6 @@ export class AnalyticsComponent implements OnInit {
         value: this.devStats[0]?.inTesting || 0
       }
     ];
-    console.log('Workload Chart Data:', this.workloadDevDistributionChart);
 
 
     
@@ -401,7 +437,7 @@ export class AnalyticsComponent implements OnInit {
   calculateProductivity(dev: Developer): number {  // Return number instead of string
     if (!dev.salary || dev.salary === 0) return 0;
     // Multiply by 1000 to get more meaningful values
-    return (dev.completed / dev.salary) * 1000; 
+    return (dev.devProjects / dev.salary) * 1000; 
   }
   calculateTesterProductivity(tester: Tester): number {  // Return number instead of string
     if (!tester.salary || tester.salary === 0) return 0;

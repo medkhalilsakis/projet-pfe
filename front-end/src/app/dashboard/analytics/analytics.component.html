@@ -98,6 +98,55 @@
       </div>
     </div>
 
+    <div class="summary-card">
+      <h3>🐞 bugs</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugs }}</span>
+          <span class="metric-label">Total bugs</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugsLastWeek }}</span>
+          <span class="metric-label">last week</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugsLastMonth }}</span>
+          <span class="metric-label">last month</span>
+        </div>
+      </div>
+      <div class="metric">
+        <span class="metric-value">{{BugStats.bugsLastYear}}</span>
+        <span class="metric-label">last year</span>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h3>Pause Requests</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ pauseRequestStats.total }}</span>
+          <span class="metric-label">Total</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ pauseRequestStats.success }}</span>
+          <span class="metric-label"> acceptées</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ pauseRequestStats.failed }}</span>
+          <span class="metric-label"> refuse</span>
+        </div>
+      </div>
+      <div class="metric">
+        <span class="metric-value">{{ (pauseRequestStats.success / pauseRequestStats.total * 100).toFixed(2) }}%</span>
+        <span class="metric-label">la % de l'acceptation</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value">{{ complaintCount }}</span>
+        <span class="metric-label">nombre de reclamations</span>
+      </div>
+    </div>
+
+
     <!-- Charts Section -->
     <div class="chart-card ">
       <h3>📊 Task Distribution</h3>
@@ -168,10 +217,11 @@
 
     <!-- Team Performance Sections -->
     <div class="performance-section">
-      <h3>🏆 Top Performers</h3>
+      <h3>🏆 Top Performers ( per (projects completed /salary))</h3>
       <div class="tabs">
         <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
         <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+
       </div>
       
       <div class="performance-grid">
@@ -229,7 +279,26 @@
       </div>
     </div>
     <div class="performance-section">
-        <h3>📅 Top performers last month</h3>
+        <h3>📅 Most Uplaods</h3>
+
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+          </div>
+    <div class="performance-grid">
+        <div *ngFor="let dev of devstatsSortedByDev" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.devProjects }}</span>
+              <span class="metric-label">projects</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    <div class="performance-section">
+        <h3>📅 Top performers last month(per project completed)</h3>
 
         <div class="tabs">
             <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
@@ -241,40 +310,90 @@
           <div class="performance-metrics">
             <div class="performance-metric">
               <span class="metric-value">{{ dev.projectsLastMonth }}</span>
+              <span class="metric-label">bugs</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    <div class="performance-section">
+        <h3>📅 Top performers last Year (per project completed)</h3>
+
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+          </div>
+    <div class="performance-grid">
+        <div *ngFor="let dev of devStatsSortedByLastYear" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.projectsLastYear }}</span>
               <span class="metric-label">projects</span>
             </div>
         </div>
     </div>
-            <div *ngIf="devStatsSortedByLastMonth.length === 0" class="no-data">
-               <h2> No projects completed last year </h2>
-              </div>
-              <div class="performance-section">
-                <h3>📅 Developer Performance last year</h3>
+    </div>
+    </div>
+    <div class="performance-section">
+        <h3>🐞 Most Dev Bugs</h3>
 
-                <div class="tabs">
-                    <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
-                    <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
-                  </div>
-            <div class="performance-grid">
-              <div *ngFor="let dev of devStatsSortedByLastYear"  class="performance-card">
-                <h4>{{ dev.name }}</h4>
-                <div class="performance-metrics">
-                  <div class="performance-metric">
-                    <span class="metric-value">{{ dev.projectsLastYear }}</span>
-                    <span class="metric-label">projects </span>
-                  </div>
-              </div>
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
           </div>
-                  <div *ngIf="devStatsSortedByLastMonth.length === 0" class="no-data">
-                      No projects completed last month
-                    </div>
-      
-         
+    <div class="performance-grid">
+        <div *ngFor="let dev of devBugStatsSortedByDev" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.bugs }}</span>
+              <span class="metric-label">bugs</span>
+            </div>
         </div>
-      </div>
+    </div>
+    </div>
+    </div>
+   <div class="performance-section">
+        <h3>🐞 Most Dev Bugs (Last Month)</h3>
+
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+          </div>
+    <div class="performance-grid">
+        <div *ngFor="let dev of devBugStatsSortedByDevLastMounth" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.bugsLastMounth }}</span>
+              <span class="metric-label">bugs</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+   <div class="performance-section">
+        <h3>🐞 Most Dev Bugs (Last year)</h3>
+
+        <div class="tabs">
+            <button [class.active]="!showAllDevs" (click)="showAllDevs = false">Top 5</button>
+            <button [class.active]="showAllDevs" (click)="showAllDevs = true">All Developers</button>
+          </div>
+    <div class="performance-grid">
+        <div *ngFor="let dev of devBugStatsSortedByDevLastYear" class="performance-card">
+          <h4>{{ dev.name }}</h4>
+          <div class="performance-metrics">
+            <div class="performance-metric">
+              <span class="metric-value">{{ dev.bugsLastYear }}</span>
+              <span class="metric-label">bugs</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+   
     
-  </div>
-  </div>
   </div>
   </div>
   <div *ngIf="isDeveloper() && projectStats" class="dashboard" id=dashboardDeveloperContent>
@@ -288,7 +407,7 @@
       <div class="dashboard-grid">
         <!-- Summary Cards -->
         <div class="summary-card">
-          <h3>📅 Projects Overview</h3>
+          <h3>📅 Projects Completed </h3>
           <div class="metric-group">
             <div class="metric">
               <span class="metric-value">{{ projectStats?.week }}</span>
@@ -304,7 +423,7 @@
             </div>
           </div>
           <div class="sub-metrics">
-            <h4>✅ Passed to Testing</h4>
+            <h4>✅ Uploads </h4>
             <div class="metric-group">
               <div class="metric">
                 <span class="metric-value">{{ projectStats.toTesting?.week }}</span>
@@ -371,6 +490,29 @@
             <span class="metric-label">Success Rate</span>
           </div>
           </div>
+
+          <div class="summary-card">
+      <h3>🐞 bugs</h3>
+      <div class="metric-group">
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugs }}</span>
+          <span class="metric-label">Total bugs</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugsLastWeek }}</span>
+          <span class="metric-label">last week</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">{{ BugStats.bugsLastMonth }}</span>
+          <span class="metric-label">Last month</span>
+        </div>
+      </div>
+      <div class="metric">
+        <span class="metric-value">{{BugStats.bugsLastYear}}</span>
+        <span class="metric-label">Last Year</span>
+      </div>
+    </div>
+
               <!-- Charts Section -->
     <div class="chart-card ">
         <h3>📊 Task Distribution</h3>

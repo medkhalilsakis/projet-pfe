@@ -35,4 +35,10 @@ export class ComplaintService {
   getComplaintsByProjectId(projectId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/project/${projectId}`);
   }
+   getComplaintCount(): Observable<any>{
+    const url = `${this.baseUrl}/stats`;
+   return this.http.get<any>(url);
+
+
+  } 
 }

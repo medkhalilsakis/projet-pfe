@@ -13,6 +13,9 @@ import { ProjectService } from '../../services/project.service';
 import { SessionStorageService } from '../../services/session-storage.service';
 import {PauseRequestService} from '../../services/pause-request.service'
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-complaints',
   templateUrl: './complaints.component.html',
@@ -29,7 +32,8 @@ import { HttpClient } from '@angular/common/http';
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
-    MatListModule
+    MatListModule,
+    RouterModule
   ]
 })
 export class ComplaintsComponent implements OnInit {
@@ -45,7 +49,9 @@ export class ComplaintsComponent implements OnInit {
     private complaintService: ComplaintService,
     private sessionService: SessionStorageService,
     private pauseRequestService :PauseRequestService,
-  private http: HttpClient
+  private http: HttpClient,
+      private router: Router
+
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +74,10 @@ export class ComplaintsComponent implements OnInit {
   /* Supervisor view: list all complaints */
   private loadAllComplaints(): void {
     this.complaintService.getAllComplaints().subscribe(data => {
-      this.complaints = data;
+    this.complaints = data
+      .sort((a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );      console.log(data)
     });
   }
 
@@ -80,13 +89,18 @@ export class ComplaintsComponent implements OnInit {
       this.loadOwnComplaints();
     });
 }
-
+ 
 
   private loadOwnComplaints(): void {
     this.complaintService.getComplaintsByProjectId(this.currentUser.id)
       .subscribe(data => {
-        this.complaints = data;
+this.complaints = data
+        .sort((a, b) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
       });
+      console.log(this.complaints)
+
   }
 
   onSubmit(): void {
@@ -101,5 +115,9 @@ export class ComplaintsComponent implements OnInit {
         this.loadOwnComplaints();
       });
     }
+  }
+    rootToProject(projectId: number) {
+    console.log('navigating to project', projectId);
+    this.router.navigate(['/dashboard/projects', projectId]);
   }
 }

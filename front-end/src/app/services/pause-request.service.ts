@@ -25,6 +25,12 @@ export class PauseRequestService {
     const url = `http://localhost:8080/api/projects/user/${userId}/pause-requests`;
     return this.http.get<PauseRequest[]>(url);
   }
+  listPauseRequestStats(): Observable<any>{
+    const url = `${this.baseUrl}/1/pause-requests/stats`;
+   return this.http.get<any>(url);
+
+
+  } 
 
 
 

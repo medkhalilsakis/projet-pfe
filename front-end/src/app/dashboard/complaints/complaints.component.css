@@ -1,0 +1,84 @@
+:host {
+  display: block;
+  padding: 1rem;
+  font-family: Roboto, “Helvetica Neue”, sans-serif;
+}
+
+/* Card styles */
+mat-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: #fff;
+}
+
+/* Headings */
+mat-card h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #424242;
+}
+
+/* Form fields */
+.full-width {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Submit button */
+button[type="submit"] {
+  margin-top: 0.5rem;
+}
+
+/* List styles */
+mat-list {
+  padding: 0;
+}
+
+mat-list-item {
+  display: block;
+  border-bottom: 1px solid #eceff1;
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+    padding: 1.5rem 2rem;      /* more vertical + horizontal padding */
+  min-height: 150px;          /* ensure a taller row */
+  font-size: 1.125rem;       /* bump up the font size */
+  line-height: 1.4;          /* comfortable line spacing */
+}
+
+mat-list-item:last-child {
+  border-bottom: none;
+}
+
+mat-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Content inside list item */
+mat-list-item div[fxLayout="column"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+    font-size: 1.125rem;
+
+}
+
+mat-list-item strong {
+  color: #333;
+}
+
+mat-list-item em {
+  color: #757575;
+  font-size: 0.875rem;
+}
+
+/* Utility */
+.mt-4 {
+  margin-top: 1.5rem;
+}

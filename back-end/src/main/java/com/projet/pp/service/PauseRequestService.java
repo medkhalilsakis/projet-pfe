@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -66,5 +67,18 @@ return pauseRequest;
     @Transactional(readOnly = true)
     public List<PauseRequest> findByProject(Long projectId) {
         return pauseRequestRepo.findByProjectId(projectId);
+    }
+
+    @Transactional
+    public Map<String, Object> getStats(){
+        long total   = pauseRequestRepo.count();
+        long approved = pauseRequestRepo.countByStatus(PauseStatus.APPROVED);
+        long failed   = pauseRequestRepo.countByStatus(PauseStatus.REJECTED);
+
+        return Map.of(
+                "total",   total,
+                "success", approved,
+                "failed",  failed
+        );
     }
 }

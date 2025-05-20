@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/projects/{pid}/bugs")
@@ -52,4 +53,14 @@ public class BugReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(file);
     }
+    @GetMapping("stats")
+    public ResponseEntity<Map<String, Object>> listBugCount(@PathVariable("pid") Long projectId) {
+        return ResponseEntity.ok(svc.getCount());
+    }
+    @GetMapping("statsByDev")
+    public ResponseEntity<Map<String, Object>> listBugCountByUser(@PathVariable("pid") Long UserId) {
+        return ResponseEntity.ok(svc.getCountPerUser(UserId));
+    }
+
+
 }

@@ -1,31 +1,37 @@
-<div class="noti-detail">
-    <strong>name:</strong><strong>{{ notification?.title }}</strong>
-    <p>Created: {{ notification.createdAt }} </p>
+<ng-container *ngIf="notification">
+  <div class="noti-overlay">
+    <div class="noti-detail">
+      <header class="noti-header">
+        <strong class="label">Name:</strong>
+        <strong class="value">{{ notification.title }}</strong>
+      </header>
 
-    <p>{{ notification.message }}</p>
+      <p class="created">Created: {{ notification.createdAt | date:'short' }}</p>
+      <p class="message">{{ notification.message }}</p>
 
-    <!-- Task-related content -->
-    <div *ngIf="notification.relatedTask">
-        <p class="notif-message">By: {{ notification.relatedTask.assignedBy?.nom }} {{ notification.relatedTask.assignedBy?.prenom }}</p>
-        <p class="notif-message">Task: {{ notification.relatedTask.name }}</p>
-        <p class="notif-message">{{ notification.relatedTask.description }}</p>
-        <button (click)="viewTaskDetails(notification.relatedTask)">Click here for details</button>
-    </div>
+      <section *ngIf="notification.relatedTask" class="noti-section">
+        <h4>Task Details</h4>
+        <p><strong>By:</strong> {{ notification.relatedTask.assignedBy?.nom }} {{ notification.relatedTask.assignedBy?.prenom }}</p>
+        <p><strong>Task:</strong> {{ notification.relatedTask.name }}</p>
+        <p>{{ notification.relatedTask.description }}</p>
+        <button (click)="viewTaskDetails(notification.relatedTask)">View Task</button>
+      </section>
 
-    <!-- Project-related content -->
-    <div *ngIf="notification.relatedProject">
-        <p class="notif-message">Nom du projet: {{ notification.relatedProject.name }}</p>
-        <p class="notif-message">Type: {{ notification.relatedProject.type }}</p>
-        <p class="notif-message">Description: {{ notification.relatedProject.description }}</p>
-        <p class="notif-message">Status: {{ notification.relatedProject.status }}</p>
-        <button (click)="viewProjectDetails(notification.relatedProject)">Click here for details</button>
+      <section *ngIf="notification.relatedProject" class="noti-section">
+        <h4>Project Details</h4>
+        <p><strong>Nom du projet:</strong> {{ notification.relatedProject.name }}</p>
+        <p><strong>Type:</strong> {{ notification.relatedProject.type }}</p>
+        <p><strong>Description:</strong> {{ notification.relatedProject.description }}</p>
+        <p><strong>Status:</strong> {{ notification.relatedProject.status }}</p>
+        <button (click)="viewProjectDetails(notification.relatedProject)">View Project</button>
+      </section>
 
-    </div>
-
-    <!-- Chat message content -->
-    <div *ngIf="notification.chatMessage">
-        <p class="notif-message">By: {{ notification.chatMessage.sender?.nom }} {{ notification.chatMessage.sender?.prenom }}</p>
-        <p class="notif-message">Message: {{ notification.chatMessage.message }}</p>
+      <section *ngIf="notification.chatMessage" class="noti-section">
+        <h4>Chat Message</h4>
+        <p><strong>By:</strong> {{ notification.chatMessage.sender?.nom }} {{ notification.chatMessage.sender?.prenom }}</p>
+        <p><strong>Message:</strong> {{ notification.chatMessage.message }}</p>
         <button (click)="viewMessageDetails(notification.chatMessage)">View Discussion</button>
+      </section>
     </div>
-</div>
+  </div>
+</ng-container>

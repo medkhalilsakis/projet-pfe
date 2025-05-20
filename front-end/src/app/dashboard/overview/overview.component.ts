@@ -18,6 +18,8 @@ import { MbscCalendarColor, MbscCalendarLabel, MbscCalendarMarked, setOptions /*
 import { dyndatetime } from '../../../app/app.util';
 import { MbscDatepickerModule } from '@mobiscroll/angular';
 import { MbscModule } from '@mobiscroll/angular';
+import { Router } from '@angular/router';
+import th from '@mobiscroll/angular/dist/js/i18n/th.js';
 @Component({
    selector: 'app-overview',
   standalone: true,
@@ -153,7 +155,6 @@ rotationInterval: any;
 
 currentArticleIndex  = 0;
 rotationNewsInterval: any;
-  router: any;
 
 // Add this getter
 get currentArticle(): NewsArticle {
@@ -176,7 +177,9 @@ get currentArticle(): NewsArticle {
     private http:HttpClient,
     private notifSvc: NotificationService,
     private meetSvc: MeetingService,
-    private sessionStorage:SessionStorageService
+    private sessionStorage:SessionStorageService,
+      private router: Router  // <-- Add this line
+
   ) {
     this.currentUser=sessionStorage.getUser()
   }
@@ -632,88 +635,44 @@ get devStatsSortedByLastYear(): any[] {
   }
   prepareRotatingStats() {
     console.log(this.projectStats);
-    if (this.currentUser.role.id===3){
+  if (this.currentUser.role.id === 3) {
   this.statsToRotate = [
-    { 
-      title: 'Projects This Week', 
-      value: this.projectStats?.week || 'N/A',
-      icon: '📅'
-    },
-    {
-      title: 'Completed Tasks',
-      value: this.taskStats?.completed || 'N/A',
-      icon: '✅'
-    },
-    {
-      title: 'Success Rate',
-      value: this.testStats.total ? 
-        (this.testStats.success / this.testStats.total * 100).toFixed(2) + '%' : 'N/A',
-      icon: '📈'
-    },
-    {
-      title: 'Active Tasks',
-      value: (this.taskStats?.inDev || 0) + (this.taskStats?.inTest || 0),
-      icon: '⚡'
-    },
-    {
-      title: 'Team Productivity',
-      value: this.devStats.length ? 
-        Math.round(this.devStats.reduce((acc, dev) => acc + this.calculateProductivity(dev), 0)) : 'N/A',
-      icon: '🚀'
-    }
-  ];
-}else if(this.currentUser.role.id===1){
-this.statsToRotate = [
-    { 
-      title: 'Projects This Week', 
-      value: this.projectStats?.week || 'N/A',
-      icon: '📅'
-    },
-    {
-      title: 'Completed Tasks',
-      value: this.taskStats?.completed || '0',
-      icon: '✅'
-    },
-    {
-      title: 'Success Rate',
-      value: this.testStats.total ? 
-        (this.testStats.success / this.testStats.total * 100).toFixed(2) + '%' : '0',
-      icon: '📈'
-    },
-    {
-      title: 'Active Tasks',
-      value: (this.taskStats?.inDev || 0) + (this.taskStats?.inTest || 0),
-      icon: '⚡'
-    },
-    {
-      title: 'Team Productivity',
-      value: this.devStats.length ? 
-        Math.round(this.devStats.reduce((acc, dev) => acc + this.calculateProductivity(dev), 0)) : '0',
-      icon: '🚀'
-    }
-  ];
-}else if(this.currentUser.role.id===2){
-this.statsToRotate = [
-    { 
-      title: 'Projects This Week', 
-      value: this.projectStats?.week || 'N/A',
-      icon: '📅'
-    },
-    
-    {
-      title: 'Success Rate',
-      value: this.testStats.total ? 
-        (this.testStats.success / this.testStats.total * 100).toFixed(2) + '%' : '0',
-      icon: '📈'
-    },
-    {
-      title: 'Active Tasks',
-      value: (this.taskStats?.inDev || 0) + (this.taskStats?.inTest || 0),
-      icon: '⚡'
-    },
-    
+    { title: 'Projects This Week',   value: this.projectStats?.week  || '0', icon: 'calendar_today' },
+    { title: 'Completed Tasks',      value: this.taskStats?.completed || '0', icon: 'task_alt' },
+    { title: 'Success Rate',         value: this.testStats.total? (this.testStats.success / this.testStats.total * 100).toFixed(2) + '%' : '0', icon: 'trending_up' },
+    { title: 'Active Tasks',         value: (this.taskStats?.inDev || 0) + (this.taskStats?.inTest || 0), icon: 'assignment' },
+    { title: 'Team Productivity',    value: this.devStats.length? Math.round(this.devStats.reduce((acc, d) => acc + this.calculateProductivity(d), 0)): '0',icon: 'rocket_launch' }
   ];
 }
+else if (this.currentUser.role.id === 1) {
+  this.statsToRotate = [
+    { title: 'Projects This Month',  value: this.projectStats?.month || '0',  icon: 'calendar_view_month' },
+    { title: 'Projects This Year',   value: this.projectStats?.year  || '0',  icon: 'calendar_view_year' },
+    { title: 'Uploads This Month',   value: this.projectStats?.month || '0',  icon: 'cloud_upload' },
+    { title: 'Uploads This Year',    value: this.projectStats?.year  || '0',  icon: 'cloud_upload' },
+    { title: 'Completed Tasks',      value: this.taskStats?.completed || '0', icon: 'task_alt' },
+    { title: 'Tasks In Dev',         value: this.taskStats?.inDev     || '0', icon: 'build_circle' },
+    { title: 'Tasks In Test',        value: this.taskStats?.inTest    || '0', icon: 'bug_report' },
+    { title: 'Blocked Tasks',        value: this.taskStats?.blocked   || '0', icon: 'block' },
+    { title: 'Success Rate',         value: this.testStats.total? (this.testStats.success / this.testStats.total * 100).toFixed(2) + '%': '0',icon: 'trending_up' },
+    { title: 'Active Tasks',         value: this.devStats[0]?.activeTasks    || 0, icon: 'assignment' },
+    { title: 'Active Projects',      value: this.devStats[0]?.activeProjects || 0, icon: 'folder_open' },
+    { title: 'Tasks In Testing',     value: this.devStats[0]?.inTesting      || 0, icon: 'engineering' }
+  ];
+  console.log(this.statsToRotate)
+}
+else if (this.currentUser.role.id === 2) {
+  this.statsToRotate = [
+    { title: 'To-Testing This Week',   value: this.projectStats.toTesting?.week  || '0', icon: 'schedule' },
+    { title: 'To-Testing This Month',  value: this.projectStats.toTesting?.month || '0', icon: 'schedule' },
+    { title: 'To-Testing This Year',   value: this.projectStats.toTesting?.year  || '0', icon: 'schedule' },
+    { title: 'Success Rate',           value: this.testStats.total? (this.success / this.total * 100).toFixed(2) + '%': '0',icon: 'trending_up' },
+    { title: 'Active Tasks',           value: this.testerStats[0]?.activeTasks    || 0, icon: 'assignment' },
+    { title: 'Active Projects',        value: this.testerStats[0]?.activeProjects || 0, icon: 'folder_open' }
+  ];
+}
+
+
   this.statsLoading = false;
   this.startRotation();
 }
@@ -735,17 +694,17 @@ ngOnDestroy() {
   }
 }
 rootToAnalaytics(){
-      this.router.navigate(['/analytics']);
+      this.router.navigate(['/dashboard/analytics']);
 
 }
 rootToProject(projectId: number) {
     this.router.navigate(['/dashboard/projects', projectId]);
   }
   rootToTask(taskId: number) {
-    this.router.navigate(['/tâches', taskId]);
+    this.router.navigate(['/dashboard/tâches', taskId]);
   }
    rootToNotification(notiId: number) {
-    this.router.navigate(['/notifications', notiId]);
+    this.router.navigate(['/dashboard/notifications', notiId]);
   }
 
 }

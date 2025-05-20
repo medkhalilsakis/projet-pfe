@@ -78,6 +78,11 @@ export class ProjectDetailsComponent implements OnInit {
   ) {
     this.currentUser=this.session.getUser();
   }
+  canResume(){
+    return (this.isSupervisor && this.project.status==55)
+  }
+
+
   canSeeInvitedList(): boolean {
   const isSupervisor = this.currentUser?.role?.id === 3;
   const isOwner = this.currentUser?.id === this.project?.user?.id;
@@ -125,7 +130,11 @@ denyInviteRequest() {
   
   
 ];
+resumeProject(){
+  this.projectService.updateProjectStatus(this.project.id,2,this.currentUser.id).subscribe(a=>console.log(a));
+  this.loadProject()
 
+}
 closeProject() {
  this.projectService.updateProjectStatus(this.project.id,99,this.currentUser.id).subscribe(a=>console.log(a));
  this.loadProject()

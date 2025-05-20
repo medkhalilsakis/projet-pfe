@@ -17,7 +17,7 @@
     <h2>Pause Requests</h2>
    <div class="content-box">
   <div class="request-card" *ngFor="let request of pauseRequests" (click)="rootToProject(request.projectId)">
-    <p matLine>Reason :{{ request.reason }}</p>
+    <p matLine>Reason :{{ request.reason }}</p> 
     <p matLine>{{ request.project.name }}</p>
     <span matLine
           class="status"

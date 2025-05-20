@@ -37,4 +37,10 @@ export class BugReportService {
   list(projectId: number): Observable<BugReport[]> {
     return this.http.get<BugReport[]>(`${this.base}/${projectId}/bugs`);
   }
+  getStats():Observable<any>{
+    return this.http.get<any>(`${this.base}/1/bugs/stats`)  
+  }
+  getDevStats(userId :number):Observable<any>{
+    return this.http.get<any>(`${this.base}/${userId}/bugs/statsByDev`)  
+  }
 }

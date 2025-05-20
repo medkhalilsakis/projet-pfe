@@ -127,6 +127,15 @@
       </button>
       <span class="action-label">Mettre en pause</span>
     </div>
+    <!-- pause only if permitted -->
+    <div class="action-item" *ngIf="canResume()">
+      <button mat-icon-button
+              class="action-btn pause_circle"
+              (click)="resumeProject()">
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+      <span class="action-label">Mettre en pause</span>
+    </div>
     
     <!-- close only if permitted -->
     <div class="action-item" *ngIf="isSupervisor">

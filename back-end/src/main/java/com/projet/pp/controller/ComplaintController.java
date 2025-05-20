@@ -82,4 +82,8 @@ public class ComplaintController {
     public List<Complaint> getComplaintsByProjectId(@PathVariable Long projectId) {
         return complaintService.getComplaintsByProjectId(projectId);
     }
+    @GetMapping("/stats")
+    public ResponseEntity<Long> getSats(){
+        return ResponseEntity.ok(complaintService.getCount());
+    }
 }

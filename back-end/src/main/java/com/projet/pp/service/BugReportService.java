@@ -3,6 +3,7 @@ package com.projet.pp.service;
 
 import com.projet.pp.model.BugReport;
 import com.projet.pp.model.Project;
+import com.projet.pp.model.User;
 import com.projet.pp.repository.BugReportRepository;
 import com.projet.pp.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class BugReportService {
@@ -79,4 +83,39 @@ public class BugReportService {
             throw new RuntimeException("URL invalide: " + filename, e);
         }
     }
+    public Map<String, Object> getCount(){
+        long bugs =bugRepo.count();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastWeek = now.minusWeeks(1);
+        LocalDateTime lastMonth = now.minusMonths(1);
+        LocalDateTime lastYear = now.minusYears(1);
+        long bugsLastWeek = bugRepo.countByCreatedAtAfter( lastWeek);
+        long bugsLastMonth = bugRepo.countByCreatedAtAfter(  lastMonth);
+        long bugsLastYear = bugRepo.countByCreatedAtAfter(   lastYear);
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("bugs",   bugs);
+        stats.put("bugsLastWeek",   bugsLastWeek);
+        stats.put("bugsLastMonth",   bugsLastMonth);
+        stats.put("bugsLastYear",   bugsLastYear);
+        return stats;
+
+    }
+    public Map<String, Object> getCountPerUser(Long userId ){
+        long bugs= bugRepo.countByProject_User_Id(userId);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastWeek = now.minusWeeks(1);
+        LocalDateTime lastMonth = now.minusMonths(1);
+        LocalDateTime lastYear = now.minusYears(1);
+        long bugsLastWeek = bugRepo.countByProject_User_IdAndCreatedAtAfter(userId, lastWeek);
+        long bugsLastMonth = bugRepo.countByProject_User_IdAndCreatedAtAfter(userId, lastMonth);
+        long bugsLastYear = bugRepo.countByProject_User_IdAndCreatedAtAfter(userId, lastYear);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("bugs",   bugs);
+        stats.put("bugsLastWeek",   bugsLastWeek);
+        stats.put("bugsLastMonth",   bugsLastMonth);
+        stats.put("bugsLastYear",   bugsLastYear);
+        return stats;
+    }
+
 }

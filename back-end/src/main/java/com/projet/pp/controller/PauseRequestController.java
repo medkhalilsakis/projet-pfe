@@ -60,7 +60,11 @@ public class PauseRequestController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(PauseRequestDto.fromEntity(pr));
     }
-
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>>getPauseRequestStats(@PathVariable Long projectId){
+        Map<String, Object> pr = pauseSvc.getStats();
+        return ResponseEntity.ok(pr);
+    }
     @GetMapping
     public ResponseEntity<List<PauseRequestDto>> list(@PathVariable Long projectId) {
         List<PauseRequestDto> pr=  pauseSvc.findByProject(projectId)

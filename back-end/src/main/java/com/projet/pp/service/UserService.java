@@ -42,6 +42,9 @@ public class UserService {
     private final Path uploadsRoot = Paths.get("uploads").toAbsolutePath().normalize();
     @Autowired
     private ChatMessageService chatMessageService;
+    @Autowired
+    private BugReportService bugReportService;
+    @Autowired private BugReportRepository bugRepo;
 
 
     // Récupérer tous les utilisateurs
@@ -188,7 +191,10 @@ public class UserService {
     public List<?> getAllDeveloperStats() {
 //Filter from the line before where the user.nom="user" user.prenom=deleted
         List<User> devs = userRepository.findAllActiveByRoleId(1L);
-
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastWeek = now.minusWeeks(1);
+        LocalDateTime lastMonth = now.minusMonths(1);
+        LocalDateTime lastYear = now.minusYears(1);
         // 2) build DTO per dev
         return devs.stream().map(dev -> {
             Long  id    = dev.getId();
@@ -196,7 +202,10 @@ public class UserService {
             long  done  = projectRepo.countByUser_IdAndStatus(id, 5 );
             long  test  = projectRepo.countByUser_IdAndStatus(id, 2);
             long projectsLastMonth= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5, now.minusMonths(1),now);
-
+            long bugs = bugRepo.countByProject_User_Id(id);
+            long bugsLastWeek = bugRepo.countByProject_User_IdAndCreatedAtAfter(id, lastWeek);
+            long bugsLastMonth = bugRepo.countByProject_User_IdAndCreatedAtAfter(id, lastMonth);
+            long bugsLastYear = bugRepo.countByProject_User_IdAndCreatedAtAfter(id, lastYear);
 
             long projectsLastYear= projectRepo.countByUser_IdAndStatusAndUpdatedAtBetween(id, 5,now.minusYears(1),now);
             long activeTasks       = tacheRepo.countActiveTasks(id);
@@ -212,6 +221,10 @@ public class UserService {
             stats.put("activeProjects",   activeProjects);
             stats.put("projectsLastMonth",   projectsLastMonth);
             stats.put("projectsLastYear",   projectsLastYear);
+            stats.put("bugs",   bugs);
+            stats.put("bugsLastWeek",   bugsLastWeek);
+            stats.put("bugsLastMounth",   bugsLastMonth);
+            stats.put("bugsLastYear",   bugsLastYear);
 
 
             return stats;

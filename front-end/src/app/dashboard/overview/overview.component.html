@@ -104,7 +104,7 @@
       </mat-card-title>
       <mat-card-content *ngIf="!statsLoading">
         <div class="current-stat">
-          <div class="stat-icon">{{ currentStat.icon }}</div>
+          <div class="stat-icon"><mat-icon>{{ currentStat.icon }}</mat-icon></div>
           <div class="stat-content">
             <h3>{{ currentStat.title }}</h3>
             <div class="stat-value">{{ currentStat.value }}</div>

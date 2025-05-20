@@ -30,8 +30,12 @@
   <h2 *ngIf="isSupervisor">Toutes les réclamations</h2>
   <h2 *ngIf="!isSupervisor">Mes réclamations</h2>
   <mat-list>
-    <mat-list-item *ngFor="let c of complaints">
-      <div fxLayout="column" fxLayoutGap="4px">
+<mat-list-item
+  *ngFor="let c of complaints"
+  [routerLink]="['/dashboard/projects', c.projectId]"
+  style="cursor: pointer"
+>
+      <div fxLayout="column" fxLayoutGap="100px">
         <div><strong>Projet ID:</strong> {{ c.projectId }}</div>
         <div><strong>Raison:</strong> {{ c.reason }}</div>
         <div><strong>Détails:</strong> {{ c.details }}</div>
@@ -39,4 +43,4 @@
       </div>
     </mat-list-item>
   </mat-list>
-</mat-card>
+</mat-card> 

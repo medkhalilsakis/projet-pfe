@@ -32,4 +32,7 @@ public class ComplaintService {
     public List<Complaint> getComplaintsByProjectId(Long projectId) {
         return complaintRepository.findByProjectId(projectId);
     }
+    public Long getCount(){
+        return complaintRepository.count();
+    }
 }
