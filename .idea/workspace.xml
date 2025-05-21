@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca5c6ffd-1d66-4ac5-a723-e7af2dc7570e" name="Changes" comment="testCases Aattachments">
+    <list default="true" id="ca5c6ffd-1d66-4ac5-a723-e7af2dc7570e" name="Changes" comment="publish">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/MeetingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/MeetingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,7 +93,7 @@
       <workItem from="1747653622834" duration="2974000" />
       <workItem from="1747737121397" duration="593000" />
       <workItem from="1747764891900" duration="727000" />
-      <workItem from="1747827582219" duration="1453000" />
+      <workItem from="1747827582219" duration="3011000" />
     </task>
     <task id="LOCAL-00001" summary="k3ad ken lanalytics">
       <option name="closed" value="true" />
@@ -115,7 +119,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747827848418</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="publish">
+      <option name="closed" value="true" />
+      <created>1747842543442</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1747842543442</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -127,6 +139,7 @@
     <MESSAGE value="famma files nsit ma3mltlhomch git add ahaya el 5edma s7i7a kemla" />
     <MESSAGE value="testCasesAattachments" />
     <MESSAGE value="testCases Aattachments" />
-    <option name="LAST_COMMIT_MESSAGE" value="testCases Aattachments" />
+    <MESSAGE value="publish" />
+    <option name="LAST_COMMIT_MESSAGE" value="publish" />
   </component>
 </project>

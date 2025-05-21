@@ -21,6 +21,7 @@ import java.util.Date;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/projects/{pid}/meetings")
@@ -41,9 +42,10 @@ public class MeetingController {
     ) {
         try {
             Meeting saved = svc.schedule(projectId, data, files);
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
             LocalDateTime date = saved.getDate();
-            String strDate = formatter.format(date);
+            String strDate = date.format(formatter);
+
             Notification noti = new Notification(
                     null,
                     saved.getProject().getUser(),

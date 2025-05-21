@@ -292,10 +292,12 @@ loadAllMeetings() {
     this.showProjectList = !this.showProjectList;
   }
 
-  selectProject(project: any) {
+  selectProject(projects: any[]) {
     this.showProjectList = false;
+    console.log('Selected project(s):', projects);
+for (const project of projects) {
     this.openAddMeetingDialog(project.id);
-  }
+  }  }
 
   openAddMeetingDialog(projectId: number) {
     this.userService.getAllUsers().subscribe(users => {

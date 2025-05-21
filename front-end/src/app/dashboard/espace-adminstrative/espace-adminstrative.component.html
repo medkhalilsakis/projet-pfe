@@ -39,13 +39,13 @@
   <div *ngIf="showProjectList" class="project-list-dropdown">
     <mat-label>Sélectionner un projet</mat-label>
 
- <mat-select   (selectionChange)="selectProject($event.value)"
-    placeholder="Sélectionner un projet" multiple>
-            <mat-option *ngFor="let project of projects"  [value]="project">
-              {{ project.name }}
-             </mat-option>
-        </mat-select>
-  </div>
+  <mat-select   (selectionChange)="selectProject($event.value)"
+      placeholder="Sélectionner un projet" multiple>
+              <mat-option *ngFor="let project of projects"  [value]="project">
+                {{ project.name }}
+              </mat-option>
+          </mat-select>
+    </div>
   <!-- My Meetings -->
   
       <div class="content-box">
