@@ -20,6 +20,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { AddUserDialogComponent } from './add-user-dialog/add-user-dialog.component';
 import { EditUserData, EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 export interface User {
   id: number;
@@ -48,7 +49,8 @@ export interface User {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule
+    MatTooltipModule,
+    FlexLayoutModule
   ],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.css'],

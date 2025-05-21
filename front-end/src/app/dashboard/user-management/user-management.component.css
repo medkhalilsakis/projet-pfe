@@ -1,20 +1,233 @@
-/* src/app/dashboard/user-management/user-management.component.css */
+/* ================================
+   Styles CSS Complets pour User Management
+   ================================ */
 
+/* ================================
+   Variables et Théming
+   ================================ */
+:host {
+  --primary-color:   #1976d2;
+  --accent-color:    #e91e63;
+  --warn-color:      #f44336;
+  --bg-card:         #ffffff;
+  --bg-hover:        #f5f5f5;
+  --text-color:      #333333;
+  --text-light:      #777777;
+  --border-color:    #e0e0e0;
+  --border-radius:   8px;
+  --transition-fast: 0.3s ease;
+  --header-bg:       #fafafa;
+  --header-text:     #ffffff;
+  --row-alt-bg:      #fcfcfc;
+  --scrollbar-bg:    #e0e0e0;
+  --scrollbar-thumb: #b0b0b0;
+}
+
+/* ================================
+   Card Principal
+   ================================ */
 .user-mgmt-card {
-    margin: 16px;
-  }
-  
-  .controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .avatar-cell {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  
+  background: var(--bg-card);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast);
+  overflow: hidden;
+}
+.user-mgmt-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ================================
+   Titre du Composant
+   ================================ */
+.um-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--primary-color);
+  color: var(--header-text);
+}
+
+/* ================================
+   Zone de Contrôles (Recherche + Bouton)
+   ================================ */
+.um-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  gap: 1rem;
+}
+.um-search-field {
+  flex: 1 1 300px;
+}
+.um-search-input:focus + .mat-form-field-outline {
+  border-color: var(--primary-color) !important;
+}
+.um-add-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.um-add-btn:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* ================================
+   Conteneur du Tableau
+   ================================ */
+.um-table-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  margin: 0 1.5rem 1rem;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+/* Barre de défilement custom */
+.um-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.um-table-container::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+.um-table-container::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+/* ================================
+   Tableau
+   ================================ */
+.um-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.94rem;
+}
+
+/* En-têtes */
+.um-header {
+  position: sticky;
+  top: 0;
+  background: var(--primary-color);
+  color: var(--header-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--border-color);
+  z-index: 2;
+}
+
+/* Cellules */
+.um-cell {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  color: var(--text-color);
+}
+
+/* Largeurs minimales par colonne (ajuster selon besoin) */
+.um-header.titre, .um-cell.titre    { min-width: 120px; }
+.um-header.avatar, .um-cell.avatar  { width: 60px; text-align: center; }
+.um-header.nom, .um-cell.nom        { min-width: 100px; }
+.um-header.prenom, .um-cell.prenom  { min-width: 110px; }
+.um-header.ncin, .um-cell.ncin      { width: 100px; }
+.um-header.email, .um-cell.email    { min-width: 180px; }
+.um-header.date, .um-cell.date      { width: 120px; }
+.um-header.salaire, .um-cell.salaire{ width: 100px; }
+.um-header.role, .um-cell.role      { min-width: 120px; }
+.um-header.actions, .um-cell.actions{ width: 140px; }
+
+/* Lignes zébrées et hover */
+.um-row:nth-child(even) {
+  background: var(--row-alt-bg);
+}
+.um-row:hover {
+  background: var(--bg-hover);
+  transition: background var(--transition-fast);
+}
+
+/* ================================
+   Avatar Rond et Interactif
+   ================================ */
+.um-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+.um-avatar:hover {
+  transform: scale(1.1);
+  border-color: var(--accent-color);
+}
+
+/* ================================
+   Boutons d’Actions
+   ================================ */
+.um-icon-btn {
+  margin-right: 0.3rem;
+  transition: transform var(--transition-fast);
+}
+.um-icon-btn:hover {
+  transform: scale(1.2);
+}
+.um-icon-btn.edit      mat-icon { color: var(--primary-color); }
+.um-icon-btn.delete    mat-icon { color: var(--warn-color); }
+.um-icon-btn.analytics mat-icon { color: var(--accent-color); }
+.um-icon-btn.message   mat-icon { color: var(--text-light); }
+
+/* ================================
+   Pagination
+   ================================ */
+.um-paginator-container {
+  padding: 0.5rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+.um-paginator ::ng-deep .mat-paginator-range-label,
+.um-paginator ::ng-deep .mat-paginator-icon {
+  color: var(--text-color);
+}
+.um-paginator ::ng-deep .mat-paginator-page-size {
+  margin-left: 1rem;
+}
+
+/* ================================
+   Responsive (Flex Layout prend le relais)
+   ================================ */
+@media (max-width: 768px) {
+  .um-controls { flex-direction: column; }
+  .um-table, .um-header, .um-cell { font-size: 0.85rem; }
+}
+
+/* ================================
+   Mode Sombre
+   ================================ */
+.dark-theme .user-mgmt-card {
+  --bg-card:       #1e1e1e;
+  --text-color:    #f0f0f0;
+  --text-light:    #bbbbbb;
+  --border-color:  #2a2a2a;
+  --bg-hover:      #2a2a2a;
+  --header-bg:     #333333;
+  --row-alt-bg:    #252525;
+  --primary-color: #90caf9;
+  --accent-color:  #f48fb1;
+  --warn-color:    #ef9a9a;
+}
+.dark-theme .um-title {
+  background: var(--header-bg);
+}
