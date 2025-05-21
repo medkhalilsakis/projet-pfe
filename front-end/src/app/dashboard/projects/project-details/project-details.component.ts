@@ -81,7 +81,10 @@ export class ProjectDetailsComponent implements OnInit {
   canResume(){
     return (this.isSupervisor && this.project.status==55)
   }
-
+  canPublish(){
+    
+    return ((this.project.user.id===this.currentUser.id)  && (this.project.status===0))
+  }
 
   canSeeInvitedList(): boolean {
   const isSupervisor = this.currentUser?.role?.id === 3;
@@ -134,7 +137,13 @@ resumeProject(){
   this.projectService.updateProjectStatus(this.project.id,2,this.currentUser.id).subscribe(a=>console.log(a));
   this.loadProject()
 
+  
 }
+
+publishProject() {
+ this.projectService.updateProjectStatus(this.project.id,1,this.currentUser.id).subscribe(a=>console.log(a));
+ this.loadProject()
+  this.router.navigate(['/dashboard/projects']);}
 closeProject() {
  this.projectService.updateProjectStatus(this.project.id,99,this.currentUser.id).subscribe(a=>console.log(a));
  this.loadProject()
@@ -237,7 +246,7 @@ denyPauseRequest(requestId: number) {
 
         // maybe you only want to archive if it’s “online” (4) or “closed” (99):
         this.canArchive = ((isSupervisor|| isOwner) && (this.project.status === 4 || this.project.status === 99));
-        
+
 
         // une fois le projet chargé, on peut charger les dépendances
         this.loadInvitedUsers();

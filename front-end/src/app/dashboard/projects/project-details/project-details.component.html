@@ -137,6 +137,26 @@
       <span class="action-label">Mettre en pause</span>
     </div>
     
+     <!-- pause only if permitted -->
+    <div class="action-item" *ngIf="isSupervisor">
+      <button mat-icon-button
+              class="action-btn pause_circle"
+              (click)="pauseProject()">
+        <mat-icon>pause_circle</mat-icon>
+      </button>
+      <span class="action-label">Mettre en pause</span>
+    </div>
+    <!-- pause only if permitted -->
+    <div class="action-item" *ngIf="canPublish()">
+      <button mat-icon-button
+              class="action-btn pause_circle"
+              (click)="publishProject()">
+        <mat-icon>publish</mat-icon>
+      </button>
+      <span class="action-label">publier</span>
+    </div>
+
+
     <!-- close only if permitted -->
     <div class="action-item" *ngIf="isSupervisor">
       <button mat-icon-button
