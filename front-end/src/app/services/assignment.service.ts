@@ -6,6 +6,7 @@ import { Project } from '../models/project.model';
 import { User } from '../models/user.model';
 import { ProjectTesterAssignment } from '../models/assignment.model';
 import { FinishedProjectDetail } from '../models/finished-project-detail.model';
+import path from 'path';
 
 
 
@@ -64,19 +65,30 @@ export class AssignmentService {
    * @param testeurIds     Tableau d’IDs des testeurs à assigner
    * @param superviseurId  ID du superviseur qui désigne
    */
-  assignTesters(
-    projectId: number,
-    testeurIds: number[],
-    superviseurId: number
-  ): Observable<void> {
-    // on passe superviseurId en query params
-    const params = new HttpParams().set('superviseurId', superviseurId.toString());
-    return this.http.post<void>(
-      `${this.baseUrl}/${projectId}/assign`,
-      testeurIds,
-      { params }
-    );
-  }
+assignTesters(
+  projectId: number,
+  testeurIds: number[],
+  superviseurId: number,
+  testCasesPdf: File
+): Observable<void> {
+  const formData = new FormData();
+
+  // create a blob part called "data"
+  const payload = { testeurIds, superviseurId };
+  const blob    = new Blob(
+    [ JSON.stringify(payload) ],
+    { type: 'application/json' }
+  );
+  formData.append('data', blob);
+
+  // file part
+  formData.append('testCasesPdf', testCasesPdf, testCasesPdf.name);
+
+  return this.http.post<void>(
+    `${this.baseUrl}/${projectId}/assign`,
+    formData
+  );
+}
 
 
   changePhase(
@@ -144,5 +156,12 @@ syncStatus(id:number){
     return this.http.put<User[]>(`${this.baseUrl}/${id}/syncStatus`, null);
 
 }
+getProjectTesterAssignment(testerId: number, projectId: number) {
+  return this.http.post<ProjectTesterAssignment>(
+    `${this.baseUrl}/by-tester-and-project`,
+    { TesterId: testerId, ProjectId: projectId }
+  );
+}
+
 
 }

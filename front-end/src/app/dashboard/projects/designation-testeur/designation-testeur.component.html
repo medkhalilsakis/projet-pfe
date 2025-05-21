@@ -15,6 +15,10 @@
                 <mat-option *ngFor="let t of allTesteurs" [value]="t.id">{{ t.prenom }} {{ t.nom }}</mat-option>
               </mat-select>
             </mat-form-field>
+            <div class="full-width">
+              <label class="mat-body-1">PDF cahier de charge*</label>
+              <input type="file" accept=".pdf" (change)="onTestCasesPdfChange($event)" />
+            </div>
           </mat-card-content>
           <mat-card-actions align="end">
             <button mat-flat-button color="primary" (click)="assign(proj.id)">

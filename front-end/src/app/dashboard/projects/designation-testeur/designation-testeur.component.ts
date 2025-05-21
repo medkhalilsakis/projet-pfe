@@ -49,7 +49,7 @@ export class DesignationTesteurComponent implements OnInit {
   pending: Project[] = [];
   inTest: Project[] = [];
   finished: Project[] = [];
-
+  testCasesPdf!: File;
   allTesteurs: User[] = [];
   selectedTesteursMap: { [projectId: number]: number[] } = {};
   finishedDetails: FinishedProjectDetail[] = [];
@@ -127,7 +127,10 @@ export class DesignationTesteurComponent implements OnInit {
   
   
   }
-  
+   onTestCasesPdfChange(e: any) {
+    this.testCasesPdf = e.target.files[0];
+  }
+
   
 
   loadTesteurs() {
@@ -144,12 +147,15 @@ export class DesignationTesteurComponent implements OnInit {
   }
 
   assign(projectId: number) {
+    if(!this.testCasesPdf){
+      return;
+    }
     const list = this.selectedTesteursMap[projectId] || [];
     if (list.length < 1) {
       this.snack.open('Au moins un testeur requis', 'OK', { duration: 2000 });
       return;
     }
-    this.svc.assignTesters(projectId, list, this.superviseurId)
+    this.svc.assignTesters(projectId, list, this.superviseurId,this.testCasesPdf)
       .subscribe(() => {
         this.snack.open('Testeurs désignés', 'OK', { duration: 2000 });
         this.loadAll();

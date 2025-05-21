@@ -4,10 +4,14 @@ import com.projet.pp.dto.FinishedProjectDTO;
 import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +25,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.File;
+
+import java.nio.file.*;
+
 
 @Service
 public class TesterAssignmentService {
@@ -33,13 +43,16 @@ public class TesterAssignmentService {
 
     @Autowired
     private ProjectTesterAssignmentRepository assignmentRepo;
-
+    @Autowired
+    private TestAssignmentAttachmentRepository testAssignmentAttachmentRepository;
 
     private final Path baseStorage = Paths.get("uploads/test-report").toAbsolutePath().normalize();
-
+    private final Path testStorage = Paths.get("uploads/test-assignment/project")            .toAbsolutePath().normalize();
+    ;
     public TesterAssignmentService() {
         try {
             Files.createDirectories(baseStorage);  // Créer les répertoires si nécessaire
+            Files.createDirectories(testStorage);
         } catch (IOException e) {
             throw new RuntimeException("Impossible de créer le répertoire pour les rapports de test", e);
         }
@@ -68,32 +81,67 @@ public class TesterAssignmentService {
      * pour lancer la phase de test status projet -> 2.
      */
     @Transactional
-    public void assignTesters(Long projectId, List<Long> testeurIds, Long superviseurId) {
+    public void assignTesters(Long projectId, List<Long> testeurIds, Long superviseurId,MultipartFile testCasesPdf) throws IOException {
         Project projet = projectRepo.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
         User superviseur = userRepo.findById(superviseurId)
                 .orElseThrow(() -> new RuntimeException("Superviseur introuvable"));
 
         // 1) On supprime les anciennes désignations si on reprend à zéro
-        assignmentRepo.deleteByProjectId(projectId);
+        ProjectTesterAssignment assignment = assignmentRepo.findOneByProjectId(projectId);
+        if (assignment != null) {
+            testAssignmentAttachmentRepository.deleteById(assignment.getTestAssignmentAttachment().getId());
 
+            assignmentRepo.deleteByProjectId(projectId);
+        }
         // 2) On recrée les désignations
         int num = 1;
-        for (Long tid : testeurIds) {
-            User t = userRepo.findById(tid)
-                    .orElseThrow(() -> new RuntimeException("Testeur introuvable: " + tid));
-            ProjectTesterAssignment pa = new ProjectTesterAssignment();
-            pa.setProject(projet);
-            pa.setSuperviseur(superviseur);
-            pa.setTesteur(t);
-            pa.setDateDesignation(LocalDate.now());
-            pa.setNumeroTesteur(num++);
-            pa.setStatutTest(TestStatus.non_commence);
-            assignmentRepo.save(pa);
-        }
+
+        // Création du dossier pour stocker les fichiers
+        Path testCasesDir = testStorage.resolve(projectId.toString());
+        Files.createDirectories(testCasesDir);
+
+        // Enregistrement du PDF principal sur disque
+        Path pdfPath = testCasesDir.resolve("testCases.pdf");
+        testCasesPdf.transferTo(pdfPath);
+
+        // Persist PDF principal en base comme attachment
+        TestAssignmentAttachment pdfAtt = new TestAssignmentAttachment();
+        pdfAtt.setFileName(testCasesPdf.getOriginalFilename());
+        pdfAtt.setFilePath(pdfPath.toString());
+        pdfAtt.setFileType(testCasesPdf.getContentType());
+        pdfAtt.setFileSize(testCasesPdf.getSize());
+        testAssignmentAttachmentRepository.save(pdfAtt);
+
+
+
+
+
+        for (Long tid : testeurIds)
+
+    {
+        User t = userRepo.findById(tid)
+                .orElseThrow(() -> new RuntimeException("Testeur introuvable: " + tid));
+        ProjectTesterAssignment pa = new ProjectTesterAssignment();
+        pa.setProject(projet);
+        pa.setSuperviseur(superviseur);
+        pa.setTesteur(t);
+        pa.setDateDesignation(LocalDate.now());
+        pa.setNumeroTesteur(num++);
+        pa.setStatutTest(TestStatus.non_commence);
+        pa.setTestAssignmentAttachment(pdfAtt);
+    assignmentRepo.save(pa);
+
+
+    }
+
+
 
         // 3) On met à jour le statut du projet -> en phase de test
         projet.setStatus(2);
+
+
+
         projectRepo.save(projet);
     }
 
@@ -299,6 +347,26 @@ public class TesterAssignmentService {
         stats.put("failed",  failed);
         return stats;
     }
-
+    @Transactional(readOnly = true)
+    public Resource loadAttachmentAsResource(Long id) {
+        TestAssignmentAttachment att = testAssignmentAttachmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Attachment not found"));
+        try {
+            Path file = Paths.get(att.getFilePath());
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or not readable");
+            }
+        } catch (MalformedURLException ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading file", ex);
+        }
+    }
+    @Transactional
+    public ProjectTesterAssignment getAssignment(Long testerId,Long projectId) {
+        ProjectTesterAssignment pta = assignmentRepo.findByTesteur_IdAndProject_Id(testerId, projectId).orElseThrow(() -> new RuntimeException(" introuvable"));
+        return pta;
+    }
 
 }

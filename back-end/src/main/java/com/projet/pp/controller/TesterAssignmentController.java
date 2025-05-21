@@ -6,11 +6,17 @@ import com.projet.pp.service.ProjectService;
 import com.projet.pp.service.TesterAssignmentService;
 import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,15 +56,19 @@ public class TesterAssignmentController {
         list55.addAll(list99);
         return ResponseEntity.ok(list55);
     }
-
+    public static class AssignPayload {
+        public List<Long> testeurIds;
+        public Long       superviseurId;
+    }
     /** Désigner une nouvelle liste de testeurs et lancer la phase de test */
     @PostMapping("/{projectId}/assign")
     public ResponseEntity<Void> assignTesters(
             @PathVariable Long projectId,
-            @RequestBody List<Long> testeurIds,
-            @RequestParam Long superviseurId
-    ) {
-        service.assignTesters(projectId, testeurIds, superviseurId);
+            @RequestPart("data")        AssignPayload payload,
+
+            @RequestPart("testCasesPdf") MultipartFile testCasesPdf
+            ) throws IOException {
+        service.assignTesters(projectId,payload.testeurIds,payload.superviseurId,testCasesPdf);
         return ResponseEntity.ok().build();
     }
     @PutMapping("/{id}/syncStatus")
@@ -223,6 +233,27 @@ public class TesterAssignmentController {
         System.out.println(testersStats);
         return ResponseEntity.ok(testersStats);
     }
+    @GetMapping("/attachments/{id}")
+    public ResponseEntity<Resource> downloadAttachment(@PathVariable Long id) throws IOException {
+        Resource resource = service.loadAttachmentAsResource(id);
+        String contentType = Files.probeContentType(Paths.get(resource.getURI()));
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+    @PostMapping("by-tester-and-project")
+    public ResponseEntity<ProjectTesterAssignment>getAssignment(@RequestBody Map<String, Long> data){
+        Long testerId=data.get("TesterId");
+        Long projectId=data.get("ProjectId");
+        System.out.println(testerId+" "+projectId);
+        if (testerId == null || projectId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(service.getAssignment(testerId,projectId));
+    }
+
 
 
 }

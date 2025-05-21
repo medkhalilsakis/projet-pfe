@@ -497,6 +497,7 @@ public class ProjectController {
             List<Project> list = projectService.findAcceptedInvitedProjects(userId);
             return ResponseEntity.ok(list);
         }
+
     }
 
 

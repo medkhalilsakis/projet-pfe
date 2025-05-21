@@ -26,9 +26,12 @@
   </div>
 
   <div class="main-content">
+    <div class="big-left">
+      <div class="row-1">
 
     <section class="project-details">
-      <h2>{{ project.name }}</h2>
+      <h2>{{ project?.name }}</h2>
+  
       <div class="info">
         <p><strong>Utilisateur qui a téléchargé :</strong> {{ project.user.nom }} {{ project.user.prenom }}</p>
         <p><strong>Date d'upload :</strong> {{ project.createdAt | date:'yyyy-MM-dd HH:mm' }}</p>
@@ -66,9 +69,16 @@
       <div class="actions">
         <button mat-raised-button color="primary" (click)="exploreProject()">Explorer le contenu</button>
         <button mat-raised-button color="accent" (click)="exportProject()">Exporter en ZIP</button>
+
       </div>
+     
+      <div class="actions">
+        <button mat-raised-button color="accent" (click)="downloadTestCases()">telecharger TestCases.pdf</button>
+
+      </div>
+
+
     </section>
-    
 
     <!-- 2. Colonne gauche -->
     <section class="left-col">
@@ -190,6 +200,26 @@
       </div>
       
     </section>
+
+      </div>
+      <!-- Row 2: PDF viewer -->
+      <div class="row-2" *ngIf="testCaseAttachment">
+        <h2>Cahier des charges (PDF)</h2>
+        <div class="pdf-section">
+          <ngx-extended-pdf-viewer
+            [src]="api + '/api/tester-assignments/attachments/' + testCaseAttachment.id"
+            useBrowserLocale="true"
+            [minifiedJSLibraries]="false"
+            height="600px"
+            [showSidebarButton]="true"
+            style="width: 100%;">
+          </ngx-extended-pdf-viewer>
+        </div>
+      </div>
+    </div>
+
+
+
 
     <!-- 3. Colonne droite -->
     <aside class="right-col">

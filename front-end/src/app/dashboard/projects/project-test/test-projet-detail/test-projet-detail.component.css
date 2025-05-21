@@ -194,3 +194,48 @@ button {
   background-color: #856404 !important;
   color: #fff !important;
 }
+
+.pdf-section {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.pdf-section ngx-extended-pdf-viewer {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.big-left {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Split the left big column into two rows */
+.row-1 {
+  display: flex;
+  gap: 1rem;
+}
+.project-details {
+  flex: 1;
+}
+.left-col {
+  flex: 1;
+}
+
+/* Row-2 is full-width under row-1 */
+.row-2 {
+  width: 100%;
+}
+
+/* Right big column (narrower) */
+.big-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+

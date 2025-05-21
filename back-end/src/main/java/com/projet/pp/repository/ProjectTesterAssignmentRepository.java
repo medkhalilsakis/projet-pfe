@@ -87,5 +87,6 @@ public interface ProjectTesterAssignmentRepository extends JpaRepository<Project
 
 
     List<ProjectTesterAssignment> findByTesteur_IdAndStatutTest(Long testeurId, TestStatus statutTest);
+    Optional<ProjectTesterAssignment> findByTesteur_IdAndProject_Id(Long testeurId, Long projectId);
 
 }

@@ -37,6 +37,8 @@ import { Meeting } from '../../../../models/meeting.model';
 import { PauseRequest } from '../../../../models/pause-request.model';
   import { forkJoin, of } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -57,6 +59,7 @@ import { switchMap, map } from 'rxjs/operators';
     MatCheckboxModule,
     MatTreeModule,
     MatExpansionModule,
+    NgxExtendedPdfViewerModule
   ]
 })
 export class TestProjetDetailComponent implements OnInit {
@@ -74,13 +77,13 @@ export class TestProjetDetailComponent implements OnInit {
 
   pauseRequests: Array<PauseRequest & { requesterName?: string }> = [];
 
-  projectTesterAssignment!: ProjectTesterAssignment;
+  projectTesterAssignment!: any;
   canLaunchTest: boolean = false;
   canSubmitDecision: boolean = false;
-  participants: string[] = []
-
+  participants: string[] = [];
+  testCaseAttachment : any =[];
   isPaused: boolean = false;
-
+api='http://localhost:8080'
 
   testTypes = [
     'Test unitaire','Test d\'intégration','Test fonctionnel',
@@ -114,6 +117,7 @@ export class TestProjetDetailComponent implements OnInit {
     private pauseReqSvc: PauseRequestService,
     private dialog: MatDialog,
     private snack: MatSnackBar,
+    private http:HttpClient
   ) {
     this.projectId = this.session.getCurrentProject();
     this.currentUserId = this.session.getUser().id;
@@ -125,7 +129,66 @@ export class TestProjetDetailComponent implements OnInit {
     this.loadProgress();
     this.loadPauseRequests();
     this.checkProjectPaused();
+    this.loadprojectTesterAssignment();
+    console.log(this.project)
+
   }
+ downloadTestCases() {
+
+  /*
+<!--
+        <section *ngIf="pdfAttachments.length">
+      <h2>Cahier des charges (PDF)</h2>
+      <div  class="pdf-section">
+        <ngx-extended-pdf-viewer
+          [src]="api + '/api/tester-assignments/attachments/' + testCaseAttachment.id"
+          useBrowserLocale="true"
+          [minifiedJSLibraries]="false"
+          height="600px"
+          [showSidebarButton]="true"
+          style="width: 100%;">
+        </ngx-extended-pdf-viewer>
+      </div>
+    </section>
+        -->
+  */
+  console.log(this.projectTesterAssignment)
+  const att = this.projectTesterAssignment.testAssignmentAttachment;
+
+  const url = `${this.api}/api/tester-assignments/attachments/${att.id}`;
+  const filename = att.fileName || 'test-cases.pdf';
+
+  this.http.get(url, { responseType: 'blob' }).subscribe(
+    (response: Blob) => {
+      const blob = new Blob([response], { type: response.type });
+      const downloadURL = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadURL);
+    },
+    (error) => {
+      console.error('Download error:', error);
+    }
+  );
+
+}
+
+
+loadprojectTesterAssignment(){
+  console.log(this.currentUserId)
+  console.log(this.projectId)
+  this.assignmentService.getProjectTesterAssignment(this.currentUserId,this.projectId).subscribe(
+    (data: any) =>{
+ this.projectTesterAssignment=data
+ this.testCaseAttachment= this.projectTesterAssignment.testAssignmentAttachment;
+  console.log(this.testCaseAttachment)
+    }
+  )
+}
 
 
 private loadAll() {

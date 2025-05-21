@@ -5,24 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ca5c6ffd-1d66-4ac5-a723-e7af2dc7570e" name="Changes" comment="famma files nsit ma3mltlhomch git add ahaya el 5edma s7i7a kemla">
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ComplaintController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/ComplaintController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/PauseRequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/controller/PauseRequestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/PauseRequestRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/repository/PauseRequestRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/ComplaintService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/ComplaintService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/PauseRequestService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-end/src/main/java/com/projet/pp/service/PauseRequestService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/.angular/cache/19.2.6/projet-pfe/.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/analytics/analytics.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/analytics/analytics.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/analytics/analytics.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/analytics/analytics.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/complaints/complaints.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/espace-adminstrative/espace-adminstrative.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notification/notifcation-detail/notifcation-detail.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/notification/notifcation-detail/notifcation-detail.component.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/notification/notifcation-detail/notifcation-detail.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/notification/notifcation-detail/notifcation-detail.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/overview/overview.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/overview/overview.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/dashboard/overview/overview.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/dashboard/overview/overview.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/services/complaint.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/services/complaint.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/src/app/services/pause-request.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/src/app/services/pause-request.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +48,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;v21&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;v22&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/souil/OneDrive/Desktop/projet-pfe/back-end&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -81,61 +66,6 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="projet-pfe" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <module name="projet-pfe" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Python.FlaskServer">
-      <module name="projet-pfe" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Tox" factoryName="Tox">
-      <module name="projet-pfe" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <method v="2" />
     </configuration>
   </component>
   <component name="SharedIndexes">
@@ -160,6 +90,7 @@
       <workItem from="1746825175360" duration="732000" />
       <workItem from="1747653622834" duration="2974000" />
       <workItem from="1747737121397" duration="593000" />
+      <workItem from="1747764891900" duration="727000" />
     </task>
     <task id="LOCAL-00001" summary="k3ad ken lanalytics">
       <option name="closed" value="true" />
