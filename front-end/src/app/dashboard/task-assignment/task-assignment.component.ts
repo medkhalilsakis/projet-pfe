@@ -91,11 +91,10 @@ export class TaskAssignmentComponent implements OnInit {
 
 
   }
-  isSupervisor(){
-    console.log(this.role)
-    return (this.role===3)
-    
+  isSupervisor(): boolean {
+    return this.role.id === 3;
   }
+
    isDev(){
     if (this.role===1){
       return true

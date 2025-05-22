@@ -38,7 +38,7 @@ export const routes: Routes = [
       { path: 'notifications', component: NotificationComponent },
       { path: 'notification/:id', component: NotifcationDetailComponent },
       {path:'espace-adminstrative', component:EspaceAdminstrativeComponent},
-      { path: 'analytics', component: InitiationPhaseComponent },
+      { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
       { path: 'settings', component: SettingsComponent },

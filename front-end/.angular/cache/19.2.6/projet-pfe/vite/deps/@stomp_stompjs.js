@@ -1,6 +1,6 @@
 import {
   __async
-} from "./chunk-EIB7IA3J.js";
+} from "./chunk-KBUIKKCC.js";
 
 // ../../../../node_modules/@stomp/stompjs/esm6/augment-websocket.js
 function augmentWebsocket(webSocket, debug) {

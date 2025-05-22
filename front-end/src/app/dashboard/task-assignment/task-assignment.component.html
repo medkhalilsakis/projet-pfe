@@ -1,34 +1,27 @@
-<!-- src/app/task-assignment/task-assignment.component.html -->
- <div  *ngIf="  isSupervisor()">
-<mat-toolbar color="primary" class="top-bar" fxLayout="row" fxLayoutAlign="start center">
-  <span class="title">Gérer les tâches</span>
-  <span fxFlex></span>
-  <button mat-flat-button color="accent" (click)="openNew()" fxLayout="row" fxLayoutAlign="center center">
-    <mat-icon>add</mat-icon>
-    <span class="btn-text">Nouvelle tâche</span>
-  </button>
-</mat-toolbar>
+<div *ngIf="isSupervisor()">
+  <mat-toolbar color="primary" class="top-bar" fxLayout="row" fxLayoutAlign="start center">
+    <span class="title">Gérer les tâches</span>
+    <span fxFlex></span>
+    <button mat-flat-button color="accent" (click)="openNew()" fxLayout="row" fxLayoutAlign="center center">
+      <mat-icon>add</mat-icon>
+      <span class="btn-text">Nouvelle tâche</span>
+    </button>
+  </mat-toolbar>
 </div>
+
 <div class="controls" fxLayout="row wrap" fxLayoutGap="16px">
   <div *ngIf="isSupervisor()">
-  <mat-form-field  appearance="outline" class="ctrl" fxFlex.gt-sm="30%" fxFlex.xs="100%">
-    <mat-label>Recherche</mat-label>
-    <input matInput
-           [(ngModel)]="search"
-           (ngModelChange)="onSearchChange()"
-           placeholder="Nom, assigned à…">
-    <button matSuffix mat-icon-button
-            *ngIf="search"
-            (click)="search=''; onSearchChange()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-</div>
+    <mat-form-field appearance="outline" class="ctrl" fxFlex.gt-sm="30%" fxFlex.xs="100%">
+      <mat-label>Recherche</mat-label>
+      <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Nom, assigned à…">
+      <button matSuffix mat-icon-button *ngIf="search" (click)="search=''; onSearchChange()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
   <mat-form-field appearance="outline" class="ctrl status" fxFlex.gt-sm="20%" fxFlex.xs="100%">
     <mat-label>Statut</mat-label>
-    <mat-select
-      [(value)]="statusFilter"
-      (selectionChange)="onStatusChange()">
+    <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
       <mat-option *ngFor="let s of statuses" [value]="s.value">
         {{ s.label }}
       </mat-option>
@@ -39,6 +32,7 @@
 <div class="grid" fxLayout="column" fxLayoutGap="24px">
   <ng-container *ngIf="pageSlice.length; else noTasks">
     <div class="task-grid" fxLayout="row wrap" fxLayoutGap="24px">
+      <!-- Cartes de tâches existantes -->
       <mat-card *ngFor="let t of pageSlice"
                 class="task-card"
                 fxFlex="1 1 calc(33% - 24px)"
@@ -78,8 +72,7 @@
           <div *ngIf="t.outils" class="info tools" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
             <mat-icon>build</mat-icon>
             <div class="tool-badges" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="6px">
-              <span class="tool-badge"
-                    *ngFor="let tool of (t.outils.split(',') | slice:0:3)">
+              <span class="tool-badge" *ngFor="let tool of (t.outils.split(',') | slice:0:3)">
                 {{ tool }}
               </span>
               <span *ngIf="t.outils.split(',').length > 3" class="more-badge">
