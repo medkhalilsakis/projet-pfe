@@ -13,11 +13,11 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-OX42BNUF.js";
-import "./chunk-6PBVBKNM.js";
+} from "./chunk-IE2UKDNC.js";
 import {
   NEVER
-} from "./chunk-LE5FXKQ4.js";
+} from "./chunk-7AJXV5U5.js";
+import "./chunk-7FTWXQ5T.js";
 import {
   Observable,
   Subject,
@@ -25,12 +25,12 @@ import {
   map,
   switchMap,
   take
-} from "./chunk-INKKGWHP.js";
+} from "./chunk-3NZL6B4S.js";
 import {
   __spreadValues
 } from "./chunk-KBUIKKCC.js";
 
-// node_modules/@angular/service-worker/fesm2022/service-worker.mjs
+// ../../../../node_modules/@angular/service-worker/fesm2022/service-worker.mjs
 var ERR_SW_NOT_SUPPORTED = "Service workers are disabled or not supported by this browser";
 var NgswCommChannel = class {
   serviceWorker;

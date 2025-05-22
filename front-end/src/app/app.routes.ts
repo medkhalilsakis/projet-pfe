@@ -25,6 +25,7 @@ import { ProjectChatComponent } from './dashboard/projects/project-chat/project-
 import { EspaceAdminstrativeComponent} from './dashboard/espace-adminstrative/espace-adminstrative.component';
 import{ProjectInProgressComponent} from './dashboard/projects/project-in-progress/project-in-progress.component'
 import{ProjectTermineComponent} from './dashboard/projects/project-termine/project-termine.component'
+import { InitiationPhaseComponent } from './dashboard/task-assignment/initiation-phase/initiation-phase.component';
 
 export const routes: Routes = [
   { 
@@ -37,7 +38,7 @@ export const routes: Routes = [
       { path: 'notifications', component: NotificationComponent },
       { path: 'notification/:id', component: NotifcationDetailComponent },
       {path:'espace-adminstrative', component:EspaceAdminstrativeComponent},
-      { path: 'analytics', component: AnalyticsComponent },
+      { path: 'analytics', component: InitiationPhaseComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },
       { path: 'settings', component: SettingsComponent },

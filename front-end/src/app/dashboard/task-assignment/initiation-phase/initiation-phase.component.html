@@ -1,0 +1,129 @@
+<mat-toolbar color="primary">
+  <mat-icon>assignment</mat-icon>
+  &nbsp; Phase d'Initiation > {{ currentStepLabel }}
+</mat-toolbar>
+
+<mat-horizontal-stepper #stepper linear>
+  <mat-step *ngFor="let step of steps; let i = index" [completed]="currentStep > i">
+    <ng-template matStepLabel>{{ step.label }}</ng-template>
+    <div [ngSwitch]="i">
+      <!-- Page 1: Introduction -->
+      <div *ngSwitchCase="0">
+        <h1>Phase d'Initiation du Projet</h1>
+        <h3>Cahier des charges et planification</h3>
+        <p>Cette phase est cruciale pour définir les objectifs, les exigences et établir un plan pour le projet.</p>
+        <button mat-raised-button color="primary" (click)="next()">Commencer la phase d'initiation</button>
+      </div>
+
+      <!-- Page 2: Recueil des Exigences -->
+      <div *ngSwitchCase="1">
+        <h2>Recueil des Exigences</h2>
+        <p>Définissez les exigences fonctionnelles et non fonctionnelles du projet.</p>
+
+        <form>
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Exigence fonctionnelle</mat-label>
+            <textarea matInput rows="3" placeholder="Description..."></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Exigence non fonctionnelle</mat-label>
+            <textarea matInput rows="3" placeholder="Description..."></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Priorité</mat-label>
+            <mat-select>
+              <mat-option value="Haute">Haute</mat-option>
+              <mat-option value="Moyenne">Moyenne</mat-option>
+              <mat-option value="Basse">Basse</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-button type="button">Ajouter</button>
+          <button mat-raised-button color="accent" type="submit">Valider</button>
+        </form>
+      </div>
+
+      <!-- Page 3: Analyse de Faisabilité -->
+      <div *ngSwitchCase="2">
+        <h2>Analyse de Faisabilité</h2>
+        <p>Vérifiez la faisabilité technique, économique, et temporelle du projet.</p>
+
+        <form>
+          <mat-checkbox>Les technologies nécessaires sont disponibles ?</mat-checkbox><br>
+          <mat-checkbox>Le budget estimé est-il suffisant ?</mat-checkbox><br>
+          <mat-checkbox>Les délais sont-ils réalistes ?</mat-checkbox><br>
+          <mat-checkbox>Les ressources humaines sont-elles suffisantes ?</mat-checkbox><br>
+
+          <button mat-raised-button color="accent" class="mt-3">Analyser</button>
+        </form>
+      </div>
+
+      <!-- Page 4: Cahier des Charges -->
+      <div *ngSwitchCase="3">
+        <h2>Rédaction du Cahier des Charges</h2>
+        <p>Définissez les objectifs, livrables, contraintes et critères de succès.</p>
+
+        <form>
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Objectifs du projet</mat-label>
+            <textarea matInput rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Livrables</mat-label>
+            <textarea matInput rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Contraintes</mat-label>
+            <textarea matInput rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Critères de succès</mat-label>
+            <textarea matInput rows="3"></textarea>
+          </mat-form-field>
+
+          <button mat-raised-button color="accent">Valider</button>
+        </form>
+      </div>
+
+      <!-- Page 5: Planification -->
+      <div *ngSwitchCase="4">
+        <h2>Planification du Projet</h2>
+        <p>Créez un planning avec les phases, ressources et budget.</p>
+
+        <form>
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Nom de la phase</mat-label>
+            <input matInput placeholder="ex. Développement">
+          </mat-form-field>
+
+            <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Date de début</mat-label>
+            <input matInput type="date" id="dateDebut">
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Date de fin</mat-label>
+            <input matInput type="date" id="dateFin">
+            </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Budget estimé</mat-label>
+            <input matInput type="number">
+          </mat-form-field>
+
+          <button mat-raised-button color="primary">Planifier</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <button mat-button (click)="prev()" [disabled]="currentStep === 0">Retour</button>
+      <button mat-raised-button color="primary" (click)="next()" *ngIf="currentStep < steps.length - 1" matStepperNext>Suivant</button>
+    </div>
+  </mat-step>
+</mat-horizontal-stepper>
