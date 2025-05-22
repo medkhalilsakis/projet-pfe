@@ -1,75 +1,95 @@
 <mat-card class="settings-card">
-  <mat-card-title>Mes Paramètres</mat-card-title>
-  <mat-card-content>
+
+  <!-- Card Title -->
+  <mat-card-title class="settings-title">Mes Paramètres</mat-card-title>
+
+  <mat-card-content class="settings-content">
+
+    <!-- Avatar Section -->
     <div class="avatar-section">
-      <!-- Aperçu temporaire si sélectionné -->
-      <img *ngIf="previewUrl; else showStored"
-           [src]="previewUrl"
-           class="avatar">
+      <!-- Preview of the newly selected image -->
+      <img
+        *ngIf="previewUrl; else showStoredAvatar"
+        [src]="previewUrl"
+        class="avatar-img preview"
+      />
 
-      <ng-template #showStored>
-        <!-- Sinon l'avatar actuel -->
-        <img *ngIf="profileImageUrl; else placeholder"
-             [src]="profileImageUrl"
-             class="avatar">
+      <!-- Stored avatar or placeholder -->
+      <ng-template #showStoredAvatar>
+        <img
+          *ngIf="profileImageUrl; else placeholderAvatar"
+          [src]="profileImageUrl"
+          class="avatar-img stored"
+        />
+      </ng-template>
+      <ng-template #placeholderAvatar>
+        <mat-icon class="avatar-placeholder-icon">person</mat-icon>
       </ng-template>
 
-      <ng-template #placeholder>
-        <mat-icon class="avatar-placeholder">person</mat-icon>
-      </ng-template>
-
-      <!-- input caché pour sélectionner l'image -->
-      <input #fileInput
-             type="file"
-             accept="image/*"
-             hidden
-             (change)="onFileSelected($event)">
-      <button mat-mini-fab
-              color="primary"
-              (click)="fileInput.click()">
+      <!-- Hidden file input + camera button -->
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+      <button mat-mini-fab color="primary" class="avatar-btn" (click)="fileInput.click()">
         <mat-icon>photo_camera</mat-icon>
       </button>
     </div>
 
-    <button mat-raised-button
-            color="accent"
-            (click)="uploadImage()"
-            [disabled]="!selectedFile || uploadInProgress">
-      {{ uploadInProgress ? 'Chargement…' : 'Enregistrer Photo' }}
+    <!-- Upload Button -->
+    <button
+      mat-raised-button
+      color="accent"
+      class="upload-btn"
+      (click)="uploadImage()"
+      [disabled]="!selectedFile || uploadInProgress"
+    >
+      {{ uploadInProgress ? 'Chargement…' : 'Modifier Photo' }}
     </button>
 
-    <form [formGroup]="userForm" class="form">
-      <mat-form-field appearance="outline">
+    <!-- User Form -->
+    <form [formGroup]="userForm" class="settings-form">
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Nom</mat-label>
-        <input matInput formControlName="nom">
+        <input matInput formControlName="nom" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Prénom</mat-label>
-        <input matInput formControlName="prenom">
+        <input matInput formControlName="prenom" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Email</mat-label>
-        <input matInput formControlName="email">
+        <input matInput formControlName="email" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Username</mat-label>
-        <input matInput formControlName="username">
+        <input matInput formControlName="username" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>NCIN</mat-label>
-        <input matInput formControlName="ncin">
+        <input matInput formControlName="ncin" />
       </mat-form-field>
-      <mat-form-field appearance="outline">
+
+      <mat-form-field appearance="outline" class="form-field">
         <mat-label>Mot de passe</mat-label>
-        <input matInput type="password" formControlName="password">
+        <input matInput type="password" formControlName="password" />
       </mat-form-field>
     </form>
+
   </mat-card-content>
-  <mat-card-actions align="end">
-    <button mat-raised-button
-            color="primary"
-            (click)="saveProfile()">
+
+  <!-- Save Action -->
+  <mat-card-actions align="end" class="settings-actions">
+    <button mat-raised-button color="primary" class="save-btn" (click)="saveProfile()">
       Enregistrer
     </button>
   </mat-card-actions>
+
 </mat-card>
