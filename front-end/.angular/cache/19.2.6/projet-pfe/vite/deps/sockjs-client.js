@@ -1,6 +1,6 @@
 import {
   __commonJS
-} from "./chunk-KBUIKKCC.js";
+} from "./chunk-EIB7IA3J.js";
 
 // ../../../../node_modules/sockjs-client/lib/utils/browser-crypto.js
 var require_browser_crypto = __commonJS({
