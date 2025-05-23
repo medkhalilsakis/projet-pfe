@@ -20,6 +20,7 @@ import { MbscDatepickerModule } from '@mobiscroll/angular';
 import { MbscModule } from '@mobiscroll/angular';
 import { Router } from '@angular/router';
 import th from '@mobiscroll/angular/dist/js/i18n/th.js';
+import { FlexLayoutModule } from '@angular/flex-layout';
 @Component({
    selector: 'app-overview',
   standalone: true,
@@ -30,9 +31,9 @@ import th from '@mobiscroll/angular/dist/js/i18n/th.js';
     MatIconModule,
     MatProgressSpinnerModule,
     MatButtonModule,
-     MbscDatepickerModule,
+    MbscDatepickerModule,
     MbscModule,
-  
+    FlexLayoutModule
   ],
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.css'],
@@ -155,6 +156,7 @@ rotationInterval: any;
 
 currentArticleIndex  = 0;
 rotationNewsInterval: any;
+importantNotes: any[] = []; 
 
 // Add this getter
 get currentArticle(): NewsArticle {

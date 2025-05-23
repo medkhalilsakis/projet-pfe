@@ -1,11 +1,8 @@
-<div
-  class="dashboard-card"
-  fxLayout="column"
-  fxLayoutGap="24px"
-  fxLayout.xs="column"
->
-  <div fxLayout="row" fxLayoutGap="16px" style="flex: 1;">
-    <div style="flex: 1">
+<div class="dashboard-card" fxLayout="column" fxLayoutGap="24px">
+
+  <!-- Ligne de bienvenue -->
+  <div fxLayout="row">
+    <div fxFlex="100">
       <div class="welcome-message">
         <h2>
           Bienvenue M. {{ currentUser.nom }} {{ currentUser.prenom }}
@@ -14,154 +11,130 @@
     </div>
   </div>
 
-  <div fxLayout="row" fxLayoutGap="16px" style="flex: 1;">
-    <div style="flex: 1">
-      <mat-card class="dashboard-card">
+  <!-- Conteneur principal en deux colonnes -->
+  <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start stretch">
+  <!-- Partie gauche (70%) -->
+  <div fxFlex="70" fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+
+    <!-- Ligne 1 : Prochaines réunions + Notes importantes -->
+    <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start start">
+      <!-- Prochaines réunions -->
+      <mat-card class="dashboard-card" fxFlex>
         <mat-card-title><mat-icon>event</mat-icon> Prochaines réunions</mat-card-title>
         <mat-card-content>
-          <mat-progress-spinner
-            *ngIf="meetLoading"
-            mode="indeterminate"
-            diameter="24"
-          ></mat-progress-spinner>
-          <div class="content-box">
-    <div class="meeting-card" *ngFor="let meeting of meetings" (click)="rootToProject(meeting.project.id)">
-      <h4>{{ meeting.subject }}</h4>
-      <p>Date : {{ meeting.date | date:'mediumDate' }} à {{ meeting.time }}</p>
-      <p>Description : {{ meeting.description }}</p>
-      <p>Project : {{ meeting.project.name }}</p>
-    </div>
-  </div>
-          <p *ngIf="!meetLoading && !meetings.length" class="empty">
-            Aucune réunion programmée.
-          </p>
+          <mat-progress-spinner *ngIf="meetLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
+          <div class="content-box" *ngIf="!meetLoading && meetings.length">
+            <div class="meeting-card" *ngFor="let meeting of meetings" (click)="rootToProject(meeting.project.id)">
+              <h4>{{ meeting.subject }}</h4>
+              <p>Date : {{ meeting.date | date:'mediumDate' }} à {{ meeting.time }}</p>
+              <p>Description : {{ meeting.description }}</p>
+              <p>Project : {{ meeting.project.name }}</p>
+            </div>
+          </div>
+          <p *ngIf="!meetLoading && !meetings.length" class="empty">Aucune réunion programmée.</p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Notes importantes -->
+      <mat-card class="dashboard-card" fxFlex>
+        <mat-card-title><mat-icon>note</mat-icon> Notes importantes</mat-card-title>
+        <mat-card-content>
+          <ng-container *ngIf="importantNotes.length > 0; else noNotes">
+            <ul>
+              <li *ngFor="let note of importantNotes">{{ note }}</li>
+            </ul>
+          </ng-container>
+          <ng-template #noNotes>
+            <p class="empty">Aucune note importante.</p>
+          </ng-template>
         </mat-card-content>
       </mat-card>
     </div>
-  </div>
 
-  <div fxLayout="row" fxLayoutGap="16px" style="flex: 1;">
-    <div style="flex: 1">
-      <mat-card *ngIf="!isTester()" class="dashboard-card">
+    <!-- Ligne 2 : Mes tâches -->
+    <div fxLayout="row" fxLayoutAlign="start start">
+      <mat-card *ngIf="!isTester()" class="dashboard-card" fxFlex>
         <mat-card-title><mat-icon>check_circle</mat-icon> Mes tâches</mat-card-title>
         <mat-card-content>
-          <mat-progress-spinner
-            *ngIf="tasksLoading"
-            mode="indeterminate"
-            diameter="24"
-          ></mat-progress-spinner>
+          <mat-progress-spinner *ngIf="tasksLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
           <div class="content-box" *ngIf="!tasksLoading && taches.length">
-            <div class ="taches-card" *ngFor="let t of taches" (click)="rootToTask(t.id)">
+            <div class="taches-card" *ngFor="let t of taches" (click)="rootToTask(t.id)">
               <mat-icon matListIcon>task</mat-icon>
               <div matLine>Nom : {{ t.name }}, Outils : {{ t.outils }}</div>
             </div>
-          </div>        
-            <p *ngIf="!tasksLoading && !taches.length" class="empty">
-            Aucune tâche en cours.
-          </p>
+          </div>
+          <p *ngIf="!tasksLoading && !taches.length" class="empty">Aucune tâche en cours.</p>
         </mat-card-content>
       </mat-card>
     </div>
+
+    <!-- Ligne 3 : Statistiques + Mes notifications -->
+    <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start start">
+      <!-- Statistiques -->
+      <mat-card class="dashboard-card rotating-stats" fxFlex (click)="rootToAnalaytics()">
+        <mat-card-title>
+          <mat-icon>insights</mat-icon> Statistiques
+          <div class="stat-indicators">
+            <span *ngFor="let _ of statsToRotate; let i=index" [class.active]="currentStatIndex===i">•</span>
+          </div>
+        </mat-card-title>
+        <mat-card-content *ngIf="!statsLoading">
+          <div class="current-stat">
+            <div class="stat-icon"><mat-icon>{{ currentStat.icon }}</mat-icon></div>
+            <div class="stat-content">
+              <h3>{{ currentStat.title }}</h3>
+              <div class="stat-value">{{ currentStat.value }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-progress-spinner *ngIf="statsLoading" mode="indeterminate" diameter="40" class="loading-spinner"></mat-progress-spinner>
+      </mat-card>
+
+      <!-- Mes notifications -->
+      <mat-card class="dashboard-card" fxFlex>
+        <mat-card-title><mat-icon>notifications</mat-icon> Mes notifications</mat-card-title>
+        <mat-card-content>
+          <mat-progress-spinner *ngIf="notifLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
+          <mat-list *ngIf="!notifLoading && notifications.length">
+            <mat-list-item *ngFor="let n of notifications" (click)="rootToNotification(n.id)">
+              <mat-icon matListIcon>info</mat-icon>
+              <div matLine>{{ n.message }}</div>
+              <span matLine class="timestamp">{{ n.date | date:'short' }}</span>
+            </mat-list-item>
+          </mat-list>
+          <p *ngIf="!notifLoading && !notifications.length" class="empty">Pas de nouvelles notifications.</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
   </div>
 
-  <div
-    fxLayout="row"
-    fxLayoutGap="16px"
-    fxLayout.xs="column"
-    style="flex: 1;"
-  >
-    <mat-card fxFlex="33" class="dashboard-card">
-      <mat-card-title><mat-icon>notifications</mat-icon> Mes notifications</mat-card-title>
+  <!-- Partie droite (30%) : Actualités technologiques + Calendrier -->
+  <div fxFlex="30" fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+
+    <!-- Actualités technologiques -->
+    <mat-card class="dashboard-card news-widget">
+      <mat-card-title><mat-icon>public</mat-icon> Actualités technologiques</mat-card-title>
       <mat-card-content>
-        <mat-progress-spinner
-          *ngIf="notifLoading"
-          mode="indeterminate"
-          diameter="24"
-        ></mat-progress-spinner>
-        <mat-list *ngIf="!notifLoading && notifications.length">
-          <mat-list-item *ngFor="let n of notifications" (click)="rootToNotification(n.id)">
-            <mat-icon matListIcon>info</mat-icon>
-            <div matLine>{{ n.message }}</div>
-            <span matLine class="timestamp">{{ n.date | date: "short" }}</span>
-          </mat-list-item>
-        </mat-list>
-        <p *ngIf="!notifLoading && !notifications.length" class="empty">
-          Pas de nouvelles notifications.
-        </p>
+        <div *ngIf="newsLoading" class="loading">Chargement...</div>
+        <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+        <div *ngIf="!newsLoading && !errorMessage">
+          <mat-card *ngFor="let article of articles" class="news-card">
+            <mat-card-header><mat-card-title>{{ article.title }}</mat-card-title></mat-card-header>
+            <img mat-card-image [src]="article.urlToImage" alt="{{ article.title }}" *ngIf="article.urlToImage">
+            <mat-card-content><p>{{ article.description }}</p></mat-card-content>
+            <mat-card-actions><a mat-button color="primary" [href]="article.url" target="_blank">Lire la suite</a></mat-card-actions>
+          </mat-card>
+        </div>
       </mat-card-content>
     </mat-card>
 
-    <mat-card fxFlex="33" class="dashboard-card rotating-stats" (click)="rootToAnalaytics()">
-      <mat-card-title>
-        <mat-icon>insights</mat-icon> Statistiques
-        <div class="stat-indicators">
-          <span
-            *ngFor="let _ of statsToRotate; let i = index"
-            [class.active]="currentStatIndex === i"
-            >•</span
-          >
-        </div>
-      </mat-card-title>
-      <mat-card-content *ngIf="!statsLoading">
-        <div class="current-stat">
-          <div class="stat-icon"><mat-icon>{{ currentStat.icon }}</mat-icon></div>
-          <div class="stat-content">
-            <h3>{{ currentStat.title }}</h3>
-            <div class="stat-value">{{ currentStat.value }}</div>
-          </div>
-        </div>
-      </mat-card-content>
-      <mat-progress-spinner
-        *ngIf="statsLoading"
-        mode="indeterminate"
-        diameter="40"
-        class="loading-spinner"
-      ></mat-progress-spinner>
+    <!-- Calendrier -->
+    <mat-card class="dashboard-card calendar-placeholder">
+      <div class="mbsc-form-group-title">Calendrier</div>
+      <mbsc-datepicker [controls]="['calendar']" display="inline" [colors]="coloredDays" [labels]="labelDays"></mbsc-datepicker>
     </mat-card>
 
-    <div fxFlex="33">
-      <mat-card class="dashboard-card calendar-placeholder">
-        <div class="mbsc-form-group-title">calendrier</div>
+  </div>
 
-          <mbsc-datepicker [controls]="['calendar']" display="inline" [colors]="coloredDays" [labels]="labelDays"
-            ></mbsc-datepicker>
-        </mat-card>
-    </div>
-  </div>
-  <div  fxLayout="row"  fxLayoutGap="16px" style="flex: 1;">
-    <div style="flex: 1">
-        <div class="news-widget">
-          <div class="widget-header">
-            <h3>Technologie News</h3>
-          </div>
-          <div *ngIf="newsLoading" class="loading">
-            Chargement...
-          </div>
-          <div *ngIf="errorMessage" class="error">
-            {{ errorMessage }}
-          </div>
-          <div class="news-content" *ngIf="!newsLoading && !errorMessage">
-            <mat-card *ngFor="let article of articles" class="news-card">
-              <mat-card-header>
-                <mat-card-title>{{ article.title }}</mat-card-title>
-              </mat-card-header>
-              <img
-                mat-card-image
-                [src]="article.urlToImage"
-                alt="{{ article.title }}"
-                *ngIf="article.urlToImage"
-              />
-              <mat-card-content>
-                <p>{{ article.description }}</p>
-              </mat-card-content>
-              <mat-card-actions>
-                <a mat-button color="primary" [href]="article.url" target="_blank"
-                  >Lire la suite</a
-                >
-              </mat-card-actions>
-            </mat-card>
-          </div>
-        </div>
-    </div>
-  </div>
 </div>
