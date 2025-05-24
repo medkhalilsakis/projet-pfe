@@ -1,9 +1,9 @@
 import {
   _typeof
-} from "./chunk-UWFPMDTY.js";
+} from "./chunk-WUUVWCMF.js";
 import "./chunk-KBUIKKCC.js";
 
-// ../../../../node_modules/fflate/esm/browser.js
+// node_modules/fflate/esm/browser.js
 var ch2 = {};
 var wk = function(c2, id, msg, transfer, cb) {
   var w2 = new Worker(ch2[id] || (ch2[id] = URL.createObjectURL(new Blob([c2 + ';addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.code,e.stack]})})'], {
@@ -1686,7 +1686,7 @@ var Unzip = function() {
   return Unzip2;
 }();
 
-// ../../../../node_modules/jspdf/dist/jspdf.es.min.js
+// node_modules/jspdf/dist/jspdf.es.min.js
 var n = /* @__PURE__ */ function() {
   return "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self ? self : this;
 }();
@@ -6982,7 +6982,7 @@ function(t2) {
     });
   }
   function i2() {
-    return (n.DOMPurify ? Promise.resolve(n.DOMPurify) : import("./purify.es-MIT5YO3M.js")).catch(function(t2) {
+    return (n.DOMPurify ? Promise.resolve(n.DOMPurify) : import("./purify.es-BWNRTNOE.js")).catch(function(t2) {
       return Promise.reject(new Error("Could not load dompurify: " + t2));
     }).then(function(t2) {
       return t2.default ? t2.default : t2;
@@ -10506,7 +10506,7 @@ function(t2) {
  */
 function(t2) {
   function e() {
-    return (n.canvg ? Promise.resolve(n.canvg) : import("./index.es-UENE5H4G.js")).catch(function(t3) {
+    return (n.canvg ? Promise.resolve(n.canvg) : import("./index.es-QA74AIAF.js")).catch(function(t3) {
       return Promise.reject(new Error("Could not load canvg: " + t3));
     }).then(function(t3) {
       return t3.default ? t3.default : t3;

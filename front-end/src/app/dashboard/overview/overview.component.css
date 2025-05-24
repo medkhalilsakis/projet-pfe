@@ -40,26 +40,114 @@
   background: #e3e8f1;
 }
 
-/* News widget */
+/* Couleurs et constantes */
 .news-widget {
+  --primary-color: #1a73e8;
+  --text-color: #333;
+  --text-muted: #777;
+  --border-color: #e0e0e0;
+  --background-hover: #f9f9f9;
+  --radius: 8px;
+  --transition: 0.3s ease;
+}
+
+/* Titre de la card */
+.news-widget .mat-card-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.news-widget .mat-card-title mat-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  color: var(--primary-color);
+}
+
+/* Contenu de la card */
+.news-widget .mat-card-content {
+  padding: 0;
+}
+
+.news-widget mat-list {
+  padding: 0;
+  margin: 0;
+}
+
+.news-widget mat-list-item {
+  padding: 0;
+}
+
+/* Item d’actualité */
+.news-widget .news-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: background var(--transition);
+}
+
+.news-widget .news-item:hover {
+  background: var(--background-hover);
+}
+
+.news-widget .news-item:last-child {
+  border-bottom: none;
+}
+
+/* Vignette de l’image */
+.news-widget .news-thumb {
+  flex-shrink: 0;
+  width: 40px;            /* Taille réduite */
+  height: 40px;           /* Même valeur pour garder un cercle */
+  object-fit: cover;
+  border-radius: 50%;     /* Cercle parfait */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Contenu textuel */
+.news-widget .news-content {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  justify-content: space-between;
+  flex: 1;
 }
-.news-widget .news-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-  overflow: hidden;
-  animation: slideIn 0.5s ease;
+
+.news-widget .news-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  text-decoration: none;
+  line-height: 1.3;
+  transition: color var(--transition);
 }
-.news-widget .news-card img {
-  height: 140px;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+
+.news-widget .news-title:hover {
+  color: #1558b0; /* 10% plus foncé que #1a73e8 */
 }
-.news-widget .news-card:hover img {
-  transform: scale(1.05);
+
+.news-widget .news-date {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
 }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .news-widget .news-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .news-widget .news-thumb {
+    width: 100%;
+    height: auto;
+  }
+}
+
 
 /* Mes tâches list */
 .content-box {

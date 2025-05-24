@@ -5,8 +5,8 @@ import { MatListModule }       from '@angular/material/list';
 import { MatIconModule }       from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule }     from '@angular/material/button';
-
-import { NewsArticle, NewsService }           from '../../services/news.service';
+import { map } from 'rxjs/operators';  
+import { NewsArticle, NewsService, NewsResponse }           from '../../services/news.service';
 //import { Task, TaskService }                  from '../../services/task.service';
 import {  NotificationService }  from '../../services/notification.service';
 import {  MeetingService }            from '../../services/meeting.service';
@@ -21,6 +21,14 @@ import { MbscModule } from '@mobiscroll/angular';
 import { Router } from '@angular/router';
 import th from '@mobiscroll/angular/dist/js/i18n/th.js';
 import { FlexLayoutModule } from '@angular/flex-layout';
+
+// importer la locale française et la registre
+import localeFr from '@angular/common/locales/fr';
+import { registerLocaleData } from '@angular/common';
+
+
+
+
 @Component({
    selector: 'app-overview',
   standalone: true,
@@ -41,7 +49,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 export class OverviewComponent  implements OnInit {
   // News
   articles: NewsArticle[] = [];
-   newsLoading = true;
+  displayedArticles: NewsArticle[] = [];
+  newsLoading = true;
   errorMessage: string | null = null;
 
   currentUser :any =[]
@@ -173,15 +182,13 @@ get currentArticle(): NewsArticle {
   readonly API = 'http://localhost:8080/api';
 
 
-
   constructor(
     private newsService: NewsService,
     private http:HttpClient,
     private notifSvc: NotificationService,
     private meetSvc: MeetingService,
     private sessionStorage:SessionStorageService,
-      private router: Router  // <-- Add this line
-
+    private router: Router
   ) {
     this.currentUser=sessionStorage.getUser()
   }
@@ -190,41 +197,44 @@ get currentArticle(): NewsArticle {
   }
 
   ngOnInit(): void {
+    registerLocaleData(localeFr);
     this.loadGlobalNews();
     this.loadMeetings();
     if(this.currentUser!==2){
           this.loadTasks();
 
     }
-
     this.loadStats();
     this.loadNotifications()
   }
     // 1) Tech news
-    loadGlobalNews(){
-    this.newsService.getTechNews().subscribe({
-      next: (data) => {
-        console.log(data)
-        this.articles = data.articles;
-              if (this.articles.length > 0) {
 
-        this.startNewsRotation();
-              }
-        this.newsLoading = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors de la récupération des actualités', error);
-        this.errorMessage = "Erreur lors du chargement des actualités";
-        this.newsLoading = false;
-      }
-    });
+  private loadGlobalNews(): void {
+    this.newsService.getTechNews()
+      .pipe(
+        map(resp => this.pickRandom(resp.articles, 10))
+      )
+      .subscribe({
+        next: (list) => {
+          this.articles = list;
+          this.displayedArticles = list;
+          this.newsLoading = false;
+        },
+        error: () => {
+          this.errorMessage = 'Erreur lors du chargement des actualités';
+          this.newsLoading = false;
+        }
+      });
   }
-  startNewsRotation() {
-  this.rotationNewsInterval = setInterval(() => {
-    this.currentArticleIndex = (this.currentArticleIndex + 1) % this.articles.length;
-  }, 15000);
-}
-  
+
+  private pickRandom<T>(arr: T[], max: number): T[] {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, Math.min(max, a.length));
+  }
 
     loadTasks(){
     if (this.currentUser.role.id===3){

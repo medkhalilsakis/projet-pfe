@@ -113,21 +113,39 @@
   <div fxFlex="30" fxLayout="column" fxLayoutGap="24px" fxLayoutAlign="start stretch">
 
     <!-- Actualités technologiques -->
-    <mat-card class="dashboard-card news-widget">
-      <mat-card-title><mat-icon>public</mat-icon> Actualités technologiques</mat-card-title>
-      <mat-card-content>
-        <div *ngIf="newsLoading" class="loading">Chargement...</div>
-        <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-        <div *ngIf="!newsLoading && !errorMessage">
-          <mat-card *ngFor="let article of articles" class="news-card">
-            <mat-card-header><mat-card-title>{{ article.title }}</mat-card-title></mat-card-header>
-            <img mat-card-image [src]="article.urlToImage" alt="{{ article.title }}" *ngIf="article.urlToImage">
-            <mat-card-content><p>{{ article.description }}</p></mat-card-content>
-            <mat-card-actions><a mat-button color="primary" [href]="article.url" target="_blank">Lire la suite</a></mat-card-actions>
-          </mat-card>
-        </div>
-      </mat-card-content>
-    </mat-card>
+   <mat-card class="dashboard-card news-widget">
+  <mat-card-title class="mat-card-title">
+    <mat-icon>public</mat-icon> Actualités technologiques
+  </mat-card-title>
+  <mat-card-content class="mat-card-content">
+    <div *ngIf="newsLoading" class="loading">Chargement...</div>
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+    <div *ngIf="!newsLoading && !errorMessage">
+      <mat-list fxLayout="column" fxLayoutGap="16px">
+        <mat-list-item *ngFor="let art of displayedArticles">
+          <div class="news-item">
+            <img
+              *ngIf="art.urlToImage"
+              [src]="art.urlToImage"
+              alt="thumbnail"
+              class="news-thumb"
+            />
+            <div class="news-content">
+              <a [href]="art.url" target="_blank" class="news-title">
+                {{ art.title }}
+              </a>
+              <span class="news-date">{{ art.publishedAt | date:'d MMMM y':'':'fr' }}</span>
+            </div>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+
+
 
     <!-- Calendrier -->
     <mat-card class="dashboard-card calendar-placeholder">
