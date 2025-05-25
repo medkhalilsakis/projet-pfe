@@ -4,51 +4,67 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Meeting } from '../models/meeting.model';
 
-
-
 @Injectable({ providedIn: 'root' })
 export class MeetingService {
-  private base = 'http://localhost:8080/api/projects';
+  /** Pour les réunions liées à un projet */
+  private baseProject = 'http://localhost:8080/api/projects';
+
+  /** Pour les réunions indépendantes de tout projet */
+  private baseGlobal = 'http://localhost:8080/api/meetings';
 
   constructor(private http: HttpClient) {}
 
-  schedule(projectId: number, m: any, userId: number): Observable<Meeting> {
-    const url = `${this.base}/${projectId}/meetings`;
+  /**
+   * Planifie une réunion rattachée à un projet spécifique.
+   */
+  schedule(projectId: number, m: Meeting, userId: number): Observable<Meeting> {
+    const url = `${this.baseProject}/${projectId}/meetings`;
+    return this.postMeeting(url, m, userId);
+  }
+
+  /**
+   * Planifie une réunion sans projet (projectId = null côté backend).
+   */
+  scheduleNoProject(m: Meeting, userId: number): Observable<Meeting> {
+    const url = this.baseGlobal;
+    return this.postMeeting(url, m, userId);
+  }
+
+  /**
+   * Internal helper pour emballer le Meeting + userId dans un FormData
+   */
+  private postMeeting(url: string, m: Meeting, userId: number): Observable<Meeting> {
     const form = new FormData();
 
-    // 1) Emballer le JSON dans un blob
-    const blob = new Blob([ JSON.stringify({
-      subject:      m.subject,
-      date:         m.date,
-      participantsIds: [...m.participantsIds, userId],
-      description:  m.description
-    })], { type: 'application/json' });
+    // Construire le payload JSON
+    const payload = {
+      subject: m.subject,
+      date: m.date,
+      participantsIds: [...(m.participantsIds || []), userId],
+      description: m.description,
+      projectId: m.projectId ?? null
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
     form.append('data', blob);
 
-    // 2) Normaliser attachments en tableau de File
-    const filesArray: File[] = [];
+    // pièces jointes
     if (m.attachments) {
-      if (m.attachments instanceof FileList) {
-        for (let i = 0; i < m.attachments.length; i++) {
-          const f = m.attachments.item(i);
-          if (f) filesArray.push(f);
-        }
-      } else {
-        filesArray.push(...m.attachments);
-      }
+      const files: File[] = m.attachments instanceof FileList
+        ? Array.from(m.attachments as FileList)
+        : (m.attachments as File[]);
+      files.forEach(f => form.append('attachments', f, f.name));
     }
 
-    // 3) Ajouter chaque fichier au FormData
-    filesArray.forEach(file => form.append('attachments', file, file.name));
-
-    // 4) Envoyer le multipart/form-data
     return this.http.post<Meeting>(url, form);
   }
 
+  /** Liste des réunions pour un projet */
   list(projectId: number): Observable<Meeting[]> {
-    return this.http.get<Meeting[]>(`${this.base}/${projectId}/meetings`);
+    return this.http.get<Meeting[]>(`${this.baseProject}/${projectId}/meetings`);
   }
-    getUserMeetings(userId: number): Observable<any[]> {
+
+  /** Toutes réunions d’un utilisateur */
+  getUserMeetings(userId: number): Observable<Meeting[]> {
     return this.http.get<Meeting[]>(`http://localhost:8080/api/users/${userId}/meetings`);
   }
 }

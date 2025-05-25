@@ -1,0 +1,51 @@
+<h1 mat-dialog-title>Planifier une réunion</h1>
+<div mat-dialog-content [formGroup]="form" fxLayout="column" fxLayoutGap="12px">
+
+  <!-- Sélecteur de projet (optionnel) -->
+  <mat-form-field appearance="fill">
+    <mat-label>Projet (optionnel)</mat-label>
+    <mat-select formControlName="projectId">
+      <mat-option [value]="null">Aucun</mat-option>
+      <mat-option *ngFor="let p of projects" [value]="p.id">
+        {{ p.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Sujet</mat-label>
+    <input matInput formControlName="subject" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Date &amp; Heure</mat-label>
+    <input matInput type="datetime-local" formControlName="date" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Participants</mat-label>
+    <mat-select formControlName="participantsIds" multiple>
+      <mat-option *ngFor="let u of allUsers" [value]="u.id">
+        {{ u.nom }} {{ u.prenom }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3"></textarea>
+  </mat-form-field>
+
+  <div>
+    <label for="fileUpload">Pièces jointes</label>
+    <input id="fileUpload" type="file" (change)="onFileChange($event)" multiple />
+  </div>
+
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
+    Enregistrer
+  </button>
+</div>

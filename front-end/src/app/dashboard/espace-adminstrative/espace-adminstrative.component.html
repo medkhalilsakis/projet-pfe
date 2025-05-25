@@ -1,70 +1,140 @@
-<div class="dashboard-container">
+<div class="dashboard-container" fxLayout="column" fxLayoutGap="32px">
 
-  <!-- Reclamations -->
-  <div class="section" *ngIf="isSuperviser()">
-    <h2>Réclamations</h2>
-    <div class="content-box">
-    <div class="complaint-card" *ngFor="let complaint of complaints" (click)="rootToProject(complaint.projectId)">
-      <h3>{{ complaint.project.name }}</h3>
-      <p>reason : {{ complaint.reason }}</p>
-      <small>Submitted by User #{{ complaint.complainerId }}</small>
-    </div>
-  </div>
-  </div>
+  <!-- 1ère ligne : Réunions & Notes -->
+  <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <!-- Réunions -->
+    <section class="section meetings" fxFlex="50" fxLayout="column" fxLayoutGap="16px">
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <h2>Mes réunions</h2>
+        <button
+        mat-raised-button
+        color="primary"
+        (click)="openAddMeetingDialog()"
+      >
+        Ajouter une réunion
+      </button>
 
-  <!-- Pause Requests -->
-  <div class="section" *ngIf="isSuperviser()">
-    <h2>Pause Requests</h2>
-   <div class="content-box">
-  <div class="request-card" *ngFor="let request of pauseRequests" (click)="rootToProject(request.projectId)">
-    <p matLine>Reason :{{ request.reason }}</p> 
-    <p matLine>{{ request.project.name }}</p>
-    <span matLine
-          class="status"
-          [class.approved]="request.status === 'APPROVED'"
-          [class.rejected]="request.status === 'REJECTED'"
-          [class.pending]="request.status === 'PENDING'">
-      {{ request.status }}
-    </span>
-  </div>
-</div>
 
-  </div>
+      </div>
 
-  <!-- Add Meeting Button & Project Dropdown -->
-   <div class="section">
-    <h2>My Meetings</h2>
-  <button mat-raised-button color="primary" class="add-meeting-button" (click)="showProjects()">Add a Meeting</button>
-  
-  <div *ngIf="showProjectList" class="project-list-dropdown">
-    <mat-label>Sélectionner un projet</mat-label>
-
-  <mat-select   (selectionChange)="selectProject($event.value)"
-      placeholder="Sélectionner un projet" multiple>
-              <mat-option *ngFor="let project of projects"  [value]="project">
-                {{ project.name }}
-              </mat-option>
-          </mat-select>
-    </div>
-  <!-- My Meetings -->
-  
-      <div class="content-box">
-    <div class="meeting-card" *ngFor="let meeting of meetings" (click)="rootToProject(meeting.project.id)">
-      <h4>{{ meeting.subject }}</h4>
-      <p>Date : {{ meeting.date | date:'mediumDate' }} à {{ meeting.time }}</p>
-      <p>Description : {{ meeting.description }}</p>
-      <p>Project : {{ meeting.project.name }}</p>
-    </div>
-  </div>
-</div>
-</div>
-  
-        <div class="mbsc-form-group">
-          <div class="mbsc-form-group-title"></div>
-          <!--mbsc-datepicker [controls]="['calendar']" display="inline"></mbsc-datepicker-->
-
-          <mbsc-datepicker [controls]="['calendar']" display="inline" [colors]="coloredDays" [labels]="labelDays"
-            ></mbsc-datepicker>
+      <div class="content-box" fxLayout="column" fxLayoutGap="16px">
+        <div
+          class="meeting-card"
+          *ngFor="let m of meetings"
+          (click)="rootToProject(m.project.id)"
+        >
+          <h4>{{ m.subject }}</h4>
+          <p>
+            <strong>Date :</strong>
+            {{ m.date | date:'mediumDate' }} à {{ m.date | date:'shortTime' }}
+          </p>
+          <p><strong>Description :</strong> {{ m.description }}</p>
+          <p><strong>Projet :</strong> {{ m.project.name }}</p>
         </div>
-    
-<!---->
+        <p *ngIf="!meetings.length" class="empty">Aucune réunion planifiée.</p>
+      </div>
+    </section>
+
+    <!-- Notes & Décisions -->
+    <section
+      class="section notes-decisions"
+      *ngIf="isSuperviser()"
+      fxFlex="50"
+      fxLayout="column"
+      fxLayoutGap="16px"
+    >
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <h2>Notes &amp; Décisions</h2>
+        <button mat-flat-button color="accent" (click)="openNoteDialog()">
+          Nouvelle note/décision
+        </button>
+      </div>
+      <div class="content-box" fxLayout="column" fxLayoutGap="12px">
+        <div
+          class="note-card"
+          *ngFor="let note of notes"
+          (click)="viewNoteDetail(note.id)"
+        >
+          <h3 class="note-title">{{ note.titre }}</h3>
+          <span class="note-meta">
+            {{ note.typeNote }} • {{ note.dateCreation | date:'d MMM y':'':'fr' }}
+          </span>
+        </div>
+        <p *ngIf="!notes.length" class="empty">Aucune note ou décision.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- 2ème ligne : Réclamations & Demandes de suspension -->
+  <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <!-- Réclamations -->
+    <section
+      class="section complaints"
+      *ngIf="isSuperviser()"
+      fxFlex="50"
+      fxLayout="column"
+      fxLayoutGap="16px"
+    >
+      <h2>Réclamations</h2>
+      <div class="content-box" fxLayout="column" fxLayoutGap="16px">
+        <div
+          class="complaint-card"
+          *ngFor="let complaint of complaints"
+          (click)="rootToProject(complaint.projectId)"
+        >
+          <h3>{{ complaint.project.name }}</h3>
+          <p><strong>Raison :</strong> {{ complaint.reason }}</p>
+          <small>Soumis par utilisateur #{{ complaint.complainerId }}</small>
+        </div>
+        <p *ngIf="!complaints.length" class="empty">Aucune réclamation.</p>
+      </div>
+    </section>
+
+    <!-- Demandes de suspension -->
+    <section
+      class="section pause-requests"
+      *ngIf="isSuperviser()"
+      fxFlex="50"
+      fxLayout="column"
+      fxLayoutGap="16px"
+    >
+      <h2>Demandes de suspension</h2>
+      <div class="content-box" fxLayout="column" fxLayoutGap="16px">
+        <div
+          class="request-card"
+          *ngFor="let req of pauseRequests"
+          (click)="rootToProject(req.projectId)"
+        >
+          <p><strong>Projet :</strong> {{ req.project.name }}</p>
+          <p><strong>Raison :</strong> {{ req.reason }}</p>
+          <span
+            class="status"
+            [ngClass]="{
+              approved: req.status === 'APPROVED',
+              rejected: req.status === 'REJECTED',
+              pending: req.status === 'PENDING'
+            }"
+          >
+            {{ req.status }}
+          </span>
+        </div>
+        <p *ngIf="!pauseRequests.length" class="empty">Aucune demande.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- 3ème ligne : Calendrier full width -->
+  <div fxLayout="row">
+    <section class="section calendar" fxFlex="100" fxLayout="column">
+      <h2>Calendrier</h2>
+      <mbsc-datepicker
+        [controls]="['calendar']"
+        display="inline"
+        [colors]="coloredDays"
+        [labels]="labelDays"
+        (onDayChange)="onDayChange($event)"
+      ></mbsc-datepicker>
+    </section>
+  </div>
+
+</div>

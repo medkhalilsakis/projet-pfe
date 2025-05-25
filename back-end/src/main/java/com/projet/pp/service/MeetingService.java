@@ -14,6 +14,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.UUID;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -80,4 +81,32 @@ public class MeetingService {
     public List<Meeting> findByUser(Long userId) {
         return meetingRepo.findByParticipantId(userId);
     }
+
+    @Transactional
+    public Meeting scheduleNoProject(MeetingRequest req, MultipartFile[] attachments) throws IOException {
+        Meeting m = new Meeting();
+        m.setSubject(req.getSubject());
+        m.setDate(req.getDate());
+        m.setParticipantsIds(req.getParticipantsIds());
+        m.setDescription(req.getDescription());
+        m.setProject(null);  // pas de projet
+
+        // stockage des pièces jointes (copié depuis schedule)
+        List<String> stored = new ArrayList<>();
+        if (attachments != null) {
+            for (MultipartFile f : attachments) {
+                String ext = f.getOriginalFilename().contains(".")
+                        ? f.getOriginalFilename().substring(f.getOriginalFilename().lastIndexOf('.'))
+                        : "";
+                String filename = System.currentTimeMillis() + "_" + UUID.randomUUID() + ext;
+                Path target = storageDir.resolve(filename);
+                Files.copy(f.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+                stored.add(filename);
+            }
+        }
+        m.setAttachments(stored);
+
+        return meetingRepo.save(m);
+    }
+
 }

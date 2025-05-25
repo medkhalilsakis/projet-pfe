@@ -31,6 +31,10 @@ import { dyndatetime } from '../../../app/app.util';
 import { MbscDatepickerModule } from '@mobiscroll/angular';
 import { MbscModule } from '@mobiscroll/angular';
 import { ChangeDetectorRef } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { NoteDecisionService } from '../../services/note-decision.service';
+import { NoteDialogComponent } from './note-dialog/note-dialog.component';
+import { Meeting } from '../../models/meeting.model';
 
 setOptions ( {
   theme: 'ios', // or other theme
@@ -52,8 +56,9 @@ setOptions ( {
     CommonModule,
     MbscDatepickerModule,
     MbscModule,
-     MatSelectModule,
-    MatOptionModule
+    MatSelectModule,
+    MatOptionModule,
+    FlexLayoutModule
   ],
   templateUrl: './espace-adminstrative.component.html',
   styleUrl: './espace-adminstrative.component.css',
@@ -72,7 +77,8 @@ export class EspaceAdminstrativeComponent implements OnInit {
   showProjectList = false;
   daysToHighlight: any[] = [];
   deadLines: any[] = [];
-  tâches :any
+  tâches :any;
+  notes: any[] = [];
 coloredDays: MbscCalendarColor[] = [
     { recurring: { repeat: 'yearly', month: 1, day: 1 }, background: 'red' },
     { recurring: { repeat: 'yearly', month: 3, day: 20 }, background: 'red' },
@@ -97,6 +103,7 @@ coloredDays: MbscCalendarColor[] = [
 
   
   constructor(
+    private noteSvc: NoteDecisionService,
     private complaintService: ComplaintService,
     private pauseRequestService: PauseRequestService,
     private meetingService: MeetingService,
@@ -117,7 +124,8 @@ coloredDays: MbscCalendarColor[] = [
     this.loadComplaints();
     this.loadPauseRequests();
     this.loadAllMeetings();
-    this.loadTasks()
+    this.loadTasks();
+    this.loadNotes();
   }
   isSuperviser(){
     const user =this.session.getUser()
@@ -288,39 +296,56 @@ loadAllMeetings() {
   );
 }
 
-  showProjects() {
-    this.showProjectList = !this.showProjectList;
-  }
 
-  selectProject(projects: any[]) {
-    this.showProjectList = false;
-    console.log('Selected project(s):', projects);
-for (const project of projects) {
-    this.openAddMeetingDialog(project.id);
-  }  }
+  openAddMeetingDialog(): void {
+    const currentUser = this.session.getUser();
 
-  openAddMeetingDialog(projectId: number) {
+    // 1) Récupère la liste des utilisateurs pour le multiselect
     this.userService.getAllUsers().subscribe(users => {
-      const current = this.session.getUser();
-      const all = users.filter(u => u.id !== current.id);
-      const ref = this.dialog.open(MeetingDialogComponent, { width: '600px', data: { allUsers: all, projectId } });
-      ref.afterClosed().subscribe(meeting => {
-        if (meeting) {
-          this.meetingService.schedule(projectId, meeting, current.id).subscribe(
-            () => this.loadAllMeetings(),
-            err => console.error('Error scheduling meeting', err)
-          );
+      const otherUsers = users.filter(u => u.id !== currentUser.id);
+
+      // 2) Ouvre le dialog
+      const dialogRef = this.dialog.open(MeetingDialogComponent, {
+        width: '600px',
+        data: {
+          allUsers: otherUsers
         }
       });
-    }, err => console.error('Error loading users', err));
+
+      // 3) Après fermeture, récupère le Meeting créé
+      dialogRef.afterClosed().subscribe((meeting: Meeting | undefined) => {
+        if (!meeting) return;
+
+        // 4) Envoie au service : si meeting.projectId est null => scheduleNoProject
+        const obs$ = meeting.projectId != null
+          ? this.meetingService.schedule(meeting.projectId, meeting, currentUser.id)
+          : this.meetingService.scheduleNoProject(meeting, currentUser.id);
+
+        obs$.subscribe({
+          next: () => this.loadAllMeetings(),
+          error: err => console.error('Erreur planification réunion', err)
+        });
+      });
+    });
   }
 
-  onDateSelected(date: Date | null) {
-    if (date) {
-      this.selectedDate = date;
-      console.log('Selected date:', this.datePipe.transform(date, 'yyyy-MM-dd'));
-    }
+
+  onDayChange(event: any): void {
+  // selon la version de Mobiscroll, la date peut être dans `event.date` ou dans `event.value`
+  const selected: Date = event.date ?? event.value;
+  this.onDateSelected(selected);
+}
+
+/**  
+ * Votre méthode existante qui prend un Date  
+ */
+onDateSelected(date: Date | null): void {
+  if (date) {
+    this.selectedDate = date;
+    console.log('Selected date:', this.datePipe.transform(date, 'yyyy-MM-dd'));
   }
+}
+
 
   getCalendarStartDate(): Date {
     return new Date();
@@ -333,5 +358,49 @@ for (const project of projects) {
     return '';
   }
 
+
+  private loadNotes(): void {
+  this.noteSvc.findAll().subscribe({
+    next: list => this.notes = list,
+    error: err => console.error('Erreur chargement notes', err)
+  });
+}
+
+openNoteDialog(): void {
+  // Ouvrir un MatDialog pour créer ou modifier une note
+  const ref = this.dialog.open(NoteDialogComponent, {
+    width: '600px',
+    data: {}  // passer un objet vide pour création
+  });
+  ref.afterClosed().subscribe(result => {
+    if (result) this.loadNotes();
+  });
+}
+
+viewNoteDetail(id: number): void {
+  // Soit naviguer vers une page /details/:id, soit ouvrir un dialogue
+  this.router.navigate(['/dashboard/notes', id]);
+}
   
+showAddMeetingDialog(projectId: number) {
+  const currentUser = this.session.getUser();
+  this.userService.getAllUsers().subscribe(users => {
+    const otherUsers = users.filter(u => u.id !== currentUser.id);
+
+    const dialogRef = this.dialog.open(MeetingDialogComponent, {
+      width: '600px',
+      data: {
+        projectId,
+        allUsers: otherUsers
+      } as Partial<Meeting> // meeting data not required at creation
+    });
+
+    dialogRef.afterClosed().subscribe((meeting: Meeting | undefined) => {
+      if (meeting) {
+        this.meetingService.schedule(projectId, meeting, currentUser.id)
+          .subscribe(() => this.loadAllMeetings());
+      }
+    });
+  });
+}
 }
