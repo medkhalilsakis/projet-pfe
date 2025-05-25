@@ -1,0 +1,189 @@
+/* Fond global du composant */
+:host {
+  display: block;
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  min-height: 100vh;
+  box-sizing: border-box;
+  animation: fadeInBg 1s ease;
+}
+
+@keyframes fadeInBg {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Style du mat-card */
+mat-card {
+  position: relative;
+  margin: 16px auto;
+  max-width: 800px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+mat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* En-tête du card */
+/* En-tête de la carte avec bandelette colorée et ombre portée */
+mat-card-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  background: linear-gradient(120deg, #3949ab 0%, #5c6bc0 100%);
+  color: #ffffff;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Petite bande verticale accentuée sur la gauche */
+mat-card-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: #ff4081;
+}
+
+/* Titre principal : plus grand, majuscules et lettre espacées */
+mat-card-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 15px;
+}
+
+/* Sous-titre : plus lisible, avec un léger relief */
+/* Style personnalisé pour le sous-titre de la carte */
+mat-card-subtitle {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #eceff1;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease, transform 0.3s ease;
+  text-transform: capitalize;
+}
+
+/* Petit cercle animé avant le texte */
+mat-card-subtitle::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #ffca28;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  animation: pulseDot 1.5s infinite;
+}
+
+/* Effet hover sur le badge du sous-titre */
+mat-card-subtitle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Animation du point */
+@keyframes pulseDot {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  50%  { transform: scale(1.2); opacity: 1;   }
+  100% { transform: scale(0.8); opacity: 0.6; }
+}
+
+
+/* Conteneur des icônes d’action alignées à droite */
+.actions {
+  display: flex;
+  gap: 16px;
+  z-index: 1; /* pour apparaître au-dessus de la bande avant */
+}
+
+/* Icônes : cerclées, transitions douces */
+.actions mat-icon {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Effet au survol : léger agrandissement et halo */
+.actions mat-icon:hover {
+  background: rgba(255, 255, 255, 0.30);
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Effet au clic : rotation subtile */
+.actions mat-icon:active {
+  transform: scale(1.1) rotate(-10deg);
+}
+
+
+/* Contenu du card */
+mat-card-content {
+  padding: 24px;
+  color: #333333;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+mat-card-content p {
+  margin-bottom: 16px;
+}
+
+/* Liens de pièce jointe */
+mat-card-content a {
+  color: #ff4081;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+mat-card-content a:hover {
+  border-color: #ff4081;
+}
+
+/* Message d’erreur */
+.error {
+  margin: 16px auto;
+  max-width: 800px;
+  padding: 12px 16px;
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* État de chargement */
+.loading {
+  margin: 32px auto;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #6573c3;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%   { opacity: 0.3; transform: scale(0.95); }
+  50%  { opacity: 1;   transform: scale(1.00); }
+  100% { opacity: 0.3; transform: scale(0.95); }
+}

@@ -35,6 +35,8 @@ import { NoteDecisionService } from '../../services/note-decision.service';
 import { NoteDialogComponent } from './note-dialog/note-dialog.component';
 import { Meeting } from '../../models/meeting.model';
 import { MeetingDialogComponent } from './meeting-dialog/meeting-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
+import { ComplaintDetailsComponent } from './complaint-details/complaint-details.component';
 
 setOptions ( {
   theme: 'ios', // or other theme
@@ -51,6 +53,7 @@ setOptions ( {
     MatTabsModule,
     MatListModule,
     MatInputModule,
+    MatIconModule,
     MatFormFieldModule,
     FormsModule,
     CommonModule,
@@ -67,6 +70,8 @@ setOptions ( {
 
 })
 export class EspaceAdminstrativeComponent implements OnInit {
+  currentUserId!: number;
+  users: User[] = [];
   complaints: any[] = [];
   pauseRequests: any[] = [];
   meetings: any[] = [];
@@ -119,7 +124,11 @@ coloredDays: MbscCalendarColor[] = [
   ) {}
 
   ngOnInit(): void {
-    
+    this.currentUserId = this.session.getUser().id!;
+    this.userService.getAllUsers().subscribe({
+      next: users => this.users = users,
+      error: err => console.error('Impossible de charger les utilisateurs', err)
+    });
     this.initProjects();
     this.loadComplaints();
     this.loadPauseRequests();
@@ -132,6 +141,13 @@ coloredDays: MbscCalendarColor[] = [
     return (user.role.id===3)
   }
 
+  markAsRead(c: any) {
+    this.complaintService
+      .markAsRead(c.id, this.currentUserId)
+      .subscribe(() => {
+        this.complaints = this.complaints.filter(x => x.id !== c.id);
+      });
+  }
   private initProjects() {
     this.projectService.getAllProjects().subscribe(
       data => this.projects = data,
@@ -412,4 +428,19 @@ openMeetingDetails(m: Meeting): void {
     this.router.navigate(['/dashboard/meetings', m.id]);
   }
 }
+getUser(id: number): User | undefined {
+    return this.users.find(u => u.id === id);
+  }
+
+
+
+openDetails(complaint: any): void {
+  this.dialog.open(ComplaintDetailsComponent, {
+    data: {
+      details: complaint.details,
+      date: complaint.date
+    }
+  });
+}
+
 }

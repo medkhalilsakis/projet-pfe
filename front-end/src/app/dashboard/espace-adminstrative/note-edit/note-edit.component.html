@@ -1,0 +1,84 @@
+<h2 mat-dialog-title class="dialog-title">
+  {{ data.note ? 'Modifier une note / décision' : 'Nouvelle note / décision' }}
+</h2>
+
+<form mat-dialog-content
+      [formGroup]="form"
+      fxLayout="column"
+      fxLayoutGap="16px"
+      class="mat-dialog-content">
+
+  <!-- Ligne 1 : Type & Statut -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px">
+    <mat-form-field fxFlex appearance="fill">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="typeNote">
+        <mat-option *ngFor="let t of types" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('typeNote')?.hasError('required')">
+        Le type est obligatoire.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field fxFlex appearance="fill">
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="statut">
+        <mat-option *ngFor="let s of statuts" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('statut')?.hasError('required')">
+        Le statut est obligatoire.
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <!-- Ligne 2 : Titre & Remarque -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px">
+    <mat-form-field fxFlex appearance="fill">
+      <mat-label>Titre</mat-label>
+      <input matInput formControlName="titre" />
+      <mat-error *ngIf="form.get('titre')?.hasError('required')">
+        Le titre est obligatoire.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field fxFlex appearance="fill">
+      <mat-label>Remarque</mat-label>
+      <input matInput formControlName="remarque" />
+    </mat-form-field>
+  </div>
+
+  <!-- Ligne 3 : Contenu & Fichier joint -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px">
+    <mat-form-field fxFlex appearance="fill">
+      <mat-label>Contenu</mat-label>
+      <textarea matInput formControlName="contenu" rows="4"></textarea>
+      <mat-error *ngIf="form.get('contenu')?.hasError('required')">
+        Le contenu est obligatoire.
+      </mat-error>
+    </mat-form-field>
+
+    <div fxFlex class="form-field form-field--file-upload" fxLayout="column" fxLayoutGap="4px">
+      <label for="fileJointInput" class="form-label form-label--file-upload">
+        Fichier joint
+      </label>
+      <input id="fileJointInput"
+             type="file"
+             multiple
+             (change)="onFileSelected($event)"
+             class="file-upload-input" />
+      <mat-hint *ngIf="selectedFiles?.length" class="file-upload-hint">
+        {{ selectedFiles.length }} fichier(s) sélectionné(s)
+      </mat-hint>
+    </div>
+  </div>
+
+</form>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button class="mat-button" (click)="cancel()">Annuler</button>
+  <button mat-raised-button class="mat-raised-button" color="primary"
+          (click)="submit()"
+          [disabled]="form.invalid">
+    Enregistrer
+  </button>
+</mat-dialog-actions>

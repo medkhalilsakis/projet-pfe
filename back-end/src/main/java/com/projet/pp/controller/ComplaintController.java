@@ -86,4 +86,18 @@ public class ComplaintController {
     public ResponseEntity<Long> getSats(){
         return ResponseEntity.ok(complaintService.getCount());
     }
+
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long id,
+            @RequestParam("supervisorId") Long supervisorId
+    ) {
+        return complaintService.getComplaintById(id)
+                .map(c -> {
+                    c.setSuperviserId(supervisorId);
+                    complaintService.saveComplaint(c);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

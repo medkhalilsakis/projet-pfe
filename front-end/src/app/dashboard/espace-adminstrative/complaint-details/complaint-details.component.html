@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Détails de la Réclamation</h2>
+<mat-dialog-content>
+  <p>
+    <strong>Date de soumission :</strong>
+    {{ data.date 
+       | date:'fullDate':'':'fr' 
+    }}
+  </p>
+  <p><strong>Détails :</strong> {{ data.details }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button class="mat-button" (click)="close()">Fermer</button>
+</mat-dialog-actions>

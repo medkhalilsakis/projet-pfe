@@ -1,0 +1,140 @@
+/* Conteneur dialog */
+.mat-dialog-container {
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  background-color: #fafafa;
+  max-width: 580px;
+}
+
+/* Titre */
+.dialog-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2c3e50;
+  border-bottom: 2px solid #ececec;
+  padding-bottom: 0.5rem;
+}
+
+/* Champs de formulaire */
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+mat-form-field.appearance-fill .mat-form-field-flex {
+  background: #ffffff;
+  border-radius: 0.5rem;
+}
+
+.mat-form-field-label {
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.mat-input-element,
+.mat-select-trigger {
+  padding: 0.75rem 1rem;
+}
+
+/* Upload fichier */
+.file-upload-input {
+  padding: 1rem;
+  border: 2px dashed #bdc3c7;
+  border-radius: 0.5rem;
+  background: #fff;
+  transition: border-color 0.3s, background 0.3s;
+}
+.file-upload-input:hover {
+  border-color: #95a5a6;
+  background: #fbfbfb;
+}
+
+/* Erreurs */
+.mat-error {
+  font-size: 0.8rem;
+  color: #e74c3c;
+}
+
+/* Actions (boutons) */
+.dialog-actions {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ececec;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Bouton secondaire “Annuler” */
+.dialog-actions button:first-child {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  color: #34495e;
+  border: 2px solid #34495e;
+  padding: 0.6rem 1.4rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: color 0.3s, background 0.3s;
+}
+.dialog-actions button:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(52, 73, 94, 0.1);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 0;
+}
+.dialog-actions button:first-child:hover {
+  color: #ffffff;
+}
+.dialog-actions button:first-child:hover::before {
+  transform: scaleX(1);
+}
+
+/* Bouton principal “Enregistrer” */
+.dialog-actions button.mat-raised-button {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.6rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+.dialog-actions button.mat-raised-button::after {
+  content: "";
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: rgba(255, 255, 255, 0.2);
+  top: -110%;
+  left: -110%;
+  transform: rotate(45deg);
+  transition: top 0.5s, left 0.5s;
+  z-index: 0;
+}
+.dialog-actions button.mat-raised-button:hover {
+  box-shadow: 0 6px 18px rgba(26, 188, 156, 0.5);
+  transform: translateY(-2px);
+}
+.dialog-actions button.mat-raised-button:hover::after {
+  top: 100%;
+  left: 100%;
+}
+
+/* Désactivé */
+.dialog-actions button.mat-raised-button:disabled {
+  background: #bdc3c7;
+  box-shadow: none;
+  color: #ecf0f1;
+  cursor: not-allowed;
+}

@@ -1,0 +1,61 @@
+/* Conteneur du champ d’upload */
+.form-field--file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Label du champ */
+.form-label--file-upload {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* Zone d’upload (input file) */
+.file-upload-input {
+  position: relative;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #42a5f5 0%, #478ed1 100%);
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  text-align: center;
+}
+
+/* Masquer le bouton natif de l’input */
+.file-upload-input::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+/* Texte personnalisé du bouton */
+.file-upload-input::before {
+  content: "Joindre des fichiers";
+  display: block;
+  pointer-events: none;
+}
+
+/* Hover et focus */
+.file-upload-input:hover,
+.file-upload-input:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(33,150,243,0.4);
+}
+
+/* Indication du nombre de fichiers */
+.file-upload-hint {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Message d’erreur */
+.file-upload-error {
+  font-size: 0.85rem;
+  color: #e53935;
+}

@@ -38,7 +38,13 @@ export class ComplaintService {
    getComplaintCount(): Observable<any>{
     const url = `${this.baseUrl}/stats`;
    return this.http.get<any>(url);
-
-
   } 
+
+  markAsRead(id: number, supervisorId: number): Observable<void> {
+    return this.http.patch<void>(
+      `${this.baseUrl}/${id}/read`,
+      {}, // corps vide
+      { params: { supervisorId: supervisorId.toString() } }
+    );
+  }
 }

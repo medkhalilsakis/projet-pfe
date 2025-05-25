@@ -1,144 +1,381 @@
+/* === Variables de couleurs === */
+:host {
+  --color-primary: #3366ff;
+  --color-accent: #ff6633;
+  --color-bg-section: #f9fafb;
+  --color-bg-card: #ffffff;
+  --color-border: #e0e0e0;
+  --color-text: #333333;
+  --color-muted: #777777;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-hover: rgba(0, 0, 0, 0.1);
+  --transition-fast: 0.2s ease-in-out;
+  --primary-gradient: linear-gradient(45deg, #3366ff, #33ccff);
+  --accent-gradient: linear-gradient(45deg, #ff6633, #ff33cc);
+  --text-gradient: linear-gradient(45deg, #8e2de2, #4a00e0);
+}
 
+/* === Conteneur principal === */
 .dashboard-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  padding: 24px;
+  background: #f0f2f5;
 }
 
+/* === Sections === */
 .section {
-  background: white;
+  background: var(--color-bg-section);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 20px;
+  border: 1px solid var(--color-border);
+  padding: 16px;
+  box-shadow: 0 2px 4px var(--shadow-light);
+  transition: box-shadow var(--transition-fast);
+}
+.section:hover {
+  box-shadow: 0 4px 12px var(--shadow-hover);
 }
 
-.content-box {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.complaint-card {
-  background: #f5f5f5;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-.status {
-  font-weight: bold;
-}
-.status.approved {
-  color: green;
-}
-.status.rejected {
-  color: red;
-}
-.status.pending {
-  color: yellow;
-}
-
-.calendar-container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.project-list-dropdown {
-  max-width: 300px;
-  margin-top: 10px;
-}
-
-.meeting-card {
-  cursor: pointer;
-}
-
-.selected-info {
-  margin-top: 16px;
-  text-align: center;
-}
-.holiday-name {
-  color: red;
-}
-
-/* Highlight public holidays (red) */
-::ng-deep .mat-calendar-body-cell.public-holiday .mat-calendar-body-cell-content {
-  background-color: #d32f2f !important;
-  color: white !important;
-  border-radius: 50% !important;
-}
-
-/* Highlight meetings (blue) */
-::ng-deep .mat-calendar-body-cell.has-meeting .mat-calendar-body-cell-content {
-  background-color: #1976d2 !important;
-  color: white !important;
-  border-radius: 50% !important;
-}
-.content-box {
-  display: flex;
-  flex-direction: column;
-  /* gap depuis CSS moderne, sinon margin-bottom sur .request-card */
-  gap: 16px;
-}
-.content-box {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;       /* Espace entre chaque carte */
-  margin-top: 12px;
-}
-
-/* Styles communs aux cartes (réclamations, demandes, meetings) */
-.complaint-card,
-.request-card,
-.meeting-card {
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.complaint-card:hover,
-.request-card:hover,
-.meeting-card:hover {
-  background-color: #fafafa;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* Optionnel : espacer le titre de la section */
+/* === Titres de sections === */
 .section h2 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  position: relative;
+}
+.section h2::after {
+  content: "";
+  width: 48px;
+  height: 4px;
+  background: var(--color-accent);
+  display: block;
+  margin-top: 4px;
+  border-radius: 2px;
+}
+
+
+/* === Conteneur de contenu === */
+.content-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* === Cartes réutilisables === */
+.meeting-card,
+.note-card,
+.complaint-card,
+.request-card {
+  background: var(--color-bg-card);
+  border: 2px dashed #333;
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+}
+.meeting-card:hover,
+.note-card:hover,
+.complaint-card:hover,
+.request-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px var(--shadow-light);
+}
+
+/* === Titres de carte === */
+.meeting-card h4,
+.note-card .note-title,
+.complaint-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  color: var(--color-text);
+}
+
+/* === Métadonnées et textes secondaires === */
+.meeting-card p,
+.note-card,
+.complaint-card small,
+.request-card p {
+  margin: 4px 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* === Statut demandes de suspension === */
+.request-card .status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 8px;
+  text-transform: capitalize;
+}
+.request-card .status.approved {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+.request-card .status.rejected {
+  background: #fdecea;
+  color: #c62828;
+}
+.request-card .status.pending {
+  background: #fff4e5;
+  color: #ed6c02;
+}
+
+/* === État vide === */
+.empty {
+  text-align: center;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* === Calendrier full-width === */
+.section.calendar {
+  padding: 8px;
+}
+.section.calendar h2 {
   margin-bottom: 8px;
 }
-/* fichier : espace-administrative.component.css */
 
-/* Style général pour le bouton */
-.add-meeting-button {
-  /* Taille et alignement */
-  padding: 0.6rem 1.4rem;
+/* === Animations subtiles === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.meeting-card,
+.note-card,
+.complaint-card,
+.request-card {
+  animation: fadeInUp 0.3s both;
+}
+
+/* === Responsive adjustments === */
+@media (max-width: 599px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+  .section {
+    padding: 12px;
+  }
+  button[mat-raised-button],
+  button[mat-flat-button] {
+    font-size: 0.85rem;
+  }
+}
+
+.enhanced-meeting-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8rem 1.6rem;
   font-size: 1rem;
-  font-weight: 500;
-  
-  /* Couleur et fond */
-  background-color: #3f51b5;   /* même que ton primary Mat */
+  font-weight: 600;
+  text-transform: none;
   color: #fff;
-  
-  /* Bords arrondis et ombre légère */
-  border-radius: 24px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16);
-
-  /* Transition douce */
-  transition: background-color 0.3s, transform 0.2s;
+  background: linear-gradient(135deg, #4f9aff, #1e3a8a, #10b981);
+  background-size: 250% 250%;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  animation: gradientMove 5s ease infinite, hueRotate 10s linear infinite;
 }
 
-/* Effet au survol */
-.add-meeting-button:hover {
-  background-color: #303f9f;  /* un peu plus foncé */
-  transform: translateY(-2px);
+/* Icône à gauche */
+.enhanced-meeting-button .icon-left {
+  margin-right: 0.6rem;
+  font-size: 1.3rem;
+  transition: transform 0.3s ease;
 }
 
-/* Effet au clic */
-.add-meeting-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+/* Survol */
+.enhanced-meeting-button:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
+
+.enhanced-meeting-button:hover .icon-left {
+  transform: rotate(-15deg) translateY(-1px);
+}
+
+/* Clic */
+.enhanced-meeting-button:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation du dégradé */
+@keyframes gradientMove {
+  0%   { background-position: 0%   50%; }
+  33%  { background-position: 50% 100%; }
+  66%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* Animation de teinte */
+@keyframes hueRotate {
+  0%   { filter: hue-rotate(0deg); }
+  50%  { filter: hue-rotate(180deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* État loading (si nécessaire) */
+.enhanced-meeting-button.loading {
+  pointer-events: none;
+  color: rgba(255,255,255,0.8);
+  animation-play-state: paused;
+}
+
+.enhanced-meeting-button.loading .icon-left {
+  display: none;
+}
+
+.enhanced-meeting-button.loading::after {
+  content: "";
+  margin-left: 0.6rem;
+  border: 3px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* Styles de base pour tous les boutons */
+.simple-button {
+  display: inline-block;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1.2rem;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
+    transform 0.1s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  min-width: auto; /* supprime le min-width d’Angular Material */
+}
+
+/* Variante accent (rose) */
+.simple-button.mat-accent {
+  background-color: #e91e63;
+  color: #ffffff;
+  border-color: #e91e63;
+}
+
+.simple-button.mat-accent:hover,
+.simple-button.mat-accent:focus {
+  background-color: #d81b60;
+  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Variante primary (bleu) */
+.simple-button.mat-primary {
+  background-color: #1976d2;
+  color: #ffffff;
+  border-color: #1976d2;
+}
+
+.simple-button.mat-primary:hover,
+.simple-button.mat-primary:focus {
+  background-color: #1565c0;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Variante “outline” si besoin */
+.simple-button.outline {
+  background-color: transparent;
+  color: currentColor;
+  border-color: currentColor;
+}
+
+.simple-button.outline:hover,
+.simple-button.outline:focus {
+  background-color: rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+}
+
+/* État désactivé */
+.simple-button[disabled] {
+  background-color: #eeeeee;
+  color: #aaaaaa;
+  border-color: #dddddd;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* Conteneur regroupant les meta (optionnel) */
+.note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.875rem;
+  align-items: center;
+  margin-top: 4px;
+}
+
+/* Style de base pour chaque badge */
+.note-meta span {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+  cursor: default;
+}
+
+/* Statut */
+.note-statut {
+  background: #ffe8e8;
+  color: #c00;
+}
+.note-statut:hover {
+  background: #ffd4d4;
+  transform: translateY(-1px);
+}
+
+/* Type de note */
+.note-type {
+  background: #e8f0ff;
+  color: #003c8f;
+}
+.note-type:hover {
+  background: #d4e3ff;
+  transform: translateY(-1px);
+}
+
+/* Date */
+.note-date {
+  background: #f0f0f0;
+  color: #555;
+}
+.note-date:hover {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+/* Exemples de classes dynamiques pour statut */
+.note-statut.approved    { background: #e6ffed; color: #27632a; }
+.note-statut.pending     { background: #fff8e1; color: #806000; }
+.note-statut.rejected    { background: #ffe8e8; color: #c00; }
+

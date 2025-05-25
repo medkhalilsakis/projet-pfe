@@ -15,10 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -187,6 +184,13 @@ public class UserService {
         return userRepository.findAllById(ids);  // Récupère les utilisateurs par leurs IDs
     }
 
+
+    public Optional<User> getUserByIdOptional(Integer id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return userRepository.findById(id.longValue());
+    }
 
     public List<?> getAllDeveloperStats() {
 //Filter from the line before where the user.nom="user" user.prenom=deleted

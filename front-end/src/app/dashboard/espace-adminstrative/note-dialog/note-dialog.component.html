@@ -46,10 +46,47 @@
   </div>
 
   <!-- Ligne 6 : Fichier joint -->
-  <mat-form-field appearance="fill">
-    <mat-label>Fichier joint</mat-label>
-    <input matInput formControlName="fichierJoint" placeholder="Chemin ou URL" />
-  </mat-form-field>
+<div
+  class="form-field form-field--file-upload"
+  fxLayout="column"
+  fxLayoutGap="4px"
+>
+  <!-- Label du champ fichier -->
+  <label
+    for="fileJointInput"
+    class="form-label form-label--file-upload"
+  >
+    Fichier joint
+  </label>
+
+  <!-- Input natif masqué, stylé via .file-upload-input -->
+  <input
+    id="fileJointInput"
+    type="file"
+    multiple
+    (change)="onFileSelected($event)"
+    class="file-upload-input"
+  />
+
+  <!-- Indication du nombre de fichiers chargés -->
+  <mat-hint
+    *ngIf="form.get('fichierJoint')?.value?.length"
+    class="file-upload-hint"
+  >
+    {{ form.get('fichierJoint')?.value.length }}
+    fichier(s) sélectionné(s)
+  </mat-hint>
+
+  <!-- Message d’erreur si obligatoire non rempli -->
+  <mat-error
+    *ngIf="form.get('fichierJoint')?.hasError('required')"
+    class="file-upload-error"
+  >
+    Au moins un fichier est requis.
+  </mat-error>
+</div>
+
+
 
 </form>
 

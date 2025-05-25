@@ -1,0 +1,51 @@
+<ng-container *ngIf="loading">
+  <p>Chargement...</p>
+</ng-container>
+
+<ng-container *ngIf="!loading">
+  <div *ngIf="errorMessage">
+    <p class="error">{{ errorMessage }}</p>
+  </div>
+
+  <mat-card *ngIf="note">
+    <mat-card-header>
+      <mat-card-title>{{ note.titre }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ note.typeNote }} • créé le
+        {{ note.dateCreation | date:'short' }}
+      </mat-card-subtitle>
+      <div class="actions">
+          <mat-icon (click)="onEdit()">edit</mat-icon>
+          <mat-icon (click)="onDelete()">delete</mat-icon>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p><strong>Contenu : </strong>{{ note.contenu }}</p>
+
+      <p *ngIf="note.remarque">
+        <strong>Remarque :</strong> {{ note.remarque }}
+      </p>
+
+      <p *ngIf="note.statut">
+        <strong>Statut :</strong> {{ note.statut }}
+      </p>
+
+      <p *ngIf="note.dateModification">
+        <strong>Dernière modification :</strong>
+        {{ note.dateModification | date:'short' }}
+      </p>
+
+      <p *ngIf="note.fichierJoint">
+        <strong>Pièce jointe : </strong>
+        <a
+          [href]="'http://localhost:8080/api/notes-decisions/download/' + note.fichierJoint"
+          target="_blank"
+          rel="noopener"
+        >
+          Télécharger
+        </a>
+      </p>
+    </mat-card-content>
+  </mat-card>
+</ng-container>

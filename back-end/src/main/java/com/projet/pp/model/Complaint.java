@@ -21,7 +21,7 @@ public class Complaint {
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
-    @Column(name = "superviser_id", nullable = false)
+    @Column(name = "superviser_id")
     private Long superviserId;
 
     @Column(name = "complainer_id", nullable = false)

@@ -1,0 +1,113 @@
+/* Container du dialogue */
+:host ::ng-deep .mat-dialog-container {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* En-tête (titre) */
+h2[mat-dialog-title] {
+  margin-bottom: 20px;
+  padding: 16px 24px;
+  background: linear-gradient(120deg, #556cd6, #19857b);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Contenu principal */
+mat-dialog-content {
+  padding: 24px;
+  background: #fafafa;
+  color: #333;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Champ date */
+mat-dialog-content p:first-of-type {
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+mat-dialog-content p:first-of-type strong {
+  color: #333;
+}
+
+/* Paragraphes de détail */
+mat-dialog-content p + p {
+  margin-top: 16px;
+  padding-left: 8px;
+  border-left: 4px solid #19857b;
+  background: #fff;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+/* Boutons en pied de dialogue */
+mat-dialog-actions {
+  padding: 16px 24px;
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Style des boutons */
+/* Bouton mat-button (texte uniquement) */
+mat-dialog-actions button.mat-button {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #19857b;
+  background: transparent;
+  border: 2px solid transparent;
+  padding: 6px 16px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+mat-dialog-actions button.mat-button:hover {
+  background: rgba(25, 133, 123, 0.1);
+  color: #156b58;
+}
+
+/* Bouton mat-raised-button (primaire) */
+mat-dialog-actions button.mat-raised-button {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #556cd6;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+  padding: 8px 20px;
+  border-radius: 6px;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+}
+
+mat-dialog-actions button.mat-raised-button:hover {
+  background: #4054a1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.24);
+  transform: translateY(-1px);
+}
+
+mat-dialog-actions button.mat-raised-button:active {
+  background: #374482;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.20);
+  transform: translateY(0);
+}
+
+
+/* Responsive mobile */
+@media (max-width: 480px) {
+  h2[mat-dialog-title] {
+    font-size: 1.3rem;
+    text-align: center;
+  }
+  mat-dialog-content {
+    padding: 16px;
+  }
+  mat-dialog-actions {
+    padding: 12px;
+  }
+}

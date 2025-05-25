@@ -27,6 +27,7 @@ import{ProjectInProgressComponent} from './dashboard/projects/project-in-progres
 import{ProjectTermineComponent} from './dashboard/projects/project-termine/project-termine.component'
 import { InitiationPhaseComponent } from './dashboard/task-assignment/initiation-phase/initiation-phase.component';
 import { MeetingDetailsComponent } from './dashboard/espace-adminstrative/meeting-details/meeting-details.component';
+import { NoteDetailsComponent } from './dashboard/espace-adminstrative/note-details/note-details.component';
 
 export const routes: Routes = [
   { 
@@ -50,11 +51,11 @@ export const routes: Routes = [
       { path: 'projects',       component: ProjectsComponent },
       { path: 'complaints',       component: ComplaintsComponent },
       { path: 'meetings/:id',       component: MeetingDetailsComponent },
+      { path: 'notes/:id',       component: NoteDetailsComponent },
       { path: 'my-projects',       component: MyProjectsComponent },
       { path: 'projects-test',       component: ProjectTestComponent },
       { path: 'projects-in-progress',       component: ProjectInProgressComponent },
       { path: 'projects-termine',       component: ProjectTermineComponent },
-
       { path: 'projects-test/:id',       component: TestProjetDetailComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
