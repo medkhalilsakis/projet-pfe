@@ -122,20 +122,4 @@ public class MeetingController {
                         "attachment; filename=\"" + filename + "\"")
                 .body(file);
     }
-
-
-    @PostMapping(path = "/api/meetings",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Meeting> scheduleWithoutProject(
-            @RequestPart("data") MeetingRequest data,
-            @RequestPart(name = "attachments", required = false) MultipartFile[] files
-    ) {
-        try {
-            Meeting saved = svc.scheduleNoProject(data, files);
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
 }

@@ -26,6 +26,7 @@ import { EspaceAdminstrativeComponent} from './dashboard/espace-adminstrative/es
 import{ProjectInProgressComponent} from './dashboard/projects/project-in-progress/project-in-progress.component'
 import{ProjectTermineComponent} from './dashboard/projects/project-termine/project-termine.component'
 import { InitiationPhaseComponent } from './dashboard/task-assignment/initiation-phase/initiation-phase.component';
+import { MeetingDetailsComponent } from './dashboard/espace-adminstrative/meeting-details/meeting-details.component';
 
 export const routes: Routes = [
   { 
@@ -48,7 +49,7 @@ export const routes: Routes = [
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
       { path: 'complaints',       component: ComplaintsComponent },
-
+      { path: 'meetings/:id',       component: MeetingDetailsComponent },
       { path: 'my-projects',       component: MyProjectsComponent },
       { path: 'projects-test',       component: ProjectTestComponent },
       { path: 'projects-in-progress',       component: ProjectInProgressComponent },

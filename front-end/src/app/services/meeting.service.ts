@@ -67,4 +67,28 @@ export class MeetingService {
   getUserMeetings(userId: number): Observable<Meeting[]> {
     return this.http.get<Meeting[]>(`http://localhost:8080/api/users/${userId}/meetings`);
   }
+
+
+  getById(meetingId: number): Observable<Meeting> {
+    return this.http.get<Meeting>(`${this.baseGlobal}/${meetingId}`);
+  }
+
+  /** Récupérer une réunion rattachée à un projet */
+  getByProject(projectId: number, meetingId: number): Observable<Meeting> {
+    return this.http.get<Meeting>(
+      `${this.baseProject}/${projectId}/meetings/${meetingId}`
+    );
+  }
+
+  /** Mettre à jour une réunion (PATCH) */
+  update(meetingId: number, changes: Partial<Meeting>): Observable<Meeting> {
+    // Adapte l’URL selon que la réunion a ou non un projectId
+    const urlGlobal = `${this.baseGlobal}/${meetingId}`;
+    return this.http.patch<Meeting>(urlGlobal, changes);
+  }
+
+  /** Supprimer (annuler) une réunion */
+  delete(meetingId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseGlobal}/${meetingId}`);
+  }
 }

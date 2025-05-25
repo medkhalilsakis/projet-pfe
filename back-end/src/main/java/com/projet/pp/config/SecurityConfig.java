@@ -25,30 +25,27 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Permet toutes les requêtes sur tous les chemins
-                        .requestMatchers("/**").permitAll()
-
-                        // Si tu veux ajouter des règles spécifiques plus tard, tu peux le faire ici
-                        //.requestMatchers("/api/projects/**").permitAll()
-
-                        // Les autres règles peuvent être gardées si nécessaire
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        CorsConfiguration cfg = new CorsConfiguration();
+        // autoriser localhost:4200 (et tous les ports) pour credentials
+        cfg.setAllowedOriginPatterns(List.of("http://localhost:4200"));
+        // si vous voulez tester en local sur plusieurs ports, utilisez pattern wildcard :
+        // cfg.setAllowedOriginPatterns(List.of("http://localhost:*"));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));           // TOUTES les headers
+        cfg.setAllowCredentials(true);                // cookies / autorisation
+        cfg.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
     }
 
     @Bean

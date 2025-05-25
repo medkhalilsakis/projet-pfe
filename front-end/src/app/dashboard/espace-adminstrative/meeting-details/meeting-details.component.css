@@ -1,0 +1,423 @@
+:host {
+  --color-primary:    #4A90E2;  /* bleu apaisant */
+  --color-secondary:  #50E3C2;  /* vert doux */
+  --color-accent:     #F5A623;  /* orange vibrant */
+  --color-bg:         #F2F7FA;  /* gris clair */
+  --color-surface:    #FFFFFF;  /* blanc pur */
+  --color-text:       #333333;  /* gris foncé */
+  --color-muted:      #777777;  /* gris doux */
+  --elevation-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --border-radius:    8px;
+  --transition-fast:  0.2s ease-in-out;
+  --transition-slow:  0.4s ease-in-out;
+  --clr-bg-form:       #fafcff;   /* fond très clair */
+  --clr-surface:       #ffffff;   /* cartes / champs */
+  --clr-primary:       #3F51B5;   /* Indigo foncé */
+  --clr-secondary:     #FF4081;   /* Rose vibrant */
+  --clr-accent:        #03A9F4;   /* Bleu clair */
+  --clr-error:         #F44336;   /* Rouge alerte */
+  --clr-text:          #212121;   /* Texte sombre */
+  --clr-muted:         #757575;   /* Texte secondaire */
+  --shadow-light:      0 2px 4px rgba(0,0,0,0.1);
+  --shadow-medium:     0 4px 8px rgba(0,0,0,0.15);
+  --radius:            8px;
+  --transition-fast:   0.2s ease-in-out;
+  --transition-slow:   0.4s ease-out;
+}
+
+/* Conteneur général */
+.meeting-details {
+  background: var(--color-bg);
+  padding: 24px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--elevation-shadow);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: var(--color-text);
+}
+
+/* Blocs (sections) */
+.block {
+  background: var(--color-surface);
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--elevation-shadow);
+  transition: box-shadow var(--transition-fast);
+}
+.block:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Titres de section */
+.block h3 {
+  margin-top: 0;
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  border-bottom: 2px solid var(--color-secondary);
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+/* Liste de participants */
+.mat-list .mat-list-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  animation: fadeInUp 0.3s ease forwards;
+}
+.participant-name {
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+/* Bouton d’icône de suppression */
+.mat-icon-button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+.mat-icon-button:hover {
+  color: #e07b1f;
+  transform: scale(1.2);
+}
+
+/* Menu d’actions (bas de page) */
+.actions {
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--elevation-shadow);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Boutons »
+```html
+<button mat-button>  // standard
+<button mat-raised-button>  // focus primary
+/* Style général des boutons */
+button.mat-button,
+button.mat-raised-button {
+font-weight: 600;
+border-radius: var(--border-radius);
+transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Bouton « Modifier » */
+button.mat-button[color="accent"] {
+color: var(--color-secondary);
+}
+button.mat-button[color="accent"]:hover {
+background: rgba(80, 227, 194, 0.1);
+}
+
+/* Bouton « Annuler » */
+button.mat-button[color="warn"] {
+color: #d0021b;
+}
+button.mat-button[color="warn"]:hover {
+background: rgba(208, 2, 27, 0.1);
+}
+
+/* Bouton principal « Enregistrer » */
+button.mat-raised-button[color="primary"] {
+background: var(--color-primary);
+color: #fff;
+box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+}
+button.mat-raised-button[color="primary"]:hover {
+background: #3a7dc4;
+box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Animations clés */
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+.meeting-details {
+padding: 16px;
+}
+.actions {
+flex-direction: column;
+align-items: stretch;
+}
+.actions button {
+width: 100%;
+}
+}
+
+
+/* Section Pièces jointes */
+.block.attachments {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.block.attachments:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.block.attachments h3 {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  color: #4A90E2;
+  border-bottom: 2px solid #50E3C2;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+/* Liste sans puces, alignée*/
+.block.attachments ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Chaque élément de fichier */
+.block.attachments li {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #E0E0E0;
+  transition: background 0.2s;
+}
+/* Survol de la ligne */
+.block.attachments li:hover {
+  background: #f9faff;
+}
+.block.attachments li:hover::before {
+  transform: scale(1.2);
+}
+
+/* Lien texte */
+.block.attachments a {
+  flex: 1;
+  color: #333333;
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+/* Hover sur le lien */
+.block.attachments a:hover {
+  color: #4A90E2;
+}
+
+
+.block.attachments li a:hover::after {
+  color: #50E3C2;
+  transform: translateX(4px);
+}
+
+
+
+
+
+
+/*────────────────────────────────────────────
+  Conteneur du formulaire
+────────────────────────────────────────────*/
+.form.meeting-edit-form {
+  background: var(--clr-bg-form);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.3s var(--transition-slow) forwards;
+}
+
+
+
+/*────────────────────────────────────────────
+  Mat Form Field – aspect général
+────────────────────────────────────────────*/
+.mat-form-field {
+  background: var(--clr-surface);
+  border-radius: var(--radius);
+  padding: 8px;
+  box-shadow: var(--shadow-light);
+  transition: box-shadow var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.mat-form-field:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+/* Focused Outline */
+.mat-form-field.mat-focused .mat-form-field-outline {
+  border-color: var(--clr-accent) !important;
+}
+
+/*────────────────────────────────────────────
+  Champs ‘Sujet’ & ‘Date’
+────────────────────────────────────────────*/
+.mat-input--subject,
+.mat-input--date {
+  font-size: 1rem;
+  color: var(--clr-text);
+}
+
+/*────────────────────────────────────────────
+  Champ Description (textarea)
+────────────────────────────────────────────*/
+.mat-form-field--description textarea {
+  min-height: 100px;
+  font-family: inherit;
+  color: var(--clr-text);
+}
+
+/*────────────────────────────────────────────
+  Section Participants (édition)
+────────────────────────────────────────────*/
+.participants-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--clr-primary);
+  border-bottom: 2px solid var(--clr-secondary);
+  padding-bottom: 4px;
+}
+
+/* Ligne d’un participant */
+.participant-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background var(--transition-fast);
+}
+
+.participant-row:hover {
+  background: rgba(63,81,181,0.05);
+}
+
+/* Sélecteur Material dans participant */
+.mat-form-field--participant-select {
+  background: var(--clr-surface);
+}
+
+/*────────────────────────────────────────────
+  Mat Select & Mat Option
+────────────────────────────────────────────*/
+.mat-select--participant {
+  color: var(--clr-text);
+}
+
+.mat-option--participant {
+  transition: background var(--transition-fast);
+}
+
+.mat-option--participant:hover {
+  background: rgba(3,169,244,0.1);
+}
+
+/*────────────────────────────────────────────
+  Boutons icônes (‘remove’)
+────────────────────────────────────────────*/
+.mat-icon-button--remove {
+  color: var(--clr-error);
+  transition: color var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.mat-icon-button--remove:hover {
+  color: #d32f2f;
+  transform: scale(1.2);
+}
+
+/*────────────────────────────────────────────
+  Bouton ‘Ajouter un participant’
+────────────────────────────────────────────*/
+.mat-button--add {
+  color: var(--clr-accent);
+  font-weight: 500;
+  transition: background var(--transition-fast);
+}
+
+.mat-button--add:hover {
+  background: rgba(3,169,244,0.1);
+}
+
+/*────────────────────────────────────────────
+  Messages d’erreur
+────────────────────────────────────────────*/
+.error.error--participants {
+  color: var(--clr-error);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+
+/* Bouton ‘Annuler’ */
+.mat-button.mat-button--cancel {
+  color: var(--clr-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: background var(--transition-fast);
+}
+
+.mat-button.mat-button--cancel:hover {
+  background: rgba(255,64,129,0.1);
+}
+
+/* Bouton ‘Enregistrer’ */
+.mat-raised-button.mat-raised-button--save {
+  background: var(--clr-primary);
+  color: #fff;
+  box-shadow: var(--shadow-medium);
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: background var(--transition-fast),
+              box-shadow var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.mat-raised-button.mat-raised-button--save:hover {
+  background: #354495;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+}
+
+/*────────────────────────────────────────────
+  Animations clés
+────────────────────────────────────────────*/
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/*────────────────────────────────────────────
+  Responsive tweaks
+────────────────────────────────────────────*/
+@media (max-width: 768px) {
+  .mat-form-field {
+    box-shadow: var(--shadow-light);
+    transform: none !important;
+  }
+}

@@ -13,4 +13,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByUser(User user);
     @Query("SELECT n FROM Notification n WHERE n.user = :user AND n.isRead = false")
     List<Notification> findUnreadByUser(@Param("user") User user);
+
+    int deleteByMeeting_Id(Long meetingId);
 }

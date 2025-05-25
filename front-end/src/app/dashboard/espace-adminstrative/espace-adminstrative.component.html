@@ -18,19 +18,21 @@
       </div>
 
       <div class="content-box" fxLayout="column" fxLayoutGap="16px">
-        <div
-          class="meeting-card"
-          *ngFor="let m of meetings"
-          (click)="rootToProject(m.project.id)"
-        >
+        <div class="meeting-card" *ngFor="let m of meetings">
           <h4>{{ m.subject }}</h4>
           <p>
             <strong>Date :</strong>
             {{ m.date | date:'mediumDate' }} à {{ m.date | date:'shortTime' }}
           </p>
           <p><strong>Description :</strong> {{ m.description }}</p>
-          <p><strong>Projet :</strong> {{ m.project.name }}</p>
-        </div>
+          <p *ngIf="m.project"><strong>Projet :</strong> {{ m.project.name }}</p>
+
+          <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+            <button mat-button color="accent" (click)="openMeetingDetails(m)">Détails</button>
+            <button *ngIf="m.project" mat-button color="primary" (click)="rootToProject(m.project.id)">Aller au projet</button>
+          </div>
+</div>
+
         <p *ngIf="!meetings.length" class="empty">Aucune réunion planifiée.</p>
       </div>
     </section>

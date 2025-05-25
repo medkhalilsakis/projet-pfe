@@ -1,1 +1,63 @@
-<p>note-dialog works!</p>
+<h2 mat-dialog-title class="dialog-title">
+  {{ data.note ? 'Modifier une note' : 'Nouvelle note / décision' }}
+</h2>
+
+<form mat-dialog-content
+      [formGroup]="form"
+      fxLayout="column"
+      fxLayoutGap="16px">
+
+  <!-- Ligne 1 : Type & Statut -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px">
+    <mat-form-field fxFlex>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="typeNote">
+        <mat-option *ngFor="let t of types" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field fxFlex>
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="statut">
+        <mat-option *ngFor="let s of statuts" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Ligne 2 : Titre -->
+  <mat-form-field appearance="fill">
+    <mat-label>Titre</mat-label>
+    <input matInput formControlName="titre" />
+  </mat-form-field>
+
+  <!-- Ligne 3 : Contenu -->
+  <mat-form-field appearance="fill">
+    <mat-label>Contenu</mat-label>
+    <textarea matInput formControlName="contenu" rows="4"></textarea>
+  </mat-form-field>
+
+
+  <!-- Ligne 5 : Superviseur & Remarque -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px">
+    <mat-form-field fxFlex>
+      <mat-label>Remarque</mat-label>
+      <input matInput formControlName="remarque" />
+    </mat-form-field>
+  </div>
+
+  <!-- Ligne 6 : Fichier joint -->
+  <mat-form-field appearance="fill">
+    <mat-label>Fichier joint</mat-label>
+    <input matInput formControlName="fichierJoint" placeholder="Chemin ou URL" />
+  </mat-form-field>
+
+</form>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary"
+          (click)="submit()"
+          [disabled]="form.invalid">
+    Enregistrer
+  </button>
+</mat-dialog-actions>

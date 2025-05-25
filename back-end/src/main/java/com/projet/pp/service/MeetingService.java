@@ -6,6 +6,7 @@ import com.projet.pp.model.Meeting;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.User;
 import com.projet.pp.repository.MeetingRepository;
+import com.projet.pp.repository.NotificationRepository;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +15,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.UUID;
+
+import java.util.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class MeetingService {
@@ -30,11 +30,60 @@ public class MeetingService {
     @Autowired private MeetingRepository meetingRepo;
     @Autowired private ProjectRepository projectRepo;
     @Autowired private UserRepository userRepo;
+    @Autowired private NotificationRepository notificationRepo;
 
     public MeetingService() throws IOException {
         Files.createDirectories(storageDir);
     }
 
+    public Optional<Meeting> findById(Long meetingId) {
+        return meetingRepo.findById(meetingId);
+    }
+
+    @Transactional
+    public Meeting update(Long meetingId, MeetingRequest req) {
+        Meeting m = meetingRepo.findById(meetingId)
+                .orElseThrow(() -> new NoSuchElementException("Meeting introuvable"));
+
+        m.setSubject(req.getSubject());
+        m.setDate(req.getDate());
+        m.setDescription(req.getDescription());
+
+        // → mettre à jour la liste des IDs cochés
+        m.setParticipantsIds(req.getParticipantsIds());
+
+        return meetingRepo.save(m);
+    }
+
+    public boolean existsById(Long meetingId) {
+        return meetingRepo.existsById(meetingId);
+    }
+
+    @Transactional
+    public void deleteById(Long meetingId) {
+        // 1) Charger la réunion (ou échouer si introuvable)
+        Meeting m = meetingRepo.findById(meetingId)
+                .orElseThrow(() -> new NoSuchElementException("Réunion introuvable pour id=" + meetingId));
+
+        // 2) Supprimer d’abord toutes les notifications liées
+        notificationRepo.deleteByMeeting_Id(meetingId);
+
+        // 3) Supprimer physiquement les pièces-jointes
+        if (m.getAttachments() != null) {
+            for (String filename : m.getAttachments()) {
+                try {
+                    Path file = storageDir.resolve(filename).normalize();
+                    Files.deleteIfExists(file);
+                } catch (IOException ex) {
+                    // log et continuer
+                    System.err.println("Erreur suppression fichier " + filename + ": " + ex.getMessage());
+                }
+            }
+        }
+
+        // 4) Enfin supprimer l’entité Meeting
+        meetingRepo.deleteById(meetingId);
+    }
     @Transactional
     public Meeting schedule(Long projectId, MeetingRequest req, MultipartFile[] attachments) throws IOException {
         Project project = projectRepo.findById(projectId)

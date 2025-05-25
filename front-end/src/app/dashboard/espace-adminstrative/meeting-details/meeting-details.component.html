@@ -1,0 +1,173 @@
+<div class="meeting-details" *ngIf="meeting" fxLayout="column" fxLayoutGap="16px">
+
+  <!-- Titre -->
+  <h2>Réunion #{{ meeting.id }}</h2>
+
+  <!-- MODE ÉDITION -->
+    <form
+    class="form meeting-edit-form"
+    [formGroup]="form"
+    *ngIf="editMode; else viewMode"
+    fxLayout="column"
+    fxLayoutGap="16px"
+    >
+
+    <!-- Ligne 1 : Sujet & Date -->
+    <div
+        class="row row--subject-date"
+        fxLayout="row"
+        fxLayout.lt-md="column"
+        fxLayoutGap="16px"
+    >
+        <mat-form-field
+        class="mat-form-field mat-form-field--subject"
+        appearance="fill"
+        fxFlex="50"
+        fxFlex.lt-md="100"
+        >
+        <mat-label class="mat-form-field-label">Sujet</mat-label>
+        <input
+            class="mat-input mat-input--subject"
+            matInput
+            formControlName="subject"
+        />
+        </mat-form-field>
+
+        <mat-form-field
+        class="mat-form-field mat-form-field--date"
+        appearance="fill"
+        fxFlex="50"
+        fxFlex.lt-md="100"
+        >
+        <mat-label class="mat-form-field-label">Date & heure</mat-label>
+        <input
+            class="mat-input mat-input--date"
+            matInput
+            type="datetime-local"
+            formControlName="date"
+        />
+        </mat-form-field>
+    </div>
+
+    <!-- Ligne 2 : Description -->
+    <mat-form-field
+        class="mat-form-field mat-form-field--description"
+        appearance="fill"
+        fxFlex="100"
+    >
+        <mat-label class="mat-form-field-label">Description</mat-label>
+        <textarea
+        class="mat-input mat-input--description"
+        matInput
+        rows="3"
+        formControlName="description"
+        ></textarea>
+    </mat-form-field>
+
+    <!-- Ligne 3 : Participants éditables avec mat-list + mat-checkbox -->
+    <div
+        class="section participants-edit-section"
+        fxLayout="column"
+        fxLayoutGap="8px"
+    >
+        <h3 class="section-title">Participants</h3>
+
+        <mat-list class="participants-list">
+        <mat-list-item
+            class="participants-list-item"
+            *ngFor="let u of allUsers; let idx = index"
+        >
+            <mat-checkbox
+    class="participant-checkbox"
+    [checked]="isChecked(u.id!)"
+    (change)="toggleUser(u.id!, $event.checked)"
+  >
+    {{ u.nom }} {{ u.prenom }} <span class="participant-role">({{ u.role?.libelle }})</span>
+  </mat-checkbox>
+        </mat-list-item>
+        </mat-list>
+
+        <div
+        class="error error--participants"
+        *ngIf="form.get('participants')?.invalid && form.touched"
+        >
+        Il faut sélectionner au moins un participant.
+        </div>
+    </div>
+
+    <!-- Menu d’actions en bas -->
+    <div
+        class="form-actions"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+        fxLayoutGap="12px"
+    >
+        <button
+        mat-button
+        class="mat-button mat-button--cancel"
+        (click)="toggleEdit()"
+        >
+        Annuler
+        </button>
+        <button
+        mat-raised-button
+        class="mat-raised-button mat-raised-button--save"
+        color="primary"
+        (click)="save()"
+        [disabled]="form.invalid"
+        >
+        Enregistrer
+        </button>
+    </div>
+    </form>
+
+
+  <!-- MODE AFFICHAGE -->
+  <ng-template #viewMode>
+  <!-- Ligne 1 : Sujet & Date -->
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px">
+    <section fxFlex="50" fxFlex.lt-md="100" class="block">
+      <h3>Sujet</h3>
+      <p>{{ meeting.subject }}</p>
+    </section>
+    <section fxFlex="50" fxFlex.lt-md="100" class="block">
+      <h3>Date & heure</h3>
+      <p>{{ meeting.date | date: "EEEE d MMMM yyyy 'à' HH:mm:ss" }}</p>
+    </section>
+  </div>
+
+  <!-- Ligne 2 : Description & Pièces jointes -->
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px">
+    <!-- Bloc Description -->
+    <section fxFlex="50" fxFlex.lt-md="100" class="block">
+      <h3>Description</h3>
+      <p>{{ meeting.description }}</p>
+    </section>
+
+    <!-- Bloc Pièces Jointes -->
+    <section
+      fxFlex="50"
+      fxFlex.lt-md="100"
+      class="block attachments"
+      *ngIf="meeting.attachments?.length"
+    >
+      <h3>Pièces jointes</h3>
+      <ul class="attachments-list">
+        <li *ngFor="let f of meeting.attachments" class="attachments-list-item">
+          <mat-icon class="attachments-icon">attach_file</mat-icon>
+          <a
+            class="attachments-link"
+            [href]="'/api/projects/' + meeting.projectId + '/meetings/attachments/' + f"
+            target="_blank"
+          >{{ f }}</a>
+        </li>
+      </ul>
+    </section>
+  </div>
+    <!-- Menu d’actions en bas (full width) -->
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px" class="block">
+      <button mat-button class="mat-button" color="accent" (click)="toggleEdit()">Modifier</button>
+      <button mat-button class="mat-button" color="warn" (click)="cancelMeeting()">Annuler la réunion</button>
+    </div>
+  </ng-template>
+</div>

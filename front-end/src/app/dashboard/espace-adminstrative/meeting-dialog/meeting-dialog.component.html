@@ -1,51 +1,80 @@
-<h1 mat-dialog-title>Planifier une réunion</h1>
-<div mat-dialog-content [formGroup]="form" fxLayout="column" fxLayoutGap="12px">
+<h1 mat-dialog-title class="dialog-title">Planifier une réunion</h1>
 
-  <!-- Sélecteur de projet (optionnel) -->
-  <mat-form-field appearance="fill">
-    <mat-label>Projet (optionnel)</mat-label>
-    <mat-select formControlName="projectId">
-      <mat-option [value]="null">Aucun</mat-option>
-      <mat-option *ngFor="let p of projects" [value]="p.id">
-        {{ p.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+<div mat-dialog-content 
+     class="dialog-content"
+     [formGroup]="form"
+     fxLayout="column"
+     fxLayoutGap="16px">
 
-  <mat-form-field appearance="fill">
-    <mat-label>Sujet</mat-label>
-    <input matInput formControlName="subject" />
-  </mat-form-field>
+  <!-- Ligne 1 : Sujet & Date -->
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px">
+    <mat-form-field class="form-field form-field--subject" fxFlex>
+      <mat-label class="form-label">Sujet</mat-label>
+      <input class="form-input" matInput formControlName="subject" />
+    </mat-form-field>
 
-  <mat-form-field appearance="fill">
-    <mat-label>Date &amp; Heure</mat-label>
-    <input matInput type="datetime-local" formControlName="date" />
-  </mat-form-field>
+    <mat-form-field class="form-field form-field--date" fxFlex>
+      <mat-label class="form-label">Date &amp; Heure</mat-label>
+      <input class="form-input" matInput type="datetime-local" formControlName="date" />
+    </mat-form-field>
+  </div>
 
-  <mat-form-field appearance="fill">
-    <mat-label>Participants</mat-label>
-    <mat-select formControlName="participantsIds" multiple>
-      <mat-option *ngFor="let u of allUsers" [value]="u.id">
-        {{ u.nom }} {{ u.prenom }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+  <!-- Ligne 2 : Participants & Projet -->
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px">
+    <mat-form-field class="form-field form-field--participants" fxFlex>
+      <mat-label class="form-label">Participants</mat-label>
+      <mat-select class="form-select" formControlName="participantsIds" multiple>
+        <mat-option class="form-option" 
+                    *ngFor="let u of allUsers" 
+                    [value]="u.id">
+          {{ u.nom }} {{ u.prenom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-  <mat-form-field appearance="fill">
-    <mat-label>Description</mat-label>
-    <textarea matInput formControlName="description" rows="3"></textarea>
-  </mat-form-field>
+    <mat-form-field class="form-field form-field--project" fxFlex>
+      <mat-label class="form-label">Projet (optionnel)</mat-label>
+      <mat-select class="form-select" formControlName="projectId">
+        <mat-option class="form-option" [value]="null">Aucun</mat-option>
+        <mat-option class="form-option" *ngFor="let p of projects" [value]="p.id">
+          {{ p.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-  <div>
-    <label for="fileUpload">Pièces jointes</label>
-    <input id="fileUpload" type="file" (change)="onFileChange($event)" multiple />
+  <!-- Ligne 3 : Description -->
+  <div fxLayout="row" fxLayout.lt-md="column">
+    <mat-form-field class="form-field form-field--description" fxFlex>
+      <mat-label class="form-label">Description</mat-label>
+      <textarea class="form-textarea" 
+                matInput 
+                formControlName="description" 
+                rows="4">
+      </textarea>
+    </mat-form-field>
+  </div>
+
+  <!-- Ligne 4 : Pièces jointes -->
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px" class="attachments-section" fxFlex>
+    <label for="fileUpload" class="attachments-label">Pièces jointes</label>
+    <input id="fileUpload" 
+           class="attachments-input" 
+           type="file" 
+           (change)="onFileChange($event)" 
+           multiple />
   </div>
 
 </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
+<!-- Zone des boutons -->
+<div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="12px">
+  <button mat-button class="action-button action-cancel" (click)="cancel()">Annuler</button>
+  <button mat-raised-button 
+          class="action-button action-submit" 
+          color="primary" 
+          (click)="submit()" 
+          [disabled]="form.invalid">
     Enregistrer
   </button>
 </div>

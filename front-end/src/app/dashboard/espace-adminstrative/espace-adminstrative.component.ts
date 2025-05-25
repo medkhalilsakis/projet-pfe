@@ -15,7 +15,6 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog } from '@angular/material/dialog';
-import { MeetingDialogComponent } from '../projects/project-test/test-projet-detail/meeting-dialog/meeting-dialog.component';
 import { UserService } from '../../services/users.service';
 import { MeetingService } from '../../services/meeting.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,6 +34,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { NoteDecisionService } from '../../services/note-decision.service';
 import { NoteDialogComponent } from './note-dialog/note-dialog.component';
 import { Meeting } from '../../models/meeting.model';
+import { MeetingDialogComponent } from './meeting-dialog/meeting-dialog.component';
 
 setOptions ( {
   theme: 'ios', // or other theme
@@ -307,6 +307,7 @@ loadAllMeetings() {
       // 2) Ouvre le dialog
       const dialogRef = this.dialog.open(MeetingDialogComponent, {
         width: '600px',
+        height: '90vh',
         data: {
           allUsers: otherUsers
         }
@@ -402,5 +403,13 @@ showAddMeetingDialog(projectId: number) {
       }
     });
   });
+}
+
+openMeetingDetails(m: Meeting): void {
+  if (m.projectId) {
+    this.router.navigate(['/dashboard/projects', m.projectId, 'meetings', m.id]);
+  } else {
+    this.router.navigate(['/dashboard/meetings', m.id]);
+  }
 }
 }
