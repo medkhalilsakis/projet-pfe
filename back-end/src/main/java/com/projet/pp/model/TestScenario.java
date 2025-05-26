@@ -22,8 +22,10 @@ public class TestScenario {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
 
     /**
      * Relation vers le projet testé

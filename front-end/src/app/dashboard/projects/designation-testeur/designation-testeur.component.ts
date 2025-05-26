@@ -20,6 +20,7 @@ import { FinishedProjectDetail } from '../../../models/finished-project-detail.m
 import { Project } from '../../../models/project.model';
 import { TestScenarioComponent } from './test-scenario/test-scenario.component';
 import { MatDialog } from '@angular/material/dialog';
+import { TestScenarioService } from '../../../services/test-scenario.service';
 
 @Component({
   selector: 'app-designation-testeur',
@@ -59,14 +60,16 @@ export class DesignationTesteurComponent implements OnInit {
   /** pour chaque projet, nouveaux testeurs à ajouter */
   newTesteursMap: { [projectId: number]: number[] } = {};
 
+  scenarioExistsMap: { [projectId: number]: boolean } = {};
+
   constructor(
     private svc: AssignmentService,
     private session: SessionStorageService,
     private userSvc: UserService,
     private snack: MatSnackBar,
     private datePipe: DatePipe,
-    private dialog: MatDialog
-
+    private dialog: MatDialog,
+    private scenarioSvc: TestScenarioService,
   ) {
     this.superviseurId = this.session.getUser().id;
   }
@@ -77,14 +80,23 @@ export class DesignationTesteurComponent implements OnInit {
     this.loadFinishedDetails();
   }
 
-  loadAll() {
-    this.svc.getPending().subscribe(p => this.pending = p);
-    this.svc.getInTest().subscribe(p => {
-    this.inTest = p;
-      // pour chaque projet, charger ses assignations
-    //  p.forEach(proj => this.loadAssignments(proj.id));
+    private loadAll() {
+    this.svc.getPending().subscribe(p => {
+      this.pending = p;
+      this.checkScenariosExistence(p);
     });
-    //this.svc.getFinished().subscribe(p => this.finished = p);
+    this.svc.getInTest().subscribe(p => {
+      this.inTest = p;
+      this.checkScenariosExistence(p);
+    });
+    this.loadFinishedDetails();
+  }
+
+  private checkScenariosExistence(list: Project[]): void {
+    list.forEach(proj => {
+      this.scenarioSvc.existsForProject(proj.id)
+        .subscribe(exists => this.scenarioExistsMap[proj.id] = exists);
+    });
   }
 
   refreshAll() {

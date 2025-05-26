@@ -31,7 +31,12 @@
             </div>
           </mat-card-content>
           <mat-card-actions align="end" class="dt-card-actions">
-            <button mat-stroked-button class="dt-btn dt-btn-warn" (click)="ScenarioTest(proj.id)">Scénario de test</button>
+          <button mat-stroked-button
+                  class="dt-btn dt-btn-warn"
+                  *ngIf="!scenarioExistsMap[proj.id]"
+                  (click)="ScenarioTest(proj.id)">
+            Scénario de test
+          </button>
             <button mat-flat-button
                     class="dt-btn dt-btn-primary"
                     (click)="assign(proj.id)">

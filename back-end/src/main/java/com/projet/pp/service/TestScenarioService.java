@@ -24,6 +24,11 @@ public class TestScenarioService {
         return repo.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByProjectId(Long projectId) {
+        return repo.existsByProject_Id(projectId);
+    }
+
     @Transactional
     public TestScenario save(TestScenario scenario) {
         return repo.save(scenario);

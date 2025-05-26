@@ -34,4 +34,9 @@ export class TestScenarioService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  existsForProject(projectId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/exists/${projectId}`);
+  }
+
 }

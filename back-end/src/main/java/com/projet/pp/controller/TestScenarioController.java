@@ -127,4 +127,12 @@ public class TestScenarioController {
             return ResponseEntity.ok(result);
         }).orElse(ResponseEntity.notFound().build());
     }
+
+
+    @GetMapping("/exists/{projectId}")
+    public ResponseEntity<Boolean> existsForProject(@PathVariable Long projectId) {
+        boolean exists = service.existsByProjectId(projectId);
+        return ResponseEntity.ok(exists);
+    }
+
 }

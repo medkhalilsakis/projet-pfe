@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TestScenarioRepository extends JpaRepository<TestScenario, Long> {
+    boolean existsByProject_Id(Long projectId);
 }
