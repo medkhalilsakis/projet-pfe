@@ -1,29 +1,227 @@
-/* Container général pour la grille */
+/* === GRID LAYOUT : toujours 3 colonnes égales === */
 .projects-grid {
-  margin: 16px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  gap: 16px;
+  padding: 12px;
 }
 
-/* Style des cartes projets */
-.project-card {
+/* Force la même taille quelle que soit la ligne */
+.grid-item {
+  /* prend 100% de la colonne, pas plus */
+  width: 100%;
+}
+
+/* === Card styling === */
+.dt-project-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  justify-content: space-between;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.25s, box-shadow 0.25s;
+  position: relative;
+}
+.dt-project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
 
-  mat-card-header {
-    background: #f5f5f5;
+/* Bande verticale dégradée */
+.dt-project-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 6px; height: 100%;
+  background: linear-gradient(180deg,#42a5f5,#1e88e5);
+}
+
+/* === Header === */
+.dt-card-header {
+  background: #1e88e5;
+  padding: 16px;
+  border-top-right-radius: 10px;
+}
+.dt-card-title {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* === Contenu === */
+.dt-card-content {
+  padding: 16px;
+  font-size: 0.95rem;
+  color: #333;
+}
+.full-width {
+  width: 100%;
+}
+.dt-form-field {
+  margin-bottom: 12px;
+}
+.dt-label {
+  font-weight: 500;
+  color: #444;
+}
+
+/* Upload PDF */
+.dt-upload-wrapper {
+  margin-top: 8px;
+}
+.dt-upload-input {
+  display: block;
+  margin-top: 4px;
+  border: 1px dashed #ccc;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dt-upload-input:hover {
+  background: #f0f0f0;
+}
+
+/* === Actions === */
+.dt-card-actions {
+  padding: 16px;
+  background: #fafafa;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* === Boutons “premium” === */
+
+.dt-btn {
+  position: relative;
+  display: inline-block;
+  padding: 0.6em 1.8em;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff8a65, #d84315);
+  box-shadow: 0 4px 12px rgba(216,67,21,0.3);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Variation “primary” */
+.dt-btn-primary {
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+  box-shadow: 0 4px 12px rgba(30,136,229,0.3);
+}
+.dt-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(30,136,229,0.4);
+}
+
+/* Variation “warn” */
+.dt-btn-warn {
+  background: linear-gradient(135deg, #f06292, #c2185b);
+  box-shadow: 0 4px 12px rgba(194,24,91,0.3);
+}
+.dt-btn-warn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(194,24,91,0.4);
+}
+
+/* Variation “accent” */
+.dt-btn-accent {
+  background: linear-gradient(135deg, #66bb6a, #2e7d32);
+  box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+}
+.dt-btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46,125,50,0.4);
+}
+
+/* Effet “ripple” CSS pur */
+.dt-btn::after {
+  content: "";
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: 50%;
+  left: 50%;
+  background: rgba(255,255,255,0.2);
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  pointer-events: none;
+}
+.dt-btn:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  transition: transform 0s, opacity 0.4s ease-out;
+}
+
+/* Désactivation */
+.dt-btn:disabled,
+.dt-btn[disabled] {
+  background: #ccc !important;
+  color: #777 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
+/* === Divider & List === */
+.dt-divider {
+  margin: 16px 0;
+  border-color: #e0e0e0;
+}
+.dt-assigned-list h4 {
+  margin-bottom: 8px;
+  color: #1976d2;
+}
+.dt-assigned-item {
+  margin-bottom: 4px;
+}
+.dt-assigned-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+}
+
+/* === Finished / Pause styling === */
+.dt-finished-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dt-finished-icon {
+  font-size: 24px;
+  color: #757575;
+}
+.dt-finished-text {
+  font-size: 0.95rem;
+  color: #444;
+}
+.dt-finished-date {
+  margin-left: 8px;
+  font-weight: 600;
+}
+.dt-finished-supervisor,
+.dt-finished-testers {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* === Responsive fallback === */
+@media (max-width: 800px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-
-  mat-card-content {
-    flex: 1;
-    padding: 16px;
-  }
-
-  .full-width {
-    width: 100%;
-  }
-
-  mat-card-actions {
-    padding: 8px 16px;
-    justify-content: flex-end;
+}
+@media (max-width: 500px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
   }
 }

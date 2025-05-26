@@ -1,0 +1,64 @@
+<!-- test-scenario.component.html -->
+<div fxLayout="column" fxLayoutGap="24px" class="ts-container">
+  <h2 class="ts-title" fxFlex="none">Créer un scénario de test</h2>
+
+  <form [formGroup]="scenarioForm" (ngSubmit)="submit()" fxLayout="column" fxLayoutGap="20px" class="ts-form">
+
+    <!-- Nom et description du scénario -->
+    <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="16px">
+      <mat-form-field appearance="outline" fxFlex>
+        <mat-label>Nom du scénario *</mat-label>
+        <input matInput formControlName="name" placeholder="Entrez un nom" />
+        <mat-error *ngIf="scenarioForm.get('name')?.hasError('required')">
+          Ce champ est obligatoire
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex>
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2" placeholder="Optionnel"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Étapes du scénario -->
+    <div fxLayout="column" fxLayoutGap="12px" class="ts-steps">
+      <h3 class="ts-steps-title">Étapes</h3>
+      <div formArrayName="steps">
+        <div *ngFor="let step of steps.controls; let i = index" [formGroupName]="i"
+             fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="12px" fxLayoutAlign="start center" class="ts-step-row">
+
+          <mat-form-field appearance="outline" fxFlex class="ts-step-field">
+            <mat-label>Description étape *</mat-label>
+            <input matInput formControlName="description" placeholder="Décrivez l’étape" />
+            <mat-error *ngIf="step.get('description')?.invalid">
+              Obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" fxFlex class="ts-step-field">
+            <mat-label>Résultat attendu *</mat-label>
+            <input matInput formControlName="expected" placeholder="Résultat attendu" />
+            <mat-error *ngIf="step.get('expected')?.invalid">
+              Obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-icon-button color="warn" aria-label="Supprimer étape" (click)="removeStep(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-stroked-button color="primary" (click)="addStep()" class="ts-add-btn">
+        <mat-icon>add</mat-icon>
+        Ajouter une étape
+      </button>
+    </div>
+
+    <!-- Bouton d’enregistrement -->
+    <div fxLayout="row" fxLayoutAlign="end">
+      <button mat-flat-button color="accent" class="ts-submit-btn" [disabled]="!scenarioForm.valid">
+        Enregistrer
+      </button>
+    </div>
+  </form>
+</div>

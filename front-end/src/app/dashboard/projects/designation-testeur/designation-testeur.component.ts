@@ -17,13 +17,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { User } from '../../../models/user.model';
 import { ProjectTesterAssignment } from '../../../models/assignment.model';
 import { FinishedProjectDetail } from '../../../models/finished-project-detail.model';
-
-interface Project {
-  id: number;
-  name: string;
-  status: number;
-  // etc.
-}
+import { Project } from '../../../models/project.model';
+import { TestScenarioComponent } from './test-scenario/test-scenario.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-designation-testeur',
@@ -46,6 +42,7 @@ interface Project {
   providers: [DatePipe]
 })
 export class DesignationTesteurComponent implements OnInit {
+
   pending: Project[] = [];
   inTest: Project[] = [];
   finished: Project[] = [];
@@ -67,7 +64,9 @@ export class DesignationTesteurComponent implements OnInit {
     private session: SessionStorageService,
     private userSvc: UserService,
     private snack: MatSnackBar,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private dialog: MatDialog
+
   ) {
     this.superviseurId = this.session.getUser().id;
   }
@@ -233,5 +232,20 @@ isTesteurAssigned(projectId: number, testeurId?: number): boolean {
   // méthode pour choisir l’icône selon le statut
   getStatusIcon(status: number): string {
     return status === 55 ? 'pause' : 'stop';
+  }
+
+  ScenarioTest(projectId: number): void {
+    const dialogRef = this.dialog.open(TestScenarioComponent, {
+      width: '800px',
+      data: { projectId: projectId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.snack.open('Scénario de test enregistré', 'OK', { duration: 2500 });
+        // si besoin de rafraîchir la liste ou autre
+        this.refreshAll();
+      }
+    });
   }
 }

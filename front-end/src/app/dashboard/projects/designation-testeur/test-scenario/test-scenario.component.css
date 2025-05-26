@@ -1,0 +1,166 @@
+/* ==============================================
+   Variables globales
+   ============================================== */
+:host {
+  --bg-container:    #fafafa;
+  --card-bg:         #ffffff;
+  --card-shadow:     rgba(0, 0, 0, 0.05);
+  --primary-color:   #1976d2;
+  --primary-light:   #63a4ff;
+  --accent-color:    #e91e63;
+  --error-color:     #d32f2f;
+  --text-color:      #333333;
+  --text-light:      #757575;
+  --border-radius:   6px;
+  --transition:      0.3s;
+  --gap-standard:    16px;
+  --gap-large:       24px;
+  --font-family:     'Segoe UI', Roboto, sans-serif;
+}
+
+/* ==============================================
+   Container principal
+   ============================================== */
+.ts-container {
+  background-color: var(--bg-container);
+  padding: var(--gap-large);
+  display: flex;
+  justify-content: center;
+}
+
+.ts-form {
+  background-color: var(--card-bg);
+  padding: var(--gap-large);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  width: 100%;
+  max-width: 800px;
+  font-family: var(--font-family);
+  color: var(--text-color);
+}
+
+/* ==============================================
+   Titres
+   ============================================== */
+.ts-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.ts-steps-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 4px;
+}
+
+/* ==============================================
+   Form fields (mat-form-field inherits largeur 100%)
+   ============================================== */
+.ts-form ::ng-deep .mat-form-field {
+  width: 100%;
+}
+
+/* ==============================================
+   Étapes styling
+   ============================================== */
+.ts-steps {
+  background: #f7f7f7;
+  padding: var(--gap-standard);
+  border-radius: var(--border-radius);
+}
+
+.ts-step-row {
+  background: var(--card-bg);
+  padding: var(--gap-standard);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 4px var(--card-shadow);
+  align-items: center;
+}
+
+.ts-step-field {
+  min-width: 180px;
+}
+
+/* ==============================================
+   Boutons généraux
+   ============================================== */
+.ts-add-btn,
+.ts-submit-btn {
+  font-family: var(--font-family);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color var(--transition), box-shadow var(--transition);
+  border-radius: var(--border-radius);
+}
+
+/* Bouton “Ajouter une étape” */
+.ts-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5em 1em;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  background: transparent;
+  border: 2px solid var(--primary-color);
+}
+
+.ts-add-btn:hover {
+  background: var(--primary-light);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+}
+
+/* Bouton “Enregistrer” */
+.ts-submit-btn {
+  padding: 0.6em 1.5em;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  background-color: var(--accent-color);
+  border: none;
+  cursor: pointer;
+}
+
+.ts-submit-btn:hover:enabled {
+  background-color: #ff6090;
+  box-shadow: 0 3px 12px rgba(233, 30, 99, 0.4);
+}
+
+.ts-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==============================================
+   Mat Icon Button (supprimer étape)
+   ============================================== */
+.ts-step-row button.mat-icon-button {
+  margin-left: var(--gap-standard);
+  color: var(--error-color);
+  transition: transform var(--transition), color var(--transition);
+}
+
+.ts-step-row button.mat-icon-button:hover {
+  transform: scale(1.1);
+  color: #9a0007;
+}
+
+/* ==============================================
+   Responsive tweaks
+   ============================================== */
+@media (max-width: 599px) {
+  .ts-form {
+    padding: var(--gap-standard);
+  }
+  .ts-step-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

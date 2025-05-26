@@ -1,27 +1,40 @@
-<mat-tab-group>
+<mat-tab-group class="dt-tab-group">
 
   <!-- Onglet EN ATTENTE -->
-  <mat-tab label="En attente">
-    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+  <mat-tab label="En attente" class="dt-tab">
+    <div class="projects-grid">
       <ng-container *ngFor="let proj of pending">
-        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
-          <mat-card-header>
-            <mat-card-title>{{ proj.name }}</mat-card-title>
+        <mat-card class="dt-project-card grid-item">
+          <mat-card-header class="dt-card-header">
+            <mat-card-title class="dt-card-title">{{ proj.name }}</mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Testeurs</mat-label>
-              <mat-select multiple [value]="selectedTesteursMap[proj.id]" (selectionChange)="selectedTesteursMap[proj.id] = $event.value">
-                <mat-option *ngFor="let t of allTesteurs" [value]="t.id">{{ t.prenom }} {{ t.nom }}</mat-option>
+          <mat-card-content class="dt-card-content">
+            <mat-form-field appearance="outline" class="full-width dt-form-field">
+              <mat-label class="dt-label">Testeurs</mat-label>
+              <mat-select class="dt-select"
+                          multiple
+                          [value]="selectedTesteursMap[proj.id]"
+                          (selectionChange)="selectedTesteursMap[proj.id] = $event.value">
+                <mat-option *ngFor="let t of allTesteurs"
+                            [value]="t.id"
+                            class="dt-option">
+                  {{ t.prenom }} {{ t.nom }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
-            <div class="full-width">
-              <label class="mat-body-1">PDF cahier de charge*</label>
-              <input type="file" accept=".pdf" (change)="onTestCasesPdfChange($event)" />
+            <div class="full-width dt-upload-wrapper">
+              <label class="dt-upload-label mat-body-1">Scénario de test*</label>
+              <input type="file"
+                     accept=".pdf"
+                     class="dt-upload-input"
+                     (change)="onTestCasesPdfChange($event)" />
             </div>
           </mat-card-content>
-          <mat-card-actions align="end">
-            <button mat-flat-button color="primary" (click)="assign(proj.id)">
+          <mat-card-actions align="end" class="dt-card-actions">
+            <button mat-stroked-button class="dt-btn dt-btn-warn" (click)="ScenarioTest(proj.id)">Scénario de test</button>
+            <button mat-flat-button
+                    class="dt-btn dt-btn-primary"
+                    (click)="assign(proj.id)">
               Désigner
             </button>
           </mat-card-actions>
@@ -31,90 +44,81 @@
   </mat-tab>
 
   <!-- Onglet EN TEST -->
-  <mat-tab label="En test">
-    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+  <mat-tab label="En test" class="dt-tab">
+    <div class="projects-grid">
       <ng-container *ngFor="let proj of inTest">
-        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
-          <mat-card-header>
-            <mat-card-title>{{ proj.name }}</mat-card-title>
+        <mat-card class="dt-project-card grid-item">
+          <mat-card-header class="dt-card-header">
+            <mat-card-title class="dt-card-title">{{ proj.name }}</mat-card-title>
           </mat-card-header>
-  
-          <mat-card-content>
-  
-            <!-- Liste des testeurs assignés -->
-            <div fxLayout="column" fxLayoutGap="8px">
-              <h4>Testeurs assignés :</h4>
-              <div *ngFor="let a of assignmentsMap[proj.id]" fxLayout="row" fxLayoutAlign="space-between center">
-                <span>{{ a.testeur.prenom }} {{ a.testeur.nom }}</span>
-  
+
+          <mat-card-content class="dt-card-content">
+            <div class="dt-assigned-list">
+              <h4 class="dt-assigned-title">Testeurs assignés :</h4>
+              <div *ngFor="let a of assignmentsMap[proj.id]" class="dt-assigned-item">
+                <span class="dt-assigned-name">
+                  <mat-icon inline>person</mat-icon>
+                  {{ a.testeur.prenom }} {{ a.testeur.nom }}
+                </span>
               </div>
             </div>
-  
-            <mat-divider class="my-2"></mat-divider>
-  
-            <!-- Ajout de nouveaux testeurs -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Ajouter des testeurs</mat-label>
-              <mat-select multiple
+
+            <mat-divider class="dt-divider my-2"></mat-divider>
+
+            <mat-form-field appearance="outline" class="full-width dt-form-field">
+              <mat-label class="dt-label">Ajouter des testeurs</mat-label>
+              <mat-select class="dt-select"
+                          multiple
                           [value]="newTesteursMap[proj.id]"
                           (selectionChange)="newTesteursMap[proj.id] = $event.value">
                 <mat-option *ngFor="let t of allTesteurs"
                             [value]="t.id"
-                            [disabled]="isTesteurAssigned(proj.id, t.id)">
+                            [disabled]="isTesteurAssigned(proj.id, t.id)"
+                            class="dt-option">
                   {{ t.prenom }} {{ t.nom }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            
           </mat-card-content>
-  
-          <mat-card-actions align="end">
-            <button mat-flat-button color="primary"
-                    (click)="addTesteurs(proj.id)">
-              Ajouter
-            </button>
-            <button mat-stroked-button color="warn"
-                    (click)="pauseProject(proj.id)">
-              Mettre en pause
-            </button>
-            <button mat-flat-button color="accent"
-                    (click)="closeProject(proj.id)">
-              Clôturer
-            </button>
+
+          <mat-card-actions align="end" class="dt-card-actions">
+            <button mat-flat-button
+                    class="dt-btn dt-btn-primary"
+                    (click)="addTesteurs(proj.id)">Ajouter</button>
+            <button mat-stroked-button
+                    class="dt-btn dt-btn-warn"
+                    (click)="pauseProject(proj.id)">Pause</button>
+            <button mat-flat-button
+                    class="dt-btn dt-btn-accent"
+                    (click)="closeProject(proj.id)">Clôturer</button>
           </mat-card-actions>
-          
-  
         </mat-card>
       </ng-container>
     </div>
   </mat-tab>
-  
 
   <!-- Onglet TERMINÉS / EN PAUSE -->
-  <mat-tab label="Terminés / Pause">
-    <div fxLayout="row wrap" fxLayoutGap="16px" class="projects-grid">
+  <mat-tab label="Terminés / Pause" class="dt-tab">
+    <div class="projects-grid">
       <ng-container *ngFor="let proj of finishedDetails">
-        <mat-card fxFlex="1 1 calc(33% - 16px)" class="project-card">
-          <mat-card-header>
-            <mat-card-title>{{ proj.name }}</mat-card-title>
+        <mat-card class="dt-project-card grid-item">
+          <mat-card-header class="dt-card-header">
+            <mat-card-title class="dt-card-title">{{ proj.name }}</mat-card-title>
           </mat-card-header>
-          <mat-card-content>
-            <mat-divider></mat-divider>
-            <div>
-              <!-- Afficher l'icône et la date de pause ou de clôture -->
-              <mat-icon>{{ getStatusIcon(proj.status) }}</mat-icon>
-              <span>
-                {{ proj.status === 55 ? 'Mis en pause le' : 'Clôturé le' }} 
-                <p>{{ getActionDateText(proj) }}</p>
-
-              </span>
-              <div>Superviseur : {{ proj.supervisorName }}</div>
-              <div>Testeurs : {{ proj.testerNames.join(', ') }}</div>
+          <mat-card-content class="dt-card-content dt-finished-info">
+            <mat-divider class="dt-divider"></mat-divider>
+            <mat-icon class="dt-finished-icon">{{ getStatusIcon(proj.status) }}</mat-icon>
+            <div class="dt-finished-text">
+              <strong>{{ proj.status === 55 ? 'Mis en pause le' : 'Clôturé le' }}:</strong>
+              {{ getActionDateText(proj) }}
             </div>
+            <div class="dt-finished-supervisor">Superviseur : {{ proj.supervisorName }}</div>
+            <div class="dt-finished-testers">Testeurs : {{ proj.testerNames.join(', ') }}</div>
           </mat-card-content>
-          <mat-card-actions align="end">
-            <!-- Relancer le projet -->
-            <button mat-flat-button color="primary" (click)="restartProject(proj.projectId)">
+          <mat-card-actions align="end" class="dt-card-actions">
+            <button mat-flat-button
+                    class="dt-btn dt-btn-primary"
+                    (click)="restartProject(proj.projectId)">
               Relancer
             </button>
           </mat-card-actions>
@@ -122,8 +126,5 @@
       </ng-container>
     </div>
   </mat-tab>
-  
-
-  
 
 </mat-tab-group>

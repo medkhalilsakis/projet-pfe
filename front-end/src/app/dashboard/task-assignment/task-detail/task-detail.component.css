@@ -1,226 +1,197 @@
-/* src/app/task-detail/task-detail.component.css */
-
-/* —— Conteneur principal —— */
+/* Container principal */
 .detail-page {
   padding: 24px;
-  background-color: #fafafa;
-  color: #212121;
-  font-family: 'Roboto', sans-serif;
-  min-height: 100vh;
-  box-sizing: border-box;
+  background-color: #f5f7fa;
+  font-family: "Roboto", sans-serif;
 }
 
-/* —— Chargement —— */
+/* Spinner de chargement */
 .loading {
-  font-size: 1.1rem;
-  color: #616161;
-  opacity: 0.8;
-}
-
-/* —— Titres —— */
-.task-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #3f51b5;
-  margin: 0;
-}
-section h2 {
-  margin-bottom: 8px;
-  font-size: 1.25rem;
-  color: #3f51b5;
-  position: relative;
-}
-section h2::after {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 2px;
-  background-color: #ff4081;
-  margin-top: 4px;
-}
-
-/* —— Métadonnées —— */
-.meta .meta-item {
-  font-size: 0.95rem;
-  color: #616161;
-}
-.meta .meta-item mat-icon {
-  color: #3f51b5;
-  font-size: 1rem;
-  vertical-align: middle;
-}
-
-/* —— Badge de statut —— */
-.status-badge {
-  background-color: #e8eaf6;
-  color: #3f51b5;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-transform: capitalize;
-  transition: background-color 0.2s, transform 0.2s;
-}
-.status-badge:hover {
-  transform: scale(1.05);
-}
-
-/* —— Description —— */
-.description p {
-  line-height: 1.6;
-  color: #424242;
-}
-
-/* —— Outils & Technologies —— */
-.tools-section .badges {
-  margin-top: 8px;
-}
-.tools-section .badge {
-  display: inline-block;
-  background-color: #ff4081;
-  color: #ffffff;
-  padding: 6px 10px;
+  height: 200px;
+  background: #ffffff;
+  border: 2px dashed #cfd8dc;
   border-radius: 8px;
-  font-size: 0.85rem;
-  transition: background-color 0.2s, transform 0.2s;
+  animation: pulse 1.5s infinite ease-in-out;
 }
-.tools-section .badge:hover {
-  background-color: #f50057;
+
+.loading-text {
+  font-size: 1.2rem;
+  color: #607d8b;
+}
+
+/* Animation pulse */
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* Boutons d’action */
+.mat-stroked-button {
+  border: 1px solid #3f51b5;
+  color: #3f51b5;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+}
+.mat-stroked-button:hover {
+  background: #3f51b5;
+  color: #fff;
   transform: translateY(-2px);
 }
 
-/* —— Assignations —— */
-.assignees .custom-chip {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+/* Titre de la tâche */
+.task-title {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #263238;
+}
+
+/* Métadonnées */
+.meta {
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.status-badge {
+  background: #e8eaf6;
+  color: #3f51b5;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* Overview blocks (Description / Outils / Assigné) */
+.overview {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+}
+.overview-block {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 200px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+.overview-block:hover {
+  transform: translateY(-2px);
+}
+
+.badges .badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+/* Custom chip pour les utilisateurs */
+.custom-chip {
+  background: #fff9c4;
+  color: #f57f17;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 0.9rem;
-  color: #616161;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-.assignees .custom-chip:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
 }
 
-/* —— PDF Viewer —— */
-.pdf-section {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+/* Phase d’Initiation */
+.init-phase {
+  background: #ffffff;
+  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Ligne de sous‐blocs */
+.init-row {
+  width: 100%;
+}
+
+/* Chaque bloc (init-block) */
+.init-block {
+  background: #f9fbe7;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Tables soignées */
+.exigences-table,
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.exigences-table th,
+.exigences-table td,
+.planning-table th,
+.planning-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+.exigences-table th,
+.planning-table th {
+  background: #c5cae9;
+  color: #1a237e;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* PDF / Images / Vidéos / Autres fichiers */
+.pdf-section {
+  margin-bottom: 16px;
+  border: 1px solid #eceff1;
+  border-radius: 6px;
   overflow: hidden;
 }
-.pdf-section ngx-extended-pdf-viewer {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-}
-
-/* —— Autres pièces jointes —— */
-mat-list-item {
-  transition: background-color 0.2s;
-}
-mat-list-item:hover {
-  background-color: rgba(0,0,0,0.02);
-}
-mat-list-item mat-icon {
-  color: #3f51b5;
-  margin-right: 8px;
-}
-
-/* —— Responsive —— */
-@media (max-width: 768px) {
-  .detail-page {
-    padding: 16px;
-  }
-  .task-title {
-    font-size: 1.75rem;
-  }
-  /* Force colonne sur petits écrans */
-  section{
-    flex-direction: column !important;
-  }
-}
-
-
-/* —— Grilles d’attachments —— */
-
-/* Conteneur images */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+  gap: 12px;
 }
-
-/* Conteneur vidéos */
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-/* Conteneur autres fichiers */
-.other-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-/* Style commun aux vignettes */
-.preview-image,
-.video-player,
-.other-file-card {
+.preview-image {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  height: auto;
   border-radius: 4px;
-  background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
 }
-
-/* Pour les autres fichiers, on affiche une « carte » centrée */
+.preview-image:hover {
+  transform: scale(1.05);
+}
+.video-player {
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.other-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .other-file-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  color: #424242;
-  text-align: center;
+  gap: 8px;
+  background: #eceff1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #37474f;
+  transition: background 0.2s;
+}
+.other-file-card:hover {
+  background: #cfd8dc;
 }
 
-/* Réorganisation responsive */
+/* Responsive tweaks */
 @media (max-width: 600px) {
-  .image-grid,
-  .video-grid,
-  .other-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  }
-}
-
-
-
-/* Styles globaux pour tous les boutons */
-.mat-raised-button,
-.mat-stroked-button,
-.mat-icon-button {
-  font-family: 'Roboto', sans-serif;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-
-/* Bouton secondaire “Voir le projet” */
-.mat-stroked-button {
-  border: 2px solid #2962ff;
-  background-color: transparent;
-  color: #2962ff;
-  padding: 0.5em 1em;
-}
-.mat-stroked-button:hover {
-  background-color: #2962ff;
-  color: white;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
+  .task-title { font-size: 1.5rem; }
+  .meta { padding: 8px; }
+  .overview { flex-direction: column; }
+  .init-block { padding: 12px; }
 }
