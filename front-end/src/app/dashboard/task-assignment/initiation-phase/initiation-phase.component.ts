@@ -1,48 +1,44 @@
-// src/app/initiation-phase/initiation-phase.component.ts
-import { Component, ViewChild }                 from '@angular/core';
-import { CommonModule }                         from '@angular/common';
-import { FormsModule }                          from '@angular/forms';
-import { MatToolbarModule }                     from '@angular/material/toolbar';
-import { MatIconModule }                        from '@angular/material/icon';
-import { MatStepperModule, MatStepper } from '@angular/material/stepper';
-import { MatFormFieldModule }                   from '@angular/material/form-field';
-import { MatInputModule }                       from '@angular/material/input';
-import { MatSelectModule }                      from '@angular/material/select';
-import { MatOptionModule }                      from '@angular/material/core';
-import { MatCheckboxModule }                    from '@angular/material/checkbox';
-import { MatButtonModule }                      from '@angular/material/button';
-import { AnalyseFaisabilite } from '../../../models/initiation-phase/analyse-faisabilite.model';
-import { CahierDesCharges } from '../../../models/initiation-phase/cahier-des-charges.model';
-import { Exigence } from '../../../models/initiation-phase/exigence.model';
-import { InitiationPhase } from '../../../models/initiation-phase/initiation-phase.model';
-import { PlanificationPhase } from '../../../models/initiation-phase/planification-phase.model';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
 import { InitiationPhaseService } from '../../../services/initiation-phase.service';
-import { Priority } from '../../../enums/priority.enum';
-import { StepperSelectionEvent } from '@angular/cdk/stepper';
-
-
+import { InitiationPhase }         from '../../../models/initiation-phase/initiation-phase.model';
+import { Exigence }                from '../../../models/initiation-phase/exigence.model';
+import { AnalyseFaisabilite }      from '../../../models/initiation-phase/analyse-faisabilite.model';
+import { CahierDesCharges }        from '../../../models/initiation-phase/cahier-des-charges.model';
+import { PlanificationPhase }      from '../../../models/initiation-phase/planification-phase.model';
+import { Priority }                from '../../../enums/priority.enum';
 
 @Component({
   standalone: true,
   selector: 'app-initiation-phase',
   templateUrl: './initiation-phase.component.html',
-  styleUrls: ['./initiation-phase.component.css'],
+  styleUrls:   ['./initiation-phase.component.css'],
   imports: [
     CommonModule,
     FormsModule,
     MatToolbarModule,
     MatIconModule,
-    MatStepperModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatOptionModule,
-    MatCheckboxModule,
-    MatButtonModule
+    MatCheckboxModule
   ]
 })
-export class InitiationPhaseComponent {
-  currentStep = 0;
+export class InitiationPhaseComponent implements OnInit {
+  // Étapes
   steps = [
     'Introduction',
     'Recueil des exigences',
@@ -50,6 +46,7 @@ export class InitiationPhaseComponent {
     'Cahier des charges',
     'Planification'
   ];
+  currentStep = 0;
 
   // 1) Intro/Objectifs
   introduction = '';
@@ -65,13 +62,13 @@ export class InitiationPhaseComponent {
 
   // 3) Faisabilité
   faisabilite: AnalyseFaisabilite = {
-    techniqueDisponible: false,
-    budgetSuffisant:     false,
-    delaisRealistes:     false,
+    techniqueDisponible:           false,
+    budgetSuffisant:               false,
+    delaisRealistes:               false,
     ressourcesHumainesSuffisantes: false
   };
 
-  // 4) Cahier des charges
+  // 4) Cahier des Charges
   cahier: CahierDesCharges = {
     objectifsProjet: '',
     livrables:       '',
@@ -86,10 +83,25 @@ export class InitiationPhaseComponent {
     dateFin:      '',
     budgetEstime: 0
   };
+  plannings: PlanificationPhase[] = [];
 
-  constructor(private svc: InitiationPhaseService) {}
+  /** ID de la tâche issu de l’URL */
+  private tacheId!: number;
 
-  // navigation
+  constructor(
+    private svc: InitiationPhaseService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    // Récupération de l’ID dans /dashboard/InitTache/:id
+    this.route.paramMap.subscribe(params => {
+      this.tacheId = Number(params.get('id'));
+    });
+  }
+
+  // navigation entre étapes
   next() {
     if (this.currentStep < this.steps.length - 1) {
       this.currentStep++;
@@ -110,27 +122,30 @@ export class InitiationPhaseComponent {
     this.exigences.splice(i, 1);
   }
 
-  // validations d’étape
-  onAnalyze()    { this.next(); }
-  onValiderCahier() { this.next(); }
+  // planifications
+  addPlanning() {
+    this.plannings.push({ ...this.newPlanning });
+    this.newPlanning = { nomPhase: '', dateDebut: '', dateFin: '', budgetEstime: 0 };
+  }
 
-  // soumission finale
-  onPlanifier() {
-    const phase: InitiationPhase = {
+  // Au clic de « Planifier » (dernière étape) : envoi unique de toutes les données
+  onPlanifier(): void {
+    const payload: InitiationPhase = {
+      tache: { id: this.tacheId } as any,
       introduction:      this.introduction,
       objectifs:        this.objectifs,
       exigences:        this.exigences,
       faisabilite:      this.faisabilite,
       cahierDesCharges: this.cahier,
-      plannings:        [ this.newPlanning ]
+      plannings:        this.plannings
     };
-    this.svc.create(phase).subscribe({
-      next: saved => {
-        console.log('Enregistré', saved);
-        this.currentStep = 0;
-        // réinitialisez si besoin…
+
+    this.svc.create(payload).subscribe({
+      next: _ => {
+        // redirection vers la liste / détail de la tâche
+        this.router.navigate(['/dashboard/tâches', this.tacheId]);
       },
-      error: err => console.error(err)
+      error: err => console.error('Erreur lors de l’enregistrement de la phase', err)
     });
   }
 }

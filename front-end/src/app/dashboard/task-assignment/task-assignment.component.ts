@@ -22,6 +22,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { SessionStorageService } from '../../services/session-storage.service';
 import { UserService } from '../../services/users.service';
+import { InitiationPhaseService } from '../../services/initiation-phase.service';
 
 interface Tache {
   id: number;
@@ -33,6 +34,7 @@ interface Tache {
   outils: string;
   deadline: string;
 }
+
 
 @Component({
   selector: 'app-task-assignment',
@@ -50,6 +52,7 @@ interface Tache {
   ]
 })
 export class TaskAssignmentComponent implements OnInit {
+  private phaseExists: Record<number, boolean> = {};
   tâches: Tache[] = [];
   filtered: Tache[] = [];
   pageSlice: Tache[] = [];
@@ -76,6 +79,7 @@ export class TaskAssignmentComponent implements OnInit {
     private dialog: MatDialog,
     private router: Router,
     private sessionStorage:SessionStorageService,
+    private initPhaseSvc: InitiationPhaseService,
     private userService: UserService
   ) {}
   
@@ -136,6 +140,7 @@ export class TaskAssignmentComponent implements OnInit {
           .subscribe({
             next: () => {
               this.applyFilters();
+              this.cachePhaseFlags(list);
             },
             error: err => {
               console.error('Erreur de sync des statuts', err);
@@ -200,6 +205,29 @@ export class TaskAssignmentComponent implements OnInit {
 
   viewTask(t: Tache) {
     this.router.navigate(['/dashboard/tâches', t.id]);
+  }
+
+  InitiationPhase(t: Tache) {
+    this.router.navigate(['/dashboard/InitTache', t.id]);
+  }
+  private cachePhaseFlags(list: Tache[]): void {
+    const calls = list.map(t =>
+      this.initPhaseSvc.existsForTache(t.id)
+        .pipe(
+          catchError(() => of(false))
+        )
+    );
+    forkJoin(calls).subscribe(flags => {
+      list.forEach((t, idx) => {
+        this.phaseExists[t.id] = flags[idx];
+      });
+      this.applyFilters();
+    });
+  }
+
+  /** Méthode utilisée en template pour savoir si la phase existe */
+  hasPhase(t: Tache): boolean {
+    return !!this.phaseExists[t.id];
   }
 
   editTask(t: Tache) {

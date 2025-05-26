@@ -36,4 +36,10 @@ export class InitiationPhaseService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  existsForTache(tacheId: number): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${this.baseUrl}/exists/${tacheId}`
+    );
+  }
 }

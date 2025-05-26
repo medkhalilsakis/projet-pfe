@@ -1,80 +1,54 @@
 <mat-toolbar color="primary">
   <mat-icon>assignment</mat-icon>
-  &nbsp; Phase d'Initiation > {{ steps[currentStep] }}
+  &nbsp; Phase d'Initiation &gt; {{ steps[currentStep] }}
 </mat-toolbar>
 
 <div class="wizard-container">
-  <!-- Étape 1 : Introduction -->
-  <!-- Étape 1 : Introduction / Objectifs -->
-<section *ngIf="currentStep === 0">
-  <h1>Phase d'Initiation du Projet</h1>
-  <p>Cette phase est cruciale pour définir les objectifs, les exigences et établir un plan.</p>
 
-  <form (ngSubmit)="next()" #introForm="ngForm">
-    <!-- Champ Introduction -->
-    <mat-form-field appearance="fill" class="w-100">
-      <mat-label>Introduction</mat-label>
-      <textarea
-        matInput
-        name="introduction"
-        required
-        rows="3"
-        placeholder="Présentez brièvement le projet"
-        [(ngModel)]="introduction">
-      </textarea>
-    </mat-form-field>
-
-    <!-- Champ Objectifs -->
-    <mat-form-field appearance="fill" class="w-100">
-      <mat-label>Objectifs</mat-label>
-      <textarea
-        matInput
-        name="objectifs"
-        required
-        rows="3"
-        placeholder="Listez les objectifs principaux"
-        [(ngModel)]="objectifs">
-      </textarea>
-    </mat-form-field>
-
-    <div class="nav-buttons">
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="introForm.form.invalid">
-        Commencer
-      </button>
-    </div>
-  </form>
-</section>
+  <!-- Étape 0 : Introduction / Objectifs -->
+  <section *ngIf="currentStep === 0">
+    <h1>Phase d'Initiation du Projet</h1>
+    <p>Cette phase est cruciale pour définir les objectifs, les exigences et établir un plan.</p>
+    <form (ngSubmit)="next()" #introForm="ngForm">
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Introduction</mat-label>
+        <textarea matInput name="introduction" [(ngModel)]="introduction"
+                  required rows="3" placeholder="Présentez brièvement le projet"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Objectifs</mat-label>
+        <textarea matInput name="objectifs" [(ngModel)]="objectifs"
+                  required rows="3" placeholder="Listez les objectifs principaux"></textarea>
+      </mat-form-field>
+      <div class="nav-buttons">
+        <button mat-raised-button color="primary" type="submit" [disabled]="introForm.form.invalid">
+          Commencer
+        </button>
+      </div>
+    </form>
+  </section>
 
 
-  <!-- Étape 2 : Recueil des exigences -->
+  <!-- Étape 1 : Recueil des exigences -->
   <section *ngIf="currentStep === 1">
     <h2>Recueil des Exigences</h2>
-
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Fonctionnelle</mat-label>
-      <textarea matInput [(ngModel)]="newExigence.fonctionnelle"></textarea>
+      <textarea matInput [(ngModel)]="newExigence.fonctionnelle" name="fonctionnelle"></textarea>
     </mat-form-field>
-
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Non fonctionnelle</mat-label>
-      <textarea matInput [(ngModel)]="newExigence.nonFonctionnelle"></textarea>
+      <textarea matInput [(ngModel)]="newExigence.nonFonctionnelle" name="nonFonctionnelle"></textarea>
     </mat-form-field>
-
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Priorité</mat-label>
-      <mat-select [(ngModel)]="newExigence.priorite">
+      <mat-select [(ngModel)]="newExigence.priorite" name="priorite">
         <mat-option value="HAUTE">Haute</mat-option>
         <mat-option value="MOYENNE">Moyenne</mat-option>
         <mat-option value="BASSE">Basse</mat-option>
       </mat-select>
     </mat-form-field>
-
     <button mat-button (click)="addExigence()">Ajouter</button>
-
     <table *ngIf="exigences.length" class="mat-elevation-z2" style="width:100%; margin:16px 0;">
       <tr *ngFor="let ex of exigences; let i = index">
         <td>{{ ex.fonctionnelle }}</td>
@@ -87,78 +61,90 @@
         </td>
       </tr>
     </table>
-
     <div class="nav-buttons">
       <button mat-button (click)="prev()">Retour</button>
-      <button mat-raised-button color="primary" [disabled]="exigences.length===0" (click)="next()">
+      <button mat-raised-button color="primary" [disabled]="!exigences.length" (click)="next()">
         Suivant
       </button>
     </div>
   </section>
 
-  <!-- Étape 3 : Analyse de faisabilité -->
+
+  <!-- Étape 2 : Analyse de faisabilité -->
   <section *ngIf="currentStep === 2">
     <h2>Analyse de Faisabilité</h2>
-    <mat-checkbox [(ngModel)]="faisabilite.techniqueDisponible">Les technologies nécessaires sont disponibles ?</mat-checkbox><br>
-    <mat-checkbox [(ngModel)]="faisabilite.budgetSuffisant">Le budget estimé est-il suffisant ?</mat-checkbox><br>
-    <mat-checkbox [(ngModel)]="faisabilite.delaisRealistes">Les délais sont-ils réalistes ?</mat-checkbox><br>
-    <mat-checkbox [(ngModel)]="faisabilite.ressourcesHumainesSuffisantes">Les ressources humaines sont-elles suffisantes ?</mat-checkbox><br>
-
+    <mat-checkbox [(ngModel)]="faisabilite.techniqueDisponible" name="tech">Technologies disponibles ?</mat-checkbox><br>
+    <mat-checkbox [(ngModel)]="faisabilite.budgetSuffisant" name="bud">Budget suffisant ?</mat-checkbox><br>
+    <mat-checkbox [(ngModel)]="faisabilite.delaisRealistes" name="del">Délais réalistes ?</mat-checkbox><br>
+    <mat-checkbox [(ngModel)]="faisabilite.ressourcesHumainesSuffisantes" name="res">Ressources humaines suffisantes ?</mat-checkbox><br>
     <div class="nav-buttons">
       <button mat-button (click)="prev()">Retour</button>
-      <button mat-raised-button color="primary" (click)="onAnalyze()">Suivant</button>
+      <button mat-raised-button color="primary" (click)="next()">Suivant</button>
     </div>
   </section>
 
-  <!-- Étape 4 : Cahier des charges -->
+
+  <!-- Étape 3 : Cahier des charges -->
   <section *ngIf="currentStep === 3">
     <h2>Cahier des charges</h2>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Objectifs</mat-label>
-      <textarea matInput [(ngModel)]="cahier.objectifsProjet"></textarea>
+      <textarea matInput [(ngModel)]="cahier.objectifsProjet" name="objProj"></textarea>
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Livrables</mat-label>
-      <textarea matInput [(ngModel)]="cahier.livrables"></textarea>
+      <textarea matInput [(ngModel)]="cahier.livrables" name="livrables"></textarea>
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Contraintes</mat-label>
-      <textarea matInput [(ngModel)]="cahier.contraintes"></textarea>
+      <textarea matInput [(ngModel)]="cahier.contraintes" name="contraintes"></textarea>
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Critères de succès</mat-label>
-      <textarea matInput [(ngModel)]="cahier.criteresSucces"></textarea>
+      <textarea matInput [(ngModel)]="cahier.criteresSucces" name="critSucces"></textarea>
     </mat-form-field>
-
     <div class="nav-buttons">
       <button mat-button (click)="prev()">Retour</button>
-      <button mat-raised-button color="primary" (click)="onValiderCahier()">Suivant</button>
+      <button mat-raised-button color="primary" (click)="next()">Suivant</button>
     </div>
   </section>
 
-  <!-- Étape 5 : Planification -->
+
+  <!-- Étape 4 : Planification -->
   <section *ngIf="currentStep === 4">
     <h2>Planification du Projet</h2>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Nom de la phase</mat-label>
-      <input matInput [(ngModel)]="newPlanning.nomPhase">
+      <input matInput [(ngModel)]="newPlanning.nomPhase" name="phaseName">
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Date de début</mat-label>
-      <input matInput type="date" [(ngModel)]="newPlanning.dateDebut">
+      <input matInput type="date" [(ngModel)]="newPlanning.dateDebut" name="dateDebut">
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Date de fin</mat-label>
-      <input matInput type="date" [(ngModel)]="newPlanning.dateFin">
+      <input matInput type="date" [(ngModel)]="newPlanning.dateFin" name="dateFin">
     </mat-form-field>
     <mat-form-field appearance="fill" class="w-100">
       <mat-label>Budget estimé</mat-label>
-      <input matInput type="number" [(ngModel)]="newPlanning.budgetEstime">
+      <input matInput type="number" [(ngModel)]="newPlanning.budgetEstime" name="budget">
     </mat-form-field>
+
+    <button mat-button (click)="addPlanning()">Ajouter la phase</button>
+    <table *ngIf="plannings.length" class="mat-elevation-z2" style="width:100%; margin:16px 0;">
+      <tr *ngFor="let p of plannings; let i = index">
+        <td>{{ p.nomPhase }}</td>
+        <td>{{ p.dateDebut }} → {{ p.dateFin }}</td>
+        <td>{{ p.budgetEstime }}</td>
+      </tr>
+    </table>
 
     <div class="nav-buttons">
       <button mat-button (click)="prev()">Retour</button>
-      <button mat-raised-button color="primary" (click)="onPlanifier()">Planifier</button>
+      <button mat-raised-button color="primary" (click)="onPlanifier()">
+        Planifier et terminer
+      </button>
     </div>
   </section>
+
 </div>

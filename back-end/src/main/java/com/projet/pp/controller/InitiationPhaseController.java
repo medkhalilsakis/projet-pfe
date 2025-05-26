@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/initiation-phases")
+@CrossOrigin(origins = "http://localhost:4200")
 public class InitiationPhaseController {
 
     private final InitiationPhaseService service;
@@ -55,5 +56,13 @@ public class InitiationPhaseController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/exists/{tacheId}")
+    public ResponseEntity<Boolean> existsPhaseForTache(
+            @PathVariable Long tacheId
+    ) {
+        boolean exists = service.existsForTache(tacheId);
+        return ResponseEntity.ok(exists);
     }
 }

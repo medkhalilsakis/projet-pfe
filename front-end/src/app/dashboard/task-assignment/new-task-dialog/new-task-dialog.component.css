@@ -12,10 +12,7 @@
   gap: 16px;
 }
 
-.file-input {
-  font-size: 0.9rem;
-  color: #555;
-}
+
 
 /* new-task-dialog.component.css */
 .full {
@@ -27,11 +24,10 @@
   gap: 16px;
 }
 
-.file-input {
-  margin: 16px 0;
-}
+
 
 .dialog-content {
   max-height: 70vh;
   overflow: auto;
 }
+

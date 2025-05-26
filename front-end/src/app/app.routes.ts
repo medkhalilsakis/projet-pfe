@@ -47,6 +47,7 @@ export const routes: Routes = [
       { path: 'users',    component: UserManagementComponent },
       { path: 'tâches',   component: TaskAssignmentComponent },
       { path: 'tâches/:id',      component: TaskDetailComponent  },
+      { path: 'InitTache/:id', component: InitiationPhaseComponent },
       { path: 'designation', component: DesignationTesteurComponent },
       { path: 'projects',       component: ProjectsComponent },
       { path: 'complaints',       component: ComplaintsComponent },

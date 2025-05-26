@@ -6,4 +6,6 @@ import com.projet.pp.model.InitiationPhase;
 
 @Repository
 public interface InitiationPhaseRepository extends JpaRepository<InitiationPhase, Long> {
+
+    boolean existsByTache_Id(Long tacheId);
 }

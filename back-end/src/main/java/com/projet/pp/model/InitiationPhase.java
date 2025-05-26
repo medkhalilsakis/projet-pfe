@@ -15,6 +15,10 @@ public class InitiationPhase {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tache_id", nullable = false)
+    private Tache tache;
+
     // Partie Introduction / Objectifs
     @Column(columnDefinition = "TEXT")
     private String introduction;

@@ -31,4 +31,8 @@ public class InitiationPhaseService {
     public void delete(Long id) {
         repo.deleteById(id);
     }
+
+    public boolean existsForTache(Long tacheId) {
+        return repo.existsByTache_Id(tacheId);
+    }
 }

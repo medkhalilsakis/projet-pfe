@@ -80,9 +80,18 @@
               </span>
             </div>
           </div>
-        </mat-card-content>
+        
+        <mat-card-subtitle *ngIf="!hasPhase(t)" class="warning-banner"><mat-icon>warning</mat-icon> Phase d’initiation manquante</mat-card-subtitle>
 
+
+      </mat-card-content>
         <mat-card-actions class="card-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+          <button *ngIf="!hasPhase(t)" mat-icon-button matTooltip="Initier la phase" aria-label="Initier la phase" (click)="$event.stopPropagation(); InitiationPhase(t)">
+            <mat-icon>flag</mat-icon>
+          </button>
+
+          <span fxFlex></span>
+
           <button mat-icon-button matTooltip="Voir" aria-label="Voir" (click)="$event.stopPropagation(); viewTask(t)">
             <mat-icon>visibility</mat-icon>
           </button>
