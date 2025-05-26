@@ -57,6 +57,7 @@ public class Tache {
     @JsonManagedReference  // expose la phase, mais pas le retour vers Tache
     private InitiationPhase initiationPhase;
 
+
     public enum Status {
         a_developper,
         en_cours,

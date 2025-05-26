@@ -369,4 +369,8 @@ public class TesterAssignmentService {
         return pta;
     }
 
+
+    public long countByTester(Long testeurId) {
+        return assignmentRepo.countByTesteur_Id(testeurId);
+    }
 }

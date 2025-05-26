@@ -135,4 +135,11 @@ public class TestScenarioController {
         return ResponseEntity.ok(exists);
     }
 
+    @GetMapping("/for-project/{projectId}")
+    public ResponseEntity<TestScenario> getTestScenarioForProject(@PathVariable Long projectId) {
+        // Appel de la méthode du service pour récupérer le scénario de test
+        TestScenario testScenario = service.getTestScenarioByProjectId(projectId);
+        return ResponseEntity.ok(testScenario);
+    }
+
 }

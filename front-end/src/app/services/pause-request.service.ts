@@ -3,6 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, Observable } from 'rxjs';
 import { PauseRequest } from '../models/pause-request.model';
 
+export interface PauseStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}
 
 
 @Injectable({ providedIn: 'root' })
@@ -51,4 +57,9 @@ export class PauseRequestService {
     })
   );
 }
+
+
+getUserStats(testerId: number, projectId: number): Observable<PauseStats> {
+    return this.http.get<PauseStats>(`${this.baseUrl}/${projectId}/stats/user/${testerId}`);
+  }
 }

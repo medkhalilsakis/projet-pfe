@@ -1,241 +1,572 @@
-/* Conteneur principal */
+/* Container */
 .container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1rem;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-/* 1. Barre horizontale d’actions */
-.top-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: #e3f2fd;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-}
-
-/* 2. Disposition des colonnes */
-.main-content {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;  /* Permet d'afficher la colonne de droite sous la colonne de gauche en petite taille */
-}
-
-/* Colonne gauche */
-.left-col {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Colonne droite */
-.right-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Cartes générales */
-.card, mat-card {
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  padding: 1rem;
-}
-
-/* 2.1 Cas de test */
-.tests-block .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.upload-btn .shiny {
-  animation: shine 1.5s infinite;
-}
-
-/* Animation icône upload */
-@keyframes shine {
-  0%,100% { color: #1976d2; }
-  50% { color: #42a5f5; }
-}
-
-/* 2.2 Uploads */
-.uploads-block h3 {
-  margin-bottom: 0.5rem;
-}
-
-.uploads-block .upload-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Ajoute un espace entre les éléments */
-  padding: 10px;
-}
-
-.uploads-block .upload-details {
-  display: flex;
-  align-items: center; /* Aligne les éléments au centre verticalement */
-  gap: 20px; /* Espacement entre le nom du fichier, la date et les boutons */
-}
-
-.uploads-block .filename, .uploads-block .date {
-  font-size: 14px; /* Ajustez la taille du texte selon vos besoins */
-}
-
-button {
-  margin-left: 10px; /* Ajoute de l'espace à gauche des boutons */
-}
-
-/* 2.3 Réunions & Bugs en ligne */
-.row-two {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.meetings-block, .bugs-block {
-  flex: 1;
-}
-
-/* Actions dans expansion panel */
-.panel-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-/* Types et niveaux */
-.types-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.levels-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.level-node {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-/* 4. Barre finale de décision */
-.decision-bar {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 1rem 0;
-  background: #f1f8e9;
-  border-top: 1px solid #ccc;
-}
-
-.decision-bar button {
-  width: 140px;
-}
-
-/* 1. Barre de décision */
-.decision-bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 0;
-  background: #f1f8e9;
-  border-top: 1px solid #ccc;
-}
-
-/* Boutons de la barre de décision */
-.decision-bar button {
-  width: 140px;
-}
-
-/* Section pour l'upload du fichier */
-.file-upload {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.file-upload input {
-  margin-top: 10px;
-}
-
-.file-upload span {
-  margin-top: 5px;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* Bannière d’avertissement */
+/* Pause Banner */
 .pause-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   background-color: #fff3cd;
   color: #856404;
+  padding: 12px 16px;
   border: 1px solid #ffeeba;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
   border-radius: 4px;
+  font-weight: 500;
 }
 
-/* Style pour le snack warning */
-.snack-warning {
-  background-color: #856404 !important;
-  color: #fff !important;
+.pause-banner mat-icon {
+  margin-right: 8px;
 }
 
-.pdf-section {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+/* Top Bar */
+/* Top Bar Container */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6);
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Base Button Reset */
+.top-bar button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   overflow: hidden;
-}
-.pdf-section ngx-extended-pdf-viewer {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.big-left {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Primary Button */
+.top-bar button[color="primary"] {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+}
+.top-bar button[color="primary"]:hover:not(:disabled) {
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 8px 20px rgba(59,130,246,0.4);
+  transform: translateY(-2px);
 }
 
-/* Split the left big column into two rows */
-.row-1 {
-  display: flex;
-  gap: 1rem;
+/* Accent Button */
+.top-bar button[color="accent"] {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
 }
-.project-details {
+.top-bar button[color="accent"]:hover:not(:disabled) {
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 8px 20px rgba(245,158,11,0.4);
+  transform: translateY(-2px);
+}
+
+/* Warn Button */
+.top-bar button[color="warn"] {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+}
+.top-bar button[color="warn"]:hover:not(:disabled) {
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 8px 20px rgba(239,68,68,0.4);
+  transform: translateY(-2px);
+}
+
+/* Disabled State */
+.top-bar button:disabled {
+  background: #cccccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Icon Styling */
+.top-bar mat-icon {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+.top-bar button:hover mat-icon:not(:disabled) {
+  transform: scale(1.2);
+}
+
+/* Ripple-like Hover Background */
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(255,255,255,0);
+  }
+}
+.top-bar button:not(:disabled):hover::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+
+/* Project Details Card */
+.project-details-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.project-details-card {
+  max-width: 800px;      /* avant : 800px */
+  margin: 0 auto;
+}
+/* Hover effect */
+.project-details-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Header */
+.project-details-card mat-card-header {
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+  color: #fff;
+  padding: 16px;
+}
+
+.project-details-card mat-card-title h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+/* Card Content */
+.project-details-card mat-card-content {
+  padding: 24px;
+}
+
+/* Three-column layout */
+.project-details-card mat-card-content > div[fxLayout="row"] {
+  display: flex;
+  gap: 24px;
+}
+
+.project-details-card mat-card-content > div[fxLayout="row"] > div {
   flex: 1;
 }
+
+/* Text styling */
+.project-details-card p {
+  margin: 8px 0;
+  line-height: 1.6;
+  color: #333;
+}
+
+.project-details-card p strong {
+  color: #111;
+  font-weight: 600;
+}
+
+/* Badge for project type */
+.project-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #10b981;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Invited users list */
+.project-details-card ul {
+  margin: 8px 0 0 16px;
+  padding: 0;
+  list-style: disc;
+  color: #555;
+}
+
+.project-details-card li {
+  margin-bottom: 4px;
+}
+
+/* Card Actions */
+.project-details-card mat-card-actions {
+  background-color: #f9fafb;
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Buttons in actions */
+.project-details-card mat-card-actions button {
+  position: relative;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Primary action */
+.project-details-card mat-card-actions button[color="primary"] {
+  background: #4f46e5;
+  color: #fff;
+}
+.project-details-card mat-card-actions button[color="primary"]:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+}
+
+/* Accent action */
+.project-details-card mat-card-actions button[color="accent"] {
+  background: #f43f5e;
+  color: #fff;
+}
+.project-details-card mat-card-actions button[color="accent"]:hover {
+  background: #e11d48;
+  transform: translateY(-2px);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .project-details-card mat-card-content > div[fxLayout="row"] {
+    flex-direction: column;
+  }
+}
+
+
+/* Main Content */
+.main-content {
+  display: flex;
+  gap: 16px;
+  flex: 1 1 auto;
+}
+
+/* Left Column */
 .left-col {
-  flex: 1;
-}
-
-/* Row-2 is full-width under row-1 */
-.row-2 {
-  width: 100%;
-}
-
-/* Right big column (narrower) */
-.big-right {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
+  flex: 0 0 30%;
 }
 
+/* Right Column */
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 0 0 70%;
+}
+
+/* Generic Card */
+/* Common card base */
+.card,
+mat-card.block {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease both;
+}
+
+.card:hover,
+mat-card.block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 1. Mes cas de test */
+.tests-block {
+  border-top: 4px solid #3b82f6;
+}
+.tests-block .card-header h2 {
+  color: #1e40af;
+  font-size: 1.4rem;
+}
+.tests-block button.mat-icon-button {
+  background: #e0e7ff;
+  transition: background 0.3s ease;
+}
+.tests-block button.mat-icon-button:hover {
+  background: #c7d2fe;
+}
+
+/* 2. Cas uploadés */
+.uploads-block {
+  border-top: 4px solid #10b981;
+}
+.uploads-block h3 {
+  color: #065f46;
+}
+.uploads-block .mat-list-item {
+  transition: background 0.2s ease;
+}
+.uploads-block .mat-list-item:hover {
+  background: #ecfdf5;
+}
+
+/* 3. Réunions planifiées */
+.meetings-block {
+  border-top: 4px solid #f59e0b;
+}
+.meetings-block h3 {
+  color: #92400e;
+}
+.meetings-block mat-expansion-panel {
+  transition: background 0.3s ease;
+}
+.meetings-block mat-expansion-panel:hover {
+  background: #fef3c7;
+}
+
+/* 4. Bugs signalés */
+.bugs-block {
+  border-top: 4px solid #ef4444;
+}
+.bugs-block h3 {
+  color: #991b1b;
+}
+.bugs-block .mat-list-item button {
+  transition: color 0.3s ease;
+}
+.bugs-block .mat-list-item button:hover {
+  color: #ef4444;
+}
+
+/* 5. Demandes de suspension */
+.pause-requests-block {
+  border-top: 4px solid #8b5cf6;
+}
+.pause-requests-block h3 {
+  color: #4c1d95;
+}
+.pause-requests-block .mat-list-item {
+  transition: transform 0.2s ease;
+}
+.pause-requests-block .mat-list-item:hover {
+  transform: translateX(4px);
+}
+
+/* 6. Scénario de test */
+.scenario-card {
+  border-left: 6px solid #6366f1;
+}
+.scenario-card mat-card-title {
+  color: #4338ca;
+}
+.scenario-card button {
+  background: #e0e7ff;
+  color: #4338ca;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.scenario-card button:hover {
+  background: #c7d2fe;
+  transform: translateY(-2px);
+}
+
+/* 7. Types de test */
+.types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+  gap: 12px;
+}
+.types-grid mat-checkbox {
+  background: #fffbeb;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+.types-grid mat-checkbox:hover {
+  background: #fef3c7;
+}
+
+/* 8. Niveaux de test */
+.levels-card {
+  border-left: 6px solid #14b8a6;
+}
+.levels-card mat-card-title {
+  color: #0f766e;
+}
+.level-node {
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+.level-node:hover {
+  background: #ccfbf1;
+}
+
+/* Utility animations */
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+/* Example: pulse on upload icon when new items */
+.uploads-block .mat-list-item.new {
+  animation: pulse 1.2s infinite;
+}
+
+
+/* Decision Bar */
+/* Decision Bar Container */
+.decision-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: linear-gradient(90deg, #f3f4f6, #ffffff);
+  border-top: 2px solid #e5e7eb;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+  border-radius: 0 0 12px 12px;
+}
+
+/* Action Buttons Group */
+.decision-bar > div:first-child {
+  display: flex;
+  gap: 12px;
+}
+
+/* Base Button Styles */
+.decision-bar button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Approve Button */
+.decision-bar button[color="primary"] {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: #fff;
+}
+.decision-bar button[color="primary"]:hover:not(:disabled) {
+  animation: ripple 0.6s ease-out;
+  box-shadow: 0 6px 16px rgba(16,185,129,0.4);
+  transform: translateY(-2px);
+}
+
+/* Reject Button */
+.decision-bar button[color="warn"] {
+  background: linear-gradient(135deg, #f87171, #f87171 80%);
+  color: #fff;
+}
+.decision-bar button[color="warn"]:hover:not(:disabled) {
+  animation: ripple 0.6s ease-out;
+  box-shadow: 0 6px 16px rgba(248,113,113,0.4);
+  transform: translateY(-2px);
+}
+
+/* Disabled Buttons */
+.decision-bar button:disabled {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(255,255,255,0);
+  }
+}
+
+/* File Upload Section */
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+/* File Input */
+.file-upload input[type="file"] {
+  padding: 6px;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.file-upload input[type="file"]:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #9ca3af;
+}
+
+/* Uploaded File Label */
+.file-upload span {
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  animation: fadeIn 0.4s ease both;
+}
+
+/* Fade-in for file label */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive: Stack on Mobile */
+@media (max-width: 600px) {
+  .decision-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .decision-bar > div:first-child {
+    justify-content: center;
+  }
+  .file-upload {
+    justify-content: center;
+  }
+}

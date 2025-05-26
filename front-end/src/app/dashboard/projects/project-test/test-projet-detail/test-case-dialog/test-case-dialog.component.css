@@ -1,79 +1,140 @@
-:host {
-  display: block;
-  padding: 24px;
-  max-width: 840px;
-  margin: 0 auto;
-}
-
-/* Titre */
-h1[mat-dialog-title] {
-  font-size: 1.6rem;
-  margin-bottom: 16px;
-}
-
-/* Dialog content */
+/* Container & Layout */
 mat-dialog-content {
-  overflow-y: auto;
-  max-height: 60vh;
-  padding-bottom: 8px;
+  padding: 24px !important;
+  background: #f8fafc;
+  border-radius: 8px 8px 0 0;
+  font-family: "Roboto", sans-serif;
 }
 
-/* Flex Layout ensures le champ mat-form-field prend la largeur */
-mat-form-field {
+/* Headings */
+h1[mat-dialog-title] {
   margin: 0;
+  padding: 16px 24px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  color: #fff;
 }
 
-/* Section Étapes */
-h3 {
-  margin-top: 24px;
-  font-size: 1.3rem;
-  font-weight: 500;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 4px;
+/* Form Fields */
+mat-form-field {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
+}
+mat-form-field:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+mat-form-field.mat-focused .mat-form-field-ripple {
+  background-color: #6366f1 !important;
 }
 
-/* Conteneur du tableau */
+/* Error Messages */
+mat-error {
+  font-size: 0.85rem;
+  color: #dc2626;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Steps Table Wrapper */
 .steps-table-wrapper {
   position: relative;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
 }
 
-/* Tableau d’étapes */
+/* Table Styling */
 table.mat-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 8px;
 }
-th.mat-header-cell {
-  background: #fafafa;
+table.mat-table th.mat-header-cell {
+  background: #e0e7ff;
+  color: #1e3a8a;
   font-weight: 600;
+  padding: 12px;
+  text-align: left;
 }
-td.mat-cell {
-  border-bottom: none;
-  padding: 4px 8px;
-}
-.step-field {
-  width: 100%;
-  margin: 0;
+table.mat-table td.mat-cell {
+  padding: 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-/* Bouton Ajouter Étape */
+/* Step Field Inputs */
+.step-field {
+  width: 100%;
+}
+.step-field .mat-form-field-flex {
+  background: #f9fafb;
+}
+
+/* Add-Step Button */
 .add-step-btn {
   display: flex;
   justify-content: flex-end;
-  margin-top: 8px;
+  padding: 12px;
+  background: #f3f4f6;
+}
+.add-step-btn button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.add-step-btn button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.4);
 }
 
-/* Actions du dialog */
+/* Dialog Actions */
 mat-dialog-actions {
-  margin-top: 16px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+mat-dialog-actions button {
+  min-width: 100px;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+mat-dialog-actions button[color="primary"] {
+  background: #3b82f6;
+  color: #fff;
+}
+mat-dialog-actions button[color="primary"]:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+mat-dialog-actions button:not([color]) {
+  background: transparent;
+  color: #6b7280;
+}
+mat-dialog-actions button:not([color]):hover {
+  color: #374151;
 }
 
-/* Responsive tweaks */
+/* Responsive adjustments */
 @media (max-width: 600px) {
   h1[mat-dialog-title] {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    padding: 12px 16px;
   }
-  h3 {
-    font-size: 1.2rem;
+  .steps-table-wrapper, mat-dialog-content {
+    padding: 16px;
+  }
+  table.mat-table th.mat-header-cell,
+  table.mat-table td.mat-cell {
+    padding: 8px;
   }
 }

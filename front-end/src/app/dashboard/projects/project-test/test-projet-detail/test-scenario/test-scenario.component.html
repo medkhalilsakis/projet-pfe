@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Scénario de Test</h2>
+<mat-dialog-content>
+  <div *ngIf="scenario">
+    <p><strong>Nom :</strong> {{ scenario.name }}</p>
+    <p><strong>Description :</strong> {{ scenario.description }}</p>
+    <p><strong>Projet :</strong> {{ scenario.projectId }}</p>
+    <p><strong>Superviseur :</strong> {{ scenario.superviseurId }}</p>
+    <div *ngIf="scenario.steps && scenario.steps.length">
+      <h3>Étapes :</h3>
+      <ul>
+        <li *ngFor="let step of scenario.steps">
+          <p><strong>Description :</strong> {{ step.description }}</p>
+          <p><strong>Attendu :</strong> {{ step.expected }}</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div *ngIf="!scenario">
+    <p>Chargement du scénario...</p>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="closeDialog()">Fermer</button>
+</mat-dialog-actions>

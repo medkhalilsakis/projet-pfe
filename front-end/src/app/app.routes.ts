@@ -28,6 +28,7 @@ import{ProjectTermineComponent} from './dashboard/projects/project-termine/proje
 import { InitiationPhaseComponent } from './dashboard/task-assignment/initiation-phase/initiation-phase.component';
 import { MeetingDetailsComponent } from './dashboard/espace-adminstrative/meeting-details/meeting-details.component';
 import { NoteDetailsComponent } from './dashboard/espace-adminstrative/note-details/note-details.component';
+import { UserStatsComponent } from './dashboard/user-management/user-stats/user-stats.component';
 
 export const routes: Routes = [
   { 
@@ -45,6 +46,7 @@ export const routes: Routes = [
       { path: 'messages', component: MessagesComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'users',    component: UserManagementComponent },
+      { path: 'user/performances/:id',    component: UserStatsComponent },
       { path: 'tâches',   component: TaskAssignmentComponent },
       { path: 'tâches/:id',      component: TaskDetailComponent  },
       { path: 'InitTache/:id', component: InitiationPhaseComponent },

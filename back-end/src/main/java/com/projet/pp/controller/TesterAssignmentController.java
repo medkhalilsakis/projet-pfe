@@ -67,7 +67,7 @@ public class TesterAssignmentController {
             @RequestPart("data")        AssignPayload payload,
 
             @RequestPart("testCasesPdf") MultipartFile testCasesPdf
-            ) throws IOException {
+    ) throws IOException {
         service.assignTesters(projectId,payload.testeurIds,payload.superviseurId,testCasesPdf);
         return ResponseEntity.ok().build();
     }
@@ -255,5 +255,10 @@ public class TesterAssignmentController {
     }
 
 
+
+    @GetMapping("/tester/{testeurId}/count")
+    public long countByTester(@PathVariable Long testeurId) {
+        return service.countByTester(testeurId);
+    }
 
 }

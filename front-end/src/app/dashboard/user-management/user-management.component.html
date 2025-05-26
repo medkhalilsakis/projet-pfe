@@ -1,5 +1,5 @@
 <mat-card class="user-mgmt-card">
-    <mat-card-title>Gestion des utilisateurs</mat-card-title>
+    <mat-card-title class="mat-card-title">Gestion des utilisateurs</mat-card-title>
     <mat-card-content>
   
       <div class="controls">
@@ -10,77 +10,88 @@
         <button mat-flat-button color="primary" (click)="onAdd()">+ Ajouter</button>
       </div>
   
-      <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2">
+      <table mat-table [dataSource]="dataSource" matSort class="mat-table mat-elevation-z2">
   
         <!-- Titre -->
         <ng-container matColumnDef="titre">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Titre</th>
-          <td mat-cell *matCellDef="let u">{{u.titre}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Titre</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.titre}}</td>
         </ng-container>
   
         <!-- Avatar -->
         <ng-container matColumnDef="avatar">
-          <th mat-header-cell *matHeaderCellDef>Photo</th>
-          <td mat-cell *matCellDef="let u">
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef>Photo</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">
             <img [src]="u.avatarUrl" class="avatar-cell" alt="avatar">
           </td>
         </ng-container>
   
         <!-- Nom -->
         <ng-container matColumnDef="nom">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom</th>
-          <td mat-cell *matCellDef="let u">{{u.nom}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Nom</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.nom}}</td>
         </ng-container>
   
         <!-- Prénom -->
         <ng-container matColumnDef="prenom">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Prénom</th>
-          <td mat-cell *matCellDef="let u">{{u.prenom}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Prénom</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.prenom}}</td>
         </ng-container>
   
         <!-- NCIN -->
         <ng-container matColumnDef="ncin">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>NCIN</th>
-          <td mat-cell *matCellDef="let u">{{u.ncin}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>NCIN</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.ncin}}</td>
         </ng-container>
   
         <!-- Email -->
         <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-          <td mat-cell *matCellDef="let u">{{u.email}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Email</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.email}}</td>
         </ng-container>
   
         <!-- Date d'embauche -->
         <ng-container matColumnDef="dateEmbauche">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Embauché le</th>
-          <td mat-cell *matCellDef="let u">{{u.dateEmbauche | date:'shortDate'}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Embauché le</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.dateEmbauche | date:'shortDate'}}</td>
         </ng-container>
   
         <!-- Salaire -->
         <ng-container matColumnDef="salaire">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Salaire</th>
-          <td mat-cell *matCellDef="let u">{{u.salaire | currency}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Salaire</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.salaire | currency}}</td>
         </ng-container>
   
         <!-- Rôle -->
         <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Rôle</th>
-          <td mat-cell *matCellDef="let u">{{u.role.libelle}}</td>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef mat-sort-header>Rôle</th>
+          <td mat-cell class="mat-cell" *matCellDef="let u">{{u.role.libelle}}</td>
         </ng-container>
   
         <!-- Actions -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let u">
-            <button mat-icon-button color="primary" (click)="onEdit(u)"    matTooltip="Éditer"><mat-icon>edit</mat-icon></button>
-            <button mat-icon-button color="warn"    (click)="onDelete(u)"  matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
-            <button mat-icon-button color="accent"  (click)="onAnalytics(u)" matTooltip="Performance"><mat-icon>insights</mat-icon></button>
-            <button mat-icon-button                   (click)="onMessage(u)"   matTooltip="Message"><mat-icon>message</mat-icon></button>
+          <th mat-header-cell class="mat-header-cell" *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let u" class="mat-cell">
+            <button mat-icon-button class="mat-icon-button icon-btn icon-edit" (click)="onEdit(u)"    matTooltip="Éditer">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button class="mat-icon-button icon-btn icon-delete" (click)="onDelete(u)"  matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+            <button mat-icon-button class="mat-icon-button icon-btn icon-analytics" (click)="onAnalytics(u)" matTooltip="Performance">
+              <mat-icon>insights</mat-icon>
+            </button>
+
+            <button mat-icon-button class="mat-icon-button icon-btn icon-message" (click)="onMessage(u)"   matTooltip="Message">
+              <mat-icon>message</mat-icon>
+            </button>
           </td>
         </ng-container>
   
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-header-row class="mat-header-row" *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row class="mat-row" *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
   
       <mat-paginator [pageSizeOptions]="[5,10,20]" showFirstLastButtons></mat-paginator>

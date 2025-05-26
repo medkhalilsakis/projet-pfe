@@ -22,10 +22,8 @@ public class TestScenario {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
 
     /**
      * Relation vers le projet testé
@@ -33,6 +31,13 @@ public class TestScenario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
+
+    /**
+     * Testeur principal du scénario
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "testeur_id", nullable = false)
+    private User testeur;
 
     /**
      * Superviseur ayant validé le scénario

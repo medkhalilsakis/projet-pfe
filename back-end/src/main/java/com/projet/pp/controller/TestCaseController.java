@@ -46,4 +46,9 @@ public class TestCaseController {
     public ResponseEntity<List<TestCase>> list(@PathVariable Long pid) {
         return ResponseEntity.ok(svc.findByProject(pid));
     }
+
+    @GetMapping("/project/{projId}/count")
+    public long countByProject(@PathVariable Long projId) {
+        return svc.countByProject(projId);
+    }
 }

@@ -388,4 +388,17 @@ public class TacheService {
     }
 
 
+    public Long getTacheIdByProjectId(Long projectId) {
+        // Récupérer la tâche associée au projectId
+        Optional<Tache> tacheOpt = tacheRepository.findByProject_Id(projectId);
+
+        // Si la tâche est trouvée, retourner son ID
+        if (tacheOpt.isPresent()) {
+            return tacheOpt.get().getId();
+        } else {
+            // Si aucune tâche n'est associée au projet, lever une exception
+            throw new IllegalArgumentException("Aucune tâche trouvée pour le projectId : " + projectId);
+        }
+    }
+
 }

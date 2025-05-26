@@ -1,20 +1,231 @@
-/* src/app/dashboard/user-management/user-management.component.css */
-
+/* Container Card */
 .user-mgmt-card {
-    margin: 16px;
-  }
-  
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f4f6f8 100%);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.user-mgmt-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* ==== En-tête Personnalisé ==== */
+.mat-card-title {
+  display: inline-block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(90deg, #42a5f5, #478ed1);
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: background 0.4s ease;
+}
+.mat-card-title:hover {
+  background: linear-gradient(90deg, #478ed1, #42a5f5);
+}
+
+/* ==== Conteneur de Contrôles ==== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+/* Champ de Recherche Stylisé */
+.controls mat-form-field {
+  flex: 1 1 280px;
+  min-width: 200px;
+}
+.controls mat-form-field .mat-form-field-outline {
+  border-color: #42a5f5;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.controls mat-form-field.mat-focused .mat-form-field-outline {
+  border-width: 2px;
+  border-color: #1e88e5;
+  box-shadow: 0 0 6px rgba(30,136,229,0.5);
+}
+.controls mat-form-field .mat-form-field-infix {
+  padding: 0 12px;
+}
+
+/* Bouton “+ Ajouter” Unique */
+.controls button {
+  background: #66bb6a;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin-left: 25px;
+}
+.controls button:hover {
+  background: #5aaa5a;
+  transform: translateY(-2px);
+}
+.controls button:active {
+  background: #4e8f4e;
+  transform: translateY(0);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
   .controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+    flex-direction: column;
   }
-  
-  .avatar-cell {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
+  .controls button {
+    width: 100%;
+    text-align: center;
   }
-  
+}
+
+
+/* Table Styling */
+.mat-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+.mat-elevation-z2 {
+  box-shadow: none;
+}
+
+/* Header Cells */
+.mat-header-cell {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px;
+}
+
+/* Data Cells */
+.mat-cell {
+  background: #fafafa;
+  padding: 12px;
+  color: #555;
+}
+
+/* Row Hover */
+.mat-row:hover td {
+  background: #e3f2fd;
+  transition: background 0.3s ease;
+}
+
+/* Avatar Column */
+.avatar-cell {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2196f3;
+  transition: border-color 0.3s ease;
+}
+.avatar-cell:hover {
+  border-color: #1976d2;
+}
+
+/* Actions Buttons */
+.mat-cell .mat-icon-button {
+  margin: 0 4px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+td.mat-cell .mat-icon-button:hover {
+  background: rgba(25, 118, 210, 0.1);
+  transform: scale(1.1);
+  border-radius: 50%;
+}
+
+/* Paginator */
+.mat-paginator {
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 16px;
+  border-radius: 0 0 8px 8px;
+}
+.mat-paginator .mat-paginator-range-label {
+  font-weight: 500;
+  color: #555;
+}
+.mat-paginator .mat-paginator-navigation-next,
+.mat-paginator .mat-paginator-navigation-previous {
+  color: #1976d2;
+  transition: color 0.3s ease;
+}
+.mat-paginator .mat-paginator-navigation-next:hover,
+.mat-paginator .mat-paginator-navigation-previous:hover {
+  color: #0d47a1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 800px) {
+  .user-mgmt-card {
+    padding: 12px;
+  }
+  th.mat-header-cell, td.mat-cell {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+
+/* Classe commune pour transition */
+.icon-btn {
+  font-size: 25px;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* Éditer */
+.icon-edit .mat-icon {
+  color: #1976d2;          /* bleu primaire */
+}
+.icon-edit:hover .mat-icon {
+  color: #1565c0;
+  transform: scale(1.2);
+}
+
+/* Supprimer */
+.icon-delete .mat-icon {
+  color: #d32f2f;          /* rouge primaire */
+}
+.icon-delete:hover .mat-icon {
+  color: #c62828;
+  transform: scale(1.2);
+}
+
+/* Performance/Insights */
+.icon-analytics .mat-icon {
+  color: #7b1fa2;          /* pourpre */
+}
+.icon-analytics:hover .mat-icon {
+  color: #6a1b9a;
+  transform: scale(1.2);
+}
+
+/* Message */
+.icon-message .mat-icon {
+  color: #388e3c;          /* vert */
+}
+.icon-message:hover .mat-icon {
+  color: #2e7d32;
+  transform: scale(1.2);
+}
+
+/* Optionnel : bouton “inactif” (sans couleur définie) */
+.icon-btn:not(.icon-edit):not(.icon-delete):not(.icon-analytics):not(.icon-message) .mat-icon {
+  color: #616161;          /* gris */
+}

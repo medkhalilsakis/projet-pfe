@@ -43,5 +43,10 @@ public class TestCaseService {
     public List<TestCase> findByProject(Long projectId) {
         return repo.findByProjectId(projectId);
     }
-    // update, delete...
+
+
+    public long countByProject(Long projectId) {
+        return repo.countByProject_Id(projectId);
+    }
+
 }

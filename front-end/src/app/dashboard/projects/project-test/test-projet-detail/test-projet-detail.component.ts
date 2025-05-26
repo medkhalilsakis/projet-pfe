@@ -39,6 +39,8 @@ import { PauseRequest } from '../../../../models/pause-request.model';
 import { switchMap, map } from 'rxjs/operators';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient } from '@angular/common/http';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { TestScenarioComponent } from '../../designation-testeur/test-scenario/test-scenario.component';
 
 
 @Component({
@@ -59,10 +61,12 @@ import { HttpClient } from '@angular/common/http';
     MatCheckboxModule,
     MatTreeModule,
     MatExpansionModule,
-    NgxExtendedPdfViewerModule
+    NgxExtendedPdfViewerModule,
+    FlexLayoutModule
   ]
 })
 export class TestProjetDetailComponent implements OnInit {
+
 
   projectId!: number;
   project: any;
@@ -348,6 +352,7 @@ openTestCaseDialog(tc?: TestCase) {
         // 3) Ouvrir le dialog en passant la liste
         const dlg = this.dialog.open(MeetingDialogComponent, {
           width: '600px',
+          height:'90vh',
           data: { allUsers }
         });
 
@@ -550,4 +555,14 @@ openTestCaseDialog(tc?: TestCase) {
     }    
 
     
+    ViewScenario(): void {
+    const dialogRef = this.dialog.open(TestScenarioComponent, {
+      width: '500px',
+      data: this.projectId
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Le popup a été fermé');
+    });
+  }
 }

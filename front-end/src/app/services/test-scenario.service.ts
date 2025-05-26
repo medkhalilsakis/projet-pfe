@@ -39,4 +39,8 @@ export class TestScenarioService {
     return this.http.get<boolean>(`${this.baseUrl}/exists/${projectId}`);
   }
 
+  getTestScenarioByProjectId(projectId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/exists/${projectId}`);
+  }
+
 }

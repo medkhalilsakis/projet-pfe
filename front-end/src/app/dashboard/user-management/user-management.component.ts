@@ -75,32 +75,40 @@ export class UserManagementComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.http.get<User[]>('http://localhost:8080/api/users').subscribe(users => {
-      // On génère un observable par utilisateur pour récupérer son avatar
-      users.forEach(u => {
-        u.titre = u.genre === 'Femme' ? 'Mme.' : 'Mr.';
-      });
+  this.http.get<User[]>('http://localhost:8080/api/users').subscribe(users => {
+    // 1) Ne garder que les users dont role.id != 3 (superviseur)
+    const filtered = users.filter(u => u.role.id !== 3);
 
-      const obs$ = users.map(u =>
-        this.http.get<any>(`http://localhost:8080/api/users/${u.id}/profile-image/meta`).pipe(
-          map(meta =>
-            meta?.filePath
-              ? `http://localhost:8080/api/users/${u.id}/profile-image/raw?ts=${Date.now()}`
-              : 'https://i.imgur.com/vtrfxgY.png'
-          ),
-          catchError(() => of('https://i.imgur.com/vtrfxgY.png'))
-        )
-      );
+    // 2) Générer le titre en fonction du genre
+    filtered.forEach(u => {
+      u.titre = u.genre === 'Femme' ? 'Mme.' : 'Mr.';
+    });
 
-      forkJoin(obs$).subscribe(urls => {
-        users.forEach((u, i) => u.avatarUrl = urls[i]);
-        this.dataSource.data = users;
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort      = this.sort;
-      });
-    },
-    () => this.snack.open('Échec chargement utilisateurs','Fermer',{duration:2000}));
-  }
+    // 3) Construire un tableau d'observables pour récupérer chaque avatar
+    const obs$ = filtered.map(u =>
+      this.http.get<any>(`http://localhost:8080/api/users/${u.id}/profile-image/meta`).pipe(
+        map(meta =>
+          meta?.filePath
+            ? `http://localhost:8080/api/users/${u.id}/profile-image/raw?ts=${Date.now()}`
+            : 'https://i.imgur.com/vtrfxgY.png'
+        ),
+        catchError(() => of('https://i.imgur.com/vtrfxgY.png'))
+      )
+    );
+
+    // 4) ForkJoin pour attendre toutes les requêtes d'avatar
+    forkJoin(obs$).subscribe(urls => {
+      filtered.forEach((u, i) => u.avatarUrl = urls[i]);
+
+      // 5) Initialisation du dataSource avec les users filtrés
+      this.dataSource.data = filtered;
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort      = this.sort;
+    });
+  },
+  () => this.snack.open('Échec chargement utilisateurs','Fermer',{ duration:2000 }));
+}
+
 
   applyFilter(event: Event) {
     const filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
@@ -143,7 +151,7 @@ export class UserManagementComponent implements OnInit {
       () => this.snack.open('Erreur suppression','Fermer',{duration:2000})
     );
   }
-  onAnalytics(u: User){ this.router.navigate(['/dashboard/users',u.id,'analytics']); }
+  onAnalytics(u: User){ this.router.navigate(['/dashboard/user/performances/',u.id]); }
   onMessage(u: User)  { this.router.navigate(['/dashboard/messages'],{ queryParams:{to:u.id} }); }
 
   onAdd() {

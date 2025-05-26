@@ -18,7 +18,7 @@ public interface ProjectTesterAssignmentRepository extends JpaRepository<Project
     List<ProjectTesterAssignment> findByProjectId(Long projectId);
     ProjectTesterAssignment findOneByProjectId(Long projectId);
 
-    long countByTesteurIdAndStatutTest(Long testeurId, TestStatus statutTest);
+
     void deleteByProjectId(Long projectId);
     Optional<ProjectTesterAssignment> findByProjectIdAndTesteurId(Long projectId, Long testeurId);
     List<ProjectTesterAssignment> findByTesteurId(Long testeurId);

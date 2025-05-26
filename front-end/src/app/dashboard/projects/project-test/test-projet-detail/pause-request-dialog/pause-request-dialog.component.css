@@ -1,0 +1,139 @@
+/* Dialog Title */
+h2[mat-dialog-title] {
+  margin-bottom: 10px;
+  padding: 20px 24px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Dialog Content */
+mat-dialog-content {
+  padding: 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: "Roboto", sans-serif;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Full-width form field */
+mat-form-field.w-full {
+  width: 100%;
+  background: #f9fafb;
+  border-radius: 6px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+mat-form-field.w-full:hover {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+mat-form-field.w-full.mat-focused .mat-form-field-ripple {
+  background-color: #f59e0b !important;
+}
+
+/* Textarea */
+mat-form-field textarea[matInput] {
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 1rem;
+}
+mat-form-field textarea[matInput]:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 4px rgba(245,158,11,0.3);
+}
+
+/* Error Messages */
+mat-error {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin-top: 4px;
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Dialog Actions */
+mat-dialog-actions {
+  padding: 16px 24px;
+  background: #f3f4f6;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-radius: 0 0 8px 8px;
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Buttons */
+mat-dialog-actions button {
+  min-width: 100px;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Cancel Button */
+mat-dialog-actions button:not([color]) {
+  background: transparent;
+  color: #6b7280;
+}
+mat-dialog-actions button:not([color]):hover {
+  background: rgba(107,114,128,0.1);
+  transform: translateY(-1px);
+}
+
+/* Submit Button */
+mat-dialog-actions button[color="primary"] {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(245,158,11,0.4);
+}
+mat-dialog-actions button[color="primary"]:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f97316, #e94e2f);
+  box-shadow: 0 4px 12px rgba(245,158,11,0.6);
+  transform: translateY(-2px);
+}
+
+/* Disabled Submit */
+mat-dialog-actions button[color="primary"]:disabled {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+/* Keyframe Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  mat-dialog-content {
+    padding: 16px;
+  }
+  h2[mat-dialog-title] {
+    font-size: 1.4rem;
+    padding: 16px;
+  }
+  mat-dialog-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

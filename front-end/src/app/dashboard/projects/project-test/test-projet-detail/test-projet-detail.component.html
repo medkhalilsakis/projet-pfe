@@ -1,12 +1,13 @@
-<div class="container">
+<div class="container" fxLayout="column" fxLayoutGap="16px">
 
-  <div class="pause-banner" *ngIf="isPaused">
+  <!-- Bannière de pause -->
+  <div class="pause-banner" *ngIf="isPaused" fxFlex="none">
     <mat-icon>warning</mat-icon>
     La phase de test a été suspendue par le superviseur. Toutes les fonctionnalités sont désactivées.
   </div>
 
-  <!-- 1. Barre horizontale d’actions -->
-  <div class="top-bar">
+  <!-- 1. Barre horizontale d’actions (fixe en haut) -->
+  <div class="top-bar" fxFlex="none" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
     <button mat-stroked-button color="primary" (click)="openTestCaseDialog()" [disabled]="isPaused">
       <mat-icon>add_circle</mat-icon> Créer un cas
     </button>
@@ -17,84 +18,81 @@
       <mat-icon>event</mat-icon> Demander réunion
     </button>
     <button mat-stroked-button color="primary" (click)="openPauseRequest()" [disabled]="isPaused">
-      <mat-icon>pause_circle_filled</mat-icon>
-      Demander de suspendre la phase de test
+      <mat-icon>pause_circle_filled</mat-icon> Demander de suspendre la phase de test
     </button>
     <button mat-stroked-button color="primary" *ngIf="canLaunchTest" (click)="launchTest()" [disabled]="isPaused">
       <mat-icon>play_circle_filled</mat-icon> Lancer le test
     </button>
   </div>
 
-  <div class="main-content">
-    <div class="big-left">
-      <div class="row-1">
+  <!-- 2. Section Projet centrée comme une grande card -->
+  <div fxLayout="row" fxLayoutAlign="center center" fxFlex="none">
+  <mat-card class="project-details-card" fxFlex="none" style="max-width:800px; width:100%;">
+    <!-- Titre du projet -->
+    <mat-card-header>
+      <mat-card-title>
+        <h2>{{ project?.name }}</h2>
+      </mat-card-title>
+    </mat-card-header>
 
-    <section class="project-details">
-      <h2>{{ project?.name }}</h2>
-  
-      <div class="info">
-        <p><strong>Utilisateur qui a téléchargé :</strong> {{ project.user.nom }} {{ project.user.prenom }}</p>
-        <p><strong>Date d'upload :</strong> {{ project.createdAt | date:'yyyy-MM-dd HH:mm' }}</p>
-    
-        <div *ngIf="project.invitedUsers?.length">
-          <p><strong>Utilisateurs invités (acceptés) :</strong></p>
-          <ul>
-            <li *ngFor="let user of project.invitedUsers">
-              {{ user?.nom }} {{ user?.prenom }}
-            </li>
-          </ul>
+    <mat-card-content>
+      <!-- Contenu en 3 colonnes -->
+      <div fxLayout="row" fxLayoutGap="24px">
+
+        <!-- Colonne 1 -->
+        <div fxFlex>
+          <p><strong>Utilisateur qui a téléchargé :</strong> {{ project.user.nom }} {{ project.user.prenom }}</p>
+          <div *ngIf="project.description">
+            <p><strong>Description du projet :</strong></p>
+            <p>{{ project.description | slice:0:150 }}...</p>
+          </div>
         </div>
-        
-    
-        <div *ngIf="assignedTesters?.length">
-          <p><strong>Testeurs assignés :</strong></p>
-          <ul>
-            <li *ngFor="let tester of assignedTesters">{{ tester.nom }} {{ tester.prenom }}</li>
-          </ul>
+
+        <!-- Colonne 2 -->
+        <div fxFlex>
+          <p><strong>Date d'upload :</strong> {{ project.createdAt | date:'yyyy-MM-dd HH:mm' }}</p>
+          <p><strong>Type du projet :</strong> {{ project.type }}</p>
         </div>
-    
-        <div *ngIf="project.description">
-          <p><strong>Description du projet :</strong></p>
-          <p>{{ project.description | slice:0:150 }}...</p>
+
+        <!-- Colonne 3 -->
+        <div fxFlex>
+          <div *ngIf="project.invitedUsers?.length">
+            <p><strong>Utilisateurs invités (acceptés) :</strong></p>
+            <ul>
+              <li *ngFor="let user of project.invitedUsers">
+                {{ user.nom }} {{ user.prenom }}
+              </li>
+            </ul>
+          </div>
         </div>
-    
-        <div *ngIf="project.task">
-          <p><strong>Tâche liée :</strong> {{ project.task }}</p>
-        </div>
-    
-        <p><strong>Type du projet :</strong> {{ project.type }}</p>
-      </div>
-    
-      <!-- Actions sur le projet -->
-      <div class="actions">
-        <button mat-raised-button color="primary" (click)="exploreProject()">Explorer le contenu</button>
-        <button mat-raised-button color="accent" (click)="exportProject()">Exporter en ZIP</button>
 
       </div>
-     
-      <div class="actions">
-        <button mat-raised-button color="accent" (click)="downloadTestCases()">telecharger TestCases.pdf</button>
+    </mat-card-content>
 
-      </div>
+    <!-- Menu d’actions en bas -->
+    <mat-card-actions fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
+      <button mat-raised-button color="primary" (click)="exploreProject()">Explorer le contenu</button>
+      <button mat-raised-button color="accent" (click)="exportProject()">Exporter en ZIP</button>
+      <button mat-raised-button color="accent" (click)="downloadTestCases()">Télécharger TestCases.pdf</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
 
 
-    </section>
+  <!-- 3. Contenu principal : colonnes gauche (30%) et droite (70%) -->
+  <div class="main-content" fxLayout="row" fxLayoutGap="16px" fxFlex>
 
-    <!-- 2. Colonne gauche -->
-    <section class="left-col">
+    <!-- Colonne gauche (30%) -->
+    <section class="left-col" fxFlex="66%" fxLayout="column" fxLayoutGap="16px">
 
-      <!-- 2.1 Cas de test + Upload -->
+      <!-- Mes cas de test + Upload -->
       <div class="card tests-block">
-
-        <div class="card-header">
+        <div class="card-header" fxLayout="row" fxLayoutAlign="space-between center">
           <h2>Mes cas de test</h2>
-          <button mat-icon-button color="primary" class="upload-btn"
-                  (click)="uploadTestCases()">
+          <button mat-icon-button color="primary" (click)="uploadTestCases()">
             <mat-icon class="shiny">cloud_upload</mat-icon>
           </button>
         </div>
-
-        <!-- Table custom ou component existant -->
         <app-test-case-table
           [data]="testCases"
           (edit)="editTestCase($event)"
@@ -103,47 +101,44 @@
         </app-test-case-table>
       </div>
 
-      <!-- 2.2 Cas uploadés -->
+      <!-- Cas uploadés -->
       <div class="card uploads-block">
         <h3>Cas uploadés</h3>
         <mat-list>
-          <mat-list-item *ngFor="let up of uploads" class="upload-item">
+          <mat-list-item *ngFor="let up of uploads">
             <mat-icon matListIcon>insert_drive_file</mat-icon>
-      
-            <div class="upload-details">
-              <div class="filename">{{ up.originalFilename }}</div>
-              <div class="date">{{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}</div>
-      
-              <!-- Boutons pour télécharger et supprimer -->
-              <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
-                <mat-icon>download</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
-                <mat-icon>delete</mat-icon>
-              </button>
+            <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px">
+              <div>
+                <div class="filename">{{ up.originalFilename }}</div>
+                <div class="date">{{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}</div>
+              </div>
+              <div>
+                <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </div>
           </mat-list-item>
         </mat-list>
       </div>
-      
 
-      <!-- 2.3 Réunions planifiées & Bugs -->
-      <div class="row-two">
-
-        <div class="card meetings-block">
+      <!-- Réunions planifiées & Bugs -->
+      <div fxLayout="row" fxLayoutGap="16px">
+        <div class="card meetings-block" fxFlex>
           <h3>Réunions planifiées</h3>
           <mat-accordion>
             <mat-expansion-panel *ngFor="let m of meetings">
               <mat-expansion-panel-header>
                 <mat-panel-title>{{ m.subject }}</mat-panel-title>
-                <mat-panel-description>
-                  {{ m.date | date:'yyyy-MM-dd HH:mm' }}
-                </mat-panel-description>
+                <mat-panel-description>{{ m.date | date:'yyyy-MM-dd HH:mm' }}</mat-panel-description>
               </mat-expansion-panel-header>
               <p><strong>Créée le :</strong> {{ m.createdAt | date:'short' }}</p>
-<p><strong>Participants :</strong> {{ (m.participantNames || []).join(', ') || 'Aucun' }}</p>
-               <p>{{ m.description }}</p>
-              <div class="panel-actions">
+              <p><strong>Participants :</strong> {{ (m.participantNames || []).join(', ') || 'Aucun' }}</p>
+              <p>{{ m.description }}</p>
+              <div class="panel-actions" fxLayout="row" fxLayoutGap="8px">
                 <button mat-icon-button color="primary" (click)="editMeeting(m)">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -154,76 +149,52 @@
             </mat-expansion-panel>
           </mat-accordion>
         </div>
-  
-
-        <div class="card bugs-block">
+        <div class="card bugs-block" fxFlex>
           <h3>Bugs signalés</h3>
           <mat-list>
             <mat-list-item *ngFor="let b of bugs">
-              <!-- titre cliquable qui ouvre le popup -->
-              <button mat-button class="bug-link" (click)="viewBug(b)">
-                Bug #{{ b.id }}
-              </button>
+              <button mat-button (click)="viewBug(b)">Bug #{{ b.id }}</button>
               <span class="bug-level">{{ b.level | titlecase }}</span>
             </mat-list-item>
           </mat-list>
         </div>
       </div>
-      <div class="row-one">
-        <div class="card pause-requests-block">
-          <h3>Demandes de suspension</h3>
-          <mat-list *ngIf="pauseRequests?.length; else none">
-            <mat-list-item *ngFor="let pr of pauseRequests">
-              <mat-icon matListIcon>pause_circle</mat-icon>
-      
-              <!-- Contenu principal de la demande -->
-              <div class="pause-request-content">
-                <div matLine>
-                  <span class="requester-name">Demande #{{ pr.id }} - {{ pr.requesterName }}</span>
-                </div>
-                <div matLine class="small">
-                  <span class="date">{{ pr.requestedAt | date:'yyyy-MM-dd HH:mm' }}</span>
-                  — <em class="status">{{ pr.status | titlecase }}</em>
-                </div>
+
+      <!-- Demandes de suspension -->
+      <div class="card pause-requests-block">
+        <h3>Demandes de suspension</h3>
+        <mat-list *ngIf="pauseRequests?.length; else none">
+          <mat-list-item *ngFor="let pr of pauseRequests">
+            <mat-icon matListIcon>pause_circle</mat-icon>
+            <div>
+              <div class="requester-name">Demande #{{ pr.id }} - {{ pr.requesterName }}</div>
+              <div class="small">
+                {{ pr.requestedAt | date:'yyyy-MM-dd HH:mm' }} — 
+                <em>{{ pr.status | titlecase }}</em>
               </div>
-      
-              <!-- Actions de chaque demande (détails) -->
-              <div matLine class="actions">
-                <button mat-button (click)="viewDetails(pr)">Voir les détails</button>
-              </div>
-            </mat-list-item>
-          </mat-list>
-          <ng-template #none>
-            <p class="none">Aucune demande de suspension.</p>
-          </ng-template>
-        </div>
+            </div>
+            <button mat-button (click)="viewDetails(pr)">Voir les détails</button>
+          </mat-list-item>
+        </mat-list>
+        <ng-template #none><p>Aucune demande de suspension.</p></ng-template>
       </div>
-      
+
     </section>
 
-      </div>
-      <!-- Row 2: PDF viewer -->
-      <div class="row-2" *ngIf="testCaseAttachment">
-        <h2>Cahier des charges (PDF)</h2>
-        <div class="pdf-section">
-          <ngx-extended-pdf-viewer
-            [src]="api + '/api/tester-assignments/attachments/' + testCaseAttachment.id"
-            useBrowserLocale="true"
-            [minifiedJSLibraries]="false"
-            height="600px"
-            [showSidebarButton]="true"
-            style="width: 100%;">
-          </ngx-extended-pdf-viewer>
-        </div>
-      </div>
-    </div>
+    <!-- Colonne droite (70%) -->
+    <aside class="right-col" fxFlex="33%" fxLayout="column" fxLayoutGap="16px">
 
+      <!-- Scénario de test -->
+      <mat-card class="block scenario-card">
+        <mat-card-header>
+          <mat-card-title>Scénario de test</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <button mat-raised-button color="primary" (click)="ViewScenario()">Consulter le scénario de test</button>
+        </mat-card-content>
+      </mat-card>
 
-
-
-    <!-- 3. Colonne droite -->
-    <aside class="right-col">
-
+      <!-- Types de test -->
       <mat-card class="block">
         <mat-card-header>
           <mat-card-title>Types de test</mat-card-title>
@@ -231,30 +202,25 @@
         <mat-card-content>
           <div class="types-grid">
             <mat-checkbox *ngFor="let t of testTypes"
-              [checked]="selectedTypes.has(t)"
-              (change)="selectedTypes.has(t)
-                ? selectedTypes.delete(t)
-                : selectedTypes.add(t)">
+                          [checked]="selectedTypes.has(t)"
+                          (change)="selectedTypes.has(t) ? selectedTypes.delete(t) : selectedTypes.add(t)">
               {{ t }}
             </mat-checkbox>
           </div>
-          <button mat-raised-button color="primary" (click)="saveTypes()">
-            Valider
-          </button>
+          <button mat-raised-button color="primary" (click)="saveTypes()">Valider</button>
         </mat-card-content>
       </mat-card>
 
+      <!-- Niveaux de test -->
       <mat-card class="block levels-card">
         <mat-card-header>
           <mat-card-title>Niveaux de test</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div class="levels-list">
-            <div class="level-node" *ngFor="let lvl of testLevels">
+            <div class="level-node" *ngFor="let lvl of testLevels" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
               <button mat-icon-button (click)="toggleLevel(lvl)">
-                <mat-icon>
-                  {{ levelStatus[lvl] ? 'check_circle' : 'radio_button_unchecked' }}
-                </mat-icon>
+                <mat-icon>{{ levelStatus[lvl] ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
               </button>
               <span (click)="toggleLevel(lvl)">{{ lvl }}</span>
             </div>
@@ -263,20 +229,23 @@
       </mat-card>
 
     </aside>
+
   </div>
 
   <!-- 4. Barre finale de décision -->
-  <div class="decision-bar">
-    <button mat-flat-button color="primary" (click)="approvePhase()" [disabled]="isPaused || !canSubmitDecision">
-      <mat-icon>thumb_up</mat-icon> Approuver
-    </button>
-    <button mat-flat-button color="warn" (click)="rejectPhase()" [disabled]="isPaused || !canSubmitDecision">
-      <mat-icon>thumb_down</mat-icon> Refuser
-    </button>
-    <div class="file-upload">
+  <div class="decision-bar" fxFlex="none" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
+    <div fxLayout="row" fxLayoutGap="8px">
+      <button mat-flat-button color="primary" (click)="approvePhase()" [disabled]="isPaused || !canSubmitDecision">
+        <mat-icon>thumb_up</mat-icon> Approuver
+      </button>
+      <button mat-flat-button color="warn" (click)="rejectPhase()" [disabled]="isPaused || !canSubmitDecision">
+        <mat-icon>thumb_down</mat-icon> Refuser
+      </button>
+    </div>
+    <div class="file-upload" fxFlex="none">
       <input type="file" (change)="onFileChange($event)" [disabled]="isPaused || !canSubmitDecision" />
       <span *ngIf="rapportTestPath">Rapport téléchargé : {{ rapportTestPath }}</span>
     </div>
   </div>
-  
+
 </div>

@@ -13,6 +13,7 @@ import { BugReport } from '../../../../../models/bug-report.model';
 @Component({
   selector: 'app-bug-report-dialog',
   templateUrl: './bug-report-dialog.component.html',
+  styleUrl: './bug-report-dialog.component.css',
   standalone: true,            // si vous utilisez standalone components
   imports: [
     CommonModule,

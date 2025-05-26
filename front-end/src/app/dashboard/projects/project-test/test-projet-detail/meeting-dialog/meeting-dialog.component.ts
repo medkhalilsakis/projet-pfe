@@ -16,6 +16,7 @@ import { Meeting } from '../../../../../models/meeting.model';
 @Component({
   selector: 'app-meeting-dialog',
   templateUrl: './meeting-dialog.component.html',
+  styleUrl: './meeting-dialog.component.css',
   imports:[
     CommonModule,
     ReactiveFormsModule,

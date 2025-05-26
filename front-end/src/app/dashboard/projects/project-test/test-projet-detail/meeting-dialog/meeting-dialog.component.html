@@ -1,52 +1,43 @@
 <h1 mat-dialog-title>Planifier réunion</h1>
 
-<div mat-dialog-content [formGroup]="form" fxLayout="column" fxLayoutGap="20px">
-  <!-- Objet -->
-  <mat-form-field appearance="fill">
-    <mat-label>Objet</mat-label>
-    <input matInput formControlName="subject" />
-  </mat-form-field>
+<div mat-dialog-content class="mat-dialog-content" [formGroup]="form" fxLayout="column" fxLayoutGap="20px">
+  <!-- First Row: Objet & Date & Heure -->
+  <div fxLayout="row" fxLayoutGap="16px">
+    <mat-form-field appearance="fill" fxFlex="50">
+      <mat-label>Objet</mat-label>
+      <input matInput formControlName="subject" />
+    </mat-form-field>
 
-  <!-- Date & Heure -->
-  <mat-form-field appearance="fill">
-    <mat-label>Date & heure</mat-label>
-    <input
-      matInput
-      type="datetime-local"
-      formControlName="date"
-      placeholder="AAAA-MM-JJ hh:mm"
-    />
-  </mat-form-field>
+    <mat-form-field appearance="fill" fxFlex="50">
+      <mat-label>Date & heure</mat-label>
+      <input matInput type="datetime-local" formControlName="date" placeholder="AAAA-MM-JJ hh:mm" />
+    </mat-form-field>
+  </div>
 
-  <!-- Recherche participants -->
-  <mat-form-field appearance="fill">
-    <mat-label>Rechercher participant</mat-label>
-    <input matInput [formControl]="searchControl" placeholder="Tapez un nom..." />
-  </mat-form-field>
+  <!-- Second Row: Sélection multiple & Description -->
+  <div fxLayout="row" fxLayoutGap="16px">
+    <mat-form-field appearance="fill" fxFlex="50">
+      <mat-label>Participants</mat-label>
+      <mat-select formControlName="participantsIds" multiple>
+        <mat-option class="mat-option" *ngFor="let u of filteredUsers" [value]="u.id">
+          {{ u.nom }} {{ u.prenom }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-  <!-- Sélection multiple -->
-  <mat-form-field appearance="fill">
-    <mat-label>Participants</mat-label>
-    <mat-select formControlName="participantsIds" multiple>
-      <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
-        {{ u.nom }} {{ u.prenom }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field appearance="fill" fxFlex="50">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+  </div>
 
-  <!-- Description -->
-  <mat-form-field appearance="fill">
-    <mat-label>Description</mat-label>
-    <textarea matInput formControlName="description"></textarea>
-  </mat-form-field>
-
-  <!-- Fichiers joints -->
+  <!-- File Input (Full width) -->
   <div fxLayout="row" fxLayoutAlign="start stretch">
-    <input type="file" (change)="onFileChange($event)" multiple />
+    <input class="InputFile" type="file" (change)="onFileChange($event)" multiple />
   </div>
 </div>
 
-<div mat-dialog-actions fxLayout="row" fxLayoutAlign="end center">
-  <button mat-button (click)="dialogRef.close()">Annuler</button>
-  <button mat-flat-button color="primary" (click)="save()">Planifier</button>
+<div mat-dialog-actions class="mat-dialog-actions" fxLayout="row" fxLayoutAlign="end center">
+  <button mat-button class="mat-button" (click)="dialogRef.close()">Annuler</button>
+  <button mat-flat-button class="mat-flat-button" color="primary" (click)="save()">Planifier</button>
 </div>
