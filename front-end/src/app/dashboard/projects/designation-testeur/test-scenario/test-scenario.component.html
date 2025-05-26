@@ -54,6 +54,21 @@
       </button>
     </div>
 
+        <div fxLayout="row" fxLayoutAlign="start center" class="ts-upload-row">
+      <button mat-stroked-button type="button" (click)="fileInput.click()">
+        <mat-icon>attach_file</mat-icon>
+        Ajouter un PDF (optionnel)
+      </button>
+      <input #fileInput
+             type="file"
+             accept="application/pdf"
+             hidden
+             (change)="onFileSelected($event)" />
+      <span *ngIf="selectedFileName" class="ts-upload-name">
+        {{ selectedFileName }}
+      </span>
+    </div>
+    
     <!-- Bouton d’enregistrement -->
     <div fxLayout="row" fxLayoutAlign="end">
       <button mat-flat-button color="accent" class="ts-submit-btn" [disabled]="!scenarioForm.valid">

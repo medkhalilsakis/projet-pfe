@@ -81,67 +81,36 @@ public class TesterAssignmentService {
      * pour lancer la phase de test status projet -> 2.
      */
     @Transactional
-    public void assignTesters(Long projectId, List<Long> testeurIds, Long superviseurId,MultipartFile testCasesPdf) throws IOException {
+    public void assignTesters(
+            Long projectId,
+            List<Long> testeurIds,
+            Long superviseurId
+    ) {
         Project projet = projectRepo.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
         User superviseur = userRepo.findById(superviseurId)
                 .orElseThrow(() -> new RuntimeException("Superviseur introuvable"));
 
-        // 1) On supprime les anciennes désignations si on reprend à zéro
-        ProjectTesterAssignment assignment = assignmentRepo.findOneByProjectId(projectId);
-        if (assignment != null) {
-            testAssignmentAttachmentRepository.deleteById(assignment.getTestAssignmentAttachment().getId());
+        // (suppression éventuelle des anciennes désignations…)
+        assignmentRepo.deleteByProjectId(projectId);
 
-            assignmentRepo.deleteByProjectId(projectId);
-        }
-        // 2) On recrée les désignations
+        // Création et sauvegarde des nouvelles assignations
         int num = 1;
+        for (Long tid : testeurIds) {
+            User t = userRepo.findById(tid)
+                    .orElseThrow(() -> new RuntimeException("Testeur introuvable: " + tid));
+            ProjectTesterAssignment pa = new ProjectTesterAssignment();
+            pa.setProject(projet);
+            pa.setSuperviseur(superviseur);
+            pa.setTesteur(t);
+            pa.setDateDesignation(LocalDate.now());
+            pa.setNumeroTesteur(num++);
+            pa.setStatutTest(TestStatus.non_commence);
+            assignmentRepo.save(pa);
+        }
 
-        // Création du dossier pour stocker les fichiers
-        Path testCasesDir = testStorage.resolve(projectId.toString());
-        Files.createDirectories(testCasesDir);
-
-        // Enregistrement du PDF principal sur disque
-        Path pdfPath = testCasesDir.resolve("testCases.pdf");
-        testCasesPdf.transferTo(pdfPath);
-
-        // Persist PDF principal en base comme attachment
-        TestAssignmentAttachment pdfAtt = new TestAssignmentAttachment();
-        pdfAtt.setFileName(testCasesPdf.getOriginalFilename());
-        pdfAtt.setFilePath(pdfPath.toString());
-        pdfAtt.setFileType(testCasesPdf.getContentType());
-        pdfAtt.setFileSize(testCasesPdf.getSize());
-        testAssignmentAttachmentRepository.save(pdfAtt);
-
-
-
-
-
-        for (Long tid : testeurIds)
-
-    {
-        User t = userRepo.findById(tid)
-                .orElseThrow(() -> new RuntimeException("Testeur introuvable: " + tid));
-        ProjectTesterAssignment pa = new ProjectTesterAssignment();
-        pa.setProject(projet);
-        pa.setSuperviseur(superviseur);
-        pa.setTesteur(t);
-        pa.setDateDesignation(LocalDate.now());
-        pa.setNumeroTesteur(num++);
-        pa.setStatutTest(TestStatus.non_commence);
-        pa.setTestAssignmentAttachment(pdfAtt);
-    assignmentRepo.save(pa);
-
-
-    }
-
-
-
-        // 3) On met à jour le statut du projet -> en phase de test
+        // Passage du projet en « en test » (status = 2)
         projet.setStatus(2);
-
-
-
         projectRepo.save(projet);
     }
 

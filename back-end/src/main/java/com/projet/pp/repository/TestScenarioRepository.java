@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TestScenarioRepository extends JpaRepository<TestScenario, Long> {
     boolean existsByProject_Id(Long projectId);
-    Optional<TestScenario> findByTacheId(Long tacheId);
+
+    Optional<TestScenario> findByProject_Id(Long projectId);
 }

@@ -47,7 +47,6 @@ export class DesignationTesteurComponent implements OnInit {
   pending: Project[] = [];
   inTest: Project[] = [];
   finished: Project[] = [];
-  testCasesPdf!: File;
   allTesteurs: User[] = [];
   selectedTesteursMap: { [projectId: number]: number[] } = {};
   finishedDetails: FinishedProjectDetail[] = [];
@@ -80,17 +79,27 @@ export class DesignationTesteurComponent implements OnInit {
     this.loadFinishedDetails();
   }
 
-    private loadAll() {
-    this.svc.getPending().subscribe(p => {
-      this.pending = p;
-      this.checkScenariosExistence(p);
-    });
-    this.svc.getInTest().subscribe(p => {
-      this.inTest = p;
-      this.checkScenariosExistence(p);
-    });
-    this.loadFinishedDetails();
-  }
+private loadAll() {
+  // Chargement des pending…
+  this.svc.getPending().subscribe(p => {
+    this.pending = p;
+    this.checkScenariosExistence(p);
+  });
+
+  // Chargement des in-test…
+  this.svc.getInTest().subscribe(p => {
+    this.inTest = p;
+    this.checkScenariosExistence(p);
+
+    // POUR CHAQUE projet en test, récupérer ses assignations immédiatement
+    p.forEach(proj => this.loadAssignments(proj.id));
+  });
+
+  // Chargement des terminés…
+  this.loadFinishedDetails();
+}
+
+
 
   private checkScenariosExistence(list: Project[]): void {
     list.forEach(proj => {
@@ -105,10 +114,20 @@ export class DesignationTesteurComponent implements OnInit {
   }
   
   
-  loadAssignments(projectId: number) {
-    this.svc.getAssignments(projectId)
-      .subscribe(list => this.assignmentsMap[projectId] = list);
-  }
+loadAssignments(projectId: number) {
+  this.svc.getAssignments(projectId)
+    .subscribe(list => {
+      this.assignmentsMap[projectId] = list;
+
+      // On « non-null-assert » l’ID pour obtenir un number[]
+      this.newTesteursMap[projectId] = list
+        .map(a => a.testeur.id!)        // le "!" garantit qu’on passe de number|undefined → number
+        .filter(id => id != null);      // guard optionnel, pour filtrer d’éventuels undefined
+    });
+}
+
+
+
   
   
   removeTesteur(projectId: number, testeurId: number) {
@@ -127,20 +146,29 @@ export class DesignationTesteurComponent implements OnInit {
   
   
   addTesteurs(projectId: number) {
-    const toAdd = this.newTesteursMap[projectId] || [];
-    if (toAdd.length === 0) {
-      this.snack.open('Sélectionnez au moins un testeur à ajouter', 'OK', { duration: 2000 });
-      return;
-    }
-  
-    const existants = (this.assignmentsMap[projectId] || []).map(a => a.testeur.id);
-    const merged = Array.from(new Set([...existants, ...toAdd]));
-  
-  
+  const selected = this.newTesteursMap[projectId] || [];
+  const existants = (this.assignmentsMap[projectId] || []).map(a => a.testeur.id);
+  const toAdd = selected.filter(id => !existants.includes(id));
+
+  if (toAdd.length === 0) {
+    this.snack.open('Aucun nouveau testeur à ajouter', 'OK', { duration: 2000 });
+    return;
   }
-   onTestCasesPdfChange(e: any) {
-    this.testCasesPdf = e.target.files[0];
-  }
+
+  this.svc.assignTesters(projectId, toAdd, this.superviseurId)
+    .subscribe({
+      next: () => {
+        this.snack.open('Testeurs ajoutés', 'OK', { duration: 2000 });
+        // on recharge pour mettre à jour la liste et la sélection
+        this.loadAssignments(projectId);
+      },
+      error: err => {
+        console.error(err);
+        this.snack.open('Erreur lors de l’ajout', 'OK', { duration: 3000 });
+      }
+    });
+}
+
 
   
 
@@ -158,22 +186,28 @@ export class DesignationTesteurComponent implements OnInit {
   }
 
   assign(projectId: number) {
-    if(!this.testCasesPdf){
-      return;
-    }
-    const list = this.selectedTesteursMap[projectId] || [];
-    if (list.length < 1) {
-      this.snack.open('Au moins un testeur requis', 'OK', { duration: 2000 });
-      return;
-    }
-    this.svc.assignTesters(projectId, list, this.superviseurId,this.testCasesPdf)
-      .subscribe(() => {
-        this.snack.open('Testeurs désignés', 'OK', { duration: 2000 });
-        this.loadAll();
-        // (optionnel) reset de la sélection pour ce projet
-        this.selectedTesteursMap[projectId] = [];
-      });
+  const list = this.selectedTesteursMap[projectId] || [];
+  if (list.length < 1) {
+    this.snack.open('Au moins un testeur requis', 'OK', { duration: 2000 });
+    return;
   }
+
+  this.svc.assignTesters(
+    projectId,
+    list,
+    this.superviseurId
+  ).subscribe({
+    next: () => {
+      this.snack.open('Testeurs désignés', 'OK', { duration: 2000 });
+      this.loadAll();
+      this.selectedTesteursMap[projectId] = [];
+    },
+    error: err => {
+      console.error(err);
+      this.snack.open('Erreur lors de la désignation', 'OK', { duration: 3000 });
+    }
+  });
+}
   
 
 isTesteurAssigned(projectId: number, testeurId?: number): boolean {

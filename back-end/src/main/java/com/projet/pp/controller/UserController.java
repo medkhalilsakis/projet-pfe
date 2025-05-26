@@ -1,6 +1,7 @@
 package com.projet.pp.controller;
 
 import com.projet.pp.model.Role;
+import com.projet.pp.dto.UserDto;
 import com.projet.pp.model.User;
 import com.projet.pp.repository.RoleRepository;
 import com.projet.pp.repository.UserRepository;
@@ -10,6 +11,7 @@ import com.projet.pp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -147,16 +146,18 @@ public class UserController {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        String username = updateData.get("username");
-        userRepository.findByUsername(username)
-                .filter(u -> !u.getId().equals(id))
-                .ifPresent(u -> {
-                    throw new RuntimeException("Nom d'utilisateur déjà utilisé");
-                });
+        if (updateData.containsKey("username") && !updateData.get("username").isBlank()) {
+            String username = updateData.get("username");
+            // Vérifier unicité
+            userRepository.findByUsername(username)
+                    .filter(u -> !u.getId().equals(id))
+                    .ifPresent(u -> { throw new RuntimeException("Nom d'utilisateur déjà utilisé"); });
+            existingUser.setUsername(username);
+        }
+
 
         existingUser.setNom(updateData.getOrDefault("nom", existingUser.getNom()));
         existingUser.setPrenom(updateData.getOrDefault("prenom", existingUser.getPrenom()));
-        existingUser.setUsername(username);
         existingUser.setEmail(updateData.getOrDefault("email", existingUser.getEmail()));
         existingUser.setNcin(updateData.getOrDefault("ncin", existingUser.getNcin()));
 
@@ -224,23 +225,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/supervisor/{id}")
-    public ResponseEntity<?> updateBySupervisor(
-            @PathVariable Long id,
-            @RequestBody Map<String,String> updateData,
-            Authentication auth
-    ) {
-        // Récupérez l'id du superviseur courant depuis le token JWT ou context
-        String username = auth.getName();
-        User current = userService.getUserByUsername(username);
-        try {
-            User updated = userService.updateBySupervisor(id, updateData, current.getId());
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", ex.getMessage()));
-        }
-    }
+
     @PutMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

@@ -57,9 +57,6 @@ public class ProjectTesterAssignment {
     @Column(name="rapport_test_path", nullable=true)
     private String rapportTestPath;
 
-    @ManyToOne
-    @JoinColumn(name = "test_case_id", nullable = false)
-    private TestAssignmentAttachment testAssignmentAttachment;
 
     public void setUpdatedAt(LocalDateTime now) {
     }

@@ -3,6 +3,7 @@ package com.projet.pp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,8 +23,9 @@ public class TestScenario {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     /**
      * Relation vers le projet testé
@@ -31,13 +33,6 @@ public class TestScenario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
-
-    /**
-     * Testeur principal du scénario
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "testeur_id", nullable = false)
-    private User testeur;
 
     /**
      * Superviseur ayant validé le scénario
@@ -53,6 +48,19 @@ public class TestScenario {
     )
     @Builder.Default
     private List<TestScenarioStep> steps = new ArrayList<>();
+
+
+    @Column(name = "attachment_name")
+    private String attachmentName;
+
+    @Column(name = "attachment_path")
+    private String attachmentPath;
+
+    @Column(name = "attachment_type")
+    private String attachmentType;
+
+    @Column(name = "attachment_size")
+    private Long attachmentSize;
 
     /** Helper pour ajouter une étape et maintenir la bidirectionnalité */
     public void addStep(TestScenarioStep step) {

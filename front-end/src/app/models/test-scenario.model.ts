@@ -1,3 +1,4 @@
+// src/app/models/test-scenario.model.ts
 export interface TestScenarioStep {
   id?: number;
   description: string;
@@ -8,8 +9,14 @@ export interface TestScenario {
   id?: number;
   name: string;
   description?: string;
-  createdAt?: string;        // ISO date string
-  projectId: number;         // FK vers votre entité Project
-  superviseurId: number;     // FK vers votre entité User (superviseur)
+  createdAt?: string;        // date ISO
+  projectId: number;
+  superviseurId: number;
   steps: TestScenarioStep[];
+
+  // --- NOUVEAUX CHAMPS POUR LE FICHIER JOINT ---
+  attachmentName?: string;
+  attachmentPath?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
 }

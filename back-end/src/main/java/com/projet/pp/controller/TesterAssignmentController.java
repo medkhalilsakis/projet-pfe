@@ -64,13 +64,15 @@ public class TesterAssignmentController {
     @PostMapping("/{projectId}/assign")
     public ResponseEntity<Void> assignTesters(
             @PathVariable Long projectId,
-            @RequestPart("data")        AssignPayload payload,
-
-            @RequestPart("testCasesPdf") MultipartFile testCasesPdf
-    ) throws IOException {
-        service.assignTesters(projectId,payload.testeurIds,payload.superviseurId,testCasesPdf);
+            @RequestBody AssignPayload payload
+    ) {
+        service.assignTesters(projectId,
+                payload.testeurIds,
+                payload.superviseurId);
         return ResponseEntity.ok().build();
     }
+
+
     @PutMapping("/{id}/syncStatus")
     public ResponseEntity<Void> syncStatus(@PathVariable Long id) {
         service.syncStatus(id);

@@ -22,6 +22,8 @@ public class Role {
     @Column
     private String description;
 
+
+
     public Role(String libelle, String description) {
         this.libelle = libelle;
         this.description = description;

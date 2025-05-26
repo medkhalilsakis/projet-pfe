@@ -19,7 +19,7 @@ import { MatTableDataSource }             from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { AddUserDialogComponent } from './add-user-dialog/add-user-dialog.component';
-import { EditUserData, EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
+import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
 
 export interface User {
   id: number;
@@ -122,20 +122,9 @@ export class UserManagementComponent implements OnInit {
       return;
     }
   
-    // ouvrir le dialog avec les données du user
-    const data: EditUserData = {
-      id: u.id,
-      nom: u.nom,
-      prenom: u.prenom,
-      email: u.email,
-      genre: u.genre,
-      ncin: u.ncin,
-      dateEmbauche: u.dateEmbauche,
-      salaire: u.salaire
-    };
     const ref = this.dialog.open(EditUserDialogComponent, {
       width: '600px',
-      data
+      data: u
     });
     ref.afterClosed().subscribe(updated => {
       if (updated) {

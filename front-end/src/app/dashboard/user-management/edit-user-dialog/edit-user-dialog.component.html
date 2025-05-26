@@ -52,6 +52,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Annuler</button>
-  <button mat-button color="primary" (click)="save()">Enregistrer</button>
+  <button mat-button class="custom-button cancel" (click)="cancel()">
+    Annuler
+  </button>
+  <button mat-button class="custom-button primary" (click)="save()">
+    Enregistrer
+  </button>
 </mat-dialog-actions>
+

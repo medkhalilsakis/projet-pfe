@@ -49,7 +49,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     private session: SessionStorageService,
     private http: HttpClient,
     private snack: MatSnackBar,
-    private profileImageService: ProfileImageService
+    private profileImageService: ProfileImageService,
   ) {}
 
   ngOnInit(): void {

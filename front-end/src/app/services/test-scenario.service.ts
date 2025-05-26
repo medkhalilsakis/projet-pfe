@@ -1,11 +1,11 @@
+// src/app/services/test-scenario.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient }     from '@angular/common/http';
-import { Observable }     from 'rxjs';
-import { TestScenario }   from '../models/test-scenario.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { TestScenario } from '../models/test-scenario.model';
 
 @Injectable({ providedIn: 'root' })
 export class TestScenarioService {
-
   private readonly baseUrl = 'http://localhost:8080/api/test-scenarios';
 
   constructor(private http: HttpClient) {}
@@ -20,27 +20,52 @@ export class TestScenarioService {
     return this.http.get<TestScenario>(`${this.baseUrl}/${id}`);
   }
 
-  /** Crée un nouveau scénario */
-  create(scenario: TestScenario): Observable<TestScenario> {
-    return this.http.post<TestScenario>(this.baseUrl, scenario);
+  /** Vérifie s’il existe un scénario pour un projet */
+  existsForProject(projectId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/exists/${projectId}`);
   }
 
-  /** Met à jour un scénario existant */
-  update(id: number, scenario: TestScenario): Observable<TestScenario> {
-    return this.http.put<TestScenario>(`${this.baseUrl}/${id}`, scenario);
+  /** Récupère le scénario pour un projet (avec pièces jointes et étapes) */
+  getByProjectId(projectId: number): Observable<TestScenario> {
+    return this.http.get<TestScenario>(`${this.baseUrl}/for-project/${projectId}`);
+  }
+
+  /**
+   * Crée ou met à jour un scénario, avec optionnellement un fichier joint.
+   * Si `id` est fourni, on fait un PUT, sinon un POST.
+   */
+  save(
+    scenario: TestScenario,
+    file?: File
+  ): Observable<TestScenario> {
+    // Construit le payload multipart/form-data
+    const formData = new FormData();
+    // On met les données du DTO sous forme de JSON dans un champ 'data'
+    formData.append('data', new Blob([JSON.stringify(scenario)], {
+      type: 'application/json'
+    }));
+    // On ajoute le fichier si fourni
+    if (file) {
+      formData.append('file', file, file.name);
+    }
+
+    if (scenario.id) {
+      // Mise à jour
+      return this.http.put<TestScenario>(
+        `${this.baseUrl}/${scenario.id}`,
+        formData
+      );
+    } else {
+      // Création
+      return this.http.post<TestScenario>(
+        this.baseUrl,
+        formData
+      );
+    }
   }
 
   /** Supprime un scénario */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
-
-  existsForProject(projectId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/exists/${projectId}`);
-  }
-
-  getTestScenarioByProjectId(projectId: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/exists/${projectId}`);
-  }
-
 }

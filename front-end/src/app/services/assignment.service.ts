@@ -1,4 +1,3 @@
-// src/app/services/assignment.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -68,27 +67,15 @@ export class AssignmentService {
 assignTesters(
   projectId: number,
   testeurIds: number[],
-  superviseurId: number,
-  testCasesPdf: File
+  superviseurId: number
 ): Observable<void> {
-  const formData = new FormData();
-
-  // create a blob part called "data"
   const payload = { testeurIds, superviseurId };
-  const blob    = new Blob(
-    [ JSON.stringify(payload) ],
-    { type: 'application/json' }
-  );
-  formData.append('data', blob);
-
-  // file part
-  formData.append('testCasesPdf', testCasesPdf, testCasesPdf.name);
-
   return this.http.post<void>(
     `${this.baseUrl}/${projectId}/assign`,
-    formData
+    payload
   );
 }
+
 
 
   changePhase(

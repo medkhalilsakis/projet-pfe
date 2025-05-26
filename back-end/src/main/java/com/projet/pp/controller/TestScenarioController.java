@@ -1,4 +1,3 @@
-// src/main/java/com/projet/pp/controller/TestScenarioController.java
 package com.projet.pp.controller;
 
 import com.projet.pp.dto.TestScenarioDto;
@@ -6,13 +5,16 @@ import com.projet.pp.model.TestScenario;
 import com.projet.pp.model.TestScenarioStep;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.User;
-import com.projet.pp.service.TestScenarioService;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.UserRepository;
+import com.projet.pp.service.TestScenarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,27 +37,34 @@ public class TestScenarioController {
         this.userRepo    = userRepo;
     }
 
-    @PostMapping
-    public ResponseEntity<TestScenarioDto> create(
-            @RequestBody TestScenarioDto dto
-    ) {
-        // 1) Charger Project
+    /** Création ou mise à jour via multipart/form-data */
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<TestScenarioDto> createOrUpdate(
+            @RequestPart("data") TestScenarioDto dto,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        // 1) Charger les relations
         Project projet = projectRepo.findById(dto.getProjectId())
-                .orElseThrow(() -> new IllegalArgumentException("Project inconnu"));
-
-        // 2) Charger superviseur
+                .orElseThrow(() -> new IllegalArgumentException("Projet inconnu"));
         User superviseur = userRepo.findById(dto.getSuperviseurId())
                 .orElseThrow(() -> new IllegalArgumentException("Superviseur inconnu"));
 
-        // 3) Construire l’entité
-        TestScenario scenario = TestScenario.builder()
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .project(projet)
-                .superviseur(superviseur)
-                .build();
+        // 2) Construire l’entité
+        TestScenario scenario = (dto.getId() == null)
+                ? TestScenario.builder().build()
+                : service.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Scénario introuvable"));
 
-        // 4) Ajout des étapes (avec liaison bi-directionnelle)
+        scenario.setName(dto.getName());
+        scenario.setDescription(dto.getDescription());
+        scenario.setProject(projet);
+        scenario.setSuperviseur(superviseur);
+
+        // 3) Mettre à jour les étapes
+        scenario.getSteps().clear();
         if (dto.getSteps() != null) {
             dto.getSteps().forEach(stepDto -> {
                 TestScenarioStep step = TestScenarioStep.builder()
@@ -66,80 +75,24 @@ public class TestScenarioController {
             });
         }
 
-        // 5) Sauvegarde
-        TestScenario saved = service.save(scenario);
+        // 4) Sauvegarder avec upload éventuel
+        TestScenario saved = service.saveWithAttachment(scenario, file);
 
-        // 6) Retourne un DTO
-        TestScenarioDto result = TestScenarioDto.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .description(saved.getDescription())
-                .projectId(saved.getProject().getId())
-                .superviseurId(saved.getSuperviseur().getId())
-                .steps(saved.getSteps().stream()
-                        .map(s -> new TestScenarioDto.TestScenarioStepDto(
-                                s.getId(),
-                                s.getDescription(),
-                                s.getExpected()
-                        ))
-                        .collect(Collectors.toList())
-                )
-                .build();
-
+        // 5) Retourner un DTO
+        TestScenarioDto result = TestScenarioDto.fromEntity(saved);
         return ResponseEntity.ok(result);
     }
 
-    // même approche pour PUT
-    @PutMapping("/{id}")
-    public ResponseEntity<TestScenarioDto> update(
-            @PathVariable Long id,
-            @RequestBody TestScenarioDto dto
-    ) {
-        return service.findById(id).map(existing -> {
-            // re-charger project & superviseur
-            Project projet = projectRepo.findById(dto.getProjectId())
-                    .orElseThrow();
-            User superviseur = userRepo.findById(dto.getSuperviseurId())
-                    .orElseThrow();
-
-            // mettre à jour
-            existing.setName(dto.getName());
-            existing.setDescription(dto.getDescription());
-            existing.setProject(projet);
-            existing.setSuperviseur(superviseur);
-            existing.getSteps().clear();
-            if (dto.getSteps() != null) {
-                dto.getSteps().forEach(stepDto -> {
-                    TestScenarioStep step = TestScenarioStep.builder()
-                            .description(stepDto.getDescription())
-                            .expected(stepDto.getExpected())
-                            .build();
-                    existing.addStep(step);
-                });
-            }
-
-            TestScenario saved = service.save(existing);
-            // mapping en DTO identique à create…
-            TestScenarioDto result = TestScenarioDto.builder()
-                    .id(saved.getId())
-                    // etc.
-                    .build();
-            return ResponseEntity.ok(result);
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-
+    /** Verifier si un scénario existe pour ce projet */
     @GetMapping("/exists/{projectId}")
     public ResponseEntity<Boolean> existsForProject(@PathVariable Long projectId) {
-        boolean exists = service.existsByProjectId(projectId);
-        return ResponseEntity.ok(exists);
+        return ResponseEntity.ok(service.existsByProjectId(projectId));
     }
 
+    /** Récupérer le scénario (DTO) pour un projet */
     @GetMapping("/for-project/{projectId}")
-    public ResponseEntity<TestScenario> getTestScenarioForProject(@PathVariable Long projectId) {
-        // Appel de la méthode du service pour récupérer le scénario de test
-        TestScenario testScenario = service.getTestScenarioByProjectId(projectId);
-        return ResponseEntity.ok(testScenario);
+    public ResponseEntity<TestScenarioDto> getForProject(@PathVariable Long projectId) {
+        TestScenario s = service.getByProjectId(projectId);
+        return ResponseEntity.ok(TestScenarioDto.fromEntity(s));
     }
-
 }

@@ -150,31 +150,6 @@ public class UserService {
     }
 
 
-    @Transactional
-    public User updateBySupervisor(Long id, Map<String,String> data, Long currentSupervisorId) {
-        User target = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-        User supervisor = userRepository.findById(currentSupervisorId)
-                .orElseThrow(() -> new RuntimeException("Superviseur non trouvé"));
-
-        // 1) Interdire la modif d'un autre superviseur
-        if (target.getRole().getId() == 3 && supervisor.getRole().getId() == 3) {
-            throw new RuntimeException("Accès refusé : un superviseur ne peut pas modifier un autre superviseur");
-        }
-
-        // 2) Seuls ces champs sont modifiables :
-        if (data.containsKey("nom"))           target.setNom(data.get("nom"));
-        if (data.containsKey("prenom"))        target.setPrenom(data.get("prenom"));
-        if (data.containsKey("email"))         target.setEmail(data.get("email"));
-        if (data.containsKey("genre"))         target.setGenre(data.get("genre"));
-        if (data.containsKey("ncin"))          target.setNcin(data.get("ncin"));
-        if (data.containsKey("salaire"))       target.setSalaire(Double.parseDouble(data.get("salaire")));
-        if (data.containsKey("dateEmbauche"))  target.setDateEmbauche(LocalDate.parse(data.get("dateEmbauche")));
-
-        return userRepository.save(target);
-    }
-
-
     public List<User> getUsersByRoleId(Long roleId) {
         return userRepository.findAllActiveByRoleId(roleId);
     }

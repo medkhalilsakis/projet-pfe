@@ -25,14 +25,23 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // autoriser explicitement l’accès anonyme à votre nouvel endpoint
-                        .requestMatchers(HttpMethod.GET, "/api/initiation-phases/by-tache/**").permitAll()
-                        // autoriser aussi le GET/all et GET/{id}
-                        .requestMatchers(HttpMethod.GET, "/api/initiation-phases/**").permitAll()
-                        // autorise le reste de /api
+                        // vos endpoints publics
+                        .requestMatchers(
+                                "/api/users/signup",
+                                "/api/users/login",
+                                "/api/users/forgot-password",
+                                "/api/users/verify-otp",
+                                "/api/users/reset-password"
+                        ).permitAll()
+                        // les routes supervisor nécessitent une authentification
+                        .requestMatchers("/api/users/supervisor/**").authenticated()
+                        // toutes les autres requêtes API (le cas échéant)…
+                        .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
+                        // pages hors API
                         .anyRequest().authenticated()
                 )
+
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

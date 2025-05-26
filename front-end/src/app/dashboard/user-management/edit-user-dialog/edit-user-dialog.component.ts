@@ -1,84 +1,84 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { HttpClient } from '@angular/common/http';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserService } from '../../../services/users.service';
+import { User } from '../../../models/user.model';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldControl, MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatOptionModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
 
-export interface EditUserData {
-  id: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  genre: string;
-  ncin: string;
-  dateEmbauche: string;
-  salaire: number;
-}
 
 @Component({
   selector: 'app-edit-user-dialog',
-  standalone: true,
-  imports: [
+  templateUrl: './edit-user-dialog.component.html',
+  styleUrls: ['./edit-user-dialog.component.css'],
+  imports:[
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule,
     MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule
-  ],
-  templateUrl: './edit-user-dialog.component.html',
-  styleUrls: ['./edit-user-dialog.component.css']
+    MatOptionModule,
+    MatInputModule
+  ]
 })
 export class EditUserDialogComponent implements OnInit {
   form!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private userService: UserService,
     private snack: MatSnackBar,
     private dialogRef: MatDialogRef<EditUserDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditUserData
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: User
+  ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    // Initialise le formulaire avec les données de l'utilisateur
     this.form = this.fb.group({
-      nom:          [this.data.nom, Validators.required],
-      prenom:       [this.data.prenom, Validators.required],
-      email:        [this.data.email, [Validators.required, Validators.email]],
-      genre:        [this.data.genre, Validators.required],
-      ncin:         [this.data.ncin, Validators.required],
+      nom: [this.data.nom, [Validators.required, Validators.maxLength(100)]],
+      prenom: [this.data.prenom, [Validators.required, Validators.maxLength(100)]],
+      email: [this.data.email, [Validators.required, Validators.email]],
+      genre: [this.data.genre, Validators.required],
+      ncin: [this.data.ncin, [Validators.required, Validators.pattern(/^\d{8}$/)]],
       dateEmbauche: [this.data.dateEmbauche, Validators.required],
-      salaire:      [this.data.salaire, [Validators.required, Validators.min(0)]],
+      salaire: [this.data.salaire, [Validators.required, Validators.min(0)]]
     });
   }
 
-  save() {
-    if (this.form.invalid) return;
-    const payload = this.form.value;
-    this.http
-      .put(`http://localhost:8080/api/users/supervisor/${this.data.id}`, payload)
-      .subscribe({
-        next: () => {
-          this.snack.open('Mise à jour réussie','Fermer',{duration:2000});
-          this.dialogRef.close(true);
-        },
-        error: err => {
-          this.snack.open(err.error?.message || 'Erreur mise à jour','Fermer',{duration:2000});
-        }
-      });
+  /** Ferme la boîte de dialogue sans enregistrer */
+  cancel(): void {
+    this.dialogRef.close(false);
   }
 
-  cancel() {
-    this.dialogRef.close(false);
+  /** Enregistre les modifications et ferme la boîte de dialogue */
+  save(): void {
+    if (this.form.invalid) {
+      this.snack.open('Veuillez corriger les erreurs avant de sauvegarder.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const updated: Partial<User> = {
+      ...this.data,
+      ...this.form.value
+    };
+
+    this.userService
+      .updateUser(this.data.id!, this.form.value as Partial<User>)
+      .subscribe({
+        next: () => {
+          this.snack.open('Utilisateur mis à jour', 'Fermer', { duration: 2000 });
+          this.dialogRef.close(true);
+        },
+        error: () => {
+          this.snack.open('Erreur lors de la mise à jour', 'Fermer', { duration: 3000 });
+        }
+      });
+
+
   }
 }

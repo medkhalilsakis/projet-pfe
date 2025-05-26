@@ -78,6 +78,12 @@ export class UserService {
       this.usersSubject.next(updatedUsers);
     }
   }
+
+  // Ajoute cette méthode dans la classe UserService
+updateUser(id: number, data: Partial<User>): Observable<User> {
+  return this.http.put<User>(`${this.base}/update/${id}`, data);
+}
+
   
 
   getUsersByRole(roleId: number): Observable<User[]> {
