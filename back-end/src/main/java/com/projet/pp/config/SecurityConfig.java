@@ -25,26 +25,30 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // autoriser explicitement l’accès anonyme à votre nouvel endpoint
+                        .requestMatchers(HttpMethod.GET, "/api/initiation-phases/by-tache/**").permitAll()
+                        // autoriser aussi le GET/all et GET/{id}
+                        .requestMatchers(HttpMethod.GET, "/api/initiation-phases/**").permitAll()
+                        // autorise le reste de /api
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        // autoriser localhost:4200 (et tous les ports) pour credentials
         cfg.setAllowedOriginPatterns(List.of("http://localhost:4200"));
-        // si vous voulez tester en local sur plusieurs ports, utilisez pattern wildcard :
-        // cfg.setAllowedOriginPatterns(List.of("http://localhost:*"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("*"));           // TOUTES les headers
-        cfg.setAllowCredentials(true);                // cookies / autorisation
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
-        src.registerCorsConfiguration("/**", cfg);
+        src.registerCorsConfiguration("/api/**", cfg);
         return src;
     }
 

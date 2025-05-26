@@ -1,6 +1,7 @@
 package com.projet.pp.model;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -51,6 +52,10 @@ public class Tache {
     @OneToOne
     @JoinColumn(name = "project_id", unique = true)
     private Project project;
+
+    @OneToOne(mappedBy = "tache", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // expose la phase, mais pas le retour vers Tache
+    private InitiationPhase initiationPhase;
 
     public enum Status {
         a_developper,

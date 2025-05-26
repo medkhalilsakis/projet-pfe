@@ -1,6 +1,8 @@
 package com.projet.pp.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,5 +24,6 @@ public class AnalyseFaisabilite {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phase_id")
+    @JsonIgnore
     private InitiationPhase phase;
 }

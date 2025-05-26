@@ -1,5 +1,3 @@
-<!-- src/app/task-detail/task-detail.component.html -->
-
 <main fxLayout="column" fxLayoutGap="24px" fxFill class="detail-page">
 
   <!-- Spinner -->
@@ -12,14 +10,10 @@
 
     <!-- Bouton ZIP & Actions -->
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      
-      <!-- Tout télécharger -->
       <button mat-raised-button class="mat-stroked-button" color="accent" (click)="downloadAll()">
         <mat-icon>archive</mat-icon>
         Exporter tous les détails de la tâche (ZIP)
       </button>
-
-      <!-- Éditer la tâche -->
       <button *ngIf="isSupervisor()" mat-icon-button class="mat-stroked-button" (click)="editTask()">
         <mat-icon>edit</mat-icon>
       </button>
@@ -29,7 +23,7 @@
     <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px">
       <h1 class="task-title">{{ task.name }}</h1>
       <ng-container *ngIf="projectName">
-        <button mat-stroked-button class="mat-stroked-button" (click)="goToProject()">
+        <button mat-stroked-button (click)="goToProject()">
           Voir le projet : {{ projectName }}
         </button>
       </ng-container>
@@ -48,31 +42,116 @@
       </div>
     </section>
 
-    <!-- Description & Outils -->
-    <section fxLayout="column" fxLayoutGap="24px">
-      <div class="description" fxFlex>
+    <!-- Ligne unique : Description | Outils & Technologies | Assigné à -->
+    <section fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="24px" class="overview">
+      <!-- Description -->
+      <div fxFlex class="overview-block">
         <h2>Description</h2>
         <p>{{ task.description }}</p>
       </div>
 
-      <!-- n’affiche que s’il y a des outils -->
-      <div *ngIf="getOutilsList().length" class="tools-section" fxFlex>
+      <!-- Outils & Technologies -->
+      <div fxFlex *ngIf="getOutilsList().length" class="overview-block">
         <h2>Outils & Technologies</h2>
         <div fxLayout="row wrap" fxLayoutGap="8px" class="badges">
           <span class="badge" *ngFor="let o of getOutilsList()">{{ o }}</span>
         </div>
       </div>
-    </section>
 
-    <!-- Assigné à (si non vide) -->
-    <section *ngIf="task.assignedTo?.length">
-      <h2>Assigné à</h2>
-      <div fxLayout="row wrap" fxLayoutGap="12px" class="assignees">
-        <div *ngFor="let u of task.assignedTo" class="custom-chip">
-          {{ u.prenom }} {{ u.nom }}
+      <!-- Assigné à -->
+      <div fxFlex *ngIf="task.assignedTo?.length" class="overview-block">
+        <h2>Assigné à</h2>
+        <div fxLayout="row wrap" fxLayoutGap="12px" class="assignees">
+          <div *ngFor="let u of task.assignedTo" class="custom-chip">
+            {{ u.prenom }} {{ u.nom }}
+          </div>
         </div>
       </div>
     </section>
+
+    <!-- Phase d’Initiation : bloc unique découpé en sous‐blocs -->
+<section *ngIf="initiationPhase" fxLayout="column" fxLayoutGap="16px" class="init-phase">
+  <h2>Phase d’Initiation</h2>
+
+  <!-- 1. Introduction & Objectifs (full width) -->
+  <div fxLayout="row" fxLayoutGap="16px" class="init-row">
+    <div fxFlex class="init-block">
+      <h3>Introduction & Objectifs</h3>
+      <p><strong>Introduction :</strong> {{ initiationPhase.introduction }}</p>
+      <p><strong>Objectifs :</strong> {{ initiationPhase.objectifs }}</p>
+    </div>
+  </div>
+
+  <!-- 2. Exigences | Analyse de faisabilité -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px" class="init-row">
+    <div fxFlex.gt-sm="50%" fxFlex="100%" *ngIf="initiationPhase.exigences?.length" class="init-block">
+      <h3>Exigences</h3>
+      <table class="exigences-table">
+        <tr>
+          <th>Fonctionnelle</th>
+          <th>Non-Fonctionnelle</th>
+          <th>Priorité</th>
+        </tr>
+        <tr *ngFor="let ex of initiationPhase.exigences">
+          <td>{{ ex.fonctionnelle }}</td>
+          <td>{{ ex.nonFonctionnelle }}</td>
+          <td>{{ ex.priorite }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div fxFlex.gt-sm="50%" fxFlex="100%" *ngIf="initiationPhase.faisabilite" class="init-block">
+      <h3>Analyse de faisabilité</h3>
+      <ul>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          Technologies disponibles : {{ initiationPhase.faisabilite.techniqueDisponible ? 'Oui' : 'Non' }}
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          Budget suffisant : {{ initiationPhase.faisabilite.budgetSuffisant ? 'Oui' : 'Non' }}
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          Délais réalistes : {{ initiationPhase.faisabilite.delaisRealistes ? 'Oui' : 'Non' }}
+        </li>
+        <li>
+          <mat-icon>check_circle</mat-icon>
+          Ressources humaines : {{ initiationPhase.faisabilite.ressourcesHumainesSuffisantes ? 'Oui' : 'Non' }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3. Cahier des charges | Planification -->
+  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px" class="init-row">
+    <div fxFlex.gt-sm="50%" fxFlex="100%" *ngIf="initiationPhase.cahierDesCharges" class="init-block">
+      <h3>Cahier des charges</h3>
+      <p><strong>Objectifs Projet :</strong> {{ initiationPhase.cahierDesCharges.objectifsProjet }}</p>
+      <p><strong>Livrables :</strong> {{ initiationPhase.cahierDesCharges.livrables }}</p>
+      <p><strong>Contraintes :</strong> {{ initiationPhase.cahierDesCharges.contraintes }}</p>
+      <p><strong>Critères de succès :</strong> {{ initiationPhase.cahierDesCharges.criteresSucces }}</p>
+    </div>
+
+    <div fxFlex.gt-sm="50%" fxFlex="100%" *ngIf="initiationPhase.plannings?.length" class="init-block">
+      <h3>Planification</h3>
+      <table class="planning-table">
+        <tr>
+          <th>Phase</th><th>Début</th><th>Fin</th><th>Budget</th>
+        </tr>
+        <tr *ngFor="let p of initiationPhase.plannings">
+          <td>{{ p.nomPhase }}</td>
+          <td>{{ p.dateDebut | date:'shortDate' }}</td>
+          <td>{{ p.dateFin   | date:'shortDate' }}</td>
+          <td>{{ p.budgetEstime | currency }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+
 
     <!-- Cahier des charges (PDF) -->
     <section *ngIf="pdfAttachments.length" fxLayout="column" fxLayoutGap="16px">
@@ -88,6 +167,7 @@
         </ngx-extended-pdf-viewer>
       </div>
     </section>
+
 
   
     <!-- Images -->

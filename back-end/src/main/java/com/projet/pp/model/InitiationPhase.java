@@ -1,9 +1,12 @@
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.*;
+
 
 @Entity
 @Table(name = "initiation_phases")
@@ -15,8 +18,9 @@ public class InitiationPhase {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tache_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tache_id", nullable = false, unique = true)
+    @JsonBackReference  // empêche Jackson de remonter vers Tache
     private Tache tache;
 
     // Partie Introduction / Objectifs

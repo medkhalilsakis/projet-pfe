@@ -1,7 +1,9 @@
 package com.projet.pp.controller;
 
+import com.projet.pp.dto.InitiationPhaseDto;
 import com.projet.pp.model.InitiationPhase;
 import com.projet.pp.service.InitiationPhaseService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +26,13 @@ public class InitiationPhaseController {
         return service.findAll();
     }
 
+    @GetMapping("/by-tache/{tacheId}")
+    public ResponseEntity<InitiationPhaseDto> getByTacheId(@PathVariable Long tacheId) {
+        return service.findDtoByTacheId(tacheId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<InitiationPhase> getOne(@PathVariable Long id) {
         return service.findById(id)
@@ -31,9 +40,10 @@ public class InitiationPhaseController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public InitiationPhase create(@RequestBody InitiationPhase phase) {
-        return service.save(phase);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> create(@RequestBody InitiationPhase phase) {
+        service.save(phase);
+        return ResponseEntity.noContent().build();    // 204 No Content, pas de body JSON
     }
 
     @PutMapping("/{id}")

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, LOCALE_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient }        from '@angular/common/http';
 import { MatDialog, MatDialogModule }         from '@angular/material/dialog';
@@ -11,11 +11,15 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { ProjectService } from '../../../services/project.service';
 import { EditTaskDialogComponent } from '../edit-task-dialog/edit-task-dialog.component';
 import { Project } from '../../../models/project.model';
-
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { SessionStorageService } from '../../../services/session-storage.service';
 import { UserService } from '../../../services/users.service';
+import { InitiationPhase } from '../../../models/initiation-phase/initiation-phase.model';
+import { InitiationPhaseService } from '../../../services/initiation-phase.service';
 
 
+registerLocaleData(localeFr, 'fr');
 
 interface TacheDetailDTO {
   id: number;
@@ -43,9 +47,11 @@ interface TacheDetailDTO {
     MatDialogModule
   ],
   templateUrl: './task-detail.component.html',
-  styleUrls: ['./task-detail.component.css']
+  styleUrls: ['./task-detail.component.css'],
+  providers: [{ provide: LOCALE_ID, useValue: 'fr' }]
 })
 export class TaskDetailComponent implements OnInit {
+  initiationPhase?: InitiationPhase;
 
   task!: TacheDetailDTO;
   pdfAttachments: any[] = [];
@@ -66,6 +72,7 @@ export class TaskDetailComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private sessionStorage:SessionStorageService,
+    private initPhaseSvc: InitiationPhaseService
 
   ) {}
 isSupervisor(){
@@ -101,6 +108,15 @@ isSupervisor(){
           && !this.imageAttachments.includes(a)
           && !this.videoAttachments.includes(a)
         );
+        this.initPhaseSvc.getByTacheId(this.task.id).subscribe({
+          next: phase => this.initiationPhase = phase,
+          error: err => {
+          // si 404 (pas de phase pour cette tâche), on reste à undefined
+            if (err.status !== 404) {
+              console.error('Erreur lors du fetch de la phase d’initiation', err);
+            }
+          }
+        });
 
         // si tâche liée à un projet, récupérer son nom
         if (t.projectId) {

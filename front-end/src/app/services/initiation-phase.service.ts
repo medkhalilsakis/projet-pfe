@@ -23,8 +23,18 @@ export class InitiationPhaseService {
   }
 
   /** Crée une nouvelle phase */
-  create(phase: InitiationPhase): Observable<InitiationPhase> {
-    return this.http.post<InitiationPhase>(this.baseUrl, phase);
+  create(phase: InitiationPhase): Observable<void> {
+  return this.http.post<void>(
+    this.baseUrl,
+    phase,
+    { responseType: 'text' as 'json' }  // workaround pour 204 sans JSON
+  );
+}
+
+getByTacheId(tacheId: number): Observable<InitiationPhase> {
+    return this.http.get<InitiationPhase>(
+      `${this.baseUrl}/by-tache/${tacheId}`
+    );
   }
 
   /** Met à jour une phase existante */
