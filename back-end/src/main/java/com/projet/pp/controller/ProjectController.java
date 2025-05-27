@@ -3,6 +3,7 @@ package com.projet.pp.controller;
 import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.dto.ProjectFileNode;
 import com.projet.pp.dto.ProjectStatsDTO;
+import com.projet.pp.dto.UserDto;
 import com.projet.pp.model.*;
 import com.projet.pp.service.UserService;
 import com.projet.pp.service.TacheService;
@@ -498,7 +499,17 @@ public class ProjectController {
             return ResponseEntity.ok(list);
         }
 
+
+    @GetMapping("/{projectId}/inviteable-users")
+    public ResponseEntity<List<UserDto>> getInviteableUsers(
+            @PathVariable Long projectId
+    ) {
+        List<UserDto> list = projectService.getInviteableUsers(projectId);
+        return ResponseEntity.ok(list);
     }
+    }
+
+
 
 
 

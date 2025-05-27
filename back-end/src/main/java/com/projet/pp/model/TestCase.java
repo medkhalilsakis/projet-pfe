@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(name = "test_case")
 public class TestCase {
 
     @Id @GeneratedValue private Long id;

@@ -107,27 +107,34 @@ export class ProjectChatComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.messageText.trim() && !this.attachments.length) return;
+  if (!this.messageText.trim() && !this.attachments.length) return;
 
-    const form = new FormData();
-    form.append('senderId', `${this.currentUserId}`);
-    form.append('message', this.messageText);
-    this.attachments.forEach(f => form.append('files', f));
+  const form = new FormData();
+  form.append('senderId', `${this.currentUserId}`);
+  form.append('message', this.messageText);
+  this.attachments.forEach(f => form.append('files', f));
 
-    this.chatSvc.postMessage(this.projectId, form)
-      .subscribe(dto => {
-        this.chatSvc.publish('/app/chat.send', {
-          projectId: this.projectId,
-          senderId: this.currentUserId,
-          message: this.messageText,
-          id: dto.id
-        });
-        // reset
-        this.messageText = '';
-        this.attachments = [];
-        this.fileInput.nativeElement.value = '';
+  this.chatSvc.postMessage(this.projectId, form)
+    .subscribe(dto => {
+      // 1) On injecte tout de suite le message dans l’UI
+      this.messages.push(dto);
+      setTimeout(() => this.scrollToBottom(), 50);
+
+      // 2) On notifie le back pour diffusion STOMP (aux autres clients)
+      this.chatSvc.publish('/app/chat.send', {
+        projectId: this.projectId,
+        senderId: this.currentUserId,
+        message: this.messageText,
+        id: dto.id
       });
-  }
+
+      // 3) Reset du composer
+      this.messageText = '';
+      this.attachments = [];
+      this.fileInput.nativeElement.value = '';
+    });
+}
+
 
   onDeleteMessage(msg: ChatMessageDTO) {
     if (!confirm('Supprimer ce message ?')) return;

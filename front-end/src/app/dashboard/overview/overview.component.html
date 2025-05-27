@@ -112,6 +112,45 @@
       </mat-card>
     </div>
 
+
+    <div fxLayout="row" fxLayoutAlign="start start">
+      <mat-card class="dashboard-card invites" fxFlex>
+  <mat-card-title>
+    <mat-icon>add_circle</mat-icon> Mes invitations
+  </mat-card-title>
+  <mat-card-content>
+    <mat-progress-spinner
+      *ngIf="invitedProjects === null"
+      mode="indeterminate"
+      diameter="24">
+    </mat-progress-spinner>
+
+    <ng-container *ngIf="invitedProjects.length > 0; else noInvites">
+      <div class="invite-item" *ngFor="let proj of invitedProjects" fxLayout="row" fxLayoutAlign="space-between center">
+        <div fxFlex>
+          <mat-icon>folder_open</mat-icon>
+          {{ proj.name }}
+        </div>
+        <div fxFlex="none">
+          <button mat-button color="primary"
+                  (click)="acceptInvite(proj.id)">
+            <mat-icon>check</mat-icon> Accepter
+          </button>
+          <button mat-button color="warn"
+                  (click)="rejectInvite(proj.id)">
+            <mat-icon>close</mat-icon> Refuser
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noInvites>
+      <p class="empty">Vous n’avez aucune invitation.</p>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+
+    </div>
   </div>
 
   <!-- Partie droite (30%) : Actualités technologiques + Calendrier -->

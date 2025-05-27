@@ -59,6 +59,8 @@ export class TaskDetailComponent implements OnInit {
   videoAttachments: any[] = [];
   otherAttachments: any[] = [];
 
+  hasInitPhase?: boolean;
+
   project?: Project;
   projectName?: string;
   currentUser :any
@@ -93,41 +95,49 @@ isSupervisor(){
     this.loadTask();
   }
 
-  private loadTask() {
+private loadTask() {
     const id = this.route.snapshot.params['id'];
     this.http.get<TacheDetailDTO>(`${this.API}/taches/${id}`)
       .subscribe(t => {
         this.task = t;
+        // tri des attachments…
+        this.setupAttachments(t.attachments);
 
-        // tri des attachments
-        this.pdfAttachments   = t.attachments.filter(a => a.fileType === 'application/pdf');
-        this.imageAttachments = t.attachments.filter(a => a.fileType?.startsWith('image/'));
-        this.videoAttachments = t.attachments.filter(a => a.fileType?.startsWith('video/'));
-        this.otherAttachments = t.attachments.filter(a =>
-          !this.pdfAttachments.includes(a)
-          && !this.imageAttachments.includes(a)
-          && !this.videoAttachments.includes(a)
-        );
-        this.initPhaseSvc.getByTacheId(this.task.id).subscribe({
-          next: phase => this.initiationPhase = phase,
-          error: err => {
-          // si 404 (pas de phase pour cette tâche), on reste à undefined
-            if (err.status !== 404) {
-              console.error('Erreur lors du fetch de la phase d’initiation', err);
+        // NOUVEAU : on vérifie d’abord s’il y a une phase pour cette tâche
+        this.initPhaseSvc.existsForTache(this.task.id).subscribe({
+          next: exists => {
+            this.hasInitPhase = exists;
+            if (exists) {
+              // on charge les détails
+              this.initPhaseSvc.getByTacheId(this.task.id).subscribe({
+                next: phase => this.initiationPhase = phase,
+                error: err => console.error('Erreur fetch init phase', err)
+              });
             }
+          },
+          error: err => {
+            console.error('Erreur checking init phase existence', err);
+            this.hasInitPhase = false;
           }
         });
 
-        // si tâche liée à un projet, récupérer son nom
+        // si tâche liée à un projet, récupérer son nom…
         if (t.projectId) {
-          // on récupère tout le Projet
           this.projectSvc.getProjectById(t.projectId)
-            .subscribe(proj => {
-              this.project = proj;
-              this.projectName = proj.name;
-            });
+            .subscribe(proj => this.projectName = proj.name);
         }
       });
+  }
+
+  private setupAttachments(atts: any[]) {
+    this.pdfAttachments   = atts.filter(a => a.fileType === 'application/pdf');
+    this.imageAttachments = atts.filter(a => a.fileType?.startsWith('image/'));
+    this.videoAttachments = atts.filter(a => a.fileType?.startsWith('video/'));
+    this.otherAttachments = atts.filter(a =>
+      !this.pdfAttachments.includes(a)
+      && !this.imageAttachments.includes(a)
+      && !this.videoAttachments.includes(a)
+    );
   }
 
   getStatusLabel(status: string) {

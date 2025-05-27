@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TestCase } from '../../../../../models/test-case.model';
+import { TestCaseDetailComponent } from '../test-case-detail/test-case-detail.component';
 
 @Component({
   selector: 'app-test-case-table',
@@ -26,4 +27,5 @@ export class TestCaseTableComponent {
   @Output() view = new EventEmitter<TestCase>();
 
   displayedColumns = ['caseNumber','title','date','actions'];
+
 }

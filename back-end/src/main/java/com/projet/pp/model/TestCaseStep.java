@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(name = "test_case_step")
 public class TestCaseStep {
     @Id @GeneratedValue
     private Long id;

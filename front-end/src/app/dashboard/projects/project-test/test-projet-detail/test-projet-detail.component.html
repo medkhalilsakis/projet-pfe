@@ -57,7 +57,7 @@
         <!-- Colonne 3 -->
         <div fxFlex>
           <div *ngIf="project.invitedUsers?.length">
-            <p><strong>Utilisateurs invités (acceptés) :</strong></p>
+            <p><strong>Utilisateurs invités :</strong></p>
             <ul>
               <li *ngFor="let user of project.invitedUsers">
                 {{ user.nom }} {{ user.prenom }}
@@ -73,7 +73,6 @@
     <mat-card-actions fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
       <button mat-raised-button color="primary" (click)="exploreProject()">Explorer le contenu</button>
       <button mat-raised-button color="accent" (click)="exportProject()">Exporter en ZIP</button>
-      <button mat-raised-button color="accent" (click)="downloadTestCases()">Télécharger TestCases.pdf</button>
     </mat-card-actions>
   </mat-card>
 </div>
@@ -97,7 +96,7 @@
           [data]="testCases"
           (edit)="editTestCase($event)"
           (delete)="deleteTestCase($event)"
-          (view)="viewTestCase($event)">
+          (view)="openDetail($event)">
         </app-test-case-table>
       </div>
 

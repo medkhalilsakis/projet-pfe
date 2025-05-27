@@ -1,0 +1,34 @@
+/* add-invitation-dialog.component.css */
+
+/* Conteneur boutons */
+.mat-dialog-actions {
+  padding: 1rem;
+  background: #f5f5f5;
+}
+
+/* Bouton Annuler (stroked) */
+.mat-button {
+  border-color: #757575;
+  color: #424242;
+  border-radius: 4px;
+  min-width: 100px;
+  margin-right: 0.5rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+.mat-button:hover {
+  background-color: rgba(0,0,0,0.04);
+}
+
+/* Bouton Inviter (flat primary) */
+.mat-flat-button {
+  background-color: #1976d2;
+  color: white;
+  border-radius: 4px;
+  min-width: 100px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.mat-flat-button:hover {
+  background-color: #1565c0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}

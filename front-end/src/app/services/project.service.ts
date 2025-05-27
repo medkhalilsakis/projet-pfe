@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { FileNode } from '../models/file-node.model';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -263,4 +264,11 @@ getAcceptedInvitedProjects(userId: number): Observable<any[]> {
     `${this.baseUrl}/invited/user/accepted/${userId}`
   );
 }
+
+getInviteableUsers(projectId: number): Observable<User[]> {
+    return this.http.get<User[]>(
+      `${this.baseUrl}/${projectId}/inviteable-users`
+    );
+  }
+
 }

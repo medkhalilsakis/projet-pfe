@@ -88,13 +88,12 @@
             </ng-container>
             <!-- nom du fichier et bouton téléchargement -->
             <span class="att-name">{{ att.fileName }}</span>
-            <button mat-icon-button
-                    class="att-download"
-                    [href]="att.filePath"
-                    [download]="att.fileName"
-                    title="Télécharger {{ att.fileName }}">
-              <mat-icon>cloud_download</mat-icon>
-            </button>
+            <a class="att-download"
+     [href]="att.filePath"              
+     [attr.download]="att.fileName"
+     title="Télécharger {{ att.fileName }}">
+    <mat-icon>cloud_download</mat-icon>
+  </a>
           </div>
 </ng-container>
 
@@ -105,7 +104,7 @@
         <div class="bubble">
           <button mat-icon-button
           class="msg-delete"
-          (click)="onDelete(m)"
+          (click)="deleteMessage(m)"
           title="Supprimer le message">
             <mat-icon>delete</mat-icon>
           </button>

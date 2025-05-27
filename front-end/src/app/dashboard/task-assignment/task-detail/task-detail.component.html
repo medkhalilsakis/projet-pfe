@@ -42,6 +42,11 @@
       </div>
     </section>
 
+    <div *ngIf="hasInitPhase === false" fxLayout="row" fxLayoutAlign="start center" class="warning">
+      <mat-icon color="warn">warning</mat-icon>
+      <span>Aucune phase d’initiation disponible pour cette tâche.</span>
+    </div>
+
     <!-- Ligne unique : Description | Outils & Technologies | Assigné à -->
     <section fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="24px" class="overview">
       <!-- Description -->
