@@ -39,27 +39,7 @@
       rows="3"
       class="composer-textarea"
     ></textarea>
-    <div class="attachment-input">
-      <button mat-button (click)="fileInput.click()">
-        <mat-icon>attach_file</mat-icon> Sélectionner un fichier
-      </button>
-      <input
-        #fileInput
-        type="file"
-        multiple
-        hidden
-        (change)="onFileSelected($event)"
-      />
 
-    </div>
-    <div *ngIf="attachments.length" class="attachment-preview">
-      <div *ngFor="let f of attachments; let i = index" class="preview-item">
-        {{ f.name }}
-        <button mat-icon-button color="warn" (click)="removeAttachment(i)">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    </div>
     <button
       mat-raised-button class="send-btn"
       color="primary"

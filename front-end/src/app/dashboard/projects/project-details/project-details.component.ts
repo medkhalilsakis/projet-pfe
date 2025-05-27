@@ -360,8 +360,7 @@ private loadReclamations(): void {
       .subscribe(list => this.testers = list);
   }
   goToDesignation(): void {
-    this.router.navigate(
-      ['/dashboard/projects', this.projectId, 'designation-testeurs']
+    this.router.navigate(['/dashboard/designation']
     );
   }
 

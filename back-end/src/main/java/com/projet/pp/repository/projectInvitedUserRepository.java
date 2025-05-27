@@ -62,4 +62,6 @@ public interface projectInvitedUserRepository extends JpaRepository<ProjectInvit
       AND iu.status = 'accepted'
   """)
     List<Long> findAcceptedProjectIdsByUserId(@Param("userId") Long userId);
+
+    List<ProjectInvitedUser> findByUser_Id(Long userId);
 }

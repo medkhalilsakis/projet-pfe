@@ -1,5 +1,6 @@
 package com.projet.pp.controller;
 
+import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.model.Role;
 import com.projet.pp.dto.UserDto;
 import com.projet.pp.model.User;
@@ -266,5 +267,32 @@ public class UserController {
         List<?> testersStats= userService.getAllTesterStats();
         System.out.println(testersStats);
         return ResponseEntity.ok(testersStats);
+    }
+
+
+    /**
+     * Liste des invitations reçues par l’utilisateur.
+     */
+    @GetMapping("/{userId}/invitations")
+    public ResponseEntity<List<InvitedUserDTO>> listInvitations(@PathVariable Long userId) {
+        var dtos = userService.getInvitations(userId);
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Met à jour le statut d’une invitation existante.
+     * Body attendu : { "status": "accepted" } ou "rejected"
+     */
+    @PutMapping("/invitations/{invitationId}/status")
+    public ResponseEntity<Void> changeInvitationStatus(
+            @PathVariable Long invitationId,
+            @RequestBody Map<String,String> body
+    ) {
+        String status = body.get("status");
+        if (!List.of("pending","accepted","rejected").contains(status)) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.updateInvitationStatus(invitationId, status);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -396,33 +396,108 @@ mat-card-title, .overview-title {
 /* ================================
    PAUSES CARD
    ================================ */
-.pauses-card .mat-card-title,
-.pauses-title {
-  color: var(--color-primary);
+.pauses-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+  margin: 1.5rem 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Segoe UI', sans-serif;
 }
+
+.pauses-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Title */
+.pauses-title {
+  background: linear-gradient(120deg, #ff7e5f, #feb47b);
+  color: #ffffff;
+  padding: 1rem 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Content wrapper */
+.pauses-content {
+  padding: 1.25rem 1.5rem;
+  background: #f9fafb;
+}
+
+/* Liste */
 .pauses-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
+
+/* Chaque “détails” */
 .pause-item {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 12px;
-  transition: background var(--transition-fast);
+  border: 1px solid #e0e4e8;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.pause-item[open] {
-  background: #eef6ff;
-}
+
+/* Header cliquable */
 .pause-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  font-size: 1rem;
   font-weight: 500;
-  color: var(--color-text);
+  color: #102a43;
 }
+
+.pause-item:hover {
+  border-color: #feb47b;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Icône d’accordéon (+/-) */
+.pause-summary::marker { /* pour masquer le marker par défaut */
+  color: transparent;
+}
+
+/* On ajoute un chevron via pseudo-élément */
+.pause-summary::after {
+  content: '▸';
+  font-size: 1rem;
+  color: #feb47b;
+  transition: transform 0.2s ease;
+}
+
+/* Quand ouvert, on pivote le chevron */
+.pause-item[open] > .pause-summary::after {
+  transform: rotate(90deg);
+}
+
+/* Détails cachés */
 .pause-details {
-  margin-top: 8px;
+  padding: 0.75rem 1rem 1rem;
+  background: #fdfdfd;
   font-size: 0.95rem;
-  color: var(--color-muted);
+  color: #34495e;
+  line-height: 1.5;
+}
+
+/* Ligne “Raison” */
+.pause-reason {
+  margin: 0 0 0.5rem;
+}
+
+/* Ligne date */
+.pause-date {
+  margin: 0;
+  color: #7f8c8d;
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
 /* ================================

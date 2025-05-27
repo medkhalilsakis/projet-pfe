@@ -1,4 +1,5 @@
 package com.projet.pp.service;
+import com.projet.pp.dto.InvitedUserDTO;
 import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -340,6 +341,35 @@ public class UserService {
     }
 
 
+
+    @Transactional(readOnly = true)
+    public List<InvitedUserDTO> getInvitations(Long userId) {
+        User u = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur not found: " + userId));
+
+        List<ProjectInvitedUser> invs = invitedRepo.findByUser_Id(userId);
+        return invs.stream().map(iu ->
+                InvitedUserDTO.builder()
+                        .id(iu.getId())
+                        .userId(iu.getUser().getId())
+                        .prenom(iu.getUser().getPrenom())
+                        .nom(iu.getUser().getNom())
+                        .status(iu.getStatus())
+                        .invitedAt(iu.getInvitedAt())
+                        .build()
+        ).collect(Collectors.toList());
+    }
+
+    /**
+     * Met à jour le statut d’une invitation.
+     */
+    @Transactional
+    public void updateInvitationStatus(Long invitationId, String newStatus) {
+        ProjectInvitedUser iu = invitedRepo.findById(invitationId)
+                .orElseThrow(() -> new EntityNotFoundException("Invitation not found: " + invitationId));
+        iu.setStatus(newStatus);
+        invitedRepo.save(iu);
+    }
 
 
 }

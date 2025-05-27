@@ -26,6 +26,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import localeFr from '@angular/common/locales/fr';
 import { registerLocaleData } from '@angular/common';
 import { NoteDecisionService } from '../../services/note-decision.service';
+import { ProjectService } from '../../services/project.service';
 
 
 
@@ -163,6 +164,8 @@ statsToRotate: any[] = [];
 statsLoading = true;
 rotationInterval: any;
 
+invitedProjects: any[] = [];
+
 
 currentArticleIndex  = 0;
 rotationNewsInterval: any;
@@ -188,6 +191,7 @@ get currentArticle(): NewsArticle {
     private http:HttpClient,
     private notifSvc: NotificationService,
     private sessionStorage:SessionStorageService,
+    private projectService: ProjectService,
     private meetingService: MeetingService,
     private noteDecisionService: NoteDecisionService,
     private router: Router
@@ -207,7 +211,8 @@ get currentArticle(): NewsArticle {
       this.loadTasks();
     }
     this.loadStats();
-    this.loadNotifications()
+    this.loadNotifications();
+    this.loadInvitedProjects();
   }
 
    loadTasks(): void {
@@ -264,6 +269,48 @@ private loadPublishedNotes(): void {
     });
 }
 
+
+private loadInvitedProjects(): void {
+  const userId = this.currentUser.id;
+  this.projectService.getAllProjects().subscribe({
+    next: projects => {
+      this.invitedProjects = projects
+        .filter(p => Array.isArray(p.invitedUsers)
+          && p.invitedUsers.some((u: any) => u.id === userId))
+        .map(p => ({ id: p.id, name: p.name }));
+    },
+    error: err => console.error(err)
+  });
+}
+
+/** Accepte l’invitation */
+acceptInvite(projectId: number) {
+  const userId = this.currentUser.id;
+  this.projectService
+    .decideInvitation(userId, 'accepted', projectId)
+    .subscribe({
+      next: () => {
+        // retirer de la liste
+        this.invitedProjects = this.invitedProjects
+          .filter(p => p.id !== projectId);
+      },
+      error: () => console.error('Impossible d\'accepter')
+    });
+}
+
+/** Refuse l’invitation */
+rejectInvite(projectId: number) {
+  const userId = this.currentUser.id;
+  this.projectService
+    .decideInvitation(userId, 'rejected', projectId)
+    .subscribe({
+      next: () => {
+        this.invitedProjects = this.invitedProjects
+          .filter(p => p.id !== projectId);
+      },
+      error: () => console.error('Impossible de refuser')
+    });
+}
   private loadGlobalNews(): void {
     this.newsService.getTechNews()
       .pipe(

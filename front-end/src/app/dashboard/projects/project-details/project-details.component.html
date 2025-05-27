@@ -91,7 +91,7 @@
         <div class="pauses-list">
           <details *ngFor="let p of pauseRequests" class="pause-item">
             <summary class="pause-summary">
-              {{ p.requesterName || p.requesterId }} — {{ p.status }}
+              Demande #{{ p.id }} - {{ p.requester.nom }} {{ p.requester.prenom }}
             </summary>
             <div class="pause-details">
               <p class="pause-reason"><strong>Raison :</strong> {{ p.reason }}</p>
