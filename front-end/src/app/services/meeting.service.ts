@@ -63,10 +63,6 @@ export class MeetingService {
     return this.http.get<Meeting[]>(`${this.baseProject}/${projectId}/meetings`);
   }
 
-  /** Toutes réunions d’un utilisateur */
-  getUserMeetings(userId: number): Observable<Meeting[]> {
-    return this.http.get<Meeting[]>(`http://localhost:8080/api/users/${userId}/meetings`);
-  }
 
 
   getById(meetingId: number): Observable<Meeting> {
@@ -91,4 +87,11 @@ export class MeetingService {
   delete(meetingId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseGlobal}/${meetingId}`);
   }
+
+  /** Toutes réunions d’un utilisateur */
+getUserMeetings(userId: number): Observable<Meeting[]> {
+  // pointant sur l’endpoint Spring qui renvoie findByUser(userId)
+  return this.http.get<Meeting[]>(`http://localhost:8080/api/projects/NULL/meetings/participant/${userId}`);
+}
+
 }

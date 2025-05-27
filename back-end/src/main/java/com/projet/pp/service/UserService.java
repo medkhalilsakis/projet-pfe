@@ -132,10 +132,7 @@ public class UserService {
         userRepository.delete(u);
     }
 
-    /**
-     * Supprime récursivement un dossier et tout son contenu.
-     * Ne fait rien si le dossier n'existe pas.
-     */
+
     private void deleteDirectoryRecursively(Path dir) {
         try {
             if (Files.exists(dir)) {

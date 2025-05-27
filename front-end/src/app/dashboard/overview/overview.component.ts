@@ -25,6 +25,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 // importer la locale française et la registre
 import localeFr from '@angular/common/locales/fr';
 import { registerLocaleData } from '@angular/common';
+import { NoteDecisionService } from '../../services/note-decision.service';
 
 
 
@@ -186,11 +187,12 @@ get currentArticle(): NewsArticle {
     private newsService: NewsService,
     private http:HttpClient,
     private notifSvc: NotificationService,
-    private meetSvc: MeetingService,
     private sessionStorage:SessionStorageService,
+    private meetingService: MeetingService,
+    private noteDecisionService: NoteDecisionService,
     private router: Router
   ) {
-    this.currentUser=sessionStorage.getUser()
+    this.currentUser=sessionStorage.getUser();
   }
   isTester(){
     return this.currentUser.role.id===2;
@@ -198,16 +200,52 @@ get currentArticle(): NewsArticle {
 
   ngOnInit(): void {
     registerLocaleData(localeFr);
+    this.loadPublishedNotes();
     this.loadGlobalNews();
-    this.loadMeetings();
+    this.loadUpcomingMeetings();
     if(this.currentUser!==2){
           this.loadTasks();
-
     }
     this.loadStats();
     this.loadNotifications()
   }
     // 1) Tech news
+
+private loadPublishedNotes(): void {
+  this.noteDecisionService.findAll()
+    .pipe(
+      map(notes =>
+        notes
+          // 1) filtre sur le statut "Publié"
+          .filter(n => n.statut === 'Publié')
+          // 2) tri par dateCreation décroissante, puis dateModification
+          .sort((a, b) => {
+            // si la date est undefined, on la considère comme très ancienne (0)
+            const createdA = a.dateCreation
+              ? new Date(a.dateCreation).getTime()
+              : 0;
+            const createdB = b.dateCreation
+              ? new Date(b.dateCreation).getTime()
+              : 0;
+            if (createdA !== createdB) {
+              return createdB - createdA;
+            }
+
+            const modifiedA = a.dateModification
+              ? new Date(a.dateModification).getTime()
+              : 0;
+            const modifiedB = b.dateModification
+              ? new Date(b.dateModification).getTime()
+              : 0;
+            return modifiedB - modifiedA;
+          })
+      )
+    )
+    .subscribe({
+      next: notes => this.importantNotes = notes,
+      error: err => console.error('Erreur chargement notes publiées', err)
+    });
+}
 
   private loadGlobalNews(): void {
     this.newsService.getTechNews()
@@ -340,29 +378,33 @@ loadNotifications(){
     });
   }
     // 4) Upcoming meetings
-    loadMeetings(){
-    this.meetSvc.getUserMeetings(this.currentUser.id).subscribe({
-      next: data => {
-         this.meetings = data; 
-          this.meetings.forEach((meeting:any) => {
-        this.labelDays.push({
-          date: new Date(meeting.date),
-          text: meeting.project?.name || 'Unknown Project'
-        });
+  private loadUpcomingMeetings(): void {
+    const userId = this.currentUser.id;
+    this.meetingService.getUserMeetings(userId)
+      .subscribe({
+        next: allMeetings => {
+          const now = new Date();
 
-        this.coloredDays.push({
-          date: new Date(meeting.date),
-          highlight: 'blue'
-        });
+          this.meetings = allMeetings
+            // 1) date ≥ maintenant
+            .filter(m => new Date(m.date) >= now)
+            // 2) l’utilisateur est bien participant
+            .filter(m => m.participantsIds?.includes(userId))
+            // 3) ajouter le champ `time`
+            .map(m => ({
+              ...m,
+              time: new Date(m.date)
+                      .toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            }));
+
+          this.meetLoading = false;
+        },
+        error: err => {
+          console.error('Erreur chargement réunions', err);
+          this.meetLoading = false;
+        }
       });
-
-      this.meetLoading = false;
-    },
-    error: () => {
-      this.meetLoading = false;
-    }
-  });
-}
+  }
   loadStats(){
     const user = this.sessionStorage.getUser();
     this.userRole = user.role.id;

@@ -37,18 +37,24 @@
 
       <!-- Notes importantes -->
       <mat-card class="dashboard-card" fxFlex>
-        <mat-card-title><mat-icon>note</mat-icon> Notes importantes</mat-card-title>
-        <mat-card-content>
-          <ng-container *ngIf="importantNotes.length > 0; else noNotes">
-            <ul>
-              <li *ngFor="let note of importantNotes">{{ note }}</li>
-            </ul>
-          </ng-container>
-          <ng-template #noNotes>
-            <p class="empty">Aucune note importante.</p>
-          </ng-template>
-        </mat-card-content>
-      </mat-card>
+  <mat-card-title><mat-icon>note</mat-icon> Notes importantes</mat-card-title>
+  <mat-card-content>
+    <ng-container *ngIf="importantNotes.length > 0; else noNotes">
+      <ul>
+        <li *ngFor="let note of importantNotes">
+          <strong>{{ note.titre }}</strong><br>
+          <small>Créée le {{ note.dateCreation | date:'short' }}
+          , modifiée le {{ note.dateModification | date:'short' }}</small><br>
+          <p>{{ note.contenu }}</p>
+        </li>
+      </ul>
+    </ng-container>
+    <ng-template #noNotes>
+      <p class="empty">Aucune note importante.</p>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+
     </div>
 
     <!-- Ligne 2 : Mes tâches -->

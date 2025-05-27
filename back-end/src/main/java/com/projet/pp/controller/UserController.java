@@ -192,9 +192,8 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "Code envoyé sur votre email"));
     }
 
-    /**
-     * Étape 2 de la réinitialisation : on CONSOME l'OTP (mise à jour isUsed=true) et on change le mot de passe.
-     */
+
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
         String email   = body.get("email");

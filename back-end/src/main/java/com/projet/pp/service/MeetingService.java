@@ -40,6 +40,7 @@ public class MeetingService {
         return meetingRepo.findById(meetingId);
     }
 
+
     @Transactional
     public Meeting update(Long meetingId, MeetingRequest req) {
         Meeting m = meetingRepo.findById(meetingId)

@@ -123,4 +123,12 @@ public class MeetingController {
                 .body(file);
     }
 
+
+    @GetMapping("/participant/{userId}")
+    public ResponseEntity<List<Meeting>> getMeetingsByParticipant(
+            @PathVariable("userId") Long userId)
+    {
+        List<Meeting> meetings = svc.findByUser(userId);
+        return ResponseEntity.ok(meetings);
+    }
 }

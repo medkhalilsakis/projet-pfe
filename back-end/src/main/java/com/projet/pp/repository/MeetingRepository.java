@@ -9,7 +9,14 @@ import java.util.List;
 
 public interface MeetingRepository extends JpaRepository<Meeting,Long> {
     List<Meeting> findByProjectId(Long projectId);
-    @Query(value = "SELECT * FROM meeting m JOIN meeting_participants_ids p ON m.id = p.meeting_id WHERE p.participants_ids = :userId", nativeQuery = true)
+
+    @Query(value = """
+            SELECT m.* 
+                FROM meeting m 
+                JOIN meeting_participants_ids p 
+                  ON m.id = p.meeting_id 
+               WHERE p.participants_ids = :userId 
+            """, nativeQuery = true)
     List<Meeting> findByParticipantId(@Param("userId") Long userId);
 
 }
