@@ -217,7 +217,7 @@ export class ProjectExplorerComponent implements OnInit {
   }
 
   isTextFile(node: FlatNode): boolean {
-    return /\.(txt|js|ts|html|css|json|md)$/i.test(
+    return /\.(txt|js|ts|html|htm|tsx|vue|py|java|javac|c|cpp|cc|cs|sh|r|R|YAML|Dockerfile|sql|h|vb|xml|csv|css|json|md)$/i.test(
       node.name
     );
   }
