@@ -20,14 +20,24 @@ export class TestScenarioService {
     return this.http.get<TestScenario>(`${this.baseUrl}/${id}`);
   }
 
-  /** Vérifie s’il existe un scénario pour un projet */
-  existsForProject(projectId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/exists/${projectId}`);
+  /**
+   * Récupère le scénario de test associé à un projet.
+   * GET /api/test-scenarios/project/{projectId}
+   */
+  getByProjectId(projectId: number): Observable<TestScenario> {
+    return this.http.get<TestScenario>(
+      `${this.baseUrl}/project/${projectId}`
+    );
   }
 
-  /** Récupère le scénario pour un projet (avec pièces jointes et étapes) */
-  getByProjectId(projectId: number): Observable<TestScenario> {
-    return this.http.get<TestScenario>(`${this.baseUrl}/for-project/${projectId}`);
+  /**
+   * Indique si un scénario existe déjà pour ce projet.
+   * GET /api/test-scenarios/project/{projectId}/exists
+   */
+  existsForProject(projectId: number): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${this.baseUrl}/project/${projectId}/exists`
+    );
   }
 
   /**
@@ -38,13 +48,13 @@ export class TestScenarioService {
     scenario: TestScenario,
     file?: File
   ): Observable<TestScenario> {
-    // Construit le payload multipart/form-data
     const formData = new FormData();
-    // On met les données du DTO sous forme de JSON dans un champ 'data'
-    formData.append('data', new Blob([JSON.stringify(scenario)], {
-      type: 'application/json'
-    }));
-    // On ajoute le fichier si fourni
+    formData.append(
+      'data',
+      new Blob([JSON.stringify(scenario)], {
+        type: 'application/json'
+      })
+    );
     if (file) {
       formData.append('file', file, file.name);
     }
@@ -64,7 +74,7 @@ export class TestScenarioService {
     }
   }
 
-  /** Supprime un scénario */
+  /** Supprime un scénario par son id */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

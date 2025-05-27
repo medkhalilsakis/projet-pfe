@@ -40,7 +40,9 @@ import { switchMap, map } from 'rxjs/operators';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient } from '@angular/common/http';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { TestScenarioComponent } from '../../designation-testeur/test-scenario/test-scenario.component';
+import { Router } from '@angular/router';
+import { TestScenarioComponent } from './test-scenario/test-scenario.component';
+import { TestCaseDetailComponent } from './test-case-detail/test-case-detail.component';
 
 
 @Component({
@@ -113,6 +115,7 @@ api='http://localhost:8080'
     private uploadService: TestCaseUploadService,
     private progressSvc: TestProgressService,
     private bugService: BugReportService,
+    private router: Router,
     private meetingService: MeetingService,
     private userService: UserService,
     private assignmentService: AssignmentService,
@@ -533,9 +536,7 @@ openTestCaseDialog(tc?: TestCase) {
       });
   }
   exploreProject() {
-    // Ouvre un modal ou redirige vers une nouvelle page pour explorer le contenu
-    console.log("Exploration du contenu du projet");
-    // Exemple d'action : ouvrir un autre composant/modal pour explorer le contenu
+    this.router.navigate(['/dashboard/projects/', this.project.id,'explorer']);
   }
   
   exportProject() {
@@ -565,4 +566,11 @@ openTestCaseDialog(tc?: TestCase) {
       console.log('Le popup a été fermé');
     });
   }
+
+  openDetail(tc: TestCase) {
+        this.dialog.open(TestCaseDetailComponent, {
+          width: '600px',
+          data: tc
+        });
+      }
 }

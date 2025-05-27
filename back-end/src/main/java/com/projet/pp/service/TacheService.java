@@ -4,10 +4,7 @@ import com.projet.pp.model.Project;
 import com.projet.pp.model.Tache;
 import com.projet.pp.model.TacheAttachment;
 import com.projet.pp.model.User;
-import com.projet.pp.repository.ProjectRepository;
-import com.projet.pp.repository.TacheAttachmentRepository;
-import com.projet.pp.repository.TacheRepository;
-import com.projet.pp.repository.UserRepository;
+import com.projet.pp.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -45,6 +42,11 @@ public class TacheService {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private InitiationPhaseRepository initiationPhaseRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     private final Path baseStorage = Paths.get("uploads/taches")
             .toAbsolutePath().normalize();
@@ -64,14 +66,13 @@ public class TacheService {
         return tacheRepository.findByProject_Id(id);
     }
 
-    // src/main/java/com/projet/pp/service/TacheService.java
     @Transactional
     public void deleteTache(Long id) {
-        // 1) charger la tâche avec ses pièces jointes et assignations
+        // 1) Charger la tâche
         Tache t = tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tâche introuvable"));
 
-        // 2) nettoyage des fichiers sur disque
+        // 2) Nettoyage des fichiers sur disque
         Path taskDir = baseStorage.resolve(t.getId().toString());
         try {
             if (Files.exists(taskDir)) {
@@ -81,21 +82,30 @@ public class TacheService {
                         .forEach(File::delete);
             }
         } catch (IOException e) {
-            // logguez si nécessaire, mais on continue
+            // logger.warn("Erreur suppression fichiers disque", e);
         }
 
-        // 3) suppression des attachments en base (cascade via orphanRemoval)
+        notificationRepository.deleteByRelatedTask_Id(id);
+
+        // 3) Suppression explicite de la Phase d’Initiation et de ses sous-éléments
+        initiationPhaseRepository.findByTache_Id(id)
+                .ifPresent(phase -> {
+                    initiationPhaseRepository.delete(phase);
+                });
+
+        // 4) Suppression des attachments en base (orphanRemoval sur Tache.attachments)
         t.getAttachments().clear();
 
-        // 4) suppression des assignations dans la table de jointure
+        // 5) Suppression des assignations many-to-many
         t.getAssignedTo().clear();
 
-        // 5) on persiste les deux clear() pour que JPA exécute DELETE sur join table et attachments
+        // 6) Persister les clear() pour exécuter les DELETE sur jointures et attachments
         tacheRepository.save(t);
 
-        // 6) enfin on supprime la tâche elle-même
+        // 7) Suppression finale de la Tâche
         tacheRepository.delete(t);
     }
+
 
 
     public List<Tache> search(String q, Tache.Status status, Long assignedTo) {

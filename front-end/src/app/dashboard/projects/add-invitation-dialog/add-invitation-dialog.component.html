@@ -1,20 +1,44 @@
-<h2 mat-dialog-title>ajouter une invitation</h2>
-<mat-dialog-content [formGroup]="form">
-  <div fxLayout="column" fxLayoutGap="8px">
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Inviter des utilisateurs (optionnel)</mat-label>
-          <input matInput placeholder="Rechercher" [(ngModel)]="userFilter" [ngModelOptions]="{ standalone: true }">
-        </mat-form-field>
+<!-- add-invitation-dialog.component.html -->
+<mat-dialog-content>
+  <h3>Invitez des utilisateurs</h3>
 
-        <mat-select formControlName="users" placeholder="Sélectionner des utilisateurs" multiple>
-          <mat-option *ngFor="let u of filteredUsers" [value]="u.id">
-            {{ u.prenom }} {{ u.nom }}
-          </mat-option>
-        </mat-select>
-      </div>
+  <!-- 1) Ajout du <form> avec [formGroup] -->
+  <form [formGroup]="form" class="full-width">
+
+    <!-- 2) Le mat-selection-list est maintenant dans le formGroup -->
+    <mat-selection-list
+      multiple
+      formControlName="users"
+      class="full-width"
+    >
+      <!-- candidats -->
+      <mat-list-option
+        *ngFor="let u of filteredInviteableUsers"
+        [value]="u.id"
+      >
+        {{ u.prenom }} {{ u.nom }}
+      </mat-list-option>
+
+      <!-- déjà invités -->
+      <mat-list-option
+        *ngFor="let u of invitedUsers"
+        disabled
+      >
+        {{ u.prenom }} {{ u.nom }} (déjà invité)
+      </mat-list-option>
+    </mat-selection-list>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Annuler</button>
-  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Envoyer</button>
+  <button mat-button class="mat-button" (click)="cancel()">Annuler</button>
+  <!-- Bouton activé dès qu'il y a au moins 1 user sélectionné -->
+  <button
+    mat-flat-button class="mat-flat-button"
+    color="primary"
+    [disabled]="form.get('users')!.invalid"
+    (click)="submit()"
+  >
+    Inviter
+  </button>
 </mat-dialog-actions>

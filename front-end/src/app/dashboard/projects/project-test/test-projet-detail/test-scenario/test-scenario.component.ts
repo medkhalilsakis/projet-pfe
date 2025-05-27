@@ -1,37 +1,63 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatListModule } from '@angular/material/list';
+
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { TestScenarioService } from '../../../../../services/test-scenario.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { TestScenario } from '../../../../../models/test-scenario.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-test-scenario-popup',
-  templateUrl: './test-scenario.component.html',
-  styleUrls: ['./test-scenario.component.css'],
-  imports:[
+  selector: 'app-test-scenario',
+  standalone: true,
+  imports: [
     CommonModule,
-    FormsModule,
-    MatDialogModule
-  ]
+    DatePipe,
+    MatDialogModule,
+    MatButtonModule,
+    MatCardModule,
+    MatListModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './test-scenario.component.html',
+  styleUrls: ['./test-scenario.component.css']
 })
 export class TestScenarioComponent implements OnInit {
-
-  scenario: any;
+  scenario?: TestScenario;
+  loading = true;
+  error = '';
 
   constructor(
-    private testScenarioService: TestScenarioService,
-    public dialogRef: MatDialogRef<TestScenarioComponent>,
+    private svc: TestScenarioService,
+    private dialogRef: MatDialogRef<TestScenarioComponent>,
     @Inject(MAT_DIALOG_DATA) public projectId: number
   ) {}
 
   ngOnInit(): void {
-    // Charger le scénario de test via le service
-    this.testScenarioService.getTestScenarioByProjectId(this.projectId).subscribe(data => {
-      this.scenario = data;
-    });
+    this.svc.getByProjectId(this.projectId)
+      .pipe(
+        catchError(err => {
+          this.error = 'Aucun scénario trouvé ou erreur réseau.';
+          this.loading = false;
+          return of(null);
+        })
+      )
+      .subscribe(s => {
+        this.scenario = s || undefined;
+        this.loading = false;
+      });
   }
 
-  closeDialog(): void {
+  close(): void {
     this.dialogRef.close();
+  }
+
+  downloadAttachment(): void {
+    if (!this.scenario?.attachmentPath) return;
+    window.open(this.scenario.attachmentPath, '_blank');
   }
 }

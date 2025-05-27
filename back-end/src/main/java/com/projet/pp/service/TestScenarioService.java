@@ -2,6 +2,7 @@ package com.projet.pp.service;
 
 import com.projet.pp.model.TestScenario;
 import com.projet.pp.repository.TestScenarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,21 @@ public class TestScenarioService {
         return repo.findById(id);
     }
 
-    public boolean existsByProjectId(Long projectId) {
+    @Transactional(readOnly = true)
+    public TestScenario getByProjectId(Long projectId) {
+        return repo.findByProject_Id(projectId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Aucun scénario de test trouvé pour projectId=" + projectId
+                        )
+                );
+    }
+
+    /**
+     * Indique si un scénario existe pour ce projet.
+     */
+    @Transactional(readOnly = true)
+    public boolean existsForProject(Long projectId) {
         return repo.existsByProject_Id(projectId);
     }
 
@@ -66,10 +81,4 @@ public class TestScenarioService {
         repo.deleteById(id);
     }
 
-    /** Récupère le scénario lié à un projet (uniquement DTO ou entité brute) */
-    public TestScenario getByProjectId(Long projectId) {
-        return repo.findByProject_Id(projectId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Aucun scénario de test trouvé pour project_id=" + projectId));
-    }
 }

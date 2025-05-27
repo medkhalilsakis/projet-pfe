@@ -1,9 +1,6 @@
 package com.projet.pp.service;
 
-import com.projet.pp.dto.FinishedProjectDTO;
-import com.projet.pp.dto.InvitedUserDTO;
-import com.projet.pp.dto.ProjectFileNode;
-import com.projet.pp.dto.ProjectStatsDTO;
+import com.projet.pp.dto.*;
 import com.projet.pp.model.*;
 import com.projet.pp.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -899,7 +896,20 @@ private UserService userService;
         return projectRepository.findAllById(acceptedIds);
     }
 
+
+
+    @Transactional(readOnly = true)
+    public List<UserDto> getInviteableUsers(Long projectId) {
+        Project p = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Projet introuvable : " + projectId));
+
+        Long ownerId = p.getUser().getId();
+        List<User> candidates = userRepository.findInviteableUsers(projectId, ownerId);
+        return candidates.stream()
+                .map(UserDto::fromEntity)
+                .toList();
     }
+}
 
 
 

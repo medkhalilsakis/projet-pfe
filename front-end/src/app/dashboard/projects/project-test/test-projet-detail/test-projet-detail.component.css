@@ -387,6 +387,7 @@ mat-card.block:hover {
 }
 .scenario-card mat-card-title {
   color: #4338ca;
+  margin-bottom: 10px;
 }
 .scenario-card button {
   background: #e0e7ff;

@@ -8,6 +8,7 @@ import com.projet.pp.model.User;
 import com.projet.pp.repository.ProjectRepository;
 import com.projet.pp.repository.UserRepository;
 import com.projet.pp.service.TestScenarioService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -83,16 +84,22 @@ public class TestScenarioController {
         return ResponseEntity.ok(result);
     }
 
-    /** Verifier si un scénario existe pour ce projet */
-    @GetMapping("/exists/{projectId}")
-    public ResponseEntity<Boolean> existsForProject(@PathVariable Long projectId) {
-        return ResponseEntity.ok(service.existsByProjectId(projectId));
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<TestScenario> getScenarioByProject(
+            @PathVariable Long projectId) {
+        try {
+            TestScenario scenario = service.getByProjectId(projectId);
+            return ResponseEntity.ok(scenario);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    /** Récupérer le scénario (DTO) pour un projet */
-    @GetMapping("/for-project/{projectId}")
-    public ResponseEntity<TestScenarioDto> getForProject(@PathVariable Long projectId) {
-        TestScenario s = service.getByProjectId(projectId);
-        return ResponseEntity.ok(TestScenarioDto.fromEntity(s));
+    @GetMapping("/project/{projectId}/exists")
+    public ResponseEntity<Boolean> existsByProject(
+            @PathVariable Long projectId) {
+        boolean exists = service.existsForProject(projectId);
+        return ResponseEntity.ok(exists);
     }
+
 }

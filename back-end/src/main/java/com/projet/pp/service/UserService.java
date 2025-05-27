@@ -33,7 +33,7 @@ public class UserService {
     @Autowired private projectInvitedUserRepository      invitedRepo;
     @Autowired private ProjectTesterAssignmentRepository assignRepo;
     @Autowired private TacheRepository                   tacheRepo;
-@Autowired private NotificationService notificationService;
+    @Autowired private NotificationService notificationService;
     LocalDateTime now = LocalDateTime.now();  // No additional imports needed
 
     private final Path uploadsRoot = Paths.get("uploads").toAbsolutePath().normalize();

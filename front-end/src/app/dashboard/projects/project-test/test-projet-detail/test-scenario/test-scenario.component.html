@@ -1,24 +1,49 @@
-<h2 mat-dialog-title>Scénario de Test</h2>
-<mat-dialog-content>
-  <div *ngIf="scenario">
-    <p><strong>Nom :</strong> {{ scenario.name }}</p>
-    <p><strong>Description :</strong> {{ scenario.description }}</p>
-    <p><strong>Projet :</strong> {{ scenario.projectId }}</p>
-    <p><strong>Superviseur :</strong> {{ scenario.superviseurId }}</p>
-    <div *ngIf="scenario.steps && scenario.steps.length">
-      <h3>Étapes :</h3>
-      <ul>
-        <li *ngFor="let step of scenario.steps">
-          <p><strong>Description :</strong> {{ step.description }}</p>
-          <p><strong>Attendu :</strong> {{ step.expected }}</p>
-        </li>
-      </ul>
-    </div>
+<mat-dialog-content class="scenario-dialog">
+  <mat-progress-spinner
+    *ngIf="loading"
+    mode="indeterminate"
+    diameter="36"
+    class="spinner">
+  </mat-progress-spinner>
+
+  <div *ngIf="!loading && !scenario" class="no-scenario">
+    <p>Pas de scénario de test pour ce projet.</p>
   </div>
-  <div *ngIf="!scenario">
-    <p>Chargement du scénario...</p>
+
+  <div *ngIf="!loading && scenario">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ scenario.name }}</mat-card-title>
+        <mat-card-subtitle>
+          Créé le {{ scenario.createdAt | date:'medium' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p *ngIf="scenario.description">{{ scenario.description }}</p>
+
+        <section *ngIf="scenario.attachmentPath" class="attachment">
+          <strong>Pièce jointe : </strong>
+          <a (click)="downloadAttachment()" class="link">
+            {{ scenario.attachmentName }}
+          </a>
+        </section>
+
+        <h4>Étapes du scénario</h4>
+        <mat-list role="list">
+          <mat-list-item role="listitem" *ngFor="let step of scenario.steps">
+            <div>
+              <p><strong>• {{ step.description }}</strong></p>
+              <p><em>Résultat attendu :</em> {{ step.expected }}</p>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
   </div>
 </mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-button (click)="closeDialog()">Fermer</button>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="close()">
+    Fermer
+  </button>
 </mat-dialog-actions>

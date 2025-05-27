@@ -1,0 +1,32 @@
+<!-- src/app/modules/test-cases/test-case-detail/test-case-detail.component.html -->
+<mat-dialog-content class="detail-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Cas de test #{{ tc.caseNumber }}</mat-card-title>
+      <mat-card-subtitle>{{ tc.title }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p><strong>Sous-système :</strong> {{ tc.subsystem }}</p>
+      <p><strong>Description :</strong><br>{{ tc.description }}</p>
+      <p><strong>Date d’exécution :</strong> {{ tc.executionDate | date:'shortDate' }}</p>
+      <p><strong>Pré-conditions :</strong><br>{{ tc.preconditions }}</p>
+      <p><strong>Post-conditions :</strong><br>{{ tc.postconditions }}</p>
+
+      <h3>Étapes</h3>
+      <mat-list>
+        <mat-list-item *ngFor="let step of tc.steps">
+          <div class="step-block">
+            <p><strong>Étape {{ step.id }} :</strong> {{ step.stepDesc }}</p>
+            <p><em>Action :</em> {{ step.action }}</p>
+            <p><em>Résultat attendu :</em> {{ step.expected }}</p>
+            <p><em>Commentaire :</em> {{ step.comment }}</p>
+            <p><em>Succès :</em> {{ step.success ? '✅' : '❌' }}</p>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-flat-button color="primary" (click)="close()">Fermer</button>
+    </mat-card-actions>
+  </mat-card>
+</mat-dialog-content>

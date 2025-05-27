@@ -119,5 +119,5 @@ public class ChatMessageController {
         return ResponseEntity.noContent().build();
     }
 
-  
+
 }

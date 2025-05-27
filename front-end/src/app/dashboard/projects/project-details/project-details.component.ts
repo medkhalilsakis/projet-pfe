@@ -53,7 +53,22 @@ throw new Error('Method not implemented.');
   canDelete = false;
   canArchive = false;        // ← declare it
 
-    project!: Project;
+  actionsList = [
+  {
+    icon: 'file_download',
+    label: 'Télécharger',
+    handler: () => this.downloadContent(),
+    colorClass: 'file_download'    // ← ici
+  },
+  {
+    icon: 'settings',
+    label: 'Modifier',
+    handler: () => this.openSettings(this.project),
+    colorClass: 'settings'         // ← et là
+  },
+];
+  
+  project!: Project;
   projectId!: number;
 
   // Bloc invitations
@@ -63,6 +78,7 @@ throw new Error('Method not implemented.');
   testers: ProjectTesterAssignment[] = [];
   isSupervisor = false;
 
+  isOwner = false;
   // Bloc pauses
   pauseRequests: any = [];
   pendingPauseRequests : any[] =[]
@@ -82,16 +98,15 @@ throw new Error('Method not implemented.');
     this.currentUser=this.session.getUser();
   }
   canResume(){
-    return (this.isSupervisor && this.project.status==55)
+    return (this.isSupervisor && this.project.status==55);
   }
   canPublish(){
-    
     return ((this.project.user.id===this.currentUser.id)  && (this.project.status===0))
   }
 
-  canSeeInvitedList(): boolean {
+canSeeInvitedList(): boolean {
   const isSupervisor = this.currentUser?.role?.id === 3;
-  const isOwner = this.currentUser?.id === this.project?.user?.id;
+  this.isOwner = this.currentUser?.id === this.project?.user?.id;
 
   const isTester = this.testers?.some(tester => this.currentUser?.id === tester.id);
 
@@ -99,7 +114,7 @@ throw new Error('Method not implemented.');
     this.currentUser?.id === invite.user.id && invite.status === 'accepted'
   );
 
-  return isSupervisor || isOwner || isTester || isInviteAccepted;
+  return isSupervisor || this.isOwner || isTester || isInviteAccepted;
 }
  isInvitationPending(){
   const isInvitePending = this.invitedUsers?.some(invite => 
@@ -119,43 +134,29 @@ denyInviteRequest() {
     .subscribe(() => this.loadInvitedUsers());
 }
 
-  actionsList = [
-  {
-    icon: 'file_download',
-    label: 'Télécharger',
-    handler: () => this.downloadContent(),
-    colorClass: 'file_download'    // ← ici
-  },
-  {
-    icon: 'settings',
-    label: 'Modifier',
-    handler: () => this.openSettings(this.project),
-    colorClass: 'settings'         // ← et là
-  },
-  
-  
-  
-];
 resumeProject(){
   this.projectService.updateProjectStatus(this.project.id,2,this.currentUser.id).subscribe(a=>console.log(a));
   this.loadProject()
-
-  
 }
+
 
 publishProject() {
- this.projectService.updateProjectStatus(this.project.id,1,this.currentUser.id).subscribe(a=>console.log(a));
- this.loadProject()
-  this.router.navigate(['/dashboard/projects']);}
+  this.projectService.updateProjectStatus(this.project.id,1,this.currentUser.id).subscribe(a=>console.log(a));
+  this.loadProject()
+  this.router.navigate(['/dashboard/projects']);
+}
 closeProject() {
- this.projectService.updateProjectStatus(this.project.id,99,this.currentUser.id).subscribe(a=>console.log(a));
- this.loadProject()
-  this.router.navigate(['/dashboard/projects']);}
+  this.projectService.updateProjectStatus(this.project.id,99,this.currentUser.id).subscribe(a=>console.log(a));
+  this.loadProject()
+  this.router.navigate(['/dashboard/projects']);
+}
+
 pauseProject() {
     this.projectService.updateProjectStatus(this.project.id,55,this.currentUser.id).subscribe(a=>console.log(a));
-   this.loadProject()
+    this.loadProject()
     this.router.navigate(['/dashboard/projects']);
 }
+
 archiveProject() {
    this.projectService.updateProjectStatus(this.project.id,-1,this.currentUser.id).subscribe(a=>console.log(a));
   this.loadProject()
@@ -167,13 +168,13 @@ deleteProject() {
   this.projectService.deleteProject(this.project.id).subscribe();
       this.router.navigate(['/dashboard/projects']);
 }
-  openSettings(project: Project): void{
+openSettings(project: Project): void{
     this.dialog.open(ParametresProjetComponent, {
       width: '600px',
       data: { projectId: project.id }
     });
     this.loadProject()
-  }
+}
 downloadContent() {
     this.projectService.downloadProjectContent(this.projectId)
       .subscribe({
@@ -309,8 +310,8 @@ removeInvite(userId: number): void {
       error: err => console.error('Erreur lors de la suppression', err)
     });
 }
-  openInviteDialog(): void {
-const dlg = this.dialog.open(AddInvitationDialogComponent, {
+openInviteDialog(): void {
+    const dlg = this.dialog.open(AddInvitationDialogComponent, {
     width: '90%',
     maxWidth: '800px',
     data: {
@@ -336,7 +337,7 @@ const dlg = this.dialog.open(AddInvitationDialogComponent, {
     })
   }});
 }
-    private loadReclamations(): void {
+private loadReclamations(): void {
     this.complaintService.getComplaintsByProjectId(this.projectId)
       .subscribe(comps => {
         // For each complaint, fetch its complainer user

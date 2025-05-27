@@ -15,4 +15,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findUnreadByUser(@Param("user") User user);
 
     int deleteByMeeting_Id(Long meetingId);
+
+    void deleteByRelatedTask_Id(Long taskId);
 }
