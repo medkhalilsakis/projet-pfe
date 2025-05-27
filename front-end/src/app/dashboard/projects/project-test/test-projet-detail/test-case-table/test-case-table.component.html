@@ -1,36 +1,46 @@
-<table mat-table [dataSource]="data" class="mat-elevation-z8">
+<!-- Annotated HTML for Test Cases Table -->
+<table mat-table [dataSource]="data" class="testcases-table mat-elevation-z8">
 
-    <ng-container matColumnDef="caseNumber">
-      <th mat-header-cell *matHeaderCellDef> Numéro </th>
-      <td mat-cell *matCellDef="let tc"> {{tc.caseNumber}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="title">
-      <th mat-header-cell *matHeaderCellDef> Titre </th>
-      <td mat-cell *matCellDef="let tc"> {{tc.title}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef> Date </th>
-      <td mat-cell *matCellDef="let tc"> {{tc.executionDate | date:'short'}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Actions </th>
-      <td mat-cell *matCellDef="let tc">
-        <button mat-icon-button color="primary" (click)="view.emit(tc)">
-          <mat-icon>visibility</mat-icon>
+  <!-- Case Number Column -->
+  <ng-container matColumnDef="caseNumber">
+    <th mat-header-cell *matHeaderCellDef class="header-cell header-case-number">Numéro</th>
+    <td mat-cell *matCellDef="let tc" class="cell cell-case-number">{{ tc.caseNumber }}</td>
+  </ng-container>
+
+  <!-- Title Column -->
+  <ng-container matColumnDef="title">
+    <th mat-header-cell *matHeaderCellDef class="header-cell header-title">Titre</th>
+    <td mat-cell *matCellDef="let tc" class="cell cell-title">{{ tc.title }}</td>
+  </ng-container>
+
+  <!-- Date Column -->
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef class="header-cell header-date">Date</th>
+    <td mat-cell *matCellDef="let tc" class="cell cell-date">{{ tc.executionDate | date:'short' }}</td>
+  </ng-container>
+
+  <!-- Actions Column -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef class="header-cell header-actions">Actions</th>
+    <td mat-cell *matCellDef="let tc" class="cell cell-actions">
+      <div class="actions-group">
+        <button mat-icon-button class="action-btn view-btn" (click)="view.emit(tc)">
+          <mat-icon class="action-icon">visibility</mat-icon>
+          <span class="action-tooltip">Voir</span>
         </button>
-        <button mat-icon-button (click)="edit.emit(tc)">
-          <mat-icon>edit</mat-icon>
+        <button mat-icon-button class="action-btn edit-btn" (click)="edit.emit(tc)">
+          <mat-icon class="action-icon">edit</mat-icon>
+          <span class="action-tooltip">Modifier</span>
         </button>
-        <button mat-icon-button color="warn" (click)="delete.emit(tc)">
-          <mat-icon>delete</mat-icon>
+        <button mat-icon-button class="action-btn delete-btn" (click)="delete.emit(tc)">
+          <mat-icon class="action-icon">delete</mat-icon>
+          <span class="action-tooltip">Supprimer</span>
         </button>
-      </td>
-    </ng-container>
-  
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-  
+      </div>
+    </td>
+  </ng-container>
+
+  <!-- Header and Row Definitions -->
+  <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-row"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-data-row"></tr>
+</table>

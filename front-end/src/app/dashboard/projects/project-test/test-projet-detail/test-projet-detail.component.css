@@ -285,101 +285,537 @@
 }
 
 /* Generic Card */
-/* Common card base */
-.card,
-mat-card.block {
+/* ===========================================
+   GLOBAL CARD STYLES
+   =========================================== */
+.card {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   overflow: hidden;
+  margin: 1.5rem 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  font-family: 'Segoe UI', sans-serif;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+/* ===========================================
+   CARD HEADER (TESTS & UPLOADS)
+   =========================================== */
+.card-header,
+.uploads-block > h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #3f51b5, #5a67d8);
+  color: #fff;
+}
+.card-header h2,
+.uploads-block > h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+/* Icône “shiny” : effet de halo animé et hover lumineux */
+.shiny {
+  font-size: 24px;                 /* taille plus marquée */
+  color: #3f51b5;                  /* couleur principale */
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  animation: fadeIn 0.5s ease both;
+  transition: transform 0.3s ease, color 0.3s ease;
+  animation: glow 2.5s infinite ease-in-out;
 }
 
-.card:hover,
-mat-card.block:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+/* Effet au survol : légère pulsation + couleur secondaire */
+.shiny:hover {
+  transform: scale(1.2);
+  color: #5c6bc0;
+  animation-play-state: paused;  /* arrête l’animation pendant le hover */
 }
 
-/* Fade-in animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+
+
+/* SHINY UPLOAD ICON */
+.card-header {
+  font-size: 22px;
+  color: #fff;
+  animation: shine 2s infinite ease-in-out;
 }
 
-/* 1. Mes cas de test */
+.card-header button {
+  width: 44px; height: 44px;
+  min-width: 44px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-header button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  background: #f0f4ff;
+}
+
+/* ===========================================
+   MES CAS DE TESTE BLOCK
+   =========================================== */
 .tests-block {
-  border-top: 4px solid #3b82f6;
+  border-top: 4px solid #3f51b5;
 }
-.tests-block .card-header h2 {
-  color: #1e40af;
-  font-size: 1.4rem;
-}
-.tests-block button.mat-icon-button {
-  background: #e0e7ff;
-  transition: background 0.3s ease;
-}
-.tests-block button.mat-icon-button:hover {
-  background: #c7d2fe;
+.tests-block app-test-case-table {
+  display: block;
+  background: #f6f8fc;
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
-/* 2. Cas uploadés */
+/* ===========================================
+   CAS UPLOADÉS BLOCK
+   =========================================== */
+
 .uploads-block {
-  border-top: 4px solid #10b981;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+  margin: 1.5rem 0;
+  font-family: 'Segoe UI', sans-serif;
 }
-.uploads-block h3 {
-  color: #065f46;
+
+/* Header */
+.uploads-block > h3 {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
-.uploads-block .mat-list-item {
+
+/* List wrapper */
+.uploads-block mat-list {
+  margin: 10px;
+  padding: 0 1.5rem 1.5rem;
+  background: #f7fafb;
+}
+
+/* Each item: single horizontal line */
+.uploads-block mat-list-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem;
+  padding: 0.75rem 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
   transition: background 0.2s ease;
 }
-.uploads-block .mat-list-item:hover {
-  background: #ecfdf5;
+.uploads-block mat-list-item:last-child {
+  border-bottom: none !important;
+}
+.uploads-block mat-list-item:hover {
+  background: rgba(16,185,129,0.1);
 }
 
+/* 1. File icon */
+.uploads-block mat-icon[matListIcon] {
+  color: #047857;
+}
+
+/* 2. Filename + date */
+.uploads-block .filename {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uploads-block .date {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+/* 3. Action buttons container */
+.uploads-block mat-list-item > div:last-child {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Base style for all icon-buttons */
+.uploads-block .mat-icon-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.uploads-block .mat-icon-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Download button */
+.uploads-block .mat-icon-button:not([color="warn"]) mat-icon {
+  color: #0284c7;
+}
+
+/* Delete button */
+.uploads-block button[color="warn"] mat-icon {
+  color: #dc2626;
+}
+
+/* Responsive: keep items aligned on narrow screens */
+@media (max-width: 600px) {
+  .uploads-block mat-list-item {
+    flex-wrap: wrap !important;
+    gap: 0.5rem;
+  }
+  .uploads-block .date {
+    margin-left: 0;
+    opacity: 0.8;
+  }
+  .uploads-block mat-list-item > div:last-child {
+    justify-content: flex-start;
+  }
+}
+
+
 /* 3. Réunions planifiées */
+/* ===========================================
+   MEETINGS BLOCK – PROFESSIONAL STYLING
+   =========================================== */
 .meetings-block {
-  border-top: 4px solid #f59e0b;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin: 1.5rem 0;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Segoe UI', sans-serif;
 }
-.meetings-block h3 {
-  color: #92400e;
+.meetings-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
-.meetings-block mat-expansion-panel {
-  transition: background 0.3s ease;
+
+/* Header */
+.meetings-block > h3 {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
-.meetings-block mat-expansion-panel:hover {
-  background: #fef3c7;
+
+/* Accordion container */
+.meetings-block mat-accordion {
+  background: #f7f9fc;
+}
+
+/* Expansion panel */
+.meetings-block .mat-expansion-panel {
+  border-bottom: 1px solid #e0e6ed;
+}
+.meetings-block .mat-expansion-panel:last-child {
+  border-bottom: none;
+}
+
+/* Panel header */
+.meetings-block 
+  .mat-expansion-panel-header {
+  background: #ffffff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  margin: 0.5rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.meetings-block 
+  .mat-expansion-panel-header.mat-expanded {
+  background: #e3f2fd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.meetings-block 
+  .mat-expansion-panel-header:hover {
+  background: #f1f7fd;
+}
+
+/* Title & description */
+.meetings-block 
+  .mat-panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e3a5f;
+}
+.meetings-block 
+  .mat-panel-description {
+  font-size: 0.85rem;
+  color: #6b7c93;
+  opacity: 0.8;
+}
+
+/* Panel body */
+.meetings-block 
+  .mat-expansion-panel-body {
+  padding: 0 1.5rem 1rem;
+  background: #ffffff;
+  font-size: 0.95rem;
+  color: #34495e;
+  line-height: 1.5;
+}
+
+/* Participants & description paragraphs */
+.meetings-block p {
+  margin: 0.5rem 0;
+}
+.meetings-block p strong {
+  color: #1e3a5f;
+}
+
+/* Panel actions */
+.meetings-block .panel-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.meetings-block .panel-actions button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.meetings-block .panel-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  background: #e3f2fd;
+}
+.meetings-block .panel-actions button[color="primary"] mat-icon {
+  color: #1e88e5;
+  font-size: 20px;
+}
+.meetings-block .panel-actions button[color="warn"] mat-icon {
+  color: #e53935;
+  font-size: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .meetings-block  
+    .mat-expansion-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  .meetings-block .panel-actions {
+    justify-content: flex-start;
+  }
 }
 
 /* 4. Bugs signalés */
+/* ================================
+   BUGS BLOCK – PROFESSIONAL STYLING
+   ================================ */
 .bugs-block {
-  border-top: 4px solid #ef4444;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin: 1.5rem 0;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Segoe UI', sans-serif;
 }
-.bugs-block h3 {
-  color: #991b1b;
-}
-.bugs-block .mat-list-item button {
-  transition: color 0.3s ease;
-}
-.bugs-block .mat-list-item button:hover {
-  color: #ef4444;
+.bugs-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* 5. Demandes de suspension */
+/* Header */
+.bugs-block > h3 {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* List */
+.bugs-block mat-list {
+  margin: 0;
+  padding: 0.5rem 1.5rem 1rem;
+  background: #f9fafb;
+}
+
+/* Each bug row */
+.bug-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #ececec;
+  transition: background 0.2s ease;
+}
+.bug-item:last-child {
+  border-bottom: none;
+}
+.bug-item:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+/* Bug link button */
+.bug-item .bug-link {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #c0392b;
+  text-transform: none;
+  transition: color 0.2s ease;
+}
+.bug-item .bug-link:hover {
+  color: #e74c3c;
+}
+
+/* Bug level badge */
+.bug-level {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 12px;
+  color: #fff;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Level-specific colors */
+.bug-level.minor {
+  background: #27ae60;
+}
+.bug-level.major {
+  background: #f1c40f;
+}
+.bug-level.critical {
+  background: #c0392b;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .bug-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .bug-level {
+    margin-left: auto;
+  }
+}
+
+/* ================================
+   PAUSE REQUESTS BLOCK
+   ================================ */
 .pause-requests-block {
-  border-top: 4px solid #8b5cf6;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin: 1.5rem 0;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.pause-requests-block h3 {
-  color: #4c1d95;
+.pause-requests-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
-.pause-requests-block .mat-list-item {
-  transition: transform 0.2s ease;
+
+/* Header */
+.pause-requests-block > h3 {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #f39c12, #d35400);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
-.pause-requests-block .mat-list-item:hover {
+
+/* List container */
+.pause-requests-block mat-list {
+  margin-top: 15px;
+  padding: 0 1.5rem 1.5rem;
+  background: #fdfdfd;
+  
+}
+
+/* Each request item */
+.pause-requests-block mat-list-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #ececec;
+  transition: background 0.2s ease;
+}
+.pause-requests-block mat-list-item:last-child {
+  border-bottom: none;
+}
+.pause-requests-block mat-list-item:hover {
+  background: rgba(243,156,18,0.1);
+}
+
+/* Icon */
+.pause-requests-block mat-icon[matListIcon] {
+  font-size: 24px;
+  color: #d35400;
+}
+
+/* Request details */
+.requester-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2c3e50;
+  margin-top:15px;
+}
+.pause-requests-block .small {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-top: 0.25rem;
+}
+
+/* Action button */
+.pause-requests-block button[mat-button] {
+  background: transparent;
+  color: #d35400;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.pause-requests-block button[mat-button]:hover {
+  color: #f39c12;
   transform: translateX(4px);
 }
+
+/* “No requests” fallback */
+.pause-requests-block ng-template p {
+  padding: 1rem 1.5rem;
+  margin: 0;
+  color: #7f8c8d;
+  font-style: italic;
+  background: #fafafa;
+}
+
 
 /* 6. Scénario de test */
 .scenario-card {

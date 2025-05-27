@@ -3,6 +3,7 @@ package com.projet.pp.controller;
 import com.projet.pp.model.Project;
 import com.projet.pp.model.TestCase;
 import com.projet.pp.service.TestCaseService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -50,5 +51,40 @@ public class TestCaseController {
     @GetMapping("/project/{projId}/count")
     public long countByProject(@PathVariable Long projId) {
         return svc.countByProject(projId);
+    }
+
+
+    @PutMapping(value = "/{tcId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> update(
+            @PathVariable Long pid,
+            @PathVariable Long tcId,
+            @RequestBody TestCase tc
+    ) {
+        try {
+            TestCase updated = svc.update(pid, tcId, tc);
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+
+    @DeleteMapping("/{tcId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable("pid") Long projectId,
+            @PathVariable("tcId") Long tcId
+    ) {
+        try {
+            svc.delete(projectId, tcId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
     }
 }

@@ -34,7 +34,9 @@ public class TestCase {
     private Project project;
 
 
-    @OneToMany(mappedBy="testCase", cascade=CascadeType.ALL, orphanRemoval=true)
-    @JsonIgnore  // on n’a pas besoin de remonter à TestCase à partir des steps
+    @OneToMany(mappedBy = "testCase",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<TestCaseStep> steps = new ArrayList<>();
+
 }

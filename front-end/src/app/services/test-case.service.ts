@@ -40,14 +40,16 @@ update(projectId: number, tc: TestCase): Observable<TestCase> {
   return this.http.put<TestCase>(
     `${this.base}/${projectId}/test-cases/${tc.id}`,
     tc,
-    {
-      headers: { 'Content-Type': 'application/json' }
-    }
+    { headers: { 'Content-Type': 'application/json' } }
   );
 }
 
 
+
   delete(projectId: number, tcId: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${projectId}/test-cases/${tcId}`);
-  }
+  return this.http.delete<void>(
+    `${this.base}/${projectId}/test-cases/${tcId}`
+  );
+}
+
 }

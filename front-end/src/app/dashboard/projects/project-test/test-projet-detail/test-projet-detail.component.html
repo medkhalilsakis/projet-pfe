@@ -101,21 +101,20 @@
       </div>
 
       <!-- Cas uploadés -->
-      <div class="card uploads-block">
+      <div class="uploads-block">
         <h3>Cas uploadés</h3>
         <mat-list>
           <mat-list-item *ngFor="let up of uploads">
-            <mat-icon matListIcon>insert_drive_file</mat-icon>
             <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px">
               <div>
                 <div class="filename">{{ up.originalFilename }}</div>
                 <div class="date">{{ up.uploadedAt | date:'yyyy-MM-dd HH:mm' }}</div>
               </div>
               <div>
-                <button mat-icon-button (click)="downloadUploaded(up)" matTooltip="Télécharger">
+                <button mat-icon-button class="mat-icon-button" (click)="downloadUploaded(up)" matTooltip="Télécharger">
                   <mat-icon>download</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
+                <button mat-icon-button class="mat-icon-button" color="warn" (click)="deleteUploaded(up)" matTooltip="Supprimer">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -126,7 +125,7 @@
 
       <!-- Réunions planifiées & Bugs -->
       <div fxLayout="row" fxLayoutGap="16px">
-        <div class="card meetings-block" fxFlex>
+        <div class="meetings-block" fxFlex>
           <h3>Réunions planifiées</h3>
           <mat-accordion>
             <mat-expansion-panel *ngFor="let m of meetings">
@@ -134,17 +133,9 @@
                 <mat-panel-title>{{ m.subject }}</mat-panel-title>
                 <mat-panel-description>{{ m.date | date:'yyyy-MM-dd HH:mm' }}</mat-panel-description>
               </mat-expansion-panel-header>
-              <p><strong>Créée le :</strong> {{ m.createdAt | date:'short' }}</p>
               <p><strong>Participants :</strong> {{ (m.participantNames || []).join(', ') || 'Aucun' }}</p>
               <p>{{ m.description }}</p>
-              <div class="panel-actions" fxLayout="row" fxLayoutGap="8px">
-                <button mat-icon-button color="primary" (click)="editMeeting(m)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="deleteMeeting(m)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
+
             </mat-expansion-panel>
           </mat-accordion>
         </div>
@@ -153,7 +144,9 @@
           <mat-list>
             <mat-list-item *ngFor="let b of bugs">
               <button mat-button (click)="viewBug(b)">Bug #{{ b.id }}</button>
-              <span class="bug-level">{{ b.level | titlecase }}</span>
+              <span class="bug-level {{ b.level | lowercase }}">
+                {{ b.level | titlecase }}
+              </span>
             </mat-list-item>
           </mat-list>
         </div>
@@ -166,7 +159,7 @@
           <mat-list-item *ngFor="let pr of pauseRequests">
             <mat-icon matListIcon>pause_circle</mat-icon>
             <div>
-              <div class="requester-name">Demande #{{ pr.id }} - {{ pr.requesterName }}</div>
+              <div class="requester-name">Demande #{{ pr.id }} </div>
               <div class="small">
                 {{ pr.requestedAt | date:'yyyy-MM-dd HH:mm' }} — 
                 <em>{{ pr.status | titlecase }}</em>

@@ -20,14 +20,13 @@ public class UploadedTestCase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
-    // on ignore tout ce qui peut générer un proxy vide
     @JsonIgnoreProperties({
             "hibernateLazyInitializer",
             "handler",
             "assignments",
             "files",
             "invitedUsers",
-            "user"         // selon ce que vous ne voulez pas exposer
+            "user"
     })
     private Project project;
 
@@ -46,13 +45,12 @@ public class UploadedTestCase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by", nullable = false)
-    // idem pour l’uploader
     @JsonIgnoreProperties({
             "hibernateLazyInitializer",
             "handler",
-            "projects",         // tout ce qui ramène à du JPA
+            "projects",
             "assignments",
-            "password",         // si présent
+            "password",
             "roles"
     })
     private User uploader;

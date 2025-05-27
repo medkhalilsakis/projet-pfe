@@ -1,0 +1,6 @@
+Test ID,Titre du cas de test,Description,Étapes,Résultat attendu,Priorité
+SUB-001,Afficher les plans d’abonnement,Vérifie l’affichage correct des plans,Aller à /pricing,"Les plans Bronze, Silver et Gold s'affichent",Moyenne
+SUB-002,Souscription à un plan,Test la souscription à un plan Silver,"Aller à /pricing, cliquer sur 'Choisir Silver', suivre les étapes",Abonnement confirmé et accessible dans le profil,Élevée
+SUB-003,Annulation d’abonnement,Vérifie si l'utilisateur peut annuler son abonnement,"Aller au profil, cliquer 'Annuler abonnement'",Abonnement marqué comme annulé,Haute
+SUB-004,Changement de plan,Vérifie la possibilité de changer d’un plan à un autre,Passer de Bronze à Gold via le profil,Changement effectué avec confirmation,Élevée
+SUB-005,Durée de validité du plan,Affiche correctement la date de fin,Aller au profil,Date de validité visible,Moyenne
