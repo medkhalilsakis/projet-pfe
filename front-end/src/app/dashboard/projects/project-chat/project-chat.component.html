@@ -8,7 +8,7 @@
       <div class="message-header">
         <strong>{{ msg.sender.prenom }} {{ msg.sender.nom }}</strong>
         <span class="timestamp">{{ msg.createdAt | date:'short' }}</span>
-        <button mat-icon-button color="warn" (click)="onDeleteMessage(msg)">
+        <button class="delete-btn" mat-icon-button color="warn" (click)="onDeleteMessage(msg)">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
@@ -61,7 +61,7 @@
       </div>
     </div>
     <button
-      mat-raised-button
+      mat-raised-button class="send-btn"
       color="primary"
       (click)="sendMessage()"
       [disabled]="!messageText.trim() && !attachments.length"
