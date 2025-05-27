@@ -44,6 +44,9 @@ import{AddInvitationDialogComponent} from"../add-invitation-dialog/add-invitatio
   ]
 })
 export class ProjectDetailsComponent implements OnInit {
+relaunchProject() {
+throw new Error('Method not implemented.');
+}
   reclamationList: any[] = [];                           // ← add this
 
   currentUser : any ;

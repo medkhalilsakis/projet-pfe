@@ -74,7 +74,7 @@
       <mat-card-content class="testers-content">
         <mat-list class="testers-list">
           <mat-list-item *ngFor="let t of testers" class="tester-item">
-            <span class="tester-name">{{ t.testeur.prenom }} {{ t.testeur.nom }}</span>
+            <span class="tester-name">{{ t.testeur.prenom }} {{ t.testeur.nom }} </span>
             <span class="tester-badge">#{{ t.numeroTesteur }}</span>
           </mat-list-item>
         </mat-list>
@@ -105,87 +105,76 @@
 
     <!-- Actions Card -->
     <mat-card class="actions-card">
-      <mat-card-title class="actions-title">Actions</mat-card-title>
-      <mat-card-content class="actions-content" fxLayout="column" fxLayoutGap="16px">
-        <div class="action-item" *ngFor="let act of actionsList">
-      <button mat-icon-button
-              class="action-btn"
-              [ngClass]="act.colorClass"
-              (click)="act.handler()">
-        <mat-icon>{{ act.icon }}</mat-icon>
-      </button>
-      <span class="action-label">{{ act.label }}</span>
-    </div>
-
-
- <!-- pause only if permitted -->
+  <mat-card-title class="actions-title">Actions</mat-card-title>
+  <mat-card-content class="actions-content">
+    <!-- Boucle sur vos actions dynamiques -->
+    <ng-container *ngFor="let act of actionsList">
+      <div class="action-item">
+        <button mat-icon-button
+                class="action-btn {{ act.colorClass }}"
+                (click)="act.handler()">
+          <mat-icon>{{ act.icon }}</mat-icon>
+        </button>
+        <span class="action-label">{{ act.label }}</span>
+      </div>
+    </ng-container>
+    
+    <!-- Pause -->
     <div class="action-item" *ngIf="isSupervisor">
-      <button mat-icon-button
-              class="action-btn pause_circle"
-              (click)="pauseProject()">
+      <button mat-icon-button class="action-btn pause" (click)="pauseProject()">
         <mat-icon>pause_circle</mat-icon>
       </button>
       <span class="action-label">Mettre en pause</span>
     </div>
-    <!-- pause only if permitted -->
     <div class="action-item" *ngIf="canResume()">
-      <button mat-icon-button
-              class="action-btn pause_circle"
-              (click)="resumeProject()">
+      <button mat-icon-button class="action-btn resume" (click)="resumeProject()">
         <mat-icon>play_arrow</mat-icon>
       </button>
-      <span class="action-label">Mettre en pause</span>
+      <span class="action-label">Reprendre</span>
     </div>
-    
-     <!-- pause only if permitted -->
-    <div class="action-item" *ngIf="isSupervisor">
-      <button mat-icon-button
-              class="action-btn pause_circle"
-              (click)="pauseProject()">
-        <mat-icon>pause_circle</mat-icon>
-      </button>
-      <span class="action-label">Mettre en pause</span>
-    </div>
-    <!-- pause only if permitted -->
+
+    <!-- Publier -->
     <div class="action-item" *ngIf="canPublish()">
-      <button mat-icon-button
-              class="action-btn pause_circle"
-              (click)="publishProject()">
+      <button mat-icon-button class="action-btn publish" (click)="publishProject()">
         <mat-icon>publish</mat-icon>
       </button>
-      <span class="action-label">publier</span>
+      <span class="action-label">Publier</span>
     </div>
 
-
-    <!-- close only if permitted -->
+    <!-- Clôturer -->
     <div class="action-item" *ngIf="isSupervisor">
-      <button mat-icon-button
-              class="action-btn stop_circle"
-              (click)="closeProject()">
+      <button mat-icon-button class="action-btn stop" (click)="closeProject()">
         <mat-icon>stop_circle</mat-icon>
       </button>
       <span class="action-label">Clôturer</span>
     </div>
     
-    <!-- delete only if permitted -->
+    <!-- Supprimer -->
     <div class="action-item" *ngIf="canDelete">
-      <button mat-icon-button
-              class="action-btn delete"
-              (click)="deleteProject()">
+      <button mat-icon-button class="action-btn delete" (click)="deleteProject()">
         <mat-icon>delete</mat-icon>
       </button>
       <span class="action-label">Supprimer</span>
     </div>
-     <div class="action-item" *ngIf="canArchive">
-      <button mat-icon-button
-              class="action-btn archive "
-              (click)="archiveProject()">
+
+    <!-- Archiver -->
+    <div class="action-item" *ngIf="canArchive">
+      <button mat-icon-button class="action-btn archive" (click)="archiveProject()">
         <mat-icon>archive</mat-icon>
       </button>
-      <span class="action-label">archive</span>
+      <span class="action-label">Archiver</span>
     </div>
-      </mat-card-content>
-    </mat-card>
+
+    <!-- Nouveau : Relancer -->
+    <div class="action-item">
+      <button mat-icon-button class="action-btn relaunch" (click)="relaunchProject()">
+        <mat-icon>replay</mat-icon>
+      </button>
+      <span class="action-label">Relancer</span>
+    </div>
+  </mat-card-content>
+</mat-card>
+
 
 
   </section>
@@ -197,7 +186,7 @@
     <mat-card  class="invitations-card">
       
       <mat-card-title class="invitations-title">
-  <span>Invitations</span>
+          <span>Invitations</span>
           <button mat-mini-fab color="primary" class="invitations-add" (click)="openInviteDialog()">
             <mat-icon>person_add</mat-icon>
           </button>
@@ -249,31 +238,7 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- pauseRequests Card -->
-    <mat-card *ngIf="pendingPauseRequests.length && isSupervisor" class="pauseRequests-card">
-      <mat-card-title class="pauseRequests-title">demande de suspensions</mat-card-title>
-      <mat-card-content class="pauseRequests-content">
-        <mat-list class="pauseRequests-list">
-<mat-list-item *ngFor="let req of pendingPauseRequests; let i = index" class="invitation-item">
-            <div fxLayout="row" fxLayoutAlign="space-between center" class="invitation-details">
-            <span class="pauseRequests-number">{{i}} </span>
-
-              <span class="pauseRequests-name">{{ req.requester.prenom }} {{ req.requester.nom }}</span>
-              <span class="pauseRequests-status">{{ req.reason }}</span>
-              <button mat-icon-button class="pauseRequests-accept" color="warn" (click)="acceptPauseRequest(req.id)">
-                <mat-icon>pause</mat-icon>
-              </button>
-               <button mat-icon-button class="pauseRequests-deny" color="warn" (click)="denyPauseRequest(req.id)">
-            <mat-icon>highlight_off</mat-icon>              </button>
-            </div>
-          </mat-list-item>
-        </mat-list>
-        </mat-card-content>
-    </mat-card>
     
-        <button mat-mini-fab color="primary" class="pauseRequests-add" (click)="openInviteDialog()">
-        <mat-icon>pause_circle</mat-icon>
-        </button>
     
     <!-- reclamations Card -->
     <mat-card *ngIf="reclamationList.length && isSupervisor" class="reclamations-card">
