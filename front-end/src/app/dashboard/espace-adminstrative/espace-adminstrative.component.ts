@@ -422,11 +422,8 @@ showAddMeetingDialog(projectId: number) {
 }
 
 openMeetingDetails(m: Meeting): void {
-  if (m.projectId) {
-    this.router.navigate(['/dashboard/projects', m.projectId, 'meetings', m.id]);
-  } else {
     this.router.navigate(['/dashboard/meetings', m.id]);
-  }
+  
 }
 getUser(id: number): User | undefined {
     return this.users.find(u => u.id === id);

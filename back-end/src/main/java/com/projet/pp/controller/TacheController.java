@@ -336,4 +336,43 @@ public class TacheController {
 
         return ResponseEntity.ok(root);
     }
+
+
+    @GetMapping("/assigned/{userId}")
+    public List<TacheDTO> getByAssignee(@PathVariable Long userId) {
+        return tacheService.search(
+                        /* q */        null,
+                        /* status */   null,
+                        /* assignedTo*/ userId
+                ).stream()
+                .map(this::toSummaryDto)
+                .toList();
+    }
+
+    // Extrait la logique de mapping résumé pour la réutiliser :
+    private TacheDTO toSummaryDto(Tache t) {
+        var b = TacheDTO.builder()
+                .id(t.getId())
+                .name(t.getName())
+                .outils(t.getOutils())
+                .status(t.getStatus().name())
+                .deadline(t.getDeadline())
+                .creationDate(t.getCreationDate())
+                .assignedTo(t.getAssignedTo().stream()
+                        .map(u -> TacheDTO.SimpleUser.builder()
+                                .id(u.getId())
+                                .prenom(u.getPrenom())
+                                .nom(u.getNom())
+                                .build())
+                        .toList())
+                .assignedBy(TacheDTO.SimpleUser.builder()
+                        .id(t.getAssignedBy().getId())
+                        .prenom(t.getAssignedBy().getPrenom())
+                        .nom(t.getAssignedBy().getNom())
+                        .build());
+        if (t.getProject() != null) {
+            b.projectId(t.getProject().getId());
+        }
+        return b.build();
+    }
 }

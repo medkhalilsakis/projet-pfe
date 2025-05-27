@@ -204,10 +204,27 @@ get currentArticle(): NewsArticle {
     this.loadGlobalNews();
     this.loadUpcomingMeetings();
     if(this.currentUser!==2){
-          this.loadTasks();
+      this.loadTasks();
     }
     this.loadStats();
     this.loadNotifications()
+  }
+
+   loadTasks(): void {
+    this.tasksLoading = true;
+    const userId = this.currentUser.id;
+    this.http
+      .get<any[]>(`${this.API}/taches/assigned/${userId}`)
+      .subscribe({
+        next: list => {
+          this.taches = list;
+          this.tasksLoading = false;
+        },
+        error: err => {
+          console.error('Erreur chargement de vos tâches', err);
+          this.tasksLoading = false;
+        }
+      });
   }
     // 1) Tech news
 
@@ -274,96 +291,10 @@ private loadPublishedNotes(): void {
     return a.slice(0, Math.min(max, a.length));
   }
 
-    loadTasks(){
-    if (this.currentUser.role.id===3){
-      this.loadAndSync();
-    }
-    if (this.currentUser.role.id===1){
-      this.loadUserTasksAndSync();
-    }
-  }
-  private loadUserTasksAndSync() {
-let params = new HttpParams();
-    params = params.set('assignedTo', this.currentUser.id);
-    if (this.statusFilter) params = params.set('status', this.statusFilter);
-
-    this.http.get<any[]>(`${this.API}/taches`, { params })
-      .subscribe(list => {
-        this.taches = list;
-         this.taches.map((tache:any)=>{
-            this.labelDays=[
-              ...this.labelDays,
-              {date:new Date (tache.deadline), text : tache.name}
-            ]
-            console.log(this.labelDays)
-            this.coloredDays = [
-              ...this.coloredDays,
-              {date:new Date (tache.deadline), highlight:"green"}
-            ]
-            console.log(this.coloredDays)
-          })
-        this.syncAllStatuses()
-          .subscribe({
-            next: () => {
-            this.tasksLoading=false;
-            },
-            error: err => {
-              console.error('Erreur de sync des statuts', err);
-            }
-          });
-      });
-    
-      
-    }
-  
 
 
-  /** 1) Charge la liste, 2) synchronise statuts, 3) applique filtres */
-  private loadAndSync() {
-    let params = new HttpParams();
-    if (this.statusFilter) params = params.set('status', this.statusFilter);
 
-    this.http.get<any[]>(`${this.API}/taches`, { params })
-      .subscribe(list => {
-        this.taches = list;
-         this.taches.map((tache:any)=>{
-            this.labelDays=[
-              ...this.labelDays,
-              {date:new Date (tache.deadline), text : tache.name}
-            ]
-            this.coloredDays = [
-              ...this.coloredDays,
-              {date:new Date (tache.deadline), highlight:"green"}
-            ]
-          })
-        this.syncAllStatuses()
-          .subscribe({
-            next: () => {
-              this.tasksLoading=false;
 
-            },
-            error: err => {
-              console.error('Erreur de sync des statuts', err);
-            }
-          });
-      });
-  }
-
-  /** Appelle /syncStatus pour chaque tâche, met à jour en mémoire */
-  private syncAllStatuses() {
-    const calls = this.taches.map(t =>
-      this.http.put<{ status: string }>(
-        `${this.API}/taches/${t.id}/syncStatus`,
-        null
-      ).pipe(
-        catchError(_ => of(null))  // si erreur sur une, on continue
-      )
-    );
-    return forkJoin(calls).pipe(
-      // pour chaque réponse éventuelle, mettre à jour tâches[i].status
-      // mais ici notre endpoint ne renvoie rien, alors on se contente de rafraîchir via GET si besoin
-    );
-  }
     // 3) Recent notifications
 loadNotifications(){
 

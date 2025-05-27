@@ -38,6 +38,7 @@ interface ChatMessage {
 type SentBy = 'me' | 'other';
 
 interface DisplayMessage {
+  id:         number;    // ← nouvellement ajouté
   text:       string;
   sentBy:     SentBy;
   date:       Date;
@@ -181,15 +182,14 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   private subscribeToMessages(receiverId: number) {
     const topic = `/topic/messages/${this.currentUserId}/${receiverId}`;
     this.subscription = this.stompClient.subscribe(topic, (msg: IMessage) => {
-      const body: any = JSON.parse(msg.body);
+      const body: ChatMessage = JSON.parse(msg.body);
       const sentBy: SentBy = body.sender.id === this.currentUserId ? 'me' : 'other';
       this.appendMessage({
+        id: body.id,
         text: body.message,
         sentBy,
         date: new Date(body.createdAt),
-        avatarUrl: sentBy === 'me'
-          ? this.currentUserAvatarUrl
-          : this.selectedUser.avatarUrl,
+        avatarUrl: sentBy === 'me' ? this.currentUserAvatarUrl : this.selectedUser.avatarUrl,
         attachments: body.attachments
       });
     });
@@ -308,18 +308,27 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private toDisplay(m: ChatMessage, who: SentBy): DisplayMessage {
-    console.log(m)
     return {
-      text: m.message,
-      sentBy: who,
-      date: new Date(m.createdAt),
-      avatarUrl: who==='me'
-                   ? this.currentUserAvatarUrl
-                   : this.selectedUser.avatarUrl,
+      id:        m.id,
+      text:      m.message,
+      sentBy:    who,
+      date:      new Date(m.createdAt),
+      avatarUrl: who==='me' ? this.currentUserAvatarUrl : this.selectedUser.avatarUrl,
       attachments: m.attachments
     };
   }
 
+
+    deleteMessage(msg: DisplayMessage) {
+    if (!confirm('Supprimer ce message ?')) return;
+    this.http.delete(`${API}/chat/${msg.id}`).subscribe({
+      next: () => {
+        this.messages = this.messages.filter(m => m.id !== msg.id);
+      },
+      error: () => this.snackBar.open('Erreur suppression','Fermer',{ duration:2000 })
+    });
+  }
+  
   private appendMessage(dm: DisplayMessage) {
     this.messages.push(dm);
     this.scrollToBottom();

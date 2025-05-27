@@ -105,4 +105,11 @@ public class ChatMessageController {
         return ResponseEntity.ok(a);
     }
 
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long messageId) {
+        chatMessageService.deleteMessage(messageId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

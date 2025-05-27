@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import java.net.URI;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -120,5 +121,23 @@ public class ChatMessageService {
         chatMessageRepository.deleteBySenderId(userId);
         chatMessageRepository.deleteByReceiverId(userId);
     }
+
+
+    @Transactional
+    public void deleteMessage(Long messageId) {
+        // (1) supprimer d’abord les attachments physiques + DB
+        List<ChatAttachment> atts = attachmentRepository.findByChatMessageId(messageId);
+        for(var att : atts) {
+            // supprimer le fichier
+            try {
+                Path p = Paths.get(new URI(att.getFilePath())); // ou extraire le chemin local
+                Files.deleteIfExists(p);
+            } catch(Exception e) { /* log */ }
+            attachmentRepository.delete(att);
+        }
+        // (2) puis le message
+        chatMessageRepository.deleteById(messageId);
+    }
+
 
 }

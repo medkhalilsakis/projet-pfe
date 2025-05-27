@@ -79,22 +79,36 @@
           <p>{{ m.text }}</p>
           <ng-container *ngIf="m.attachments?.length">
             <ng-container *ngFor="let att of m.attachments">
-              <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
-                <!-- Afficher l'image -->
-                <img *ngSwitchCase="'image'" class="att-img" [src]="att.filePath" (click)="openMediaViewer(att.filePath, att.mimeType)">
-                <!-- Afficher la vidéo -->
-                <video *ngSwitchCase="'video'" class="att-video" controls [src]="att.filePath" (click)="openMediaViewer(att.filePath, att.mimeType)">
-                </video>
-                <a *ngSwitchDefault class="att-file" [href]="att.filePath" download>
-                  <mat-icon>insert_drive_file</mat-icon>{{ att.fileName }}
-                </a>
-              </ng-container>
+          <div class="attachment-row">
+            <!-- icône selon le type -->
+            <ng-container [ngSwitch]="att.mimeType.split('/')[0]">
+              <img *ngSwitchCase="'image'" class="att-img" [src]="att.filePath" (click)="openMediaViewer(att.filePath, att.mimeType)">
+              <video *ngSwitchCase="'video'" class="att-video" controls [src]="att.filePath" (click)="openMediaViewer(att.filePath, att.mimeType)"></video>
+              <mat-icon *ngSwitchDefault>insert_drive_file</mat-icon>
             </ng-container>
+            <!-- nom du fichier et bouton téléchargement -->
+            <span class="att-name">{{ att.fileName }}</span>
+            <button mat-icon-button
+                    class="att-download"
+                    [href]="att.filePath"
+                    [download]="att.fileName"
+                    title="Télécharger {{ att.fileName }}">
+              <mat-icon>cloud_download</mat-icon>
+            </button>
+          </div>
+</ng-container>
+
           </ng-container>
         </div>
       </ng-container>
       <ng-container *ngIf="m.sentBy === 'other'">
         <div class="bubble">
+          <button mat-icon-button
+          class="msg-delete"
+          (click)="onDelete(m)"
+          title="Supprimer le message">
+            <mat-icon>delete</mat-icon>
+          </button>
           <p>{{ m.text }}</p>
           <ng-container *ngIf="m.attachments?.length">
             <ng-container *ngFor="let att of m.attachments">

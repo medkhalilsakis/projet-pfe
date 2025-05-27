@@ -20,15 +20,14 @@
     <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start start">
       <!-- Prochaines réunions -->
       <mat-card class="dashboard-card" fxFlex>
-        <mat-card-title><mat-icon>event</mat-icon> Prochaines réunions</mat-card-title>
-        <mat-card-content>
+        <mat-card-title class="mat-card-title"><mat-icon>event</mat-icon> Prochaines réunions</mat-card-title>
+        <mat-card-content class="mat-card-content">
           <mat-progress-spinner *ngIf="meetLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
           <div class="content-box" *ngIf="!meetLoading && meetings.length">
-            <div class="meeting-card" *ngFor="let meeting of meetings" (click)="rootToProject(meeting.project.id)">
+            <div class="meeting-card" *ngFor="let meeting of meetings" (click)="rootToProject(meeting.project?.id)">
               <h4>{{ meeting.subject }}</h4>
               <p>Date : {{ meeting.date | date:'mediumDate' }} à {{ meeting.time }}</p>
               <p>Description : {{ meeting.description }}</p>
-              <p>Project : {{ meeting.project.name }}</p>
             </div>
           </div>
           <p *ngIf="!meetLoading && !meetings.length" class="empty">Aucune réunion programmée.</p>
@@ -37,8 +36,8 @@
 
       <!-- Notes importantes -->
       <mat-card class="dashboard-card" fxFlex>
-  <mat-card-title><mat-icon>note</mat-icon> Notes importantes</mat-card-title>
-  <mat-card-content>
+  <mat-card-title class="mat-card-title"><mat-icon>note</mat-icon> Notes importantes</mat-card-title>
+  <mat-card-content class="mat-card-content">
     <ng-container *ngIf="importantNotes.length > 0; else noNotes">
       <ul>
         <li *ngFor="let note of importantNotes">
@@ -60,8 +59,8 @@
     <!-- Ligne 2 : Mes tâches -->
     <div fxLayout="row" fxLayoutAlign="start start">
       <mat-card *ngIf="!isTester()" class="dashboard-card" fxFlex>
-        <mat-card-title><mat-icon>check_circle</mat-icon> Mes tâches</mat-card-title>
-        <mat-card-content>
+        <mat-card-title class="mat-card-title"><mat-icon>check_circle</mat-icon> Mes tâches</mat-card-title>
+        <mat-card-content class="mat-card-content">
           <mat-progress-spinner *ngIf="tasksLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
           <div class="content-box" *ngIf="!tasksLoading && taches.length">
             <div class="taches-card" *ngFor="let t of taches" (click)="rootToTask(t.id)">
@@ -78,13 +77,13 @@
     <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start start">
       <!-- Statistiques -->
       <mat-card class="dashboard-card rotating-stats" fxFlex (click)="rootToAnalaytics()">
-        <mat-card-title>
+        <mat-card-title class="mat-card-title">
           <mat-icon>insights</mat-icon> Statistiques
           <div class="stat-indicators">
             <span *ngFor="let _ of statsToRotate; let i=index" [class.active]="currentStatIndex===i">•</span>
           </div>
         </mat-card-title>
-        <mat-card-content *ngIf="!statsLoading">
+        <mat-card-content class="mat-card-content" *ngIf="!statsLoading">
           <div class="current-stat">
             <div class="stat-icon"><mat-icon>{{ currentStat.icon }}</mat-icon></div>
             <div class="stat-content">
@@ -98,8 +97,8 @@
 
       <!-- Mes notifications -->
       <mat-card class="dashboard-card" fxFlex>
-        <mat-card-title><mat-icon>notifications</mat-icon> Mes notifications</mat-card-title>
-        <mat-card-content>
+        <mat-card-title class="mat-card-title"><mat-icon>notifications</mat-icon> Mes notifications</mat-card-title>
+        <mat-card-content class="mat-card-content"> 
           <mat-progress-spinner *ngIf="notifLoading" mode="indeterminate" diameter="24"></mat-progress-spinner>
           <mat-list *ngIf="!notifLoading && notifications.length">
             <mat-list-item *ngFor="let n of notifications" (click)="rootToNotification(n.id)">
@@ -123,7 +122,7 @@
   <mat-card-title class="mat-card-title">
     <mat-icon>public</mat-icon> Actualités technologiques
   </mat-card-title>
-  <mat-card-content class="mat-card-content">
+  <mat-card-content class="mat-list-item-content">
     <div *ngIf="newsLoading" class="loading">Chargement...</div>
     <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
 
