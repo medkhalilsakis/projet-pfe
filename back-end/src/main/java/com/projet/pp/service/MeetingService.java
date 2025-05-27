@@ -1,6 +1,7 @@
 // src/main/java/com/projet/pp/service/MeetingService.java
 package com.projet.pp.service;
 
+import com.projet.pp.dto.MeetingDto;
 import com.projet.pp.dto.MeetingRequest;
 import com.projet.pp.model.Meeting;
 import com.projet.pp.model.Project;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingService {
@@ -130,6 +132,25 @@ public class MeetingService {
     }
     public List<Meeting> findByUser(Long userId) {
         return meetingRepo.findByParticipantId(userId);
+    }
+
+    public List<MeetingDto> findMeetingsByUser(Long userId) {
+        return meetingRepo.findByParticipantId(userId)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private MeetingDto toDto(Meeting m) {
+        return new MeetingDto(
+                m.getId(),
+                m.getSubject(),
+                m.getDate(),
+                m.getParticipantsIds(),
+                m.getAttachments(),
+                m.getDescription(),
+                m.getProject() != null ? m.getProject().getId() : null
+        );
     }
 
     @Transactional

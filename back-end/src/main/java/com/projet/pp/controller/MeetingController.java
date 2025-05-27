@@ -1,6 +1,7 @@
 // src/main/java/com/projet/pp/controller/MeetingController.java
 package com.projet.pp.controller;
 
+import com.projet.pp.dto.MeetingDto;
 import com.projet.pp.dto.MeetingRequest;
 import com.projet.pp.model.Meeting;
 import com.projet.pp.model.Tache;
@@ -24,7 +25,10 @@ import java.util.List;
 import java.time.format.DateTimeFormatter;
 
 @RestController
-@RequestMapping("/api/projects/{pid}/meetings")
+@RequestMapping({
+        "/api/projects/{pid}/meetings",
+        "/api/meetings"
+})
 public class MeetingController {
 
     @Autowired private MeetingService svc;
@@ -125,10 +129,9 @@ public class MeetingController {
 
 
     @GetMapping("/participant/{userId}")
-    public ResponseEntity<List<Meeting>> getMeetingsByParticipant(
-            @PathVariable("userId") Long userId)
-    {
-        List<Meeting> meetings = svc.findByUser(userId);
-        return ResponseEntity.ok(meetings);
+    public ResponseEntity<List<MeetingDto>> getMeetingsByParticipant(
+            @PathVariable Long userId) {
+        List<MeetingDto> dtos = svc.findMeetingsByUser(userId);
+        return ResponseEntity.ok(dtos);
     }
 }
