@@ -2,7 +2,7 @@ import {
   __async
 } from "./chunk-KBUIKKCC.js";
 
-// ../../../../node_modules/@stomp/stompjs/esm6/augment-websocket.js
+// node_modules/@stomp/stompjs/esm6/augment-websocket.js
 function augmentWebsocket(webSocket, debug) {
   webSocket.terminate = function() {
     const noOp = () => {
@@ -26,7 +26,7 @@ function augmentWebsocket(webSocket, debug) {
   };
 }
 
-// ../../../../node_modules/@stomp/stompjs/esm6/byte.js
+// node_modules/@stomp/stompjs/esm6/byte.js
 var BYTE = {
   // LINEFEED byte (octet 10)
   LF: "\n",
@@ -34,7 +34,7 @@ var BYTE = {
   NULL: "\0"
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/frame-impl.js
+// node_modules/@stomp/stompjs/esm6/frame-impl.js
 var FrameImpl = class _FrameImpl {
   /**
    * body of the frame
@@ -189,7 +189,7 @@ var FrameImpl = class _FrameImpl {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/parser.js
+// node_modules/@stomp/stompjs/esm6/parser.js
 var NULL = 0;
 var LF = 10;
 var CR = 13;
@@ -340,7 +340,7 @@ var Parser = class {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/types.js
+// node_modules/@stomp/stompjs/esm6/types.js
 var StompSocketState;
 (function(StompSocketState2) {
   StompSocketState2[StompSocketState2["CONNECTING"] = 0] = "CONNECTING";
@@ -365,7 +365,7 @@ var TickerStrategy;
   TickerStrategy2["Worker"] = "worker";
 })(TickerStrategy || (TickerStrategy = {}));
 
-// ../../../../node_modules/@stomp/stompjs/esm6/ticker.js
+// node_modules/@stomp/stompjs/esm6/ticker.js
 var Ticker = class {
   constructor(_interval, _strategy = TickerStrategy.Interval, _debug) {
     this._interval = _interval;
@@ -427,7 +427,7 @@ var Ticker = class {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/versions.js
+// node_modules/@stomp/stompjs/esm6/versions.js
 var Versions = class {
   /**
    * Takes an array of versions, typical elements '1.2', '1.1', or '1.0'
@@ -456,7 +456,7 @@ Versions.V1_1 = "1.1";
 Versions.V1_2 = "1.2";
 Versions.default = new Versions([Versions.V1_2, Versions.V1_1, Versions.V1_0]);
 
-// ../../../../node_modules/@stomp/stompjs/esm6/stomp-handler.js
+// node_modules/@stomp/stompjs/esm6/stomp-handler.js
 var StompHandler = class {
   get connectedVersion() {
     return this._connectedVersion;
@@ -825,7 +825,7 @@ var StompHandler = class {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/client.js
+// node_modules/@stomp/stompjs/esm6/client.js
 var Client = class {
   /**
    * Underlying WebSocket instance, READONLY.
@@ -1330,15 +1330,15 @@ var Client = class {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/stomp-config.js
+// node_modules/@stomp/stompjs/esm6/stomp-config.js
 var StompConfig = class {
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/stomp-headers.js
+// node_modules/@stomp/stompjs/esm6/stomp-headers.js
 var StompHeaders = class {
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/compatibility/heartbeat-info.js
+// node_modules/@stomp/stompjs/esm6/compatibility/heartbeat-info.js
 var HeartbeatInfo = class {
   constructor(client) {
     this.client = client;
@@ -1357,7 +1357,7 @@ var HeartbeatInfo = class {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/compatibility/compat-client.js
+// node_modules/@stomp/stompjs/esm6/compatibility/compat-client.js
 var CompatClient = class extends Client {
   /**
    * Available for backward compatibility, please shift to using {@link Client}
@@ -1570,7 +1570,7 @@ var CompatClient = class extends Client {
   }
 };
 
-// ../../../../node_modules/@stomp/stompjs/esm6/compatibility/stomp.js
+// node_modules/@stomp/stompjs/esm6/compatibility/stomp.js
 var Stomp = class _Stomp {
   /**
    * This method creates a WebSocket client that is connected to

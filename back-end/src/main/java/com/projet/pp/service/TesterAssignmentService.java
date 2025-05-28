@@ -342,4 +342,38 @@ public class TesterAssignmentService {
     public long countByTester(Long testeurId) {
         return assignmentRepo.countByTesteur_Id(testeurId);
     }
+
+
+    public void approvePhase(Long projectId, Long testeurId) {
+        ProjectTesterAssignment assignment = assignmentRepo
+                .findByProjectIdAndTesteurId(projectId, testeurId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Assignment not found for projectId=" + projectId + " and testeurId=" + testeurId));
+
+        assignment.setStatutTest(TestStatus.termine);
+        assignment.setDecision(TestApproval.APPROVED);
+        assignmentRepo.save(assignment);
+
+        Project project = assignment.getProject();
+        project.setStatus(3);
+        projectRepo.save(project);
+    }
+
+    /**
+     * Reject the testing phase: set test status to CLOTURE and decision to REJECTED.
+     */
+    public void rejectPhase(Long projectId, Long testeurId) {
+        ProjectTesterAssignment assignment = assignmentRepo
+                .findByProjectIdAndTesteurId(projectId, testeurId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Assignment not found for projectId=" + projectId + " and testeurId=" + testeurId));
+
+        assignment.setStatutTest(TestStatus.cloture);
+        assignment.setDecision(TestApproval.REJECTED);
+        assignmentRepo.save(assignment);
+
+        Project project = assignment.getProject();
+        project.setStatus(3);
+        projectRepo.save(project);
+    }
 }

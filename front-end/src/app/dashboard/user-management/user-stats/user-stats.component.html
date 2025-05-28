@@ -1,20 +1,63 @@
-<h2 mat-dialog-title>Statistiques de l'utilisateur</h2>
-<mat-dialog-content>
+<div class="charts-grid">
   <div class="chart-container">
+    <h3>Progression cumulée des projets</h3>
     <canvas baseChart
-            [data]="barChartData"
-            [options]="barChartOptions"
-            [type]="barChartType">
+            [data]="progressionCumule.data"
+            [type]="progressionCumule.type"
+            [options]="progressionCumule.options">
     </canvas>
   </div>
+
   <div class="chart-container">
+    <h3>Projets Acceptés vs Rejetés</h3>
     <canvas baseChart
-            [data]="pieChartData"
-            [options]="pieChartOptions"
-            [type]="'pie'">
+            [data]="projetsAcceptesRejetes.data"
+            [type]="projetsAcceptesRejetes.type"
+            [options]="projetsAcceptesRejetes.options">
     </canvas>
   </div>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button color="primary" (click)="close()">Fermer</button>
-</mat-dialog-actions>
+
+  <div class="chart-container">
+    <h3>Projets en phase de test vs en révision</h3>
+    <canvas baseChart
+            [data]="projetsTestRevision.data"
+            [type]="projetsTestRevision.type"
+            [options]="projetsTestRevision.options">
+    </canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>Évolution de salaire</h3>
+    <canvas baseChart
+            [data]="evolutionSalaire.data"
+            [type]="evolutionSalaire.type"
+            [options]="evolutionSalaire.options">
+    </canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>Participation aux réunions</h3>
+    <canvas baseChart
+            [data]="participationReunions.data"
+            [type]="participationReunions.type"
+            [options]="participationReunions.options">
+    </canvas>
+  </div>
+
+  <div class="chart-container">
+    <h3>Répartition par catégories</h3>
+    <canvas baseChart [data]="repartitionCategories.data" [type]="repartitionCategories.type" [options]="repartitionCategories.options"></canvas>
+  </div>
+
+  <!-- Nouveau 7. Radar -->
+  <div class="chart-container">
+    <h3>Compétences utilisateur</h3>
+    <canvas baseChart [data]="competencesUtilisateur.data" [type]="competencesUtilisateur.type" [options]="competencesUtilisateur.options"></canvas>
+  </div>
+
+  <!-- Nouveau 8. Scatter -->
+  <div class="chart-container">
+    <h3>Corrélation X/Y</h3>
+    <canvas baseChart [data]="correlationXY.data" [type]="correlationXY.type" [options]="correlationXY.options"></canvas>
+  </div>
+</div>

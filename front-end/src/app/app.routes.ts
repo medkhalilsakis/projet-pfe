@@ -40,7 +40,7 @@ export const routes: Routes = [
       { path: 'overview', component: OverviewComponent },
       { path: 'notifications', component: NotificationComponent },
       { path: 'notification/:id', component: NotifcationDetailComponent },
-      {path:'espace-adminstrative', component:EspaceAdminstrativeComponent},
+      { path: 'espace-adminstrative', component:EspaceAdminstrativeComponent},
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'upload',   component: UploadComponent },
       { path: 'messages', component: MessagesComponent },

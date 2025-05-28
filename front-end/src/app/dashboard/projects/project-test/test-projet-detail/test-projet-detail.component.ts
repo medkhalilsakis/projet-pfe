@@ -68,8 +68,7 @@ import { TestCaseDetailComponent } from './test-case-detail/test-case-detail.com
   ]
 })
 export class TestProjetDetailComponent implements OnInit {
-
-
+  
   projectId!: number;
   project: any;
   invitedUsers: User[] = [];
@@ -89,7 +88,7 @@ export class TestProjetDetailComponent implements OnInit {
   participants: string[] = [];
   testCaseAttachment : any =[];
   isPaused: boolean = false;
-api='http://localhost:8080'
+  api='http://localhost:8080';
 
   testTypes = [
     'Test unitaire','Test d\'intégration','Test fonctionnel',
@@ -141,24 +140,6 @@ api='http://localhost:8080'
 
   }
  downloadTestCases() {
-
-  /*
-<!--
-        <section *ngIf="pdfAttachments.length">
-      <h2>Cahier des charges (PDF)</h2>
-      <div  class="pdf-section">
-        <ngx-extended-pdf-viewer
-          [src]="api + '/api/tester-assignments/attachments/' + testCaseAttachment.id"
-          useBrowserLocale="true"
-          [minifiedJSLibraries]="false"
-          height="600px"
-          [showSidebarButton]="true"
-          style="width: 100%;">
-        </ngx-extended-pdf-viewer>
-      </div>
-    </section>
-        -->
-  */
   console.log(this.projectTesterAssignment)
   const att = this.projectTesterAssignment.testAssignmentAttachment;
 
@@ -437,7 +418,7 @@ openTestCaseDialog(tc?: TestCase) {
 
   approvePhase() {
     // appel service backend pour approuver
-    this.progressSvc.approvePhase(this.projectId, this.currentUserId)
+    this.assignmentService.approvePhase(this.projectId, this.currentUserId)
       .subscribe(() => {
         this.snack.open('Phase de test approuvée', 'OK', { duration: 2000 });
       });
@@ -445,7 +426,7 @@ openTestCaseDialog(tc?: TestCase) {
   
   rejectPhase() {
     // appel service backend pour rejeter
-    this.progressSvc.rejectPhase(this.projectId, this.currentUserId)
+    this.assignmentService.rejectPhase(this.projectId, this.currentUserId)
       .subscribe(() => {
         this.snack.open('Phase de test refusée', 'OK', { duration: 2000 });
       });

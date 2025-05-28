@@ -58,12 +58,7 @@ export class AssignmentService {
     );
   }
 
-  /**
-   * Désigne une nouvelle liste de testeurs et lance la phase de test.
-   * @param projectId      ID du projet
-   * @param testeurIds     Tableau d’IDs des testeurs à assigner
-   * @param superviseurId  ID du superviseur qui désigne
-   */
+
 assignTesters(
   projectId: number,
   testeurIds: number[],
@@ -149,6 +144,20 @@ getProjectTesterAssignment(testerId: number, projectId: number) {
     { TesterId: testerId, ProjectId: projectId }
   );
 }
+
+  approvePhase(projectId: number, testeurId: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/${projectId}/testeurs/${testeurId}/approve`,
+      null
+    );
+  }
+
+  rejectPhase(projectId: number, testeurId: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/${projectId}/testeurs/${testeurId}/reject`,
+      null
+    );
+  }
 
 
 }

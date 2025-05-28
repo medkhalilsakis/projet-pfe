@@ -263,4 +263,26 @@ public class TesterAssignmentController {
         return service.countByTester(testeurId);
     }
 
+
+    @PutMapping("/{projectId}/testeurs/{testeurId}/approve")
+    public ResponseEntity<Void> approvePhase(
+            @PathVariable Long projectId,
+            @PathVariable Long testeurId
+    ) {
+        service.approvePhase(projectId, testeurId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Endpoint to reject the testing phase.
+     * PUT /api/tester-assignments/{projectId}/testeurs/{testeurId}/reject
+     */
+    @PutMapping("/{projectId}/testeurs/{testeurId}/reject")
+    public ResponseEntity<Void> rejectPhase(
+            @PathVariable Long projectId,
+            @PathVariable Long testeurId
+    ) {
+        service.rejectPhase(projectId, testeurId);
+        return ResponseEntity.ok().build();
+    }
 }

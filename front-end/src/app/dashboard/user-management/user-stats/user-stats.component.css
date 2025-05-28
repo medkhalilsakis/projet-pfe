@@ -1,5 +1,44 @@
+/* Grille de 3 colonnes, qui passe à 1 colonne sur petits écrans */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Style des containers individuels */
 .chart-container {
-  width: 100%;
-  max-width: 500px;
-  margin: 16px auto;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-container h3 {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: auto !important;
+  flex-grow: 1;
 }

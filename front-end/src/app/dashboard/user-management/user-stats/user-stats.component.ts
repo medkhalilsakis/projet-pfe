@@ -1,99 +1,158 @@
-// src/app/components/user-stats/user-stats.component.ts
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-// 1. On conserve l’import de Chart.js pour les types
-import { ChartOptions, ChartData, ChartType } from 'chart.js';
-
-// 2. Imports des services métier (inchangés)
-import { PauseRequestService, PauseStats } from '../../../services/pause-request.service';
-import { UserService } from '../../../services/users.service';
-
-// 3. Modules Angular classiques
-import { CommonModule } from '@angular/common';
-import { MatDialogModule } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
-
-// 4. On importe maintenant la directive standalone BaseChartDirective
 import { BaseChartDirective } from 'ng2-charts';
+import { Chart, registerables, ChartConfiguration } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-user-stats',
+  standalone: true,
+  imports: [BaseChartDirective],
   templateUrl: './user-stats.component.html',
-  styleUrls: ['./user-stats.component.css'],
-
-  // 5. Ajout de BaseChartDirective dans imports
-  standalone: true,               // si vous souhaitez déclarer ce composant comme standalone
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    FormsModule,
-    BaseChartDirective            // → permet d’utiliser <canvas baseChart> sans ChartsModule
-  ]
+  styleUrls: ['./user-stats.component.css']
 })
 export class UserStatsComponent implements OnInit {
-  public barChartOptions: ChartOptions = { responsive: true };
-  public barChartLabels: string[] = ['Pending', 'Approved', 'Rejected'];
-  public barChartType: ChartType = 'bar';
-  public barChartData: ChartData<'bar'> = {
-    labels: this.barChartLabels,
-    datasets: []
-  };
 
-  public pieChartOptions: ChartOptions = { responsive: true };
-  public pieChartLabels: string[] = ['Pending', 'Approved', 'Rejected'];
-  public pieChartData: ChartData<'pie'> = {
-    labels: this.pieChartLabels,
-    datasets: []
-  };
+  // ChartConfigurations initialisées « vides » : on remplira dans ngOnInit
+  progressionCumule!: ChartConfiguration<'line'>;
+  projetsAcceptesRejetes!: ChartConfiguration<'pie'>;
+  projetsTestRevision!: ChartConfiguration<'bar'>;
+  evolutionSalaire!: ChartConfiguration<'line'>;
+  participationReunions!: ChartConfiguration<'bar'>;
 
-  public userId: number = 0;
-  public userRole: number = 0;
-
-  constructor(
-    private route: ActivatedRoute,
-    private userService: UserService,
-    private pauseRequestService: PauseRequestService
-  ) {}
+  repartitionCategories!: ChartConfiguration<'polarArea'>;
+  competencesUtilisateur!: ChartConfiguration<'radar'>;
+  correlationXY!: ChartConfiguration<'scatter'>;
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.userId = +params['id'];
-      this.userService.getUserById(this.userId).subscribe(user => {
-        if (user.role) {
-          this.userRole = user.role.id;
+    // Utility : génère un tableau de `n` valeurs aléatoires entre min et max
+    const randArray = (n: number, min: number, max: number) =>
+      Array.from({ length: n }, () => Math.round(min + Math.random() * (max - min)));
+
+    // 1. Progression cumulée : cumule les valeurs mois par mois
+    const monthly = randArray(5, 1, 10);
+    const cumul = monthly.reduce<number[]>((acc, v, i) => {
+      acc.push((i === 0 ? 0 : acc[i - 1]) + v);
+      return acc;
+    }, []);
+    this.progressionCumule = {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
+        datasets: [{ label: 'Projets cumulés', data: cumul, fill: true }]
+      },
+      options: { responsive: true }
+    };
+
+    // 2. Acceptés vs Rejetés
+    const accepted = Math.round(Math.random() * 100);
+    const rejected = Math.round(Math.random() * 100);
+    this.projetsAcceptesRejetes = {
+      type: 'pie',
+      data: {
+        labels: ['Acceptés', 'Rejetés'],
+        datasets: [{ data: [accepted, rejected] }]
+      },
+      options: { responsive: true }
+    };
+
+  const categories = ['Dev', 'Test', 'Docs', 'Support', 'Recherche'];
+    this.repartitionCategories = {
+      type: 'polarArea',
+      data: {
+        labels: categories,
+        datasets: [{
+          data: randArray(categories.length, 5, 30),
+          // couleurs par défaut
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: { ticks: { backdropColor: 'rgba(255,255,255,0.7)' } }
         }
-        if (this.userRole === 2) {
-          this.loadStatsForTester();
-        } else {
-          // Affichage/redirect alternatif si l’utilisateur n’est pas un testeur
+      }
+    };
+
+    // 7. Compétences utilisateur (radar)
+    const skills = ['Angular', 'Vue', 'React', 'Node', 'Python'];
+    this.competencesUtilisateur = {
+      type: 'radar',
+      data: {
+        labels: skills,
+        datasets: [{
+          label: 'Niveau',
+          data: randArray(skills.length, 1, 10),
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: { min: 0, max: 10, ticks: { stepSize: 2 } }
         }
-      });
+      }
+    };
+
+    // 8. Corrélation X/Y (scatter)
+    const points = Array.from({ length: 20 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100
+    }));
+    this.correlationXY = {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Données aléatoires',
+          data: points,
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'Variable X' } },
+          y: { title: { display: true, text: 'Variable Y' } }
+        }
+      }
+    };
+  
+
+    // 3. Test vs Révision
+    const testCount = Math.round(Math.random() * 20);
+    const reviewCount = Math.round(Math.random() * 20);
+    this.projetsTestRevision = {
+      type: 'bar',
+      data: {
+        labels: ['Test', 'Révision'],
+        datasets: [{ label: 'Projets', data: [testCount, reviewCount] }]
+      },
+      options: { responsive: true, indexAxis: 'y' }
+    };
+
+    // 4. Évolution de salaire (chaque année un salaire aléatoire croissant un peu)
+    const years = ['2020', '2021', '2022', '2023', '2024'];
+    let prev = 30000;
+    const salaries = years.map(() => {
+      prev += Math.round(2000 + Math.random() * 5000);
+      return prev;
     });
-  }
+    this.evolutionSalaire = {
+      type: 'line',
+      data: { labels: years, datasets: [{ label: 'Salaire (€)', data: salaries, fill: true }] },
+      options: { responsive: true }
+    };
 
-  loadStatsForTester() {
-    this.pauseRequestService.getUserStats(this.userId, 0)
-      .subscribe((stats: PauseStats) => {
-        this.barChartData.datasets = [
-          {
-            label: 'Nombre de demandes',
-            data: [stats.pending, stats.approved, stats.rejected],
-            backgroundColor: ['#FFC107', '#4CAF50', '#F44336']
-          }
-        ];
-
-        this.pieChartData.datasets = [
-          {
-            data: [stats.pending, stats.approved, stats.rejected],
-            backgroundColor: ['#FFEB3B', '#8BC34A', '#E91E63']
-          }
-        ];
-      });
+    // 5. Participation aux réunions (nombre de réunions par mois)
+    this.participationReunions = {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
+        datasets: [{ label: 'Réunions', data: randArray(5, 1, 8) }]
+      },
+      options: { responsive: true }
+    };
   }
-
-  close() {
-    // Vous pouvez fermer le dialog via MatDialogRef, ou laisser ce throw pour debug
-    throw new Error('Method not implemented.');
-  }
+  
 }

@@ -46,7 +46,6 @@ export class TestProgressService {
     );
   }
 
-  // test-progress.service.ts
 approvePhase(pid: number, userId: number): Observable<void> {
   return this.http.post<void>(
     `${this.base}/${pid}/progress/approve`,
