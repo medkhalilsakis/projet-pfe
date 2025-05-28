@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/repository/ComplaintRepository.java
 package com.projet.pp.repository;
 
 import com.projet.pp.model.Complaint;
