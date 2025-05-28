@@ -160,4 +160,14 @@ getProjectTesterAssignment(testerId: number, projectId: number) {
   }
 
 
+  // assignment.service.ts
+getAssignmentsByProjectAndTester(
+  projectId: number,
+  testerId: number
+): Observable<ProjectTesterAssignment[]> {
+  return this.http.get<ProjectTesterAssignment[]>(
+    `/api/assignments/project/${projectId}/tester/${testerId}`
+  );
+}
+
 }

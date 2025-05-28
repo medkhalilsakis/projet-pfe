@@ -72,7 +72,7 @@
       <mat-card-title class="testers-title">Testeurs assignés</mat-card-title>
       <mat-card-content class="testers-content">
         <mat-list class="testers-list">
-          <mat-list-item *ngFor="let t of testers" class="tester-item">
+          <mat-list-item *ngFor="let t of testers" class="tester-item" (click)="goToTester()">
             <span class="tester-name">{{ t.testeur.prenom }} {{ t.testeur.nom }} </span>
             <span class="tester-badge">#{{ t.numeroTesteur }}</span>
           </mat-list-item>
@@ -103,8 +103,39 @@
     </mat-card>
 
 
+    <!-- Test Cases Card -->
+<mat-card *ngIf="testCases?.length" class="test-case-card">
+  <mat-card-title>
+    <mat-icon>assignment</mat-icon>
+    Cas de tests ({{ testCases.length }})
+  </mat-card-title>
+  <mat-card-content>
+    <table class="test-case-table" fxFlex>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Référence</th>
+          <th>Titre</th>
+          <th>Sous-système</th>
+          <th>Date exécution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tc of testCases; let i = index" (click)="openTestCase(tc.id!)" tabindex="0">
+          <td>{{ i + 1 }}</td>
+          <td>{{ tc.caseNumber }}</td>
+          <td>{{ tc.title }}</td>
+          <td>{{ tc.subsystem }}</td>
+          <td>{{ tc.executionDate | date:'shortDate' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+
     <!-- Actions Card -->
-    <mat-card class="actions-card">
+<mat-card class="actions-card">
   <mat-card-title class="actions-title">Actions</mat-card-title>
   <mat-card-content class="actions-content">
     <!-- Boucle sur vos actions dynamiques -->
@@ -163,14 +194,6 @@
         <mat-icon>archive</mat-icon>
       </button>
       <span class="action-label">Archiver</span>
-    </div>
-
-    <!-- Nouveau : Relancer -->
-    <div class="action-item">
-      <button mat-icon-button class="action-btn relaunch" (click)="relaunchProject()">
-        <mat-icon>replay</mat-icon>
-      </button>
-      <span class="action-label">Relancer</span>
     </div>
   </mat-card-content>
 </mat-card>

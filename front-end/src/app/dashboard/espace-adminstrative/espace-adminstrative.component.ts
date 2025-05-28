@@ -440,4 +440,14 @@ openDetails(complaint: any): void {
   });
 }
 
+openComplaintDialog(): void {
+  const userId    = this.session.getUser()!.id!;
+  this.router.navigate(
+    ['/dashboard/complaint/add'],
+    { queryParams: { User: userId } }
+  );
+}
+
+
+
 }

@@ -26,7 +26,7 @@ export class ProjectTestComponent implements OnInit {
   constructor(
     private session: SessionStorageService,
     private assignmentService: AssignmentService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {

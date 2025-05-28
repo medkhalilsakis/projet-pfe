@@ -869,3 +869,81 @@ app-project-chat::-webkit-scrollbar-thumb {
 app-project-chat::-webkit-scrollbar-thumb:hover {
   background: #a8b1bc;
 }
+
+
+/* test-case-card styling */
+.test-case-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  transition: box-shadow 0.3s ease;
+}
+
+.test-case-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(to right, #1565c0, #42a5f5);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.test-case-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333333;
+}
+
+.test-case-table thead {
+  background-color: #f0f4f8;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.test-case-table th {
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #dddddd;
+  background-color: #f9fbfd;
+}
+
+.test-case-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eeeeee;
+  transition: background-color 0.2s ease;
+}
+
+.test-case-table tr:hover {
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.test-case-table tr:focus-within {
+  outline: 2px solid rgba(21, 101, 192, 0.2);
+  outline-offset: -2px;
+  background-color: #f5f5f5;
+}
+
+/* Responsive : table plus compacte sur petits écrans */
+@media (max-width: 768px) {
+  .test-case-table th,
+  .test-case-table td {
+    padding: 8px;
+    font-size: 13px;
+  }
+}

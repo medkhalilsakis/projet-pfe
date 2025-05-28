@@ -373,7 +373,6 @@ public class ProjectController {
         Long userId = Long.parseLong(body.get("userId"));
         Project p =projectService.updateProjectStatus(projectId,newStatus,userId);
         return ResponseEntity.ok(p);
-
     }
     @GetMapping("/{projectId}/closure")
     public ResponseEntity<Map<String,String>> getLastClosure(@PathVariable Long projectId) {

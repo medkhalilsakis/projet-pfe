@@ -29,6 +29,7 @@ import { InitiationPhaseComponent } from './dashboard/task-assignment/initiation
 import { MeetingDetailsComponent } from './dashboard/espace-adminstrative/meeting-details/meeting-details.component';
 import { NoteDetailsComponent } from './dashboard/espace-adminstrative/note-details/note-details.component';
 import { UserStatsComponent } from './dashboard/user-management/user-stats/user-stats.component';
+import { AddComplaintDialogComponent } from './dashboard/espace-adminstrative/add-complaint-dialog/add-complaint-dialog.component';
 
 export const routes: Routes = [
   { 
@@ -56,13 +57,14 @@ export const routes: Routes = [
       { path: 'meetings/:id',       component: MeetingDetailsComponent },
       { path: 'notes/:id',       component: NoteDetailsComponent },
       { path: 'my-projects',       component: MyProjectsComponent },
-      { path: 'projects-test',       component: ProjectTestComponent },
+      { path: 'projects-test', component: ProjectTestComponent },
       { path: 'projects-in-progress',       component: ProjectInProgressComponent },
       { path: 'projects-termine',       component: ProjectTermineComponent },
       { path: 'projects-test/:id',       component: TestProjetDetailComponent },
       { path: 'projects/:id',   component: ProjectDetailsComponent },
       { path: 'projects/:id/explorer', component: ProjectExplorerComponent },
       { path: 'projects/:id/chat', component: ProjectChatComponent },
+      { path: 'dashboard/complaint/add', component: AddComplaintDialogComponent}
     ]
   },
   {

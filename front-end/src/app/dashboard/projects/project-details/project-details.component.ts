@@ -24,6 +24,9 @@ import { Console } from 'console';
 import { forkJoin, of } from 'rxjs'; // Assure-toi d'importer ça
 import { ComplaintService } from '../../../services/complaint.service';
 import{AddInvitationDialogComponent} from"../add-invitation-dialog/add-invitation-dialog.component"
+import { TestCaseService } from '../../../services/test-case.service';
+import { TestCaseUploadService } from '../../../services/test-case-upload.service';
+import { TestCase } from '../../../models/test-case.model';
 
  
 
@@ -48,7 +51,7 @@ relaunchProject() {
 throw new Error('Method not implemented.');
 }
   reclamationList: any[] = [];                           // ← add this
-
+  testCases: TestCase[] = [];
   currentUser : any ;
   canDelete = false;
   canArchive = false;        // ← declare it
@@ -94,6 +97,8 @@ throw new Error('Method not implemented.');
     private pauseRequestService: PauseRequestService,
     private dialog: MatDialog,
     private session: SessionStorageService,
+    private testCaseService: TestCaseService,
+    private testCaseUploadService: TestCaseUploadService,
   ) {
     this.currentUser=this.session.getUser();
   }
@@ -235,7 +240,9 @@ denyPauseRequest(requestId: number) {
   ngOnInit(): void {
     // 1) Récupérer l'ID depuis la route
     this.projectId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadProject()
+    this.loadProject();
+
+    this.loadTestCases();
   }
     // 2) Charger le projet
    loadProject(){
@@ -244,15 +251,13 @@ denyPauseRequest(requestId: number) {
         this.project = p;
         const isSupervisor = this.currentUser?.role?.id === 3;
         const isOwner= this.currentUser?.id === this.project.user.id;
-        // only supervisors OR owners in certain statuses:
+
         this.canDelete = isSupervisor
           || (isOwner && (this.project.status === 1 || this.project.status === 2));
 
-        // maybe you only want to archive if it’s “online” (4) or “closed” (99):
         this.canArchive = ((isSupervisor|| isOwner) && (this.project.status === 4 || this.project.status === 99));
 
 
-        // une fois le projet chargé, on peut charger les dépendances
         this.loadInvitedUsers();
       });
 
@@ -447,5 +452,20 @@ isGreen(): boolean {
   return this.project.status == 4;
 }
 
+ loadTestCases(): void {
+    this.testCaseService
+      .list(this.projectId)
+      .subscribe({
+        next: cases => this.testCases = cases,
+        error: err => console.error('Erreur chargement cas de test', err)
+      });
+  }
 
+  openTestCase(tcId: number): void {
+    this.router.navigate(['/dashboard/projects', this.projectId, 'test-cases', tcId]);
+  }
+
+  goToTester(){
+    this.router.navigate(['/dashboard/projects-test/', this.projectId]);
+  }
 }

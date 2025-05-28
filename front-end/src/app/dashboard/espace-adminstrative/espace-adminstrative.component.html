@@ -89,13 +89,28 @@
       fxLayout="column"
       fxLayoutGap="16px"
     >
-      <h2>Réclamations</h2>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+        <h2>Réclamations</h2>
+        <button
+          mat-flat-button
+          color="accent"
+          class="enhanced-meeting-button"
+          (click)="openComplaintDialog()"
+        >
+          <mat-icon class="icon-left">note_add</mat-icon>
+          Nouvelle réclamation
+        </button>
+
+      </div>
+    
+      
       <div class="content-box" fxLayout="column" fxLayoutGap="16px">
   <div
     class="complaint-card"
     *ngFor="let complaint of complaints"
     (click)="openDetails(complaint)"
   >
+  
     <h3>Projet: {{ complaint.project.name }}</h3>
     <p><strong>Raison :</strong> {{ complaint.reason }}</p>
 
