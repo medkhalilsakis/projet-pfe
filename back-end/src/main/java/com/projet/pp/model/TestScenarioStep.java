@@ -1,6 +1,7 @@
 // TestStep.java
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,5 +21,6 @@ public class TestScenarioStep {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scenario_id", nullable = false)
+    @JsonBackReference
     private TestScenario scenario;
 }

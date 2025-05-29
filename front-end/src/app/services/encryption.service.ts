@@ -28,7 +28,7 @@ rwIDAQAB
         md: forge.md.sha256.create(),
         mgf1: {
           md: forge.md.sha256.create(),
-          saltLength: 32 // Correspond au paramètre MGF1ParameterSpec.SHA256
+          saltLength: 32 
         }
       });
       

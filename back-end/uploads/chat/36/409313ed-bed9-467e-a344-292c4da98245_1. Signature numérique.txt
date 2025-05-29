@@ -1,0 +1,79 @@
+1. Signature numérique :
+Une signature numérique est un mécanisme de sécurité cryptographique utilisé pour authentifier l'origine d'un message ou d'un document électronique et garantir qu'il n'a pas été modifié. Elle fonctionne comme une empreinte électronique unique, liée à la fois au contenu du message et à l'identité de l'expéditeur.
+
+Création de la signature :
+
+L'expéditeur génère une empreinte (hachage) du message en utilisant une fonction de hachage (par exemple, SHA-256).
+Ensuite, il chiffre cette empreinte avec sa clé privée (dans un système de chiffrement asymétrique comme RSA).
+La valeur ainsi obtenue devient la signature numérique du message.
+Vérification de la signature :
+
+Le destinataire récupère le message et la signature numérique.
+Il génère de nouveau une empreinte du message en utilisant la même fonction de hachage.
+Il déchiffre la signature numérique avec la clé publique de l'expéditeur pour récupérer l'empreinte d'origine.
+Si les deux empreintes correspondent, cela signifie que le message n'a pas été modifié (intégrité) et qu'il provient bien de l'expéditeur (authenticité).
+Objectif :
+
+Authentification : Vérifier que le message provient bien de la personne prétendant l'avoir envoyé.
+Intégrité : Assurer que le message n'a pas été altéré en cours de transmission.
+Non-répudiation : L'expéditeur ne peut pas nier avoir envoyé le message, car seul lui possède la clé privée nécessaire pour signer.
+
+------------------------------------------------
+
+
+2. Fonctions de hachage :
+Une fonction de hachage est un algorithme cryptographique qui transforme des données d'entrée de taille variable (par exemple, un fichier ou un texte) en une valeur de taille fixe, appelée hachage ou empreinte.
+
+Caractéristiques d'une fonction de hachage :
+
+Taille fixe de la sortie : Quel que soit la taille de l'entrée, la sortie (hachage) a une taille fixe (par exemple, 256 bits pour SHA-256).
+Rapidité : La fonction doit être rapide à calculer.
+Imprévisibilité : Un petit changement dans les données d'entrée génère un hachage complètement différent.
+Irreversibilité : Il est impossible de récupérer les données d'origine à partir du hachage.
+Résistance aux collisions : Il est pratiquement impossible de trouver deux ensembles de données différents produisant le même hachage.
+Les fonctions de hachage sont utilisées pour plusieurs raisons :
+
+Vérification de l'intégrité des données : Permet de s'assurer que les données n'ont pas été modifiées.
+Stockage sécurisé des mots de passe : Les mots de passe sont souvent stockés sous forme de hachage, afin qu'ils ne soient jamais conservés en clair dans une base de données.
+Signature numérique : Les fonctions de hachage sont utilisées pour créer une empreinte du message avant de la signer numériquement.
+Exemples de fonctions de hachage populaires : SHA-1, SHA-256, MD5 (bien que MD5 ne soit plus recommandé pour des raisons de sécurité).
+
+
+
+------------------------------------------------------
+
+3. Certificat numérique :
+Un certificat numérique est un document électronique qui lie une clé publique à une identité spécifique, permettant ainsi à un tiers de vérifier la validité de cette clé publique.
+
+Les certificats numériques sont utilisés dans des systèmes de sécurité basés sur la cryptographie asymétrique pour garantir l'authenticité des clés publiques.
+
+Structure d'un certificat numérique :
+
+Identité du propriétaire : Informations sur l'entité à qui appartient la clé publique (par exemple, nom, adresse e-mail, etc.).
+Clé publique : La clé publique associée à l'identité, utilisée pour le chiffrement ou la vérification de la signature.
+Autorité de certification (CA) : Une entité de confiance qui émet et signe le certificat numérique.
+Période de validité : La période durant laquelle le certificat est valide.
+Signature de la CA : La signature de l'autorité de certification qui garantit l'authenticité du certificat.
+Fonctionnement :
+
+Demande de certificat : Un utilisateur ou une organisation demande un certificat auprès d'une autorité de certification (CA).
+Vérification : La CA vérifie l'identité du demandeur.
+Émission : Si l'identité est vérifiée, la CA signe un certificat numérique, liant la clé publique à l'identité de l'utilisateur.
+Utilisation :
+
+Chiffrement des communications : Dans le cadre de SSL/TLS, un certificat numérique permet de sécuriser les communications sur Internet (par exemple, lors de la navigation sur un site HTTPS).
+Vérification d'identité : Les certificats numériques sont également utilisés dans les systèmes d'authentification pour prouver l'identité de l'utilisateur.
+Signatures numériques : Les certificats numériques permettent de signer numériquement des documents et de vérifier que la signature provient d'une personne autorisée.
+
+
+
+
+
+
+
+------------------------------------------
+Résumé :
+Signature numérique : Permet de garantir l'authenticité, l'intégrité et la non-répudiation d'un message en utilisant un mécanisme cryptographique basé sur une clé privée et une clé publique.
+Fonction de hachage : Un algorithme qui transforme des données d'entrée de taille variable en une empreinte de taille fixe, utilisée pour vérifier l'intégrité et la sécurité des données.
+Certificat numérique : Un document électronique émis par une autorité de certification (CA), qui associe une clé publique à une identité et permet de vérifier la validité de cette clé.
+Ces trois concepts sont essentiels dans les systèmes de sécurité cryptographique modernes, assurant la confidentialité, l'intégrité et l'authenticité des communications et des données.

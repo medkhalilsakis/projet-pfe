@@ -1,0 +1,149 @@
+:host {
+  /* Couleurs & espacements */
+  --primary-color:   #1976d2;
+  --secondary-color: #424242;
+  --text-color:      #333333;
+  --accent-color:    #f57c00;
+  --bg-light:        #f9f9f9;
+  --border-radius:   8px;
+  --spacing-unit:    16px;
+}
+
+/* Conteneur du dialog */
+.scenario-dialog {
+  padding: var(--spacing-unit);
+  max-width: 600px;
+  width: 100%;
+}
+
+.scenario-dialog .spinner {
+  display: block;
+  margin: 40px auto;
+  color: var(--primary-color) !important;
+}
+
+.scenario-dialog .no-scenario {
+  text-align: center;
+  padding: calc(var(--spacing-unit) * 2);
+  color: var(--secondary-color);
+  font-style: italic;
+  background: #fafafa;
+  border: 1px dashed rgba(66, 66, 66, 0.2);
+  border-radius: var(--border-radius);
+}
+
+/* Card principale */
+mat-card {
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+mat-card mat-card-header {
+  background: var(--primary-color);
+  color: #fff;
+  padding: var(--spacing-unit);
+}
+
+mat-card mat-card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+mat-card mat-card-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+mat-card mat-card-content {
+  padding: var(--spacing-unit);
+}
+
+mat-card mat-card-content p {
+  margin: var(--spacing-unit) 0;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+/* Pièce jointe */
+mat-card .attachment {
+  margin: var(--spacing-unit) 0;
+  padding: 0.5em 1em;
+  background: #fff3e0;
+  border-left: 4px solid var(--accent-color);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+mat-card .attachment .link {
+  color: var(--accent-color);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+mat-card .attachment .link:hover {
+  color: #e65100;
+  text-decoration: underline;
+}
+
+/* Titre de section */
+mat-card h4 {
+  margin-top: calc(var(--spacing-unit) * 2);
+  margin-bottom: var(--spacing-unit);
+  color: var(--secondary-color);
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(66,66,66,0.1);
+  padding-bottom: 0.3em;
+}
+
+/* Liste des étapes */
+mat-card mat-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
+
+mat-card mat-list mat-list-item {
+  padding: calc(var(--spacing-unit) / 2) 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+
+mat-card mat-list mat-list-item:last-child {
+  border-bottom: none;
+}
+
+mat-card mat-list mat-list-item div p {
+  margin: 0;
+}
+
+mat-card mat-list mat-list-item div p:first-child {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+mat-card mat-list mat-list-item div p:nth-child(2) {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+}
+
+/* Actions (boutons) */
+mat-dialog-actions {
+  padding: var(--spacing-unit);
+  background: #f5f5f5;
+  border-top: 1px solid rgba(66,66,66,0.05);
+}
+
+mat-dialog-actions button {
+  min-width: 100px;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  box-shadow: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+mat-dialog-actions button:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

@@ -1,6 +1,7 @@
 // src/main/java/com/projet/pp/model/TestScenario.java
 package com.projet.pp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -47,6 +48,7 @@ public class TestScenario {
             orphanRemoval = true
     )
     @Builder.Default
+    @JsonManagedReference
     private List<TestScenarioStep> steps = new ArrayList<>();
 
 

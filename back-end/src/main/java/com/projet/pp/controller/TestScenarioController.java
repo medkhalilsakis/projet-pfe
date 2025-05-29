@@ -85,8 +85,7 @@ public class TestScenarioController {
     }
 
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<TestScenario> getScenarioByProject(
-            @PathVariable Long projectId) {
+    public ResponseEntity<TestScenario> getByProjectId(@PathVariable Long projectId) {
         try {
             TestScenario scenario = service.getByProjectId(projectId);
             return ResponseEntity.ok(scenario);

@@ -12,4 +12,5 @@ public interface TestScenarioRepository extends JpaRepository<TestScenario, Long
     boolean existsByProject_Id(Long projectId);
 
     Optional<TestScenario> findByProject_Id(Long projectId);
+
 }

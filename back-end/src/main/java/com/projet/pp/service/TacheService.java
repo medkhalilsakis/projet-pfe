@@ -85,26 +85,25 @@ public class TacheService {
             // logger.warn("Erreur suppression fichiers disque", e);
         }
 
+        // 3) Supprimer les notifications liées
         notificationRepository.deleteByRelatedTask_Id(id);
 
-        // 3) Suppression explicite de la Phase d’Initiation et de ses sous-éléments
-        initiationPhaseRepository.findByTache_Id(id)
-                .ifPresent(phase -> {
-                    initiationPhaseRepository.delete(phase);
-                });
+        // 4) Orphan-remove le phase d’initiation
+        t.setInitiationPhase(null);
 
-        // 4) Suppression des attachments en base (orphanRemoval sur Tache.attachments)
+        // 5) Orphan-remove les attachments
         t.getAttachments().clear();
 
-        // 5) Suppression des assignations many-to-many
+        // 6) Supprimer les assignations many-to-many
         t.getAssignedTo().clear();
 
-        // 6) Persister les clear() pour exécuter les DELETE sur jointures et attachments
+        // 7) Persister les clears pour déclencher les DELETE sur attachments et initiationPhase
         tacheRepository.save(t);
 
-        // 7) Suppression finale de la Tâche
+        // 8) Enfin supprimer la tâche elle-même (cascade = ALL + orphanRemoval s’occupe du reste)
         tacheRepository.delete(t);
     }
+
 
 
 
